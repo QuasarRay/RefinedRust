@@ -13,7 +13,7 @@ use super::TX;
 use crate::base::*;
 use crate::environment::mir_analyses::initialization;
 use crate::spec_parsers::loop_attr_parser::{LoopAttrParser as _, LoopIteratorInfo, VerboseLoopAttrParser};
-use crate::{attrs, search};
+use crate::{attrs, search, types};
 
 impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
     fn check_operand_call_dest(&self, op: &mir::Operand<'tcx>) -> Option<DefId> {
@@ -62,19 +62,22 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
         current_var
     }
 
-    fn check_for_iter_next(&self, bb: mir::BasicBlock) -> Option<mir::Local> {
+    fn check_for_iter_next(
+        &self,
+        bb: mir::BasicBlock,
+    ) -> Result<Option<LoopIteratorInfo<'def>>, TranslationError<'tcx>> {
         let proc = self.proc;
         let mir = proc.get_mir();
         let bb_data = &mir.basic_blocks[bb];
         let term = bb_data.terminator();
 
         let mir::TerminatorKind::Call { func, args, .. } = &term.kind else {
-            return None;
+            return Ok(None);
         };
 
+        let fn_ty = self.get_type_of_operand(func);
         let call_dest = self.check_operand_call_dest(func).unwrap();
 
-        //core::iter::Iterato
         let iterator_did = search::try_resolve_did(self.env.tcx(), &["core", "iter", "Iterator"]).unwrap();
         let iterator_items: &ty::AssocItems = self.env.tcx().associated_items(iterator_did);
         let next_symbol = span::Symbol::intern("next");
@@ -84,13 +87,13 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
             .unwrap();
 
         if next_item.def_id != call_dest {
-            return None;
+            return Ok(None);
         }
 
         // now trace the argument back to before the mutable borrow
         let next_ref_arg = &args[0].node;
         let mir::Operand::Move(plc) = next_ref_arg else {
-            return None;
+            return Ok(None);
         };
         assert!(plc.projection.is_empty());
         let next_ref_local = plc.local;
@@ -99,23 +102,51 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
 
         trace!("check_for_iter_next: found iterator variable {iter_variable:?}");
 
-        Some(iter_variable)
+        // so: I'm calling next here.
+        // I can definitely resolve that method call.
+        // I will go either into the UserDefined or the Param path.
+        // I want to find the instantiation of the Iterator trait, right?
+        // Then I will be able to refer to the attribute term of that.
+
+        let ty::TyKind::FnDef(_, params) = fn_ty.kind() else {
+            return Err(TranslationError::UnknownError("not a FnDef type".to_owned()));
+        };
+
+        // exploiting that Iterator has the same args as Iterator::next
+        let mut scope = self.ty_translator.scope.borrow_mut();
+        let mut state = types::STInner::InFunction(&mut scope);
+        let trait_spec_term = self.trait_registry.resolve_trait_requirement_in_state(
+            &mut state,
+            iterator_did,
+            params,
+            ty::Binder::dummy(()),
+            &[],
+            radium::TyParamOrigin::Direct,
+            &[],
+        )?;
+        let trait_spec_term =
+            self.trait_registry.translate_trait_req_inst_in_state(&mut state, trait_spec_term)?;
+        trace!("trait_spec_term={trait_spec_term:?}");
+
+        Ok(Some(LoopIteratorInfo {
+            iterator_variable: iter_variable,
+            binder_name: format!("_iter_{}", iter_variable.index()),
+            iter_spec: trait_spec_term,
+        }))
     }
 
-    fn check_is_for_loop(&self, loop_head: mir::BasicBlock) -> Option<LoopIteratorInfo> {
+    fn check_is_for_loop(
+        &self,
+        loop_head: mir::BasicBlock,
+    ) -> Result<Option<LoopIteratorInfo<'def>>, TranslationError<'tcx>> {
         let proc = self.proc;
         let succs = proc.successors(loop_head);
 
         if succs.len() == 1 {
-            let local = self.check_for_iter_next(succs[0])?;
-
-            return Some(LoopIteratorInfo {
-                iterator_variable: local,
-                binder_name: format!("_iter_{}", local.index()),
-            });
+            return self.check_for_iter_next(succs[0]);
         }
 
-        None
+        Ok(None)
     }
 
     /// Parse the attributes on spec closure `did` as loop annotations and add it as an invariant
@@ -147,7 +178,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
         // One difficulty: when I prove invariant conditions later, I won't have the SL context
         // available. Need to be a bit careful.
         //
-        let iterator_info = self.check_is_for_loop(loop_head);
+        let iterator_info = self.check_is_for_loop(loop_head)?;
 
         let init_result = initialization::compute_definitely_initialized(
             self.proc.get_id(),

@@ -470,7 +470,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
     /// Resolve the trait requirements of a function call.
     /// The target of the call, [did], should have been resolved as much as possible,
     /// as the requirements of a call can be different depending on which impl we consider.
-    fn resolve_trait_requirements_of_call(
+    pub(crate) fn resolve_trait_requirements_of_call(
         &self,
         did: DefId,
         params: ty::GenericArgsRef<'tcx>,

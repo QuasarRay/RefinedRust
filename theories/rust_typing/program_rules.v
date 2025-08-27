@@ -3129,7 +3129,9 @@ Section typing.
 
   Lemma typed_block_rec fn R P b ϝ s :
     fn.(rf_fn).(f_code) !! b = Some s →
-    (□ (∀ E L, (□ typed_block P b fn R ϝ) -∗ P E L -∗ typed_stmt E L s fn R ϝ))
+    (□ (∀ E L, (□ typed_block P b fn R ϝ) -∗ 
+      introduce_with_hooks E L (P E L) (λ L2,
+        typed_stmt E L2 s fn R ϝ)))
     ⊢ typed_block P b fn R ϝ.
   Proof.
     iIntros (Hs) "#Hb". iLöb as "IH".
@@ -3145,7 +3147,8 @@ Section typing.
     iModIntro.  iModIntro. iMod "Hcl" as "_". iModIntro.
     iIntros "(Hcred1 & Hcred) (_ & Hat)".
     iMod ("HP" with "Hcred Hat") as "HP".
-    by iApply ("Hb" with "IH HP CTX HE HL").
+    iMod ("Hb" with "IH [] HE HL HP") as "(%L2 & HL & Hs)"; first done.
+    by iApply ("Hs" with "CTX HE HL").
   Qed.
 
   (** current goal: Goto.
@@ -3160,8 +3163,8 @@ Section typing.
       (* gather up the remaining ownership *)
       accu (λ Q,
       (∀ E L, (□ typed_block (λ E L, P E L ∗ Q) b fn R ϝ) -∗
-          P E L ∗ Q -∗
-          typed_stmt E L s fn R ϝ)))
+          introduce_with_hooks E L (P E L ∗ Q) (λ L2,
+          typed_stmt E L2 s fn R ϝ))))
     ⊢ typed_stmt E L (Goto b) fn R ϝ.
   Proof.
     iIntros (Hlook) "Hsubt". iIntros (?) "#CTX #HE HL Hcont".

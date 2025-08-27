@@ -1,5 +1,4 @@
-#![rr::import("refinedrust.extra_proofs.tests.enums", "enums")]
-
+#![rr::import("refinedrust.extra_proofs.tests", "loops")]
 
 #[rr::verify]
 fn loop1() {
@@ -91,7 +90,7 @@ impl Iterator for MyRange {
     }
 }
 
-#[rr::skip]
+#[rr::verify]
 fn loop4_myrange() {
     let mut x = 0;
     
@@ -113,7 +112,7 @@ fn loop4_myrange() {
     }
 }
 
-#[rr::skip]
+#[rr::verify]
 fn loop4_myrange_2() {
     let mut x = 0;
     
@@ -125,9 +124,8 @@ fn loop4_myrange_2() {
         let _ =
         #[rr::exists("Hist")]
         #[rr::inv_vars("x")]
-        // Problem: we still need to find the right Next predicate instantiation.
-        #[rr::inv(#iris "FusedNext {InitIter} Hist {Iter}")]
-        #[rr::inv("x = sum_list_Z {Hist}")]
+        #[rr::inv(#iris "IteratorNextFusedTrans {IterAttrs} (0, 10) Hist {Iter}")]
+        #[rr::inv("x = sum_list_Z Hist")]
         #[rr::ignore] ||{};
         // We'll need an inductive proof here: mainly, that FusedNext a hist b implies something
         // about the relationship of a and b.
@@ -151,7 +149,6 @@ fn loop4_myrange_2() {
         // This would just be something useful for manual proofs I suppose.
 
         // Steps:
-        // 1. Resolve the Next and make sure we can mention it in the invariant
         // 2. Add the annotation for posing a term.
         // 3. Loop invariant gets list of posed terms to also pass to the invariant (this gets
         //    resolved once when assembling the invariant)

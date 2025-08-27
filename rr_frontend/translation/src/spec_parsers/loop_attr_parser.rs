@@ -137,17 +137,18 @@ impl<'def, T: ParamLookup<'def>> Parse<T> for InvVar {
 }
 
 /// Info about the iterator we are iterating over, in case of `for` loops.
-pub(crate) struct LoopIteratorInfo {
+pub(crate) struct LoopIteratorInfo<'def> {
     pub(crate) iterator_variable: mir::Local,
     pub(crate) binder_name: String,
+    pub(crate) iter_spec: radium::TraitReqInst<'def>,
 }
 
-struct LoopMetaInfo<'a, T> {
+struct LoopMetaInfo<'def, 'a, T> {
     scope: &'a T,
-    iterator_info: Option<LoopIteratorInfo>,
+    iterator_info: Option<LoopIteratorInfo<'def>>,
 }
 
-impl<'def, T: ParamLookup<'def>> ParamLookup<'def> for LoopMetaInfo<'_, T> {
+impl<'def, T: ParamLookup<'def>> ParamLookup<'def> for LoopMetaInfo<'def, '_, T> {
     fn lookup_ty_param(&self, path: &RustPath) -> Option<specs::Type<'def>> {
         self.scope.lookup_ty_param(path)
     }
@@ -156,14 +157,28 @@ impl<'def, T: ParamLookup<'def>> ParamLookup<'def> for LoopMetaInfo<'_, T> {
         self.scope.lookup_lft(lft)
     }
 
-    fn lookup_literal(&self, path: &RustPath) -> Option<&str> {
+    fn lookup_literal(&self, path: &RustPath) -> Option<String> {
         #[expect(clippy::collapsible_if)]
         if let Some(info) = &self.iterator_info {
-            if path.len() == 1
-                && let RustPathElem::AssocItem(it) = &path[0]
-                && it == "Iter"
-            {
-                return Some(&info.binder_name);
+            if path.len() == 1 {
+                let RustPathElem::AssocItem(it) = &path[0];
+                match it.as_str() {
+                    "Iter" => {
+                        return Some(info.binder_name.clone());
+                    },
+                    "IterAttrs" => {
+                        let attr_term = info.iter_spec.get_attr_term();
+                        let term = format!("({attr_term})");
+                        return Some(term);
+                    },
+                    "IterNext" => {
+                        let attr_term = info.iter_spec.get_attr_term();
+                        let next_name = info.iter_spec.of_trait.make_spec_attr_name("Next");
+                        let term = format!("({attr_term}).({next_name})");
+                        return Some(term);
+                    },
+                    _ => (),
+                }
             }
         }
         self.scope.lookup_literal(path)
@@ -172,14 +187,14 @@ impl<'def, T: ParamLookup<'def>> ParamLookup<'def> for LoopMetaInfo<'_, T> {
 
 pub(crate) struct VerboseLoopAttrParser<'def, 'a, T> {
     locals: Vec<(mir::Local, String, radium::LocalKind, bool, radium::Type<'def>)>,
-    info: LoopMetaInfo<'a, T>,
+    info: LoopMetaInfo<'def, 'a, T>,
 }
 
 impl<'def, 'a, T: ParamLookup<'def>> VerboseLoopAttrParser<'def, 'a, T> {
     pub(crate) const fn new(
         locals: Vec<(mir::Local, String, radium::LocalKind, bool, radium::Type<'def>)>,
         scope: &'a T,
-        iterator_info: Option<LoopIteratorInfo>,
+        iterator_info: Option<LoopIteratorInfo<'def>>,
     ) -> Self {
         let info = LoopMetaInfo {
             scope,
