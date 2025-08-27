@@ -482,12 +482,10 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
 
     /// Translate the use of an `FnDef`, registering that the current function needs to link against
     /// a particular monomorphization of the used function.
-    /// Is guaranteed to return a `radium::Expr::CallTarget` with the parameter instantiation of
-    /// this function annotated.
     pub(crate) fn translate_fn_def_use(
         &mut self,
         ty: ty::Ty<'tcx>,
-    ) -> Result<radium::Expr, TranslationError<'tcx>> {
+    ) -> Result<ProcedureInst<'def>, TranslationError<'tcx>> {
         let ty::TyKind::FnDef(defid, params) = ty.kind() else {
             return Err(TranslationError::UnknownError("not a FnDef type".to_owned()));
         };
@@ -505,9 +503,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
             let trait_spec_terms = self.resolve_trait_requirements_of_call(*defid, params)?;
 
             // track that we are using this function and generate the Coq location name
-            let code_inst = self.register_use_procedure(*defid, params, trait_spec_terms)?;
-
-            return Ok(code_inst.into());
+            return self.register_use_procedure(*defid, params, trait_spec_terms);
         };
 
         // Otherwise, we are calling a trait method
@@ -536,9 +532,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
                 let trait_spec_terms =
                     self.resolve_trait_requirements_of_call(resolved_did, resolved_params)?;
 
-                let code_inst =
-                    self.register_use_procedure(resolved_did, resolved_params, trait_spec_terms)?;
-                Ok(code_inst.into())
+                self.register_use_procedure(resolved_did, resolved_params, trait_spec_terms)
             },
 
             resolution::TraitResolutionKind::Param => {
@@ -547,9 +541,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
                 // resolve the trait requirements
                 let trait_spec_terms = self.resolve_trait_requirements_of_call(*defid, params)?;
 
-                let code_inst =
-                    self.register_use_trait_method(resolved_did, resolved_params, trait_spec_terms)?;
-                Ok(code_inst.into())
+                self.register_use_trait_method(resolved_did, resolved_params, trait_spec_terms)
             },
 
             resolution::TraitResolutionKind::Closure => {
@@ -563,10 +555,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
                 // auto-generated impl
                 let trait_spec_terms = self.resolve_trait_requirements_of_call(*defid, params)?;
 
-                let code_inst =
-                    self.register_use_closure(resolved_did, clos_args, *defid, params, trait_spec_terms)?;
-
-                Ok(code_inst.into())
+                self.register_use_closure(resolved_did, clos_args, *defid, params, trait_spec_terms)
             },
         }
     }
