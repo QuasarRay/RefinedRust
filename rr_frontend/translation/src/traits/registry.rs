@@ -5,7 +5,7 @@
 // file, You can obtain one at https://opensource.org/license/bsd-3-clause/.
 
 use std::cell::{Cell, RefCell};
-use std::collections::{BTreeMap, HashMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use log::{info, trace};
 use radium::specs;
@@ -116,7 +116,10 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
     }
 
     /// Order the given traits according to their dependencies.
-    pub(crate) fn get_trait_deps(&self, traits: &[LocalDefId]) -> BTreeMap<OrderedDefId, BTreeSet<OrderedDefId>> {
+    pub(crate) fn get_trait_deps(
+        &self,
+        traits: &[LocalDefId],
+    ) -> BTreeMap<OrderedDefId, BTreeSet<OrderedDefId>> {
         let mut dep_map = BTreeMap::new();
 
         for trait_decl in traits {
@@ -161,6 +164,7 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
         name: String,
         declared_attrs: Vec<String>,
         has_semantic_interp: bool,
+        attrs_dependent: bool,
     ) -> Result<specs::LiteralTraitSpec, Error<'tcx>> {
         let spec_record = format!("{name}_spec");
         let spec_params_record = format!("{name}_spec_params");
@@ -194,6 +198,7 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
             spec_params_record,
             spec_attrs_record,
             spec_semantic,
+            attrs_dependent,
             base_spec,
             base_spec_params,
             spec_subsumption,
@@ -222,6 +227,7 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
         let trait_attrs = attrs::filter_for_tool(self.env.get_attributes(did.into()));
 
         let has_semantic_interp = self.env.has_tool_attribute(did.into(), "semantic");
+        let attrs_dependent = !self.env.has_tool_attribute(did.into(), "nondependent");
 
         // get the declared attributes that are allowed on impls
         let valid_attrs: Vec<String> =
@@ -233,6 +239,7 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
             trait_name.clone(),
             valid_attrs,
             has_semantic_interp,
+            attrs_dependent,
         )?;
         // already register it for use
         // In particular, this is also needed to be able to register the methods of this trait
@@ -584,7 +591,7 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
             below_binders,
         ) {
             trace!("resolved trait impl as {impl_did:?} with {trait_args:?} {kind:?}");
-            
+
             if let Some(deps) = impl_deps {
                 deps.insert(OrderedDefId::new(self.env.tcx(), impl_did));
             }
@@ -893,7 +900,9 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
     ) -> Result<radium::GenericScopeInst<'def>, TranslationError<'tcx>> {
         let mut scope_inst = self.compute_scope_inst_in_state_without_traits(state, params_inst)?;
 
-        for trait_req in self.resolve_radium_trait_requirements_in_state(state, did, params_inst, impl_deps)? {
+        for trait_req in
+            self.resolve_radium_trait_requirements_in_state(state, did, params_inst, impl_deps)?
+        {
             scope_inst.add_trait_requirement(trait_req);
         }
 
@@ -1040,15 +1049,18 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
         // figure out the trait ref for this
         let subject = self.env.tcx().impl_subject(trait_impl_did).skip_binder();
         if let ty::ImplSubject::Trait(trait_ref) = subject {
-
             // set up scope
             let typing_env = ty::TypingEnv::post_analysis(self.env.tcx(), trait_impl_did);
             let mut deps = BTreeSet::new();
             let state = types::TraitState::new(param_scope.clone(), typing_env, None, None);
             let mut state = types::STInner::TraitReqs(Box::new(state));
 
-            let scope_inst =
-                self.compute_scope_inst_in_state(&mut state, trait_ref.def_id, trait_ref.args, Some(&mut deps))?;
+            let scope_inst = self.compute_scope_inst_in_state(
+                &mut state,
+                trait_ref.def_id,
+                trait_ref.args,
+                Some(&mut deps),
+            )?;
             //trace!("Determined trait requirements in impl: {trait_reqs:?}");
             //trace!("get_trait_impl_info: have deps={deps:?}");
 
@@ -1079,14 +1091,17 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
                 }
             }
 
-            Ok((radium::TraitRefInst::new(
-                trait_spec_ref,
-                impl_ref,
-                param_scope.into(),
-                scope_inst,
-                assoc_types_inst,
-                impl_spec.attrs,
-            ), deps))
+            Ok((
+                radium::TraitRefInst::new(
+                    trait_spec_ref,
+                    impl_ref,
+                    param_scope.into(),
+                    scope_inst,
+                    assoc_types_inst,
+                    impl_spec.attrs,
+                ),
+                deps,
+            ))
         } else {
             unreachable!("Expected trait impl");
         }
@@ -1237,8 +1252,8 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
         // compute an override for the attributes assumed here
         // This does not include user annotations (e.g., on functions), as the attributes for those
         // are not available here.
-        //let attr_override = self.get_builtin_trait_attr_override(trait_ref.def_id);
-        let attr_override = None;
+        let attr_override = self.get_builtin_trait_attr_override(trait_ref.def_id);
+        //let attr_override = None;
 
         // create a name for this instance by including the args
         let mangled_base = types::mangle_name_with_args(&spec_ref.name, trait_ref.args.as_slice());
@@ -1278,8 +1293,12 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
         trace!("new trait scope={scope:?}");
         let mut state = state.setup_trait_state(self.env.tcx(), scope);
 
-        let trait_reqs =
-            self.resolve_radium_trait_requirements_in_state(&mut state, trait_ref.def_id, trait_ref.args, None)?;
+        let trait_reqs = self.resolve_radium_trait_requirements_in_state(
+            &mut state,
+            trait_ref.def_id,
+            trait_ref.args,
+            None,
+        )?;
         trace!("finalize_trait_use for {:?}: determined trait requirements: {trait_reqs:?}", trait_use.did);
 
         let mut trait_use_ref = trait_use.trait_use.borrow_mut();

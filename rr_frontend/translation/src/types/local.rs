@@ -7,7 +7,7 @@
 //! A wrapper around a `translator::TX` for the case we are translating the body of a function.
 
 use std::cell::RefCell;
-use std::collections::{BTreeMap, HashMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use log::{info, trace};
 use radium::coq;

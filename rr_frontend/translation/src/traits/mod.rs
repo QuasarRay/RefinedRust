@@ -366,8 +366,7 @@ fn cmp_trait_ref<'tcx>(
     if req_a.iter().any(|x| x.trait_ref.def_id == b.def_id) {
         // trait a depends on b
         return Ordering::Greater;
-    }
-    else if req_b.iter().any(|x| x.trait_ref.def_id == a.def_id) {
+    } else if req_b.iter().any(|x| x.trait_ref.def_id == a.def_id) {
         // trait b depends on a
         return Ordering::Less;
     }

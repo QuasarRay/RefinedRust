@@ -7,7 +7,7 @@
 //! The main translator for translating types within certain environments.
 
 use std::cell::{Cell, RefCell};
-use std::collections::{BTreeMap, HashMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use derive_more::{Constructor, Debug};
 use log::{info, trace};

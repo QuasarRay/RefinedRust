@@ -6,7 +6,7 @@
 
 //! Defines scopes for maintaining generics and trait requirements.
 
-use std::collections::{BTreeMap, HashMap, BTreeSet, hash_map};
+use std::collections::{BTreeMap, BTreeSet, HashMap, hash_map};
 
 use derive_more::{Constructor, Debug};
 use log::{trace, warn};

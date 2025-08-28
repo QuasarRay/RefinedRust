@@ -55,7 +55,10 @@ use crate::traits::registry;
 use crate::types::{normalize_in_function, scope};
 
 /// Order ADT definitions topologically.
-fn order_defs_with_deps(tcx: ty::TyCtxt<'_>, deps: &BTreeMap<OrderedDefId, BTreeSet<OrderedDefId>>) -> Vec<DefId> {
+fn order_defs_with_deps(
+    tcx: ty::TyCtxt<'_>,
+    deps: &BTreeMap<OrderedDefId, BTreeSet<OrderedDefId>>,
+) -> Vec<DefId> {
     let mut topo = TopologicalSort::new();
     let mut defs = BTreeSet::new();
 
@@ -233,6 +236,7 @@ impl<'rcx> VerificationCtxt<'_, 'rcx> {
                 spec_attrs_record: decl.spec_attrs_record.clone(),
                 spec_record: decl.spec_record.clone(),
                 spec_semantic: decl.spec_semantic.clone(),
+                attrs_dependent: decl.attrs_dependent,
                 base_spec: decl.base_spec.clone(),
                 base_spec_params: decl.base_spec_params.clone(),
                 spec_subsumption: decl.spec_subsumption.clone(),
@@ -448,9 +452,9 @@ impl<'rcx> VerificationCtxt<'_, 'rcx> {
             writeln!(spec_file, "Section attrs.").unwrap();
             writeln!(spec_file, "Context `{{RRGS : !refinedrustGS Σ}}.").unwrap();
             // sort according to dependency order
-            let order = order_defs_with_deps(self.env.tcx(), &self.trait_impl_deps);  
+            let order = order_defs_with_deps(self.env.tcx(), &self.trait_impl_deps);
             for did in order {
-                let spec = self.trait_impls.get(&OrderedDefId::new(self.env.tcx(), did)).unwrap();
+                let spec = &self.trait_impls[&OrderedDefId::new(self.env.tcx(), did)];
                 writeln!(spec_file, "{}\n", spec.generate_attr_decl()).unwrap();
             }
             writeln!(spec_file, "End attrs.\n").unwrap();
@@ -1056,6 +1060,7 @@ fn register_shims<'tcx>(vcx: &mut VerificationCtxt<'tcx, '_>) -> Result<(), base
                 spec_params_record: shim.spec_param_record.clone(),
                 spec_record: shim.spec_record.clone(),
                 spec_semantic: shim.spec_semantic.clone(),
+                attrs_dependent: shim.attrs_dependent,
                 base_spec: shim.base_spec.clone(),
                 base_spec_params: shim.base_spec_params.clone(),
                 spec_subsumption: shim.spec_subsumption.clone(),
