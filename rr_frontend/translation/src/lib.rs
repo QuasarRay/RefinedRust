@@ -233,6 +233,7 @@ impl<'rcx> VerificationCtxt<'_, 'rcx> {
                 refinement_type: lit.refinement_type.to_string(),
                 syn_type: lit.syn_type.to_string(),
                 sem_type: lit.type_term,
+                needs_trait_atttrs: lit.needs_trait_attrs,
             };
             return Some(a);
         }
@@ -366,6 +367,8 @@ impl<'rcx> VerificationCtxt<'_, 'rcx> {
             write!(code_file, "{}", coq::module::ImportList(&common_imports)).unwrap();
             write!(code_file, "{}", coq::module::ExportList(&code_exports)).unwrap();
         }
+
+        writeln!(spec_file).unwrap();
 
         // write trait attrs
         let trait_deps = self.trait_registry.get_registered_trait_deps();
@@ -1039,6 +1042,7 @@ fn register_shims<'tcx>(vcx: &mut VerificationCtxt<'tcx, '_>) -> Result<(), base
             type_term: shim.sem_type.clone(),
             syn_type: radium::lang::SynType::Literal(shim.syn_type.clone()),
             refinement_type: coq::term::Type::Literal(shim.refinement_type.clone()),
+            needs_trait_attrs: shim.needs_trait_atttrs,
         };
 
         if let Err(e) = vcx.type_translator.register_adt_shim(did, &lit) {

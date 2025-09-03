@@ -254,6 +254,8 @@ pub struct LiteralType {
 
     /// the syntactic type
     pub syn_type: lang::SynType,
+
+    pub needs_trait_attrs: bool,
 }
 
 pub type LiteralTypeRef<'def> = &'def LiteralType;
@@ -302,7 +304,7 @@ impl<'def> LiteralTypeUse<'def> {
         applied.to_string()
     }
 
-    /// Get the `syn_type` term for this struct use.
+    /// Get the `syn_type` term for this type use.
     #[must_use]
     pub fn generate_raw_syn_type_term(&self) -> lang::SynType {
         let ty_inst: Vec<lang::SynType> = self
@@ -331,7 +333,7 @@ impl<'def> LiteralTypeUse<'def> {
         lang::SynType::Literal(format!("({specialized_spec} : syn_type)"))
     }
 
-    /// Generate a string representation of this struct use.
+    /// Generate a string representation of this type use.
     #[must_use]
     fn generate_type_term(&self) -> String {
         if let Some(scope_inst) = self.scope_inst.as_ref() {
@@ -339,6 +341,15 @@ impl<'def> LiteralTypeUse<'def> {
                 .get_all_ty_params_with_assocs()
                 .iter()
                 .map(|ty| format!("({})", ty.get_rfn_type()))
+                .chain(
+                    (if self.def.needs_trait_attrs {
+                        scope_inst.get_direct_trait_requirements()
+                    } else {
+                        &[]
+                    })
+                    .iter()
+                    .map(TraitReqInst::get_attr_term),
+                )
                 .collect::<Vec<_>>()
                 .join(" ");
             format!("({} {rt_inst} {})", self.def.type_term, scope_inst.instantiation(true, true))
@@ -569,7 +580,9 @@ impl InvariantSpec {
         let ex = self.make_existential_binders();
         write!(
             out,
-            "λ π inner_rfn '{}, {}⌜inner_rfn = {}⌝ ∗ ",
+            "λ π inner_rfn (_ty_rfn : RT_rt ({}%type : RT)), 
+            let '{} := _ty_rfn in {}⌜inner_rfn = {}⌝ ∗ ",
+            self.rfn_type,
             self.rfn_pat,
             ex,
             self.abstracted_refinement.as_ref().unwrap()
@@ -600,8 +613,10 @@ impl InvariantSpec {
         let ex = self.make_existential_binders();
         write!(
             out,
-            "λ π {} inner_rfn '{}, {}⌜inner_rfn = {}⌝ ∗ ",
+            "λ π {} inner_rfn (_ty_rfn : RT_rt ({}%type : RT)), 
+            let '{} := _ty_rfn in {}⌜inner_rfn = {}⌝ ∗ ",
             &self.shr_lft_binder,
+            self.rfn_type,
             self.rfn_pat,
             ex,
             self.abstracted_refinement.as_ref().unwrap()
@@ -666,7 +681,9 @@ impl InvariantSpec {
         // persistence/timeless inference go nuts.
         write!(
             out,
-            "λ inner_rfn '{}, {}⌜inner_rfn = {}⌝ ∗ ",
+            "λ inner_rfn (_rfn_binder : RT_rt ({}%type : RT)), 
+            let '{} := _rfn_binder in {}⌜inner_rfn = {}⌝ ∗ ",
+            self.rfn_type,
             self.rfn_pat,
             ex,
             self.abstracted_refinement.as_ref().unwrap()
@@ -692,13 +709,16 @@ impl InvariantSpec {
         // generate the spec definition
         let spec_name = self.spec_name();
 
+        let attr_binders = scope.get_all_attr_trait_parameters(IncludeSelfReq::Dont);
+
         match self.flags {
             InvariantSpecFlags::NonAtomic => {
                 #[expect(deprecated)]
                 write!(
                     out,
-                    "{indent}Program Definition {} : {} (na_ex_inv_def ({})%type ({})%type) := ",
+                    "{indent}Program Definition {} {} : {} (na_ex_inv_def ({})%type ({})%type) := ",
                     spec_name,
+                    attr_binders,
                     scope.get_all_type_term(),
                     base_rfn_type,
                     self.rfn_type,
@@ -709,8 +729,9 @@ impl InvariantSpec {
                 #[expect(deprecated)]
                 write!(
                     out,
-                    "{indent}Program Definition {} : {} (ex_inv_def ({})%type ({})%type) := ",
+                    "{indent}Program Definition {} {} : {} (ex_inv_def ({})%type ({})%type) := ",
                     spec_name,
+                    attr_binders,
                     scope.get_all_type_term(),
                     base_rfn_type,
                     self.rfn_type,
@@ -738,6 +759,12 @@ impl InvariantSpec {
                 let lft_outlives = self.assemble_ty_lfts();
                 let lft_wf_elctx = self.assemble_ty_wf_elctx();
 
+                let attr_intro = if attr_binders.0.is_empty() {
+                    String::new()
+                } else {
+                    format!("intros{}; ", " ?".repeat(attr_binders.0.len()))
+                };
+
                 write!(
                     out,
                     "{scope} mk_ex_inv_def\n\
@@ -750,8 +777,9 @@ impl InvariantSpec {
                 )
                 .unwrap();
                 write!(out, "{indent}Next Obligation. ex_t_solve_persistent. Qed.\n").unwrap();
-                write!(out, "{indent}Next Obligation. ex_plain_t_solve_shr_mono. Qed.\n").unwrap();
-                write!(out, "{indent}Next Obligation. ex_plain_t_solve_shr. Qed.\n").unwrap();
+                write!(out, "{indent}Next Obligation. {attr_intro}ex_plain_t_solve_shr_mono. Qed.\n")
+                    .unwrap();
+                write!(out, "{indent}Next Obligation. {attr_intro}ex_plain_t_solve_shr. Qed.\n").unwrap();
             },
             InvariantSpecFlags::NonAtomic => {
                 let own_inv = self.assemble_plain_owned_invariant();
@@ -794,13 +822,16 @@ impl InvariantSpec {
 
         write!(out, "{}", self.generate_coq_invariant_def(scope, base_rfn_type)).unwrap();
 
+        let attr_binders = scope.get_all_attr_trait_parameters(IncludeSelfReq::Dont);
+        let attr_binders_uses = attr_binders.make_using_terms();
+
         // generate the definition itself.
         if InvariantSpecFlags::NonAtomic == self.flags {
             #[expect(deprecated)]
             write!(
                 out,
-                "{indent}Definition {} : {} (type ({})%type) :=\n\
-                {indent}{indent}{scope} na_ex_plain_t _ _ ({spec_name} {}) {}.\n",
+                "{indent}Definition {} {attr_binders} : {} (type ({})%type) :=\n\
+                {indent}{indent}{scope} na_ex_plain_t _ _ ({spec_name} {attr_binders_uses} {}) {}.\n",
                 self.type_name,
                 scope.get_all_type_term(),
                 self.rfn_type,
@@ -812,8 +843,8 @@ impl InvariantSpec {
             #[expect(deprecated)]
             write!(
                 out,
-                "{indent}Definition {} : {} (type ({})%type) :=\n\
-                {indent}{indent}{scope} ex_plain_t _ _ ({spec_name} {}) {}.\n",
+                "{indent}Definition {} {attr_binders} : {} (type ({})%type) :=\n\
+                {indent}{indent}{scope} ex_plain_t _ _ ({spec_name} {attr_binders_uses} {}) {}.\n",
                 self.type_name,
                 scope.get_all_type_term(),
                 self.rfn_type,
@@ -1481,6 +1512,7 @@ impl<'def> AbstractStruct<'def> {
             type_term: self.public_type_name().to_owned(),
             refinement_type: coq::term::Type::Literal(self.public_rt_def_name()),
             syn_type: lang::SynType::Literal(self.sls_def_name().to_owned()),
+            needs_trait_attrs: self.has_invariant(),
         }
     }
 }
@@ -1669,7 +1701,12 @@ impl<'def> AbstractStructUse<'def> {
                 unreachable!();
             };
 
-            format!("({} {rt_inst} {})", inv.type_name, self.scope_inst.instantiation(true, true))
+            let attrs = fmt_list!(
+                self.scope_inst.get_direct_trait_requirements().iter().map(TraitReqInst::get_attr_term),
+                " "
+            );
+
+            format!("({} {rt_inst} {attrs} {})", inv.type_name, self.scope_inst.instantiation(true, true))
         } else {
             format!("({} {rt_inst} {})", def.plain_ty_name(), self.scope_inst.instantiation(true, true))
         }
@@ -2194,6 +2231,7 @@ impl<'def> AbstractEnum<'def> {
             type_term: self.public_type_name().to_owned(),
             refinement_type: coq::term::Type::Literal(self.public_rt_def_name().to_owned()),
             syn_type: lang::SynType::Literal(self.els_def_name().to_owned()),
+            needs_trait_attrs: false,
         }
     }
 }

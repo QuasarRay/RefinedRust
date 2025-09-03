@@ -109,6 +109,8 @@ struct ShimAdtEntry {
     rtype: String,
     /// the Coq name of the semantic type
     semtype: String,
+    /// whether this definition depends on trait attrs of its generic scope
+    needs_trait_atttrs: bool,
 }
 
 #[derive(Clone, Eq, PartialEq, Debug)]
@@ -214,6 +216,7 @@ pub(crate) struct AdtShim<'a> {
     pub refinement_type: String,
     pub syn_type: String,
     pub sem_type: String,
+    pub needs_trait_atttrs: bool,
 }
 
 impl<'a> From<AdtShim<'a>> for ShimAdtEntry {
@@ -224,6 +227,7 @@ impl<'a> From<AdtShim<'a>> for ShimAdtEntry {
             syntype: shim.syn_type,
             semtype: shim.sem_type,
             rtype: shim.refinement_type,
+            needs_trait_atttrs: shim.needs_trait_atttrs,
         }
     }
 }
@@ -417,6 +421,7 @@ impl<'a> SR<'a> {
                         syn_type: b.syntype,
                         sem_type: b.semtype,
                         refinement_type: b.rtype,
+                        needs_trait_atttrs: b.needs_trait_atttrs,
                     };
 
                     self.adt_shims.push(entry);

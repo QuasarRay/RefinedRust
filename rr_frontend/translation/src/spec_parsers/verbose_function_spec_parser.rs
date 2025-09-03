@@ -554,6 +554,7 @@ where
                 type_term: lit_ty.to_owned(),
                 refinement_type: coq::term::Type::Infer,
                 syn_type: ty.into(),
+                needs_trait_attrs: false,
             };
             let lit_ref = (self.make_literal)(lit_ty);
             let lit_ty_use = specs::LiteralTypeUse::new_with_annot(lit_ref);

@@ -1,28 +1,21 @@
 From refinedrust Require Import typing.
 From rrstd.iterator.theories Require Import iterator.
 
-(* 
-
- *)
-
-(* State of the map iterator *)
-(*
-Record MapIterator 
-  {it_state : Type} (A B : Type) (IT : Iterator it_state A)
-  (*(clos_state : Type) *)
-  (*(CL : FnMut*)
-  := mk_map_iterator {
-  (* TODO: instead, this should also contain the state of the closure *)
-  map_it_fn : A → B;
-  map_it_state : it_state;
+Record MapX (I : RT) (F : RT) : Type := mk_map_x {
+  map_it : RT_xt I;
+  map_clos : RT_xt F;
 }.
+Global Arguments map_it {_ _}.
+Global Arguments map_clos {_ _}.
+Global Arguments mk_map_x {_ _}.
+Definition MapXRT (I F : RT) := directRT (MapX I F).
 
-Arguments map_it_state {_ _ _ _}.
-Arguments map_it_fn {_ _ _ _}.
+Global Instance MapX_inh I F :
+Inhabited (RT_xt I) → Inhabited (RT_xt F) → Inhabited (MapX I F).
+Proof.
+  intros Ha Hb. exact (populate (mk_map_x inhabitant inhabitant)).
+Qed.
 
-Global Instance map_iterator {it_state : Type} (A B : Type) (IT : Iterator it_state A) : Iterator (MapIterator A B IT) B :=
-{|
-  iterator_next s1 e s2 := 
-    ∃ e', IT.(iterator_next) s1.(map_it_state) e' s2.(map_it_state) ∧ s1.(map_it_fn) e' = e ∧ s2.(map_it_fn) = s1.(map_it_fn);
-|}.
-*)
+Definition li_sealed `{!refinedrustGS Σ} (P : iProp Σ) : iProp Σ :=
+  P.
+Global Typeclasses Opaque li_sealed.

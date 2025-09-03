@@ -128,7 +128,7 @@ pub trait Ord: Eq + PartialOrd<Self> {
     }
 }
 
-#[rr::export_as(core::cmp::min)]
+#[rr::export_as(core::cmp::max)]
 #[rr::returns("if bool_decide ({T::Ord} v1 v2 = Less) then v2 else v1")]
 pub fn max<T: Ord>(v1: T, v2: T) -> T {
     v1.max(v2)
@@ -331,18 +331,3 @@ impl PartialOrd for bool {
     partial_ord_methods_primitive_impl!();
 }
 */
-
-
-//#[rr::instantiate("Ord" := "λ x y, if decide (x < y) then Less else if decide (x = y) then Equal else Greater")]
-//impl Ord for i32 {
-    //fn cmp(&self, other: &Self) -> Ordering {
-        //if *self < *other {
-            //Ordering::Less
-        //}
-        //else if *self = *other {
-            //Ordering::Equal
-        //} else {
-            //Ordering::Greater
-        //}
-    //}
-//}

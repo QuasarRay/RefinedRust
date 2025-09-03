@@ -69,3 +69,45 @@ Global Hint Rewrite -> Z2Nat.inj_0 : lithium_rewrite.
 Global Hint Rewrite -> Z.sub_0_r Z.add_0_r Z.sub_0_l Z.add_0_l : lithium_rewrite.
 
 
+Definition max_list_Z_with {A} (f : A → Z) (def : Z) : list A → Z :=
+  fix go l :=
+  match l with
+  | [] => def
+  | x :: l => f x `max` go l
+  end.
+Notation max_list_Z := (max_list_Z_with id).
+
+
+(** ** Properties of the [max_list_Z_with] function *)
+Section max_list.
+  Context {A : Type}.
+  Implicit Types x y z : A.
+  Implicit Types l k : list A.
+
+  Lemma max_list_Z_with_def (f : A → Z) def l :
+    max_list_Z_with f def l = def `max` max_list_Z_with f def l.
+  Proof.
+    induction l; simpl; lia.
+  Qed.
+  Lemma max_list_Z_with_app (f : A → Z) def l k :
+    max_list_Z_with f def (l ++ k) = max_list_Z_with f def l `max` max_list_Z_with f def k.
+  Proof. 
+    induction l as [ | ?? IH] in k |-*; simpl. 
+    - rewrite max_list_Z_with_def. lia.
+    - rewrite IH. lia.
+  Qed.
+  Lemma max_list_Z_with_reverse (f : A → Z) def l :
+    max_list_Z_with f def (reverse l) = max_list_Z_with f def l.
+  Proof.
+    induction l as [ | ?? IH]; simpl; rewrite ?reverse_cons ?max_list_Z_with_app; simpl; first lia.
+    rewrite IH. rewrite max_list_Z_with_def. lia.
+  Qed.
+  Lemma max_list_Z_fmap_const l def n :
+    max_list_Z def ((λ _, n) <$> l) =
+    match l with | [] => def | _ => def `max` n end.
+  Proof. 
+    induction l as [ | ?? IH]; simpl; first done.
+    rewrite IH. destruct l; lia.
+  Qed.
+End max_list.
+Global Hint Rewrite -> @max_list_Z_with_app : lithium_rewrite.
