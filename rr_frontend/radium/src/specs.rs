@@ -4703,6 +4703,9 @@ impl TraitSpecDecl<'_> {
 
         params.0.insert(0, coq::binder::Binder::new_rrgs());
 
+        // the individual fields depend on each other, progressively
+        let mut field_params = params.clone();
+
         // we first generate definitions for the type signature of each attribute
         let mut sig_decls: Vec<coq::Sentence> = Vec::new();
 
@@ -4715,7 +4718,7 @@ impl TraitSpecDecl<'_> {
             let sig_defn = coq::command::Definition {
                 program_mode: false,
                 name: record_item_sig_name.clone(),
-                params: params.clone(),
+                params: field_params.clone(),
                 ty: None,
                 body: coq::command::DefinitionBody::Term(coq::term::RocqTerm::Type(Box::new(
                     item_ty.to_owned(),
@@ -4725,13 +4728,18 @@ impl TraitSpecDecl<'_> {
 
             let record_item_ty = coq::term::App::new(
                 coq::term::Term::Ident(coq::Ident::new(record_item_sig_name)),
-                params.make_using_terms().0,
+                field_params.make_using_terms().0,
             );
+            let ty = coq::term::RocqType::Term(Box::new(coq::term::Term::App(Box::new(record_item_ty))));
+
+            // add a new field binder for the next fields
+            let field_binder = coq::binder::Binder::new(Some(record_item_name.clone()), ty.clone());
+            field_params.0.push(field_binder);
 
             let item = coq::term::RecordDeclItem {
                 name: record_item_name,
                 params: coq::binder::BinderList::empty(),
-                ty: coq::term::RocqType::Term(Box::new(coq::term::Term::App(Box::new(record_item_ty)))),
+                ty,
             };
             record_items.push(item);
         }
@@ -5231,11 +5239,10 @@ impl TraitImplSpec<'_> {
                 attrs_type_terms.push(coq::term::Term::Literal(x.get_attr_term()));
             }
         }
+        let mut obligation_terms = Vec::new();
 
         let attrs_type = coq::term::App::new(of_trait.spec_attrs_record.clone(), attrs_type_terms.clone());
         let attrs_type = coq::term::Type::Literal(format!("{attrs_type}"));
-
-        let mut obligation_terms = Vec::new();
 
         // write the attr record decl
         let attr_record_term = if attrs.attrs.is_empty() {
@@ -5250,6 +5257,9 @@ impl TraitImplSpec<'_> {
                     coq::term::Term::Ident(coq::Ident::new(of_trait.make_spec_attr_sig_name(attr_name))),
                     attrs_type_terms.clone(),
                 );
+
+                // add a placeholder for the dependency of the next attrs
+                attrs_type_terms.push(coq::term::RocqTerm::Infer);
 
                 let inst_term = match inst {
                     TraitSpecAttrInst::Term(term) => term.to_owned(),
