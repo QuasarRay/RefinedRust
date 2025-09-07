@@ -787,10 +787,7 @@ Ltac liFastStep :=
   | liUnfoldLetGoal ].
 
 (* This does everything *)
-Ltac liRStep :=
-  liEnsureInvariant;
-  try liRIntroduceLetInGoal;
-  simp_ltypes_in_goal;
+Ltac liRStepCore :=
   first [
     liRInstantiateEvars (* must be before do_side_cond and do_extensible_judgement *)
   | liRStmt
@@ -799,8 +796,14 @@ Ltac liRStep :=
   | liRJudgement
   | liFastStep
   | lazymatch goal with | |- BACKTRACK_POINT ?P => change_no_check P end
-  | progress simpl
  ].
+
+Ltac liRStep :=
+  liEnsureInvariant;
+  try liRIntroduceLetInGoal;
+  simp_ltypes_in_goal;
+  first [liRStepCore | simpl; liRStepCore ]
+.
 
 Tactic Notation "liRStepUntil" open_constr(id) :=
   repeat lazymatch goal with
@@ -888,7 +891,7 @@ Section tac.
            in
       let E := (((fp.2 κs tys).(fn_p) x).(fp_elctx) ϝ) in
       let L := [ϝ ⊑ₗ{0} []] in
-      ∃ E', ⌜E' ⊆+ E⌝ ∗
+      ∃ E', ⌜E' ⊆+ E⌝ ∗ ⌜E' = E'⌝ ∗
       (credit_store 0 0 -∗ na_own π ⊤ -∗ introduce_with_hooks E' L (Qinit) (λ L2,
         introduce_typed_stmt E' L2 ϝ fn lsa lsv lya lyv (
         λ v L2,
@@ -910,7 +913,7 @@ Section tac.
     iIntros (?) "#CTX #HE HL Hcont".
     iApply fupd_wps.
     iPoseProof ("Ha" with "Hx1 Hx2") as "HT".
-    iDestruct ("HT" $! lsa lsv) as "(%E' & %Hsub & HT)".
+    iDestruct ("HT" $! lsa lsv) as "(%E' & %Hsub & _ & HT)".
     iPoseProof (elctx_interp_submseteq _ _ Hsub with "HE") as "HE'".
     rewrite /introduce_with_hooks.
     iMod ("HT" with "Hstore Hna [] HE' HL [Hinit]") as "(%L2 & HL & HT)"; first done.
@@ -963,6 +966,12 @@ Tactic Notation "start_function" constr(fnname) ident(ϝ) "(" simple_intropatter
     prepare_initial_coq_context;
     iExists _; iSplitR;
     [iPureIntro; solve [preprocess_elctx] | ];
+    match goal with
+    | |- envs_entails _ (⌜?E1 = ?E2⌝ ∗ _) =>
+        (*remember E1 as _E eqn:Helctx;*)
+        (*eapply mk_elctx_eqn in Helctx;*)
+        iSplitR; first done
+    end;
     inv_vec lsv; inv_vec lsa;
     simpl;
     unfold typarams_wf, typaram_wf;
@@ -1169,15 +1178,28 @@ Ltac solve_goal_normalized_prepare_hook ::=
   idtac
 .
 
+Lemma ty_lfts_unfold_lem `{!typeGS Σ} {rt} (ty : type rt) : 
+  ty_lfts ty = _ty_lfts _ ty.
+Proof. rewrite ty_lfts_unfold. done. Qed.
+Lemma ty_wf_E_unfold_lem `{!typeGS Σ} {rt} (ty : type rt) : 
+  ty_wf_E ty = _ty_wf_E _ ty.
+Proof. rewrite ty_wf_E_unfold. done. Qed.
+
 (** Enum-related tactic calls *)
 (* TODO better inclusion solvers *)
 Ltac ty_lfts_incl_solver :=
   repeat match goal with
-  | |- ?a ⊆ _ =>
+  | |- ?a ⊆ ?b =>
     match a with
-    | context[ty_lfts _] =>
-        rewrite {1}ty_lfts_unfold
+    | context[ty_lfts ?ty] =>
+        assert_fails (is_var ty);
+        rewrite (ty_lfts_unfold_lem ty)
     end;
+    (*match b with*)
+    (*| context[ty_lfts ?ty] =>*)
+        (*assert_fails (is_var ty);*)
+        (*rewrite (ty_lfts_unfold_lem ty)*)
+    (*end;*)
     simpl;
     try set_solver
   end.
@@ -1186,11 +1208,17 @@ Ltac solve_mk_enum_ty_lfts_incl :=
   intros []; ty_lfts_incl_solver.
 Ltac ty_wf_E_incl_solver :=
   repeat match goal with
-  | |- ?a ⊆ _ =>
+  | |- ?a ⊆ ?b =>
     match a with
-    | context[ty_wf_E _] =>
-        rewrite {1}ty_wf_E_unfold
+    | context[ty_wf_E ?ty] =>
+        assert_fails (is_var ty);
+        rewrite (ty_wf_E_unfold_lem ty)
     end;
+    (*match b with*)
+    (*| context[ty_wf_E ?ty] =>*)
+        (*assert_fails (is_var ty);*)
+        (*rewrite (ty_wf_E_unfold_lem ty)*)
+    (*end;*)
     simpl;
     try set_solver
   end.
@@ -1201,6 +1229,27 @@ Ltac solve_mk_enum_tag_consistent :=
   simpl; intro_adt_params;
   (*intros []; naive_solver.*)
   intros [] ? [=<-]; eexists _; done.
+
+
+Ltac enum_contractive_solve_dist :=
+    repeat match goal with
+    | |- ∀ (_ : type _), _ => intros ?
+    end;
+    let r := fresh "r" in 
+    intros r; 
+    intros;
+    simpl;
+    unfold spec_instantiated;
+    unfold spec_instantiate_typaram_fst;
+    unfold spec_instantiate_lft_fst;
+    match goal with
+    | |- TypeDist _ (?Hx ?ty1 ?lfts ?tys ?r) (?Hx ?ty2 ?lfts ?tys ?r) =>
+        eapply (type_contractive_dist _ _ (λ ty, Hx ty lfts tys r)); last done;
+        destruct r; simpl; apply _
+    | |- TypeDist2 _ (?Hx ?ty1 ?lfts ?tys ?r) (?Hx ?ty2 ?lfts ?tys ?r) =>
+        eapply (type_contractive_dist2 _ _ (λ ty, Hx ty lfts tys r)); last done;
+        destruct r; simpl; apply _
+    end.
 
 (** User facing tactic calls *)
 Ltac sidecond_hammer_it :=
@@ -1223,11 +1272,17 @@ Ltac solve_function_subtype_hook ::=
   sidecond_hammer
 .
 
-Ltac normalized_rt_of_spec_ty ty :=
-  match type of ty with
+Ltac normalized_rt_of_spec_ty_rec ty :=
+  match ty with
+  | ∀ x: _, ?B => 
+      normalized_rt_of_spec_ty_rec B
   | spec_with _ _ (type ?ty) =>
       let hnf_ty := eval hnf in ty in
       constr:(ty)
+  end.
+  Ltac normalized_rt_of_spec_ty ty :=
+  match type of ty with
+  | ?B => normalized_rt_of_spec_ty_rec B
   end.
 
 Ltac unfold_generic_inst :=

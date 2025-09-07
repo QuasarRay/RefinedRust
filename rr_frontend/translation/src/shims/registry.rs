@@ -96,6 +96,30 @@ struct ShimTraitImplEntry {
     spec_subsumption_statement: String,
 }
 
+#[derive(Serialize, Deserialize)]
+struct ShimAdtInfo {
+    /// if this is an enum: the enum definition
+    enum_name: Option<String>,
+    /// whether this definition depends on trait attrs of its generic scope
+    needs_trait_atttrs: bool,
+}
+impl From<radium::AdtShimInfo> for ShimAdtInfo {
+    fn from(shim: radium::AdtShimInfo) -> Self {
+        Self {
+            enum_name: shim.enum_name,
+            needs_trait_atttrs: shim.needs_trait_attrs,
+        }
+    }
+}
+impl From<ShimAdtInfo> for radium::AdtShimInfo {
+    fn from(shim: ShimAdtInfo) -> Self {
+        Self {
+            enum_name: shim.enum_name,
+            needs_trait_attrs: shim.needs_trait_atttrs,
+        }
+    }
+}
+
 /// A file entry for an adt shim.
 #[derive(Serialize, Deserialize)]
 struct ShimAdtEntry {
@@ -109,8 +133,8 @@ struct ShimAdtEntry {
     rtype: String,
     /// the Coq name of the semantic type
     semtype: String,
-    /// whether this definition depends on trait attrs of its generic scope
-    needs_trait_atttrs: bool,
+    /// more meta information
+    info: ShimAdtInfo,
 }
 
 #[derive(Clone, Eq, PartialEq, Debug)]
@@ -216,7 +240,7 @@ pub(crate) struct AdtShim<'a> {
     pub refinement_type: String,
     pub syn_type: String,
     pub sem_type: String,
-    pub needs_trait_atttrs: bool,
+    pub info: radium::AdtShimInfo,
 }
 
 impl<'a> From<AdtShim<'a>> for ShimAdtEntry {
@@ -227,7 +251,7 @@ impl<'a> From<AdtShim<'a>> for ShimAdtEntry {
             syntype: shim.syn_type,
             semtype: shim.sem_type,
             rtype: shim.refinement_type,
-            needs_trait_atttrs: shim.needs_trait_atttrs,
+            info: shim.info.into(),
         }
     }
 }
@@ -421,7 +445,7 @@ impl<'a> SR<'a> {
                         syn_type: b.syntype,
                         sem_type: b.semtype,
                         refinement_type: b.rtype,
-                        needs_trait_atttrs: b.needs_trait_atttrs,
+                        info: b.info.into(),
                     };
 
                     self.adt_shims.push(entry);

@@ -233,7 +233,7 @@ impl<'rcx> VerificationCtxt<'_, 'rcx> {
                 refinement_type: lit.refinement_type.to_string(),
                 syn_type: lit.syn_type.to_string(),
                 sem_type: lit.type_term,
-                needs_trait_atttrs: lit.needs_trait_attrs,
+                info: lit.info,
             };
             return Some(a);
         }
@@ -426,6 +426,30 @@ impl<'rcx> VerificationCtxt<'_, 'rcx> {
         // write tuples up to the necessary size
         // TODO
 
+        // write the attribute spec declarations of trait impls
+        {
+            writeln!(spec_file, "Section attrs.").unwrap();
+            writeln!(spec_file, "Context `{{RRGS : !refinedrustGS Σ}}.").unwrap();
+            // sort according to dependency order
+            let order = base::order_defs_with_deps(self.env.tcx(), &self.trait_impl_deps);
+            for did in order {
+                let spec = &self.trait_impls[&OrderedDefId::new(self.env.tcx(), did)];
+                writeln!(spec_file, "{}\n", spec.generate_attr_decl()).unwrap();
+            }
+            writeln!(spec_file, "End attrs.\n").unwrap();
+        }
+        // write the attribute spec declarations of closure trait impls
+        {
+            writeln!(spec_file, "Section closure_attrs.").unwrap();
+            writeln!(spec_file, "Context `{{RRGS : !refinedrustGS Σ}}.").unwrap();
+            for info in self.procedure_registry.closure_info.values() {
+                for spec in &info.generated_impls {
+                    writeln!(spec_file, "{}\n", spec.generate_attr_decl()).unwrap();
+                }
+            }
+            writeln!(spec_file, "End closure_attrs.\n").unwrap();
+        }
+
         // Include extra specs
         {
             if let Some(extra_specs_path) = rrconfig::extra_specs_file() {
@@ -464,30 +488,6 @@ impl<'rcx> VerificationCtxt<'_, 'rcx> {
         for did in &dep_order {
             let decl = &trait_decls[&did.as_local().unwrap()];
             write!(spec_file, "{}\n", decl.make_trait_req_incls()).unwrap();
-        }
-
-        // write the attribute spec declarations of trait impls
-        {
-            writeln!(spec_file, "Section attrs.").unwrap();
-            writeln!(spec_file, "Context `{{RRGS : !refinedrustGS Σ}}.").unwrap();
-            // sort according to dependency order
-            let order = base::order_defs_with_deps(self.env.tcx(), &self.trait_impl_deps);
-            for did in order {
-                let spec = &self.trait_impls[&OrderedDefId::new(self.env.tcx(), did)];
-                writeln!(spec_file, "{}\n", spec.generate_attr_decl()).unwrap();
-            }
-            writeln!(spec_file, "End attrs.\n").unwrap();
-        }
-        // write the attribute spec declarations of closure trait impls
-        {
-            writeln!(spec_file, "Section closure_attrs.").unwrap();
-            writeln!(spec_file, "Context `{{RRGS : !refinedrustGS Σ}}.").unwrap();
-            for info in self.procedure_registry.closure_info.values() {
-                for spec in &info.generated_impls {
-                    writeln!(spec_file, "{}\n", spec.generate_attr_decl()).unwrap();
-                }
-            }
-            writeln!(spec_file, "End closure_attrs.\n").unwrap();
         }
 
         {
@@ -1042,7 +1042,7 @@ fn register_shims<'tcx>(vcx: &mut VerificationCtxt<'tcx, '_>) -> Result<(), base
             type_term: shim.sem_type.clone(),
             syn_type: radium::lang::SynType::Literal(shim.syn_type.clone()),
             refinement_type: coq::term::Type::Literal(shim.refinement_type.clone()),
-            needs_trait_attrs: shim.needs_trait_atttrs,
+            info: shim.info.clone(),
         };
 
         if let Err(e) = vcx.type_translator.register_adt_shim(did, &lit) {
