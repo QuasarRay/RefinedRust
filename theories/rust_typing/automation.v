@@ -66,7 +66,7 @@ Ltac liForall_hook ::=
       match A with
       | RT_xt ?rt =>
           assert_fails (is_var rt);
-          lazymatch rt with 
+          lazymatch rt with
           | RT_of ?ty =>
               assert_fails (is_var ty)
               (* TODO: maybe unfold the RT_of? *)
@@ -218,8 +218,18 @@ Definition wrap_inv {T} (x : T) := existT (P := id) _ x.
 Definition bb_inv_t := (list loc * list loc * list loc * sigT (@id Type) * sigT (@id Type))%type.
 (* Type of the loop invariant map we keep in the context *)
 Definition bb_inv_map_t := poly_list (var_name * bb_inv_t)%type.
-Inductive bb_inv_map_marker : bb_inv_map_t → Type :=
-  BB_INV_MAP (M : bb_inv_map_t) : bb_inv_map_marker M.
+
+(* In [Prop] and sealed so it does not get discarded as a trivial assertion by Lithium when introducing *)
+Definition bb_inv_map_marker_def (M : bb_inv_map_t) := True.
+Definition bb_inv_map_marker_aux M : seal (bb_inv_map_marker_def M). Proof. by eexists. Qed.
+Definition bb_inv_map_marker M := (bb_inv_map_marker_aux M).(unseal).
+Definition bb_inv_map_marker_unfold M : bb_inv_map_marker M = bb_inv_map_marker_def M := (bb_inv_map_marker_aux M).(seal_eq).
+
+Lemma pose_bb_inv (M : bb_inv_map_t) :
+  bb_inv_map_marker M.
+Proof.
+  rewrite bb_inv_map_marker_unfold. done.
+Qed.
 
 (** Given a [runtime_function] [rfn], get the list of stack locations as a [constr]. *)
 Ltac gather_locals rfn :=
@@ -1090,6 +1100,8 @@ Global Arguments layout_of : simpl never.
 
 Global Arguments plist : simpl never.
 
+Global Arguments lft_intersect_list : simpl never.
+
 Global Typeclasses Opaque Rel2.
 Global Arguments Rel2 : simpl never.
 
@@ -1178,10 +1190,10 @@ Ltac solve_goal_normalized_prepare_hook ::=
   idtac
 .
 
-Lemma ty_lfts_unfold_lem `{!typeGS Σ} {rt} (ty : type rt) : 
+Lemma ty_lfts_unfold_lem `{!typeGS Σ} {rt} (ty : type rt) :
   ty_lfts ty = _ty_lfts _ ty.
 Proof. rewrite ty_lfts_unfold. done. Qed.
-Lemma ty_wf_E_unfold_lem `{!typeGS Σ} {rt} (ty : type rt) : 
+Lemma ty_wf_E_unfold_lem `{!typeGS Σ} {rt} (ty : type rt) :
   ty_wf_E ty = _ty_wf_E _ ty.
 Proof. rewrite ty_wf_E_unfold. done. Qed.
 
@@ -1235,8 +1247,8 @@ Ltac enum_contractive_solve_dist :=
     repeat match goal with
     | |- ∀ (_ : type _), _ => intros ?
     end;
-    let r := fresh "r" in 
-    intros r; 
+    let r := fresh "r" in
+    intros r;
     intros;
     simpl;
     unfold spec_instantiated;
@@ -1274,7 +1286,7 @@ Ltac solve_function_subtype_hook ::=
 
 Ltac normalized_rt_of_spec_ty_rec ty :=
   match ty with
-  | ∀ x: _, ?B => 
+  | ∀ x: _, ?B =>
       normalized_rt_of_spec_ty_rec B
   | spec_with _ _ (type ?ty) =>
       let hnf_ty := eval hnf in ty in
