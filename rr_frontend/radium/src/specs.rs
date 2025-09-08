@@ -2584,15 +2584,6 @@ impl<'def> InnerFunctionSpec<'def> {
             Self::TraitDefault(_) => None,
         }
     }
-
-    /// Determines whether this spec needs trait requirements quantified.
-    #[must_use]
-    const fn needs_trait_req_params(&self) -> bool {
-        match self {
-            Self::Lit(_) => true,
-            Self::TraitDefault(_) => false,
-        }
-    }
 }
 
 /// A Radium function specification.
@@ -2683,11 +2674,7 @@ impl<'def> FunctionSpec<'def, InnerFunctionSpec<'def>> {
         params.append(self.late_coq_params.0.clone());
 
         // finally, the trait spec parameters
-        let trait_params = if self.spec.needs_trait_req_params() {
-            self.generics.get_all_attr_trait_parameters(IncludeSelfReq::Attrs)
-        } else {
-            self.generics.get_surrounding_attr_trait_parameters(IncludeSelfReq::Attrs)
-        };
+        let trait_params = self.generics.get_all_attr_trait_parameters(IncludeSelfReq::Attrs);
 
         params.append(trait_params.0);
 
@@ -2701,13 +2688,7 @@ impl<'def> FunctionSpec<'def, InnerFunctionSpec<'def>> {
         let mut params = typarams.get_coq_ty_params();
 
         // finally, the trait spec parameters
-        let trait_params = if self.spec.needs_trait_req_params() {
-            // TODO?
-            self.generics.get_all_trait_parameters(IncludeSelfReq::AttrsSpec)
-        } else {
-            // TODO?
-            self.generics.get_surrounding_trait_parameters(IncludeSelfReq::AttrsSpec)
-        };
+        let trait_params = self.generics.get_all_trait_parameters(IncludeSelfReq::AttrsSpec);
 
         params.append(trait_params.0);
 
@@ -2728,11 +2709,7 @@ impl<'def> FunctionSpec<'def, InnerFunctionSpec<'def>> {
         params.append(self.late_coq_params.0.clone());
 
         // finally, the trait spec parameters
-        let trait_params = if self.spec.needs_trait_req_params() {
-            self.generics.get_all_trait_parameters(self_req)
-        } else {
-            self.generics.get_surrounding_trait_parameters(self_req)
-        };
+        let trait_params = self.generics.get_all_trait_parameters(self_req);
 
         params.append(trait_params.0);
 
@@ -4369,16 +4346,6 @@ impl<'def> GenericScope<'def, LiteralTraitSpecUseRef<'def>> {
     #[must_use]
     fn get_direct_attr_trait_parameters(&self, include_self: IncludeSelfReq) -> coq::binder::BinderList {
         self.get_trait_req_parameters(false, true, include_self, false)
-    }
-
-    #[must_use]
-    fn get_surrounding_trait_parameters(&self, include_self: IncludeSelfReq) -> coq::binder::BinderList {
-        self.get_trait_req_parameters(true, false, include_self, true)
-    }
-
-    #[must_use]
-    fn get_surrounding_attr_trait_parameters(&self, include_self: IncludeSelfReq) -> coq::binder::BinderList {
-        self.get_trait_req_parameters(true, false, include_self, false)
     }
 
     #[must_use]

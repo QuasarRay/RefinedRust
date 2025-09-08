@@ -1177,7 +1177,7 @@ impl Function<'_> {
         write!(f, "let π := get_π in\n")?;
         write!(f, "let Σ := get_Σ in\n")?;
 
-        write!(f, "set (loop_map := BB_INV_MAP {});\n", self.loop_invariants)?;
+        write!(f, "specialize (pose_bb_inv {}) as loop_map;\n", self.loop_invariants)?;
 
         // initialize lifetimes
         let mut lfts: Vec<_> =

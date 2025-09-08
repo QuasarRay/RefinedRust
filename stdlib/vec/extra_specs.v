@@ -1,3 +1,6 @@
+Section extra_specs.
+Context `{RRGS : !refinedrustGS Σ}.
+
 Section Vec_inv_t_ne.
   Context `{!refinedrustGS Σ}.
 
@@ -11,3 +14,5 @@ Section Vec_inv_t_ne.
     TypeNonExpansive (λ ty, Vec_inv_t T_rt A_rt Alloc <TY> (T ty) <TY> A <INST!>).
   Proof. Admitted.
 End Vec_inv_t_ne.
+
+End extra_specs.

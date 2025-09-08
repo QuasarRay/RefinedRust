@@ -1,3 +1,6 @@
+Section extra_specs.
+Context `{RRGS : !refinedrustGS Σ}.
+
 Section trans.
   
   (* Note: Depends on the whole attrs instead of the Next projection so that the projection doesn't simplify away, which is a problem for [LearnFromHyp] rules. *)
@@ -54,3 +57,5 @@ Section trans.
 
 
 End trans.
+
+End extra_specs.
