@@ -253,9 +253,10 @@ fn trait_get_deps(env: &Environment<'_>, trait_did: DefId) -> Vec<DefId> {
 /// Check if this is a built-in trait
 fn is_builtin_trait(tcx: ty::TyCtxt<'_>, trait_did: DefId) -> Option<bool> {
     let sized_did = search::try_resolve_did(tcx, &["core", "marker", "Sized"])?;
+    //let pointee_sized_did = search::try_resolve_did(tcx, &["core", "marker", "PointeeSized"])?;
 
     // used for closures
     let tuple_did = search::try_resolve_did(tcx, &["core", "marker", "Tuple"])?;
 
-    Some(trait_did == sized_did || trait_did == tuple_did)
+    Some((trait_did == sized_did) || (trait_did == tuple_did))
 }

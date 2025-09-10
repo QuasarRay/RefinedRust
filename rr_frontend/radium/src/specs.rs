@@ -3705,12 +3705,12 @@ impl SpecializedTraitImpl<'_> {
         out.push_str(&format!("{} ", self.impl_ref.spec_record));
 
         // specialize to rts
-        push_str_list!(out, self.impl_inst.get_direct_ty_params(), " ", |x| {
+        push_str_list!(out, self.impl_inst.get_direct_ty_params_with_assocs(), " ", |x| {
             format!("{}", x.get_rfn_type())
         });
         // specialize to sts
         out.push(' ');
-        push_str_list!(out, self.impl_inst.get_direct_ty_params(), " ", |x| {
+        push_str_list!(out, self.impl_inst.get_direct_ty_params_with_assocs(), " ", |x| {
             format!("{}", lang::SynType::from(x))
         });
 
@@ -3721,7 +3721,9 @@ impl SpecializedTraitImpl<'_> {
         }
 
         // specialize to semtys
-        push_str_list!(out, self.impl_inst.get_direct_ty_params(), " ", |x| { format!("<TY> {}", x) });
+        push_str_list!(out, self.impl_inst.get_direct_ty_params_with_assocs(), " ", |x| {
+            format!("<TY> {}", x)
+        });
         // specialize to lfts
         push_str_list!(out, self.impl_inst.get_lfts(), " ", |x| { format!("<LFT> {}", x) });
         out.push_str(" <INST!>");

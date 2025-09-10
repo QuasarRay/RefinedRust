@@ -499,7 +499,7 @@ pub(crate) trait ParamLookup<'def> {
             if let Ok((_rest, (place, modifier))) = place_parser::parse_rust_place(&content)
                 && let Some(res) = self.lookup_place(&place, modifier)
             {
-                return res;
+                return format!("{}{res}", &c[1]);
             }
 
             "ERR".to_owned()
@@ -792,5 +792,23 @@ mod tests {
 
         let (res, _) = scope.process_coq_literal(lit);
         assert_eq!(res, "bla");
+    }
+
+    #[test]
+    fn place_5() {
+        let lit = "blub ({*a.b.c.*new})";
+        let mut scope = TestScope::default();
+        let exp = RustPlace {
+            base: "a".to_owned(),
+            proj: Projections(vec![
+                Projection::Field("b".to_owned()),
+                Projection::Field("c".to_owned()),
+                Projection::Deref,
+            ]),
+        };
+        scope.places.insert(exp, "bla".to_owned());
+
+        let (res, _) = scope.process_coq_literal(lit);
+        assert_eq!(res, "blub (bla)");
     }
 }

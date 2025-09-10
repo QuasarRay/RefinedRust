@@ -66,19 +66,18 @@ where I: Iterator, F: FnMut(I::Item) -> B
 #[rr::instantiate("Next" := "(λ s1 e s2, 
         if_iNone e ({MI::Next} s1.(map_it) None s2.(map_it)) ∗
         if_iSome e (λ e, ∃ e_inner,
-            boringly (
-                {MI::Next} s1.(map_it) (Some e_inner) s2.(map_it) ∗
-                {MF::Pre} s1.(map_clos) *[e_inner] ∗
-                {MF::PostMut} s1.(map_clos) *[e_inner] s2.(map_clos) e
-            )))%I")]
+            boringly ({MI::Next} s1.(map_it) (Some e_inner) s2.(map_it)) ∗
+            boringly ({MF::Pre} s1.(map_clos) *[e_inner]) ∗
+            boringly ({MF::PostMut} s1.(map_clos) *[e_inner] s2.(map_clos) e)
+            ))%I")]
 impl<MB, MI: Iterator, MF> Iterator for Map<MB, MI, MF>
 where
     MF: FnMut(MI::Item) -> MB,
 {
     type Item = MB;
 
+    #[rr::trust_me]
     #[rr::default_spec]
-    #[rr::only_spec]
     fn next(&mut self) -> Option<MB> {
         self.iter
             // Calling next is possible without preconditions.
