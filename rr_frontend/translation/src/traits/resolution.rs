@@ -25,8 +25,11 @@ where
     T: ty::TypeFoldable<ty::TyCtxt<'tcx>>,
 {
     // TODO: should we normalize like this also below?
-    let infer_ctx: infer::InferCtxt<'tcx> =
-        tcx.infer_ctxt().with_next_trait_solver(true).build(typing_env.typing_mode);
+    let infer_ctx: infer::InferCtxt<'tcx> = tcx
+        .infer_ctxt()
+        .with_next_trait_solver(true)
+        .ignoring_regions()
+        .build(typing_env.typing_mode);
 
     let obligation_cause = middle::traits::ObligationCause::dummy();
     let at = infer_ctx.at(&obligation_cause, typing_env.param_env);
@@ -103,6 +106,10 @@ fn recover_lifetimes_for_impl_source<'tcx>(
 
             trace!("re-enumerated impl args: {enumerated_impl_args:?}");
 
+            if num_regions == 0 {
+                return impl_source.to_owned();
+            }
+
             // instantiate the trait with the impl args; the subject is the trait below the impl's binders
             let subject = tcx.impl_subject(impl_did);
             let subject = subject.skip_binder();
@@ -122,6 +129,9 @@ fn recover_lifetimes_for_impl_source<'tcx>(
             trace!("mapping regions from {required_args:?} to {impl_args:?}");
 
             // normalize both args first, taking into account the late bound binders
+            // TODO: actually, this seems to have problem if we have to normalize an alias
+            // involving region variables.
+            // Is there some way to teach the resolution about region variables in scope?
             let bound_impl_args = below_binders.rebind(impl_args);
             let impl_args = normalize_type(tcx, typing_env, bound_impl_args).unwrap();
             let impl_args = impl_args.skip_binder();

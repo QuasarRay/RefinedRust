@@ -514,7 +514,9 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
 
         let args_tuple = args[1];
         let args_tuple = args_tuple.as_type().unwrap();
-        trace!("get_closure_impl_spec_term: trying to unify input={input:?} with args_tuple={args_tuple:?}");
+        trace!(
+            "compute_closure_late_bound_inst: trying to unify input={input:?} with args_tuple={args_tuple:?}"
+        );
 
         let typing_env = state.get_typing_env(self.env.tcx());
         let mut unifier = LateBoundUnifier::new(self.env.tcx(), typing_env, late_regions.as_slice());
@@ -576,7 +578,11 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
         for ty in upvars_tys {
             ty.fold_with(&mut folder);
         }
-        for r in folder.result() {
+        let upvar_regions = folder.result();
+        trace!(
+            "get_closure_impl_spec_term: collected upvar regions {upvar_regions:?}, translating in state={state:?}"
+        );
+        for r in upvar_regions {
             let lft = types::TX::translate_region(state, r)?;
             scope_inst.add_lft_param(lft);
         }
@@ -762,7 +768,9 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
         mut impl_deps: ImplDeps<'_>,
         include_self: bool,
     ) -> Result<Vec<radium::TraitReqInst<'def, ty::Ty<'tcx>>>, TranslationError<'tcx>> {
-        trace!("Enter resolve_trait_requirements_in_state with did={did:?} and params={params:?}");
+        trace!(
+            "Enter resolve_trait_requirements_in_state with did={did:?} and params={params:?}, in state={state:?}"
+        );
 
         let current_typing_env: ty::TypingEnv<'tcx> = state.get_typing_env(self.env.tcx());
         trace!("current typing env: {current_typing_env:?}");
