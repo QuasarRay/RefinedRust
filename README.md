@@ -26,32 +26,6 @@ There are two maintained ways to do this, using `nix` or (`opam` and `rustup`).
 
 If you are using `nix`, you do not need to have a copy of this repository.
 
-### Setup using `nix` flakes
-We assume that you have `nix` installed on your system. Setup instructions can be found here: https://nixos.org/download
-
-You can use `nix shell` to enter an interactive subshell containing the project:
-```bash
-nix shell "gitlab:lgaeher/refinedrust-dev?host=gitlab.mpi-sws.org"
-```
-
-The project lives in this subshell and will disappear as soon as you leave the subshell.
-
-If you do not have flakes enabled, you may get this error:
-```
-error: experimental Nix feature 'nix-command' is disabled; use ''–extra-experimental-features nix-command' to override
-```
-
-All you have to do is activate flakes temporarily by using `--extra-experimental-features 'nix-command flakes'`:
-```bash
-nix --extra-experimental-features 'nix-command flakes' shell "gitlab:lgaeher/refinedrust-dev?host=gitlab.mpi-sws.org"
-```
-
-If you also need a specific toolchain to build RefinedRust against, you can append `.#target.<toolchain>`, as follows:
-```bash
-nix shell "gitlab:lgaeher/refinedrust-dev?host=gitlab.mpi-sws.org".#target.riscv64gc-unknown-none-elf
-```
-
-
 ### Setup using `opam` and `rustup`
 We assume that you have `opam` installed on your system. Setup instructions can be found here: https://opam.ocaml.org/doc/Install.html
 Make sure that you have a working `rustup`/Rust install. Instructions for setting up Rust can be found on https://rustup.rs/.

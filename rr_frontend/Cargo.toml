@@ -42,5 +42,5 @@ nom = "8.0.0"
 
 [workspace.package]
 edition = "2024"
-repository = "https://gitlab.mpi-sws.org/lgaeher/refinedrust-dev"
+repository = ""
 version = "0.1.0"

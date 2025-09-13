@@ -16,7 +16,7 @@ use rr_rustc_interface::hir::def_id::LocalDefId;
 use rr_rustc_interface::middle::{query, ty, util};
 use rr_rustc_interface::{borrowck, driver, interface, session};
 
-const BUG_REPORT_URL: &str = "https://gitlab.mpi-sws.org/lgaeher/refinedrust-dev/-/issues/new";
+const BUG_REPORT_URL: &str = "";
 
 /// Callbacks for the `RefinedRust` frontend.
 struct RRCompilerCalls;
