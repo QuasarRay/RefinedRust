@@ -2,11 +2,7 @@ stages: [ nix-cache, lint, build, tests ]
 
 .upstream_only: &upstream_only
   rules:
-    - if: $CI_PROJECT_PATH == "lgaeher/refinedrust-dev" && $CI_PIPELINE_SOURCE != "merge_request_event"
-
-.forks_only: &forks_only
-  rules:
-    - if: $CI_PROJECT_PATH != "lgaeher/refinedrust-dev"
+    - if: $CI_PIPELINE_SOURCE != "merge_request_event"
 
 
 # Nix jobs expects two variables: `NIX_CI_CACHE_PUB_KEY` and `NIX_CI_CACHE_PRIV_KEY` (only available on upstream)
@@ -158,14 +154,6 @@ case_studies:
   cache:
     key: "$CI_JOB_NAME"
     paths: [ "_opam/" ]
-
-build-opam-rocq.9.1+rc1:
-  <<: *forks_only
-  extends: .opam
-  tags: [ fp ]
-  variables:
-    OPAM_PINS: "rocq-core version 9.1+rc1 dune version 3.19.1"
-    MAKE_TARGET: "all_with_examples"
 
 build-opam-rocq.9.1+rc1-timing:
   <<: *upstream_only

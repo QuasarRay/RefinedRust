@@ -72,7 +72,7 @@
       version = "0.1.0";
 
       meta = with pkgs.lib; {
-        homepage = "https://gitlab.mpi-sws.org/lgaeher/refinedrust-dev";
+        homepage = "";
         license = licenses.bsd3;
       };
 
