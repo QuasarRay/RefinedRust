@@ -3,6 +3,8 @@
 #![feature(custom_inner_attributes)]
 #![feature(stmt_expr_attributes)]
 
+#![feature(unboxed_closures)]
+
 #![feature(try_trait_v2)]
 
 #![rr::coq_prefix("rrstd.iterator")]

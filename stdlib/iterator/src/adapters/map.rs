@@ -18,8 +18,8 @@ use crate::traits::iterator::Iterator;
     {I::Next} π it_state None it_state' -∗
     Inv π it_state clos_state -∗
     Inv π it_state' clos_state))")]
-pub struct Map<B, I, F> 
-where I: Iterator, F: FnMut(I::Item) -> B
+pub struct Map<I, F> 
+where I: Iterator, F: FnMut<(I::Item,)>
 {
     #[rr::field("$# x.(map_it)")]
     pub(crate) iter: I,
@@ -28,8 +28,8 @@ where I: Iterator, F: FnMut(I::Item) -> B
 }
 
 #[rr::export_as(core::iter::adapters::Map)]
-impl<B, I, F> Map<B, I, F> 
-where I: Iterator, F: FnMut(I::Item) -> B
+impl<I, F> Map<I, F> 
+where I: Iterator, F: FnMut<(I::Item,)>
 {
     #[rr::params("Inv" : "thread_id → {xt_of I} → {xt_of F} → iProp Σ")]
     /// Precondition: The picked invariant should hold initially.
@@ -47,7 +47,7 @@ where I: Iterator, F: FnMut(I::Item) -> B
         Inv π it_state clos_state -∗
         Inv π it_state' clos_state))")]
     #[rr::returns("mk_map_x iter f")]
-    pub(crate) fn new(iter: I, f: F) -> Map<B, I, F> {
+    pub(crate) fn new(iter: I, f: F) -> Map<I, F> {
         Map { iter, f }
     }
 
@@ -64,14 +64,13 @@ where I: Iterator, F: FnMut(I::Item) -> B
             boringly ({MF::Pre} π s1.(map_clos) *[e_inner]) ∗
             boringly ({MF::PostMut} π s1.(map_clos) *[e_inner] s2.(map_clos) e)
             ))%I")]
-impl<MB, MI: Iterator, MF> Iterator for Map<MB, MI, MF>
+impl<MI: Iterator, MF, MB> Iterator for Map<MI, MF>
 where
     MF: FnMut(MI::Item) -> MB,
 {
     type Item = MB;
 
     #[rr::default_spec]
-    #[rr::trust_me]
     fn next(&mut self) -> Option<MB> {
         self.iter
             // Calling next is possible without preconditions.

@@ -232,7 +232,10 @@ pub(crate) fn resolve_trait<'tcx>(
             trait_selection::traits::ImplSource::UserDefined(impl_data) => {
                 Some((impl_data.impl_def_id, impl_data.args, TraitResolutionKind::UserDefined))
             },
-            trait_selection::traits::ImplSource::Param(_) => Some((did, substs, TraitResolutionKind::Param)),
+            trait_selection::traits::ImplSource::Param(_) => {
+                //let substs = normalize_type(tcx, typing_env, substs).unwrap();
+                Some((did, substs, TraitResolutionKind::Param))
+            },
             trait_selection::traits::ImplSource::Builtin(impl_source, _) => {
                 trace!("resolve_trait: found Builtin {impl_source:?}");
                 match *substs[0].as_type().unwrap().kind() {

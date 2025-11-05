@@ -2,3 +2,4 @@ lib_load_paths = ["../"]
 generate_dune_project = false
 extra_specs = "extra_specs.v"
 output_dir = "./output"
+skip_unsupported_features = false

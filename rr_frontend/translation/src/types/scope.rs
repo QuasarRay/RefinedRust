@@ -512,12 +512,14 @@ impl<'tcx, 'def> Params<'tcx, 'def> {
     ) -> Result<(), TranslationError<'tcx>> {
         let typing_env = ty::TypingEnv::post_analysis(env.tcx(), did);
         let is_trait = env.tcx().is_trait(did);
-        let requirements = traits::requirements::get_trait_requirements_with_origin(env, did);
+        let requirements = traits::requirements::get_trait_requirements_with_origin(env, did)?;
+
+        trace!("enter add_trait_requirements for did={did:?}, phase 1");
 
         // pre-register all the requirements, in order to resolve dependencies
         for req in &requirements {
             let key = (req.trait_ref.def_id, generate_args_inst_key(env.tcx(), req.trait_ref.args).unwrap());
-            if req.is_self_in_trait_decl {
+            if req.is_used_in_self_trait && is_trait {
                 assert!(req.bound_regions.is_empty());
                 let dummy_trait_use = trait_registry.make_trait_self_use(req.trait_ref);
                 self.trait_scope.used_traits.insert(key.clone(), dummy_trait_use);
@@ -529,8 +531,9 @@ impl<'tcx, 'def> Params<'tcx, 'def> {
             self.trait_scope.ordered_assumptions.push(key);
         }
 
+        trace!("add_trait_requirements for did={did:?}, phase 2");
         for req in requirements.iter().rev() {
-            if req.is_self_in_trait_decl {
+            if req.is_used_in_self_trait && is_trait {
                 continue;
             }
 
@@ -554,11 +557,11 @@ impl<'tcx, 'def> Params<'tcx, 'def> {
                 req.origin,
             );
         }
-
+        trace!("add_trait_requirements for did={did:?}, phase 3");
         // make a second pass to specify constraints on associated types
         // We do this in a second pass so that we can refer to the other associated types
         for req in requirements.iter().rev() {
-            if req.is_self_in_trait_decl {
+            if req.is_used_in_self_trait && is_trait {
                 continue;
             }
 
@@ -581,11 +584,11 @@ impl<'tcx, 'def> Params<'tcx, 'def> {
                 trait_use.assoc_ty_constraints = translated_constraints;
             }
         }
-
+        trace!("add_trait_requirements for did={did:?}, phase 4");
         // we make a third pass to finally resolve the scope of the trait, i.e. translate its args
         // and trait requirements
         for req in requirements.iter().rev() {
-            if req.is_self_in_trait_decl {
+            if req.is_used_in_self_trait && is_trait {
                 continue;
             }
 
@@ -596,9 +599,10 @@ impl<'tcx, 'def> Params<'tcx, 'def> {
             trait_registry.finalize_trait_use(entry, &*self, typing_env, req.trait_ref)?;
         }
 
+        trace!("add_trait_requirements for did={did:?}, phase 5");
         // make a final pass to precompute the paths to associated types and attributes
         for req in requirements {
-            if req.is_self_in_trait_decl {
+            if req.is_used_in_self_trait && is_trait {
                 continue;
             }
 
@@ -642,6 +646,7 @@ impl<'tcx, 'def> Params<'tcx, 'def> {
             }
         }
 
+        trace!("add_trait_requirements for did={did:?}, phase 6");
         // finally, if we are in a trait declaration or impl declaration, add notation shorthands
         // to the scope
         if let Some(trait_did) = env.tcx().trait_of_assoc(did) {
@@ -698,6 +703,7 @@ impl<'tcx, 'def> Params<'tcx, 'def> {
                 }
             }
         }
+        trace!("leave add_trait_requirements for did={did:?}");
         Ok(())
     }
 

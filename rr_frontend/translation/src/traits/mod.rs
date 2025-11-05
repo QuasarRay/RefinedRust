@@ -81,6 +81,9 @@ pub(crate) enum Error<'tcx> {
 
     #[display("An error occurred when parsing the specification of the trait impl {:?}: {:?}", _0, _1)]
     TraitImplSpec(DefId, String),
+
+    #[display("Exceeded maximum recusion depth while evaluating trait requirement due to constraints on associated types {:?}", _0)]
+    ExceededAssocRecursionDepth(DefId),
 }
 
 pub(crate) type TraitResult<'tcx, T> = Result<T, Error<'tcx>>;
@@ -88,13 +91,11 @@ pub(crate) type TraitResult<'tcx, T> = Result<T, Error<'tcx>>;
 /// Given a particular reference to a trait, get the associated type constraints for this trait reference.
 pub(crate) fn get_trait_assoc_constraints<'tcx>(
     env: &Environment<'tcx>,
-    typing_env: ty::TypingEnv<'tcx>,
+    clauses: ty::Clauses<'tcx>,
     trait_ref: ty::TraitRef<'tcx>,
 ) -> Vec<Option<ty::Ty<'tcx>>> {
     let mut assoc_ty_map = HashMap::new();
 
-    // TODO: check if caller_bounds does the right thing for implied bounds
-    let clauses = typing_env.param_env.caller_bounds();
     for cl in clauses {
         let cl_kind = cl.kind();
         let cl_kind = cl_kind.skip_binder();

@@ -26,7 +26,6 @@ pub trait Iterator {
 
     /// We pick an invariant Inv
     /// TODO: maybe release Inv when we drop the Map iterator
-    #[rr::trust_me]
     #[rr::params("Inv" : "thread_id → {xt_of Self} → {xt_of F} → iProp Σ")]
     /// Precondition: The picked invariant should hold initially.
     #[rr::requires(#iris "Inv π self f")]
@@ -43,7 +42,7 @@ pub trait Iterator {
         Inv π it_state clos_state -∗
         Inv π it_state' clos_state)")]
     #[rr::returns("mk_map_x self f")]
-    fn map<B, F>(self, f: F) -> Map<B, Self, F>
+    fn map<B, F>(self, f: F) -> Map<Self, F>
     where
         Self: Sized,
         F: FnMut(Self::Item) -> B,
@@ -97,7 +96,7 @@ pub trait Iterator {
 }
 
 #[rr::export_as(core::iter::IntoIterator)]
-#[rr::exists("IntoIter" : "{xt_of Self} → {xt_of IntoIter}")]
+#[rr::exists("into_iter" : "{xt_of Self} → {xt_of IntoIter}")]
 pub trait IntoIterator {
     /// The type of the elements being iterated over.
     type Item;
@@ -105,11 +104,11 @@ pub trait IntoIterator {
     /// Which kind of iterator are we turning this into?
     type IntoIter: Iterator<Item = Self::Item>;
 
-    #[rr::returns("{IntoIter} self")]
+    #[rr::returns("{into_iter} self")]
     fn into_iter(self) -> Self::IntoIter;
 }
 
-#[rr::instantiate("IntoIter" := "id")]
+#[rr::instantiate("into_iter" := "id")]
 impl<I> IntoIterator for I where I: Iterator {
     type Item = <I as Iterator>::Item;
     type IntoIter = I;
@@ -124,10 +123,11 @@ impl<I> IntoIterator for I where I: Iterator {
 #[rr::export_as(core::iter::FromIterator)]
 #[rr::exists("FromSequence" : "list ({xt_of A}) → {xt_of Self}")]
 pub trait FromIterator<A> {
+    // TODO
+     //Problem: RefinedRust currently does not translate the Iterator requirement on T::IntoIter. 
+     //Maybe let's do a hacky wrapper solution for that for now. 
     #[rr::verify]
     //#[rr::exists("seq", "s2", "s2'")]
-    // Problem: RefinedRust currently does not translate the Iterator requirement on T::IntoIter. 
-    // Maybe let's do a hacky wrapper solution for that for now. 
     //#[rr::ensures(#iris "IteratorNextFusedTrans {attrs_of T::IntoIter} ({T::IntoIter} iter) seq s2")]
     //#[rr::ensures(#iris "{T::Next} s2 None s2'")]
     //#[rr::returns("{FromSequence} seq")]

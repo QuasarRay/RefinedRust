@@ -891,6 +891,8 @@ pub struct SpecDecl<'def> {
 
     /// associated types
     assoc_types: Vec<LiteralTyParam>,
+    /// obligations on associated types, in a scope where `assoc_types` are available
+    //assoc_type_obligations: Vec<LiteralSpecUseRef<'def>>,
 
     /// The default specification from the trait declaration
     default_spec: InstanceSpec<'def>,

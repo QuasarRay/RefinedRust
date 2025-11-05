@@ -602,7 +602,7 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
             trait_args,
             below_binders,
         ) {
-            trace!("resolved trait impl as {impl_did:?} with {trait_args:?} {kind:?}");
+            trace!("resolved trait impl as {impl_did:?} with {trait_args:?} {kind:?} in typing env {current_typing_env:?}");
 
             if let Some(deps) = impl_deps {
                 deps.insert(OrderedDefId::new(self.env.tcx(), impl_did));
@@ -764,11 +764,12 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
         trace!("target typing env {target_typing_env:?}");
 
         // Get the trait requirements of the target
-        let target_requirements = requirements::get_trait_requirements_with_origin(self.env, did);
+        let target_requirements = requirements::get_trait_requirements_with_origin(self.env, did)?;
         trace!("non-trivial target requirements: {target_requirements:?}");
         trace!("substituting with args {:?}", params);
 
         // For each trait requirement, resolve to a trait spec that we can provide
+        let is_trait = self.env.tcx().is_trait(did);
 
         // separate direct and indirect origins
         // (indirect = surrounding scope)
@@ -777,7 +778,7 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
         let mut indirect_trait_spec_terms = Vec::new();
 
         for req in &target_requirements {
-            if req.is_self_in_trait_decl && !include_self {
+            if req.is_used_in_self_trait && is_trait && !include_self {
                 continue;
             }
 
@@ -1101,18 +1102,20 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
                         ty::AssocTag::Type,
                         trait_impl_did,
                     );
-                    if let Some(ty_item) = ty_item {
-                        let ty_did = ty_item.def_id;
-                        let ty = self.env.tcx().type_of(ty_did);
-                        let translated_ty = self.type_translator().translate_type_in_scope(
-                            &param_scope,
-                            typing_env,
-                            ty.skip_binder(),
-                        )?;
-                        assoc_types_inst.push(translated_ty);
-                    } else {
+                    let Some(ty_item) = ty_item else {
                         unreachable!("trait impl does not have required item");
-                    }
+                    };
+
+                    let ty_did = ty_item.def_id;
+                    let ty = self.env.tcx().type_of(ty_did);
+                    let translated_ty = self.type_translator().translate_type_in_scope(
+                        &param_scope,
+                        typing_env,
+                        ty.skip_binder(),
+                    )?;
+                    assoc_types_inst.push(translated_ty);
+
+                    // TODO get obligations and resolve them?
                 }
             }
 
@@ -1298,16 +1301,18 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
         trait_ref: ty::TraitRef<'tcx>,
     ) -> Result<(), TranslationError<'tcx>> {
         trace!("enter finalize_trait_use for {:?}", trait_use.did);
-        trace!("current scope={scope:?}");
+        //trace!("current scope={scope:?}");
 
         let mut scope = scope.clone();
         let quantified_regions = scope.translate_bound_regions(self.env.tcx(), &trait_use.bound_regions);
-        trace!("new trait scope={scope:?}");
+        //trace!("new trait scope={scope:?}");
         //let mut state = state.setup_trait_state(self.env.tcx(), scope);
         let mut state =
             types::STInner::TraitReqs(Box::new(types::TraitState::new(scope, typing_env, None, None)));
 
+        trace!("finalize_trait_use for {:?}: computing scope inst for args = {:?}", trait_use.did, trait_ref.args);
         let mut scope_inst = self.compute_scope_inst_in_state_without_traits(&mut state, trait_ref.args)?;
+        trace!("finalize_trait_use for {:?}: scope_inst = {scope_inst:?}", trait_use.did);
 
         let trait_reqs = self.resolve_radium_trait_requirements_in_state(
             &mut state,
@@ -1327,7 +1332,7 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
         lit_trait_use.trait_inst = scope_inst;
         lit_trait_use.scope = quantified_regions;
 
-        trace!("enter finalize_trait_use for {:?}", trait_use.did);
+        trace!("leave finalize_trait_use for {:?}", trait_use.did);
 
         Ok(())
     }

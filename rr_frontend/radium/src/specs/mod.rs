@@ -664,7 +664,7 @@ impl<'def, T: traits::ReqInfo> GenericScope<'def, T> {
 
         out.push_str("λ ϝ, [");
 
-        // implied bounds on inputs/outputs
+        // bounds on inputs/outputs
         let lft_outlives: Vec<_> = self
             .lft_constraints
             .constrs
@@ -677,6 +677,7 @@ impl<'def, T: traits::ReqInfo> GenericScope<'def, T> {
         push_str_list!(out, &lft_outlives, "; ");
 
         // all lifetime parameters outlive this function
+        // TODO: this is implied, and maybe should be  handled differently
         if !lft_outlives.is_empty() && !self.lfts.is_empty() {
             out.push_str("; ");
         }
@@ -716,6 +717,27 @@ impl<'def, T: traits::ReqInfo> GenericScope<'def, T> {
     fn generate_validity_term_for_typaram(ty: &LiteralTyParam) -> coq::iris::IProp {
         let prop = format!("typaram_wf {} {} {}", ty.refinement_type(), ty.syn_type(), ty.type_term());
         coq::iris::IProp::Atom(prop)
+    }
+
+    /// Get the validity elctx for a generic on a function.
+    #[must_use]
+    #[expect(dead_code)]
+    pub(crate) fn generate_validity_elctx_for_generics(&self) -> String {
+        let mut out = String::with_capacity(100);
+
+        out.push_str("λ ϝ, [");
+        // all lifetime parameters outlive this function
+        push_str_list!(out, &self.lfts, "; ", |lft| format!("(ϝ, {lft})"));
+        out.push(']');
+
+        // all typarams are wellformed
+        let typarams = self.get_all_ty_params_with_assocs();
+        if !typarams.params.is_empty() {
+            out.push_str(" ++ ");
+            push_str_list!(out, typarams.params, "; ", |ty| format!("typaram_elctx ϝ _ {}", ty.type_term()));
+        }
+
+        out
     }
 
     /// Get type parameters quantified by a surrounding scope.

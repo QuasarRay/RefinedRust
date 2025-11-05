@@ -21,18 +21,16 @@ use crate::{search, traits};
 fn determine_origin_of_trait_requirement<'tcx>(
     did: DefId,
     tcx: ty::TyCtxt<'tcx>,
-    surrounding_reqs: &Option<Vec<ty::TraitRef<'tcx>>>,
+    surrounding_reqs: &[ty::TraitRef<'tcx>],
     req: ty::TraitRef<'tcx>,
 ) -> specs::TyParamOrigin {
-    if let Some(surrounding_reqs) = surrounding_reqs {
-        let in_trait_decl = tcx.trait_of_assoc(did);
+    let in_trait_decl = tcx.trait_of_assoc(did);
 
-        if surrounding_reqs.contains(&req) {
-            if in_trait_decl.is_some() {
-                return specs::TyParamOrigin::SurroundingTrait;
-            }
-            return specs::TyParamOrigin::SurroundingImpl;
+    if surrounding_reqs.contains(&req) {
+        if in_trait_decl.is_some() {
+            return specs::TyParamOrigin::SurroundingTrait;
         }
+        return specs::TyParamOrigin::SurroundingImpl;
     }
     specs::TyParamOrigin::Direct
 }
@@ -44,10 +42,23 @@ pub(crate) struct TraitReqMeta<'tcx> {
     pub bound_regions: Vec<ty::BoundRegionKind>,
     pub binders: ty::Binder<'tcx, ()>,
     pub origin: specs::TyParamOrigin,
+    /// this requirement is a reflexive trait requirement on `Self` in a trait declaration
     pub is_used_in_self_trait: bool,
-    pub is_self_in_trait_decl: bool,
-    // for the ordered associated types, an optional constraint
+    /// this requirement comes from a trait obligation on an associated type
+    pub from_obligation: bool,
+    /// for the ordered associated types, an optional constraint
     pub assoc_constraints: Vec<Option<ty::Ty<'tcx>>>,
+}
+
+/// Internal meta information of a trait requirement.
+#[derive(Clone, Debug)]
+struct TraitReqProto<'tcx> {
+    trait_ref: ty::TraitRef<'tcx>,
+    bound_regions: Vec<ty::BoundRegionKind>,
+    binders: ty::Binder<'tcx, ()>,
+    is_used_in_self_trait: bool,
+    from_obligation: bool,
+    assoc_constraints: Vec<Option<ty::Ty<'tcx>>>,
 }
 
 /// Get the trait requirements of a [did], also determining their origin relative to the [did].
@@ -55,7 +66,7 @@ pub(crate) struct TraitReqMeta<'tcx> {
 pub(crate) fn get_trait_requirements_with_origin<'tcx>(
     env: &Environment<'tcx>,
     did: DefId,
-) -> Vec<TraitReqMeta<'tcx>> {
+) -> Result<Vec<TraitReqMeta<'tcx>>, super::Error<'tcx>> {
     trace!("Enter get_trait_requirements_with_origin for did={did:?}");
     let typing_env: ty::TypingEnv<'tcx> = ty::TypingEnv::post_analysis(env.tcx(), did);
 
@@ -70,63 +81,44 @@ pub(crate) fn get_trait_requirements_with_origin<'tcx>(
     // determine the origin of this requirement below
     let surrounding_reqs = if let Some(trait_did) = in_trait_decl {
         let trait_param_env = env.tcx().param_env(trait_did);
-        Some(
-            get_nontrivial(env, trait_did, trait_param_env, None)
-                .into_iter()
-                .map(|(x, _, _)| x)
-                .collect(),
-        )
+        get_nontrivial(env, trait_did, trait_param_env, None)?
+            .into_iter()
+            .map(|x| x.trait_ref)
+            .collect()
     } else if let Some(impl_did) = in_trait_impl {
         let impl_param_env = env.tcx().param_env(impl_did);
-        Some(
-            get_nontrivial(env, impl_did, impl_param_env, None)
-                .into_iter()
-                .map(|(x, _, _)| x)
-                .collect(),
-        )
+        get_nontrivial(env, impl_did, impl_param_env, None)?
+            .into_iter()
+            .map(|x| x.trait_ref)
+            .collect()
     } else {
-        None
+        vec![]
     };
 
     let clauses = typing_env.param_env.caller_bounds();
     info!("Caller bounds: {:?}", clauses);
 
     let in_trait_decl = if is_trait { Some(did) } else { in_trait_decl };
-    let requirements = get_nontrivial(env, did, typing_env.param_env, in_trait_decl);
+    let requirements = get_nontrivial(env, did, typing_env.param_env, in_trait_decl)?;
     let mut annotated_requirements = Vec::new();
 
-    for (trait_ref, bound_regions, binders) in requirements {
-        // check if we are in the process of translating a trait decl
-        let is_self = trait_ref.args[0].as_type().unwrap().is_param(0);
-        let mut is_used_in_self_trait = false;
-        if let Some(trait_decl_did) = in_trait_decl {
-            // is this a reference to the trait we are currently declaring
-            let is_use_of_self_trait = trait_decl_did == trait_ref.def_id;
-
-            if is_use_of_self_trait && is_self {
-                // This is the self assumption of the trait we are currently implementing
-                // For a function spec in a trait decl, we remember this, as we do not require
-                // a quantified spec for the Self trait.
-                is_used_in_self_trait = true;
-            }
+    for req in requirements {
+        // TODO: we skip these requirements for now
+        if req.from_obligation {
+            continue;
         }
 
-        // we are processing the Self requirement in the scope of a trait declaration, so skip this.
-        let is_self_in_trait_decl = is_trait && is_used_in_self_trait && is_self;
-
-        let origin = determine_origin_of_trait_requirement(did, env.tcx(), &surrounding_reqs, trait_ref);
-        info!("Determined origin of requirement {trait_ref:?} as {origin:?}");
-
-        let assoc_constraints = traits::get_trait_assoc_constraints(env, typing_env, trait_ref);
+        let origin = determine_origin_of_trait_requirement(did, env.tcx(), &surrounding_reqs, req.trait_ref);
+        info!("Determined origin of requirement {:?} as {origin:?}", req.trait_ref);
 
         let req = TraitReqMeta {
-            trait_ref,
-            bound_regions,
-            binders,
+            trait_ref: req.trait_ref,
+            bound_regions: req.bound_regions,
+            binders: req.binders,
+            from_obligation: req.from_obligation,
             origin,
-            is_used_in_self_trait,
-            is_self_in_trait_decl,
-            assoc_constraints,
+            is_used_in_self_trait: req.is_used_in_self_trait,
+            assoc_constraints: req.assoc_constraints,
         };
         annotated_requirements.push(req);
     }
@@ -134,28 +126,29 @@ pub(crate) fn get_trait_requirements_with_origin<'tcx>(
     trace!(
         "Leave get_trait_requirements_with_origin for did={did:?} with annotated_requirements={annotated_requirements:?}"
     );
-    annotated_requirements
+    Ok(annotated_requirements)
 }
 
-/// Get non-trivial trait requirements of a `ParamEnv`,
-/// ordered deterministically.
-pub(crate) fn get_nontrivial<'tcx>(
+/// `is_used_in_self_trait` recursively marks whether this requirement came from the `Self`
+/// requirement of a trait decl, ensuring that also all the obligations get marked accordingly.
+fn trait_requirements_of_clauses<'tcx>(
     env: &Environment<'tcx>,
-    for_did: DefId,
-    param_env: ty::ParamEnv<'tcx>,
+    clauses: ty::Clauses<'tcx>,
     in_trait_decl: Option<DefId>,
-) -> Vec<(ty::TraitRef<'tcx>, Vec<ty::BoundRegionKind>, ty::Binder<'tcx, ()>)> {
-    let mut trait_refs = Vec::new();
-    trace!(
-        "Enter get_nontrivial_trait_requirements with for_did={for_did:?}, param_env = {param_env:?}, in_trait_decl = {in_trait_decl:?}"
-    );
-
-    let clauses = param_env.caller_bounds();
+    is_used_in_self_trait: bool,
+    in_obligation: bool,
+    max_recursion_depth: u32,
+    out: &mut Vec<TraitReqProto<'tcx>>,
+) -> Result<(), super::Error<'tcx>> {
+    trace!("enter trait_requirements_of_clauses: clauses = {clauses:?}, in_trait_decl = {in_trait_decl:?}, is_used_in_self_trait = {is_used_in_self_trait:?}, in_obligation = {in_obligation:?}");
     for cl in clauses {
-        let cl_kind = cl.kind();
+        // only look for trait predicates for now
+        let Some(trait_clause) = cl.as_trait_clause() else {
+            continue;
+        };
 
         let mut bound_regions = Vec::new();
-        let bound_vars = cl_kind.bound_vars();
+        let bound_vars = trait_clause.bound_vars();
         for v in bound_vars {
             match v {
                 ty::BoundVariableKind::Region(r) => {
@@ -168,27 +161,85 @@ pub(crate) fn get_nontrivial<'tcx>(
         }
 
         // keep the binders around
-        let binders = cl_kind.rebind(());
+        let binders = trait_clause.rebind(());
+        let trait_pred = trait_clause.skip_binder();
 
-        // TODO: maybe problematic
-        let cl_kind = cl_kind.skip_binder();
+        // We ignore negative polarities for now
+        if trait_pred.polarity != ty::PredicatePolarity::Positive {
+            continue;
+        }
 
-        // only look for trait predicates for now
-        if let ty::ClauseKind::Trait(trait_pred) = cl_kind {
-            // We ignore negative polarities for now
-            if trait_pred.polarity == ty::PredicatePolarity::Positive {
-                let trait_ref = trait_pred.trait_ref;
+        let trait_ref = trait_pred.trait_ref;
 
-                // filter Sized, Copy, Send, Sync?
-                if Some(true) == is_builtin_trait(env.tcx(), trait_ref.def_id) {
-                    continue;
+        // filter Sized, Copy, Send, Sync?
+        if Some(true) == is_builtin_trait(env.tcx(), trait_ref.def_id) {
+            continue;
+        }
+
+        // gather constraints on associated types from projection clauses
+        // Important in case of recursion: this happens withe the obligation clauses, not the outer clauses.
+        let assoc_constraints = traits::get_trait_assoc_constraints(env, clauses, trait_ref);
+
+        // check if we are in the process of translating a trait decl
+        let is_self = trait_ref.args[0].as_type().unwrap().is_param(0);
+        let is_used_in_self_trait = if let Some(trait_decl_did) = in_trait_decl && trait_decl_did == trait_ref.def_id && is_self {
+            // This is the self assumption of the trait we are currently declaring
+            // For a function spec in a trait decl, we remember this, as we do not require
+            // a quantified spec for the Self trait.
+            true
+        } else {
+            is_used_in_self_trait
+        };
+
+        // this is a nontrivial requirement
+        let req = TraitReqProto {
+            trait_ref, bound_regions, binders, 
+            is_used_in_self_trait,
+            from_obligation: in_obligation,
+            assoc_constraints
+        };
+        out.push(req);
+
+        // look at associated types and their obligations
+        let items: &ty::AssocItems = env.tcx().associated_items(trait_ref.def_id);
+        for it in items.in_definition_order() {
+            if let ty::AssocKind::Type { .. } = it.kind {
+                let it_bounds: ty::EarlyBinder<'tcx, ty::Clauses<'tcx>> = env.tcx().item_bounds(it.def_id);
+
+                trace!("trait_requirements_of_clauses: bounds of assoc {:?} : {it_bounds:?}", it.def_id);
+
+                let bounds = it_bounds.skip_binder();
+
+                // recursively process these bounds
+                if max_recursion_depth > 0 {
+                    trait_requirements_of_clauses(env, bounds, in_trait_decl, is_used_in_self_trait, true, max_recursion_depth - 1, out)?;
                 }
-
-                // this is a nontrivial requirement
-                trait_refs.push((trait_ref, bound_regions, binders));
+                else {
+                    return Err(super::Error::ExceededAssocRecursionDepth(it.def_id));
+                }
             }
         }
     }
+    trace!("leave trait_requirements_of_clauses");
+    Ok(())
+}
+
+/// Get non-trivial trait requirements of a `ParamEnv`,
+/// ordered deterministically.
+fn get_nontrivial<'tcx>(
+    env: &Environment<'tcx>,
+    for_did: DefId,
+    param_env: ty::ParamEnv<'tcx>,
+    in_trait_decl: Option<DefId>,
+) -> Result<Vec<TraitReqProto<'tcx>>, super::Error<'tcx>> {
+    let mut trait_refs = Vec::new();
+    trace!(
+        "Enter get_nontrivial_trait_requirements with for_did={for_did:?}, param_env = {param_env:?}, in_trait_decl = {in_trait_decl:?}"
+    );
+
+    let clauses = param_env.caller_bounds();
+    // TODO: hardcoded constant...
+    trait_requirements_of_clauses(env, clauses, in_trait_decl, false, false, 100, &mut trait_refs)?;
 
     // Make sure the order is stable across compilations
     trace!("get_nontrivial_trait_requirements: ordering requirements of {for_did:?}");
@@ -198,10 +249,13 @@ pub(crate) fn get_nontrivial<'tcx>(
 
     for (idx, a) in trait_refs.iter().enumerate() {
         topo.insert(idx);
-        let deps = trait_get_deps(env, a.0.def_id);
+        let mut deps = Vec::new();
+        let trait_did = a.trait_ref.def_id;
+        trait_get_deps(env, trait_did, &mut deps)?;
+        trace!("get_nontrivial_trait_requirements: deps of {trait_did:?}: {deps:?}");
         for did in deps {
             for (idxb, b) in trait_refs.iter().enumerate() {
-                if b.0.def_id == did {
+                if b.trait_ref.def_id == did {
                     topo.add_dependency(idxb, idx);
                 }
             }
@@ -217,38 +271,35 @@ pub(crate) fn get_nontrivial<'tcx>(
             next_refs.push(trait_refs[x].clone());
         }
 
-        next_refs.sort_by(|(a, _, _), (b, _, _)| traits::cmp_trait_ref(env, in_trait_decl, a, b));
+        next_refs.sort_by(|a, b| traits::cmp_trait_ref(env, in_trait_decl, &a.trait_ref, &b.trait_ref));
 
         defn_order.append(&mut next_refs);
     }
 
     trace!("Leave get_nontrivial_trait_requirements with for_did={for_did:?}, trait_refs = {defn_order:?}");
 
-    defn_order
+    Ok(defn_order)
 }
 
-fn trait_get_deps(env: &Environment<'_>, trait_did: DefId) -> Vec<DefId> {
-    let param_env = env.tcx().param_env(trait_did);
+fn trait_get_deps<'tcx>(env: &Environment<'tcx>, of_trait: DefId, out: &mut Vec<DefId>) -> Result<(), super::Error<'tcx>> {
+    let param_env = env.tcx().param_env(of_trait);
     let clauses = param_env.caller_bounds();
-
-    let mut deps = Vec::new();
     for cl in clauses {
-        let cl_kind = cl.kind();
-        let cl_kind = cl_kind.skip_binder();
-
         // only look for trait predicates for now
-        if let ty::ClauseKind::Trait(trait_pred) = cl_kind {
-            // We ignore negative polarities for now
-            if trait_pred.polarity == ty::PredicatePolarity::Positive {
-                let trait_ref = trait_pred.trait_ref;
-                if trait_ref.def_id != trait_did {
-                    deps.push(trait_ref.def_id);
-                }
+        let Some(pred) = cl.as_trait_clause() else {
+            continue;
+        };
+        let trait_pred = pred.skip_binder();
+
+        // We ignore negative polarities for now
+        if trait_pred.polarity == ty::PredicatePolarity::Positive {
+            let trait_ref = trait_pred.trait_ref;
+            if trait_ref.def_id != of_trait {
+                out.push(trait_ref.def_id);
             }
         }
     }
-
-    deps
+    Ok(())
 }
 
 /// Check if this is a built-in trait
