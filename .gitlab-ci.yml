@@ -1,168 +1,13 @@
-stages: [ nix-cache, build, lint, tests ]
-
-.upstream_only: &upstream_only
-  rules:
-    - if: $CI_PROJECT_PATH == "lgaeher/refinedrust-dev" && $CI_PIPELINE_SOURCE != "merge_request_event"
-
-.forks_only: &forks_only
-  rules:
-    - if: $CI_PROJECT_PATH != "lgaeher/refinedrust-dev"
-
-
-# Nix jobs expects two variables: `NIX_CI_CACHE_PUB_KEY` and `NIX_CI_CACHE_PRIV_KEY` (only available on upstream)
-# Those variables can be generated with: `nix-store --generate-binary-cache-key ci_nix_store priv.pem pub.pem`
-.nix:
-  <<: *upstream_only
-  image: nixos/nix:2.32.1
-  interruptible: true
-  tags: [ fp ]
-
-  before_script:
-   - echo "experimental-features = nix-command flakes ca-derivations" >> /etc/nix/nix.conf
-   - echo "substituters = file://$(pwd)/${NIX_STORE_ARTIFACTS_PATH} file://$(pwd)/${NIX_STORE_CACHE_PATH} https://cache.nixos.org" >> /etc/nix/nix.conf
-   - echo "trusted-public-keys = ${NIX_CI_CACHE_PUB_KEY} cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=" >> /etc/nix/nix.conf
-
-   # Since the cache is not guaranteed to be available, it is preferable to build the dependencies for each job (which is no-op if the cache is available)
-   - nix build --print-build-logs ${DEPENDENCIES}
-
-  variables:
-    DEPENDENCIES: ".#theories.inputDerivation .#frontend.inputDerivation .#frontend.cargoArtifacts nixpkgs#gnumake nixpkgs#gnupatch nixpkgs#gnused"
-    NIX_PLATFORM: "$(eval nix-instantiate --eval --expr 'builtins.currentSystem')"
-    NIX_STORE_ARTIFACTS_PATH: ".ci_nix_artifacts"
-    NIX_STORE_CACHE_PATH: ".ci_nix_cache"
-
-  cache: &nix_cache
-    key:
-      files: [ flake.lock, flake.nix ]
-    paths: [ "${NIX_STORE_CACHE_PATH}" ]
-    policy: pull
-
-.build_to_nix_cache:
-  cache:
-    <<: *nix_cache
-    policy: pull-push
-
-  script: &build_drv
-   - nix build --print-build-logs $(eval echo ${NIX_DERIVATION})
-   - nix store sign --key-file <(echo "${NIX_CI_CACHE_PRIV_KEY}") --recursive $(eval echo ${NIX_DERIVATION})
-   - nix copy --to "file://$(pwd)/${NIX_STORE_CACHE_PATH}" $(eval echo ${NIX_DERIVATION})
-
-.build_to_nix_artifacts:
-  artifacts:
-    paths: [ "${NIX_STORE_ARTIFACTS_PATH}" ]
-    when: always
-    expire_in: 1 week
-
-  script:
-   - *build_drv
-
-   # To avoid generating large `artifacts` without cluttering the `cache`, an overlay on top of the nix store must be used.
-   # So, one of the following solutions can be used:
-   #  1. Using OverlayFS (with `local-overlay` feature), but SYS_ADMIN capability is required
-   #  2. Moving files around, which is not the best way to do
-   - mkdir -p "${NIX_STORE_ARTIFACTS_PATH}/nar"
-   - nix path-info $(eval echo ${NIX_DERIVATION}) | xargs -r basename -a | cut -d'-' -f1 | xargs -r printf -- "${NIX_STORE_CACHE_PATH}/%s.narinfo\0" | xargs -r0 mv -v -t "${NIX_STORE_ARTIFACTS_PATH}" || true
-   - find "${NIX_STORE_ARTIFACTS_PATH}" -name "*.narinfo" -type f -print0 | xargs -r0 grep -oPh "(?<=URL:\ ).*" | xargs -r printf -- "${NIX_STORE_CACHE_PATH}/%s\0" | xargs -r0 mv -v -t ${NIX_STORE_ARTIFACTS_PATH}/nar || true
-
-nix-cache:
-  extends: [ .nix, .build_to_nix_cache ]
-  stage: nix-cache
-  variables:
-    NIX_DERIVATION: ${DEPENDENCIES}
-
-theories:
-  extends: [ .nix, .build_to_nix_artifacts ]
-  stage: build
-  needs: [ nix-cache ]
-  variables:
-    NIX_DERIVATION: .#theories
-
-frontend:
-  extends: [ .nix, .build_to_nix_artifacts ]
-  stage: build
-  needs: [ nix-cache ]
-  variables:
-    NIX_DERIVATION: .#frontend
-
-stdlib:
-  extends: [ .nix, .build_to_nix_artifacts ]
-  stage: build
-  needs: [ theories, frontend ]
-  variables:
-    NIX_DERIVATION: .#stdlib
-
-clippy:
-  extends: [ .nix, .build_to_nix_artifacts ]
-  stage: lint
-  needs: [ frontend ]
-  variables:
-    NIX_DERIVATION: .#checks.${NIX_PLATFORM}.clippy
-
-deny:
-  extends: [ .nix, .build_to_nix_artifacts ]
-  stage: lint
-  needs: [ frontend ]
-  variables:
-    NIX_DERIVATION: .#checks.${NIX_PLATFORM}.deny
-
-fmt:
-  extends: [ .nix, .build_to_nix_artifacts ]
-  stage: lint
-  needs: [ frontend ]
-  variables:
-    NIX_DERIVATION: .#checks.${NIX_PLATFORM}.fmt
-
-machete:
-  extends: [ .nix, .build_to_nix_artifacts ]
-  stage: lint
-  needs: [ frontend ]
-  variables:
-    NIX_DERIVATION: .#checks.${NIX_PLATFORM}.machete
-
-unused:
-  extends: [ .nix, .build_to_nix_artifacts ]
-  stage: lint
-  needs: [ frontend ]
-  variables:
-    NIX_DERIVATION: .#checks.${NIX_PLATFORM}.workspace-unused
-
-case-studies:
-  extends: [ .nix, .build_to_nix_artifacts ]
-  stage: tests
-  needs: [ stdlib ]
-  variables:
-    NIX_DERIVATION: .#checks.${NIX_PLATFORM}.{evenint,minivec,paper-examples,paper-examples-rr20,tests}
-
-ace:
-  extends: [ .nix, .build_to_nix_artifacts ]
-  stage: tests
-  needs: [ stdlib ]
-  allow_failure: true
-  variables:
-    NIX_DERIVATION: ./case_studies/ace-riscv#
-
-nix-shell:
-  extends: [ .nix ]
-  stage: tests
-  needs: [ stdlib ]
-  script:
-   - nix shell -c cargo refinedrust -V
-   - cd case_studies/evenint
-   - nix shell -c cargo refinedrust
-   - nix shell -c dune build --display=short -p evenint
-
-
 .opam:
   image: $CI_REGISTRY/gaeher/rust-ci
+  tags: [ fp-timing ]
+
   interruptible: true
-  stage: build
-  needs: []
 
   variables:
-    # dune takes care of parallelization itself and does not like running in parallel
     CPU_CORES: "1"
-    # DENY_WARNINGS: "1"
-    OCAML: "ocaml-variants.4.14.2+options ocaml-option-flambda"
+    MAKE_TARGET: "all_with_examples"
+    OPAM_PINS: "rocq-core version 9.1.0 dune version 3.21.0"
 
   script:
    - git clone https://gitlab.mpi-sws.org/iris/ci.git ci -b opam2
@@ -170,22 +15,22 @@ nix-shell:
    - source "$HOME/.cargo/env"
    - ci/buildjob
 
-  cache:
-    key: "$CI_JOB_NAME"
-    paths: [ "_opam/" ]
-
-build-opam-rocq.9.1.0:
-  <<: *forks_only
+ocaml-4.14.2:
   extends: .opam
-  tags: [ fp ]
   variables:
-    OPAM_PINS: "rocq-core version 9.1.0 dune version 3.21.0"
-    MAKE_TARGET: "all_with_examples"
+    OCAML: "ocaml-base-compiler.4.14.2"
 
-build-opam-rocq.9.1.0-timing:
-  <<: *upstream_only
-  extends: .opam
-  tags: [ fp-timing ]
-  variables:
-    OPAM_PINS: "rocq-core version 9.1.0 dune version 3.21.0"
-    MAKE_TARGET: "all_with_examples"
+# ocaml-4.14.2-flambda:
+#   extends: .opam
+#   variables:
+#     OCAML: "ocaml-variants.4.14.2+options ocaml-option-flambda"
+# 
+# ocaml-5.4.0:
+#   extends: .opam
+#   variables:
+#     OCAML: "ocaml-base-compiler.5.4.0"
+# 
+# ocaml-5.4.0-flambda:
+#   extends: .opam
+#   variables:
+#     OCAML: "ocaml-variants.5.4.0+options ocaml-option-flambda"
