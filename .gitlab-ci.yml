@@ -19,17 +19,17 @@
 #   extends: .opam
 #   variables:
 #     OCAML: "ocaml-base-compiler.4.14.2"
-
-ocaml-4.14.2-flambda:
-  extends: .opam
-  variables:
-    OCAML: "ocaml-variants.4.14.2+options ocaml-option-flambda"
-
-# ocaml-5.4.0:
+# 
+# ocaml-4.14.2-flambda:
 #   extends: .opam
 #   variables:
-#     OCAML: "ocaml-base-compiler.5.4.0"
-# 
+#     OCAML: "ocaml-variants.4.14.2+options ocaml-option-flambda"
+
+ocaml-5.4.0:
+  extends: .opam
+  variables:
+    OCAML: "ocaml-base-compiler.5.4.0"
+
 # ocaml-5.4.0-flambda:
 #   extends: .opam
 #   variables:
