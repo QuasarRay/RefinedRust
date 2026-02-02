@@ -4,3 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+rr-contracts = "0.1"
+
+[patch.crates-io]
+rr-contracts = { path = "../../rr-contracts" }

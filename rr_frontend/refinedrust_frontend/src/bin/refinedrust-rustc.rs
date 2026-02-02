@@ -12,8 +12,8 @@ use std::process::Command;
 use std::{env, process};
 
 use log::{debug, info};
-use rr_rustc_interface::hir::def_id::LocalDefId;
-use rr_rustc_interface::middle::{query, ty, util};
+use rr_rustc_interface::hir::{def_id::LocalDefId, OwnerNodes};
+use rr_rustc_interface::middle::{hir, query, ty, util};
 use rr_rustc_interface::{borrowck, driver, interface, session};
 
 const BUG_REPORT_URL: &str = "https://gitlab.mpi-sws.org/lgaeher/refinedrust-dev/-/issues/new";
@@ -141,9 +141,17 @@ fn mir_borrowck(tcx: ty::TyCtxt<'_>, def_id: LocalDefId) -> query::queries::mir_
     original_mir_borrowck(tcx, def_id)
 }
 
+//fn opt_hir_owner_nodes(tcx: ty::TyCtxt<'_>, def_id: LocalDefId) -> Option<&'_ OwnerNodes<'_>> {
+    //let mut providers = query::Providers::default();
+    //hir::provide(&mut providers);
+    //let original_mir_borrowck = providers.opt_hir_owner_nodes;
+    //original_mir_borrowck(tcx, def_id)
+//}
+
 fn override_queries(_session: &session::Session, providers: &mut util::Providers) {
     // overriding these queries makes sure that the `mir_storage` gets all the relevant bodies
     providers.queries.mir_borrowck = mir_borrowck;
+    //providers.queries.opt_hir_owner_nodes = opt_hir_owner_nodes;
 }
 
 /// Main entry point to the frontend that is called by the driver.
