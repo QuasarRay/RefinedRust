@@ -29,6 +29,7 @@ Section rule.
     iApply physical_step_intro_lc. iIntros "(Hcred & Hcred1) !> !> HT".
     iMod ("HT" with "Hcred1") as (L' rt ty r r' ly) "(#Hrfn & #Hshr & %Halg & %Hly & #Hlb & #Hsc & HL & Hf & HT)".
     iModIntro. iApply ("HΦ" with "HL Hf [Hshr] HT").
+    rewrite /ty_own_val/= shr_ref_own_val_unfold.
     iExists l, ly, r'. iR. iR. iFrame "Hlb Hrfn Hsc %".
     iModIntro. iModIntro. done.
   Qed.

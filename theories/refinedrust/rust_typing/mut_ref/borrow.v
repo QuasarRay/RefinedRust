@@ -45,6 +45,7 @@ Section rules.
     iNext. iIntros "Hat Hcred2".
     (* We use [Hcred2] for folding the pinned borrow, and [Hcred1] as a deposit in the reference *)
     iApply ("HΦ" with "HL Hf [Hcred2 Hcred1 Hat Hbor Hobs] HT").
+    rewrite /ty_own_val/= mut_ref_own_val_unfold.
     iExists l, ly. iSplitR; first done. iFrame "# ∗".
     iR. iR. iR.
     iSplitL "Hat". { iApply tr_weaken; last done. lia. }

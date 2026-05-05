@@ -148,7 +148,7 @@ Section extract.
     iDestruct "Hl" as "(%ly & %Hst & %Hly & Hsc & Hlb & %r' & <- & Hb)".
     iMod (fupd_mask_mono with "Hb") as "Hb"; first done.
     iDestruct "Hb" as "(%v & Hl & Hb)".
-    rewrite /ty_own_val/=.
+    rewrite /ty_own_val/= mut_ref_own_val_unfold.
     iDestruct "Hb" as "(% & % & _ & -> & ? & ? & ? & ? & Hb & Hcred' & ?)".
     iFrame.
     iSplitR. { simp_ltypes. done. }

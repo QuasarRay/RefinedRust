@@ -11,7 +11,7 @@ Section ofty.
   Lemma mut_ref_ofty_uniq_equiv {rt} (ty : type rt) π κ l r γ :
     l ◁ₗ[π, Uniq κ γ] #r @ (◁ ty) ⊣⊢ l ◁ᵥ{π, MetaNone} (#r, γ) @ mut_ref κ ty.
   Proof.
-    rewrite ltype_own_ofty_unfold/lty_of_ty_own {3}/ty_own_val/=.
+    rewrite ltype_own_ofty_unfold/lty_of_ty_own {3}/ty_own_val/= mut_ref_own_val_unfold.
     iSplit.
     - iIntros "(%ly & %Hst & %Hly & #Hsc & #Hlb & Hc & Hobs & Hb)".
       iExists _, _. iR. iR. iR. iR. iFrame "# ∗".
@@ -38,6 +38,7 @@ Section ltype_agree.
     iExists l'. iFrame.
     rewrite ltype_own_ofty_unfold /lty_of_ty_own.
     iDestruct "Hb" as "(%ly' & ? & ? & Hsc & Hlb' & ? & Hrfn'  & Hb)".
+    rewrite /ty_own_val/= mut_ref_own_val_unfold.
     iExists l'. iFrame. done.
   Qed.
 
@@ -53,9 +54,11 @@ Section ltype_agree.
     iNext. iModIntro. iSplit.
     * iIntros "(%r' & Hauth & Hb)". iExists _. iFrame. iMod "Hb" as "(%l' & Hl & Hb)".
       iExists l'. iFrame. rewrite ltype_own_ofty_unfold /lty_of_ty_own. destruct r' as [r' γ'].
+      rewrite /ty_own_val/= mut_ref_own_val_unfold.
       iDestruct "Hb" as "(%ly' & Hst' & Hly' & Hsc & Hlb & ? & Hrfn & >Hb)".
       iModIntro. iExists l', ly'. iFrame "∗". iSplitR; first done. by iFrame.
     * iIntros "(%r' & Hauth & Hb)". iExists _. iFrame. iMod "Hb" as "(%v & Hl & Hb)". destruct r' as [r' γ'].
+      rewrite /ty_own_val/= mut_ref_own_val_unfold.
       iDestruct "Hb" as "(%l' & %ly' & _ & -> & ? & ? & Hlb & Hsc & Hrfn & ? & >Hb)".
       iExists _. iFrame. rewrite ltype_own_ofty_unfold /lty_of_ty_own.
       iModIntro. iExists ly'. iFrame. done.
@@ -71,6 +74,7 @@ Section ltype_agree.
     iExists _. iFrame "# ∗". iSplitR; first done. iSplitR; first done.
     iModIntro. iMod "Hb" as "(%li & Hs & Hb)".
     rewrite ltype_own_ofty_unfold /lty_of_ty_own.
+    rewrite /ty_shr/= mut_ref_shr_unfold.
     iDestruct "Hb" as "(%ly' & >? & >? & >Hsc & >Hlb' & %r' & >Hrfn & #Hb)".
     iModIntro. iExists _, _. iFrame "∗ #". done.
   Qed.
@@ -99,6 +103,7 @@ Section ltype_agree.
     iIntros "(%ly & ? & ? & #Hlb & ? & %r' & Hrfn & Hb)". destruct r' as [r' γ'].
     (*iApply except_0_if_intro.*)
     iModIntro. iExists ly. iFrame "∗ #".
+    rewrite /ty_own_val/= mut_ref_own_val_unfold.
     iMod "Hb" as "(%v & Hl & %l' & %ly' & _ & -> & ? & ? & #Hlb' & Hsc & ? &  Hrfn' & >Hb)".
     iExists _. iFrame. rewrite ltype_own_ofty_unfold /lty_of_ty_own. iExists ly'. iFrame "∗ #". done.
   Qed.
@@ -114,11 +119,13 @@ Section ltype_agree.
     iApply (pinned_bor_iff' with "[] Hb").
     iNext. iModIntro. iSplit.
     * iIntros "(%r' & Hauth & Hb)". iExists _. iFrame. iMod "Hb" as "(%v & Hl & Hb)". destruct r' as [r' γ'].
+      rewrite /ty_own_val/= mut_ref_own_val_unfold.
       iDestruct "Hb" as "(%l' & %ly' & _ & -> & ? & ? & Hlb & Hsc & Hrfn & ? & >Hb)".
       iExists _. iFrame. rewrite ltype_own_ofty_unfold /lty_of_ty_own.
       iModIntro. iExists ly'. iFrame. done.
     * iIntros "(%r' & Hauth & Hb)". iExists _. iFrame. iMod "Hb" as "(%l' & Hl & Hb)".
       iExists l'. iFrame. rewrite ltype_own_ofty_unfold /lty_of_ty_own. destruct r' as [r' γ'].
+      rewrite /ty_own_val/= mut_ref_own_val_unfold.
       iDestruct "Hb" as "(%ly' & Hst' & Hly' & Hsc & Hlb & ? &  Hrfn & >Hb)".
       iModIntro. iExists l', ly'. iFrame "∗". iSplitR; first done. by iFrame.
   Qed.
@@ -130,6 +137,7 @@ Section ltype_agree.
     iIntros "(%ly & ? & ? & Hsc & Hlb & %r' & Hrfn & #Hb)". destruct r' as [r' γ'].
     iExists ly. iFrame "∗ #".
     iModIntro. iMod "Hb".
+    rewrite /ty_shr/= mut_ref_shr_unfold.
     iDestruct "Hb" as "(%li & %ly' & %ri & ? & Hrfn' & Hs & ? & ? & Hlb & Hlb' & Hsc & #Hb)".
     iModIntro. iExists li. iFrame.
     iNext. rewrite ltype_own_ofty_unfold /lty_of_ty_own.
