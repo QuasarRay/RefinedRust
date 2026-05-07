@@ -1,0 +1,22 @@
+opam-version: "2.0"
+synopsis: "Extract Rocq proof goals into standalone lemmas"
+description: """
+Rocq plugin for extracting the current proof goal into a standalone lemma and
+reusing the extracted lemma to refine the original goal.
+"""
+maintainer: "Lennard Gäher <lennard@users.noreply.github.com>"
+authors: "Lennard Gäher"
+license: "MIT"
+homepage: "https://gitlab.mpi-sws.org/iris/refinedrust-dev"
+bug-reports: "https://gitlab.mpi-sws.org/iris/refinedrust-dev/-/issues"
+depends: [
+  "ocaml"
+  "dune" {>= "3.21"}
+  "rocq-runtime" {>= "9.1"}
+  "rocq-stdlib"
+]
+build: [
+  ["dune" "subst"] {dev}
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+]
