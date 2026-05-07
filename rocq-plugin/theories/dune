@@ -1,0 +1,7 @@
+(rocq.theory
+ (name refinedrust_extract_goal)
+ (package refinedrust_extract_goal)
+ (synopsis "Extract Rocq proof goals into standalone lemmas")
+ (plugins refinedrust_extract_goal.plugin)
+ (generate_project_file)
+ (theories Stdlib))

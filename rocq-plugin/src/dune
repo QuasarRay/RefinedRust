@@ -1,0 +1,16 @@
+(library
+ (name extract_goal_plugin)
+ (public_name refinedrust_extract_goal.plugin)
+ (synopsis "Extract Rocq proof goals into standalone lemmas")
+ (flags :standard -alert -deprecated)
+ (libraries
+  rocq-runtime.clib
+  rocq-runtime.kernel
+  rocq-runtime.engine
+  rocq-runtime.library
+  rocq-runtime.proofs
+  rocq-runtime.tactics
+  rocq-runtime.vernac
+  rocq-runtime.interp
+  rocq-runtime.printing
+  rocq-runtime.parsing))

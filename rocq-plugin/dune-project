@@ -1,0 +1,6 @@
+(lang dune 3.21)
+(name refinedrust_extract_goal)
+(package
+ (name refinedrust_extract_goal)
+ (synopsis "Extract Rocq proof goals into standalone lemmas"))
+(using rocq 0.11)
