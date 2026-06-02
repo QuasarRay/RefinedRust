@@ -178,8 +178,8 @@ Ltac liExtensible_to_i2p_hook P bind cont ::=
       cont uconstr:(((_ : FindObservation rt γ mode) T))
   | find_delayed_observation ?E ?L ?rt ?γ ?mode ?κ ?T =>
       cont uconstr:(((_ : FindDelayedObservation E L rt γ mode κ) T))
-  | introduce_with_hooks ?E ?L ?P ?T =>
-      cont uconstr:(((_ : IntroduceWithHooks E L P) T))
+  | introduce_with_hooks ?E ?L ?learn ?P ?T =>
+      cont uconstr:(((_ : IntroduceWithHooks E L learn P) T))
   | iterate_with_hooks ?E ?L ?m ?T =>
       cont uconstr:(((_ : IterateWithHooks E L m) T))
   | prove_place_cond ?E ?L ?b ?lt1 ?lt2 ?T =>
@@ -275,7 +275,7 @@ Section automation.
     iApply ("HT" with "[//] CTX HE HL"). iFrame.
   Qed.
   Lemma tac_normalize_done Δ E L R T :
-    envs_entails Δ (introduce_with_hooks E L R T) →
+    envs_entails Δ (introduce_with_hooks E L true R T) →
     envs_entails Δ (normalize_spatial_context E L R T).
   Proof. done. Qed.
 End automation.
@@ -563,17 +563,17 @@ Ltac liRJudgement :=
 Section tac.
   Context `{!typeGS Σ}.
 
-  Lemma tac_introduce_with_hooks_exists name Δ {X} E L (Φ : X → iProp Σ) T :
-    envs_entails Δ (∀ x : name_hint_ty name X, introduce_with_hooks E L (Φ x) T) →
-    envs_entails Δ (introduce_with_hooks E L (∃ x, Φ x) T).
+  Lemma tac_introduce_with_hooks_exists name Δ {X} E L learn (Φ : X → iProp Σ) T :
+    envs_entails Δ (∀ x : name_hint_ty name X, introduce_with_hooks E L learn (Φ x) T) →
+    envs_entails Δ (introduce_with_hooks E L learn (∃ x, Φ x) T).
   Proof.
     apply tac_fast_apply.
     apply introduce_with_hooks_exists.
   Qed.
 
-  Lemma tac_introduce_with_hooks_boringly_exists name Δ E L {X} (P : X → iProp Σ) T :
-    envs_entails Δ (∀ x : name_hint_ty name X, introduce_with_hooks E L (☒ P x) T) →
-    envs_entails Δ (introduce_with_hooks E L (☒ (∃ x : X, P x)) T).
+  Lemma tac_introduce_with_hooks_boringly_exists name Δ E L learn {X} (P : X → iProp Σ) T :
+    envs_entails Δ (∀ x : name_hint_ty name X, introduce_with_hooks E L learn (☒ P x) T) →
+    envs_entails Δ (introduce_with_hooks E L learn (☒ (∃ x : X, P x)) T).
   Proof.
     apply tac_fast_apply.
     apply introduce_with_hooks_boringly_exist.
@@ -588,29 +588,29 @@ Section tac.
 End tac.
 Ltac liRBinder :=
   lazymatch goal with
-  | |- envs_entails _ (introduce_with_hooks _ _ ?P _) =>
+  | |- envs_entails _ (introduce_with_hooks _ _ _ ?P _) =>
     let P := eval simpl in P in
     match P with
     | @bi_exist _ ?T ?Φ =>
       match T with
       | name_hint_ty _ _ =>
-        notypeclasses refine (tac_fast_apply (introduce_with_hooks_exists _ _ _ _) _)
+        notypeclasses refine (tac_fast_apply (introduce_with_hooks_exists _ _ _ _ _) _)
       | _ =>
         match Φ with
         | (fun x => _) =>
           let ident := constr:(ident_to_string! x) in
-          notypeclasses refine (tac_introduce_with_hooks_exists ident _ _ _ _ _ _)
+          notypeclasses refine (tac_introduce_with_hooks_exists ident _ _ _ _ _ _ _)
         end
       end
     | boringly (@bi_exist _ ?T ?Φ) =>
       match T with
       | name_hint_ty _ _ =>
-        notypeclasses refine (tac_fast_apply (introduce_with_hooks_boringly_exist _ _ _ _) _)
+        notypeclasses refine (tac_fast_apply (introduce_with_hooks_boringly_exist _ _ _ _ _) _)
       | _ =>
         match Φ with
           | (fun x => _) =>
             let ident := constr:(ident_to_string! x) in
-            notypeclasses refine (tac_introduce_with_hooks_boringly_exists ident _ _ _ _ _ _)
+            notypeclasses refine (tac_introduce_with_hooks_boringly_exists ident _ _ _ _ _ _ _)
         end
       end
     end
@@ -950,6 +950,7 @@ Ltac liRStepCore :=
 Ltac liRStep :=
   liEnsureInvariant;
   try liRIntroduceLetInGoal;
+  liSimpl;
   first [liRStepCore | simpl; liRStepCore ]
 .
 
@@ -1004,11 +1005,11 @@ Section tac.
         fps.(fp_Pa) π ∗
         ([∗ list] l;'(existT rt (ty, r)) ∈ lsa;fp_atys fps, l ◁ₗ[ π, Owned] # r @ (◁ ty)) ∗
         ([∗ list] xl;synty ∈ zip (f_args fn).*1 lsa;sta, xl.1 is_live{ (π, f), synty} xl.2))%I in
-        (credit_store 0 0 -∗ na_own π ⊤ -∗ allocated_locals (π, f) (f_args fn).*1 -∗ introduce_with_hooks E L (Qinit) (λ L2,
+        (credit_store 0 0 -∗ na_own π ⊤ -∗ allocated_locals (π, f) (f_args fn).*1 -∗ introduce_with_hooks E L true (Qinit) (λ L2,
         introduce_typed_stmt E L2 (π, f) ϝ fn (
         λ v L2,
             prove_with_subtype E L2 true ProveDirect (fn_ret_prop π ((fp.2 κs tys).(fn_p) x).(fp_fr) v) True (λ L3 _ R3,
-            introduce_with_hooks E L3 R3 (λ L4,
+            introduce_with_hooks E L3 true R3 (λ L4,
             (* we don't really kill it here, but just need to find it in the context *)
             li_tactic (llctx_find_llft_goal L4 ϝ LlctxFindLftFull) (λ _,
             find_in_context FindCreditStore (λ _,

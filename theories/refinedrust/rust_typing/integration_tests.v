@@ -258,14 +258,14 @@ Proof.
 Qed.
 
 Local Lemma test_introduce_ex_named `{!typeGS Σ} :
-  ⊢ introduce_with_hooks [] [] (∃ foo : nat, ⌜foo = 4%nat⌝) (λ L2, True).
+  ⊢ introduce_with_hooks [] [] true (∃ foo : nat, ⌜foo = 4%nat⌝) (λ L2, True).
 Proof.
   iStartProof.
   liRStep. liRStep.
   rep liRStep.
 Qed.
 Local Lemma test_introduce_boringly_ex_named `{!typeGS Σ} :
-  ⊢ introduce_with_hooks [] [] (☒ ∃ foo : nat, ⌜foo = 4%nat⌝) (λ L2, True).
+  ⊢ introduce_with_hooks [] [] true (☒ ∃ foo : nat, ⌜foo = 4%nat⌝) (λ L2, True).
 Proof.
   iStartProof.
   liRStep. liRStep.
@@ -280,7 +280,7 @@ Proof.
   rep liRStep.
 Qed.
 Local Lemma test_introduce_all_named `{!typeGS Σ} :
-  ⊢ introduce_with_hooks [] [] (∀ foo : nat, ⌜foo ≥ 0%nat⌝) (λ L2, True).
+  ⊢ introduce_with_hooks [] [] true (∀ foo : nat, ⌜foo ≥ 0%nat⌝) (λ L2, True).
 Proof.
   iStartProof.
   liRStep. liRStep.

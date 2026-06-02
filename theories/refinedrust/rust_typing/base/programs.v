@@ -730,10 +730,10 @@ Section judgments.
 
   (** * Introduce a proposition containing tokens that we want to directly return *)
   (* TODO also thread na tokens through here *)
-  Definition introduce_with_hooks (E : elctx) (L : llctx) (P : iProp Σ) (T : llctx → iProp Σ) : iProp Σ :=
+  Definition introduce_with_hooks (E : elctx) (L : llctx) (learn : bool) (P : iProp Σ) (T : llctx → iProp Σ) : iProp Σ :=
     ∀ F, ⌜lftE ⊆ F⌝ -∗ rrust_ctx -∗ elctx_interp E -∗ llctx_interp L -∗ P ={F}=∗ ∃ L', llctx_interp L' ∗ T L'.
-  Class IntroduceWithHooks (E : elctx) (L : llctx) (P : iProp Σ) : Type :=
-    introduce_with_hooks_proof T : iProp_to_Prop (introduce_with_hooks E L P T).
+  Class IntroduceWithHooks (E : elctx) (L : llctx) (learn : bool) (P : iProp Σ) : Type :=
+    introduce_with_hooks_proof T : iProp_to_Prop (introduce_with_hooks E L learn P T).
 
   (** Do a custom iteration in the type system, determined by rules for specific M *)
   Definition iterate_with_hooks (E : elctx) (L : llctx) {M} (m : M) (T : llctx → M → iProp Σ) : iProp Σ :=
@@ -744,7 +744,7 @@ Section judgments.
   (** Judgment for normalizing the spatial context by running normalizable propositions through [introduce_with_hooks]. *)
   (** Implemented mostly through custom Ltac tactics interfacing with the Iris environments. *)
   Definition normalize_spatial_context (E : elctx) (L : llctx) (P : iProp Σ) (T : llctx → iProp Σ) : iProp Σ :=
-    introduce_with_hooks E L P T.
+    introduce_with_hooks E L true P T.
 
   (** *** Statements *)
   Definition typed_stmt_R_t := val → llctx → iProp Σ.
@@ -2244,14 +2244,14 @@ Section place.
     (T : llctx → iProp Σ) : iProp Σ :=
     upd_cx L (typed_place_finish_upd performed_access lt2 r2) (λ upd2,
     l ◁ₗ[π, b] upd2.(pupd_rfn) @ upd2.(pupd_lt) -∗
-    introduce_with_hooks E L (upd2.(pupd_R) ∗ R) T)%I.
+    introduce_with_hooks E L true (upd2.(pupd_R) ∗ R) T)%I.
 End place.
 
 Global Hint Mode LearnFromHyp + + + : typeclass_instances.
 Global Hint Mode LearnFromHypVal + + + + + : typeclass_instances.
 
 Global Hint Mode SubsumeFull + + + + + : typeclass_instances.
-Global Hint Mode IntroduceWithHooks + + + + ! : typeclass_instances.
+Global Hint Mode IntroduceWithHooks + + + + + ! : typeclass_instances.
 Global Hint Mode IterateWithHooks + + + + + + : typeclass_instances.
 Global Hint Mode ProveWithSubtype + + + + + + + + : typeclass_instances.
 
@@ -2970,7 +2970,7 @@ Section folding.
     Yields the accumulated result and continues with the next statement.
   *)
   Lemma type_context_fold_end E L acc T :
-    (introduce_with_hooks E L (Acc_interp acc) T)
+    (introduce_with_hooks E L false (Acc_interp acc) T)
     ⊢ typed_context_fold_end E L acc T.
   Proof.
     iIntros "Hs". iIntros (????) "#(LFT & LLCTX) #HE HL Hstep".
@@ -3720,7 +3720,7 @@ Ltac generate_i2p_instance_to_tc_hook arg c ::=
   | typed_assert ?E ?L ?f ?v ?ty ?r  => constr:(TypedAssert E L f v ty r)
   | typed_switch ?E ?L ?f ?v ?ty ?r ?it => constr:(TypedSwitch E L f v ty r it)
   | typed_annot_stmt ?π ?n ?a => constr:(TypedAnnotStmt π n a)
-  | introduce_with_hooks ?E ?L ?P => constr:(IntroduceWithHooks E L P)
+  | introduce_with_hooks ?E ?L ?learn ?P => constr:(IntroduceWithHooks E L learn P)
   | iterate_with_hooks ?E ?L ?m => constr:(IterateWithHooks E L m)
   | subsume_full ?wl ?P1 ?P2 => constr:(SubsumeFull wl P1 P2)
   | resolve_ghost ?π ?E ?L ?rm ?f ?l ?lt ?k ?r => constr:(ResolveGhost π E L rm f l lt k r)

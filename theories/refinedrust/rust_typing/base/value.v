@@ -568,7 +568,7 @@ Section rules.
 
   Lemma owned_subtype_value_merge {rt} π E L (ty : type rt) r v' st T :
     prove_with_subtype E L false ProveDirect (v' ◁ᵥ{π, MetaNone} r @ ty) True (λ L' _ R,
-      introduce_with_hooks E L' R (λ L2, ⌜ty_has_op_type ty (use_op_alg' (ty.(ty_syn_type) MetaNone)) MCCopy⌝ ∗
+      introduce_with_hooks E L' true R (λ L2, ⌜ty_has_op_type ty (use_op_alg' (ty.(ty_syn_type) MetaNone)) MCCopy⌝ ∗
       ⌜ty_syn_type ty MetaNone = st⌝ ∗ T L2))
     ⊢ owned_subtype π E L false v' r (value_t st) (ty) T.
   Proof.

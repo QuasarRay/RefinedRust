@@ -238,7 +238,7 @@ Section updateable_rules.
         find_tc_inst (TySized ty') (λ _,
         ⌜ty_has_op_type ty' (use_op_alg' (ty'.(ty_syn_type) MetaNone)) MCCopy⌝ ∗
         ⌜ty'.(ty_syn_type) MetaNone = st⌝ ∗
-        introduce_with_hooks updateable_E L2 ((l ◁ₗ[π, Owned] #r' @ ◁ ty') ∗ R2)%I (λ L3,
+        introduce_with_hooks updateable_E L2 true ((l ◁ₗ[π, Owned] #r' @ ◁ ty') ∗ R2)%I (λ L3,
           updateable_core updateable_E L3)))))
     ⊢ P.
   Proof.
@@ -271,7 +271,7 @@ Section updateable_rules.
         ⌜k ≤ n⌝ ∗
         ((l ◁ₗ[π, Owned] #(take k rs) @ (◁ array_t k ty) -∗
          (l offsetst{st_of ty MetaNone}ₗ k) ◁ₗ[π, Owned] #(drop k rs) @ (◁ array_t (n - k) ty) -∗
-         introduce_with_hooks updateable_E L2 R2 (λ L3,
+         introduce_with_hooks updateable_E L2 true R2 (λ L3,
           updateable_core updateable_E L3)))))
     ⊢ P.
   Proof.
@@ -299,7 +299,7 @@ Section updateable_rules.
         ⌜n = (num * size)%nat⌝ ∗
         ⌜num ≠ 0%nat⌝ ∗
         (l ◁ₗ[π, Owned] #(<#> reshape (replicate num size) rs) @ (◁ array_t num (array_t size ty)) -∗
-         introduce_with_hooks updateable_E L2 R2 (λ L3,
+         introduce_with_hooks updateable_E L2 true R2 (λ L3,
           updateable_core updateable_E L3))))
     ⊢ P.
   Proof.
@@ -323,7 +323,7 @@ Section updateable_rules.
     find_in_context (FindLoc l) (λ '(existT rt (lt, r, bk, π)),
       ⌜bk = Owned⌝ ∗
       owned_subltype_step π updateable_E updateable_L false l r r2 lt lt2 (λ L2 R2,
-        introduce_with_hooks updateable_E L2 (l ◁ₗ[π, Owned] r2 @ lt2 ∗ R2) (λ L3,
+        introduce_with_hooks updateable_E L2 true (l ◁ₗ[π, Owned] r2 @ lt2 ∗ R2) (λ L3,
           updateable_core updateable_E L3)))
     ⊢ P.
   Proof.
@@ -344,7 +344,7 @@ Section updateable_rules.
     find_in_context (FindLoc l) (λ '(existT rt (lt, r, bk, π)),
       ⌜bk = Owned⌝ ∗
       owned_subltype_step π updateable_E updateable_L false l r (PlaceIn ()) lt (◁ uninit st) (λ L2 R2,
-        introduce_with_hooks updateable_E L2 (l ◁ₗ[π, Owned] .@ (◁ uninit st) ∗ R2) (λ L3,
+        introduce_with_hooks updateable_E L2 true (l ◁ₗ[π, Owned] .@ (◁ uninit st) ∗ R2) (λ L3,
           updateable_core updateable_E L3)))
     ⊢ P.
   Proof.
@@ -538,7 +538,7 @@ Tactic Notation "iAcquireCredit" "as" constr(H) :=
 
 Lemma tac_typed_val_expr_bind' `{!typeGS Σ} E L f K e T :
   typed_val_expr E L f (W.to_expr e) (λ L' v m rt ty r,
-    introduce_with_hooks E L' (v ◁ᵥ{f.1, m} r @ ty) (λ L2,
+    introduce_with_hooks E L' true (v ◁ᵥ{f.1, m} r @ ty) (λ L2,
       typed_val_expr E L2 f (W.to_expr (W.fill K (W.Val v))) T)) -∗
   typed_val_expr E L f (W.to_expr (W.fill K e)) T.
 Proof.
@@ -556,7 +556,7 @@ Lemma tac_typed_val_expr_bind `{!typeGS Σ} E L f e Ks e' T :
   W.find_expr_fill e false = Some (Ks, e') →
   typed_val_expr E L f (W.to_expr e') (λ L' v m rt ty r,
     if Ks is [] then T L' v m rt ty r else
-    introduce_with_hooks E L' (v ◁ᵥ{f.1, m} r @ ty) (λ L2,
+    introduce_with_hooks E L' true (v ◁ᵥ{f.1, m} r @ ty) (λ L2,
       typed_val_expr E L2 f (W.to_expr (W.fill Ks (W.Val v))) T)) -∗
   typed_val_expr E L f (W.to_expr e) T.
 Proof.
@@ -578,7 +578,7 @@ Tactic Notation "typed_val_expr_bind" :=
 Lemma tac_typed_stmt_bind `{!typeGS Σ} E L f s e Ks fn ϝ T :
   W.find_stmt_fill s = Some (Ks, e) →
   typed_val_expr E L f (W.to_expr e) (λ L' v m rt ty r,
-    introduce_with_hooks E L' (v ◁ᵥ{f.1, m} r @ ty) (λ L2,
+    introduce_with_hooks E L' true (v ◁ᵥ{f.1, m} r @ ty) (λ L2,
       typed_stmt E L2 f (W.to_stmt (W.stmt_fill Ks (W.Val v))) fn T ϝ)) -∗
   typed_stmt E L f (W.to_stmt s) fn T ϝ.
 Proof.

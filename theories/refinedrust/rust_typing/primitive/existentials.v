@@ -623,7 +623,7 @@ Section stratify.
 
   (*
   Lemma owned_subtype_unfold_ex_plain_t π E L (ty : type rt) (r : rt) (r' : X) T :
-    (∀ r2 : rt, introduce_with_hooks E L (P.(inv_P) π r2 r') (λ L1,
+    (∀ r2 : rt, introduce_with_hooks E L true (P.(inv_P) π r2 r') (λ L1,
       owned_subtype π E L1 false r2 r ty ty T)) -∗
     owned_subtype π E L false r' r (∃; P, ty) ty T.
   Proof.
@@ -719,7 +719,7 @@ Section stratify.
   (** Unfolding by place access *)
   Lemma typed_place_ex_plain_t_owned E L f l (ty : type rt) x K `{!TCDone (K ≠ [])} T :
     (∀ r,
-      introduce_with_hooks E L (P.(inv_P) f.1 r x) (λ L2, typed_place E L2 f l (◁ ty) (#r) UpdStrong (Owned) K
+      introduce_with_hooks E L true (P.(inv_P) f.1 r x) (λ L2, typed_place E L2 f l (◁ ty) (#r) UpdStrong (Owned) K
       (λ L2 κs li b2 bmin' rti ltyi ri updcx,
         T L2 κs li b2 bmin' rti ltyi ri
           (λ L3 upd cont, updcx L3 upd (λ upd',
@@ -747,7 +747,7 @@ Section stratify.
 
   Lemma typed_place_ex_plain_t_uniq E L f l (ty : type rt) x κ γ K `{!TCDone (K ≠ [])} T :
     li_tactic (lctx_lft_alive_count_goal E L κ) (λ '(κs, L2),
-    (∀ r, introduce_with_hooks E L2 (P.(inv_P) f.1 r x) (λ L3, typed_place E L3 f l
+    (∀ r, introduce_with_hooks E L2 true (P.(inv_P) f.1 r x) (λ L3, typed_place E L3 f l
       (OpenedLtype (◁ ty) (◁ ty) (◁ (∃; P, ty)) (λ (r : rt) (x : X), P.(inv_P) f.1 r x) (λ r x, llft_elt_toks κs)) (#r) UpdStrong (Uniq κ γ) K
       (λ L4 κs li b2 bmin' rti ltyi ri updcx,
         T L4 κs li b2 bmin' rti ltyi ri
@@ -781,7 +781,7 @@ Section stratify.
   Global Existing Instance typed_place_ex_plain_t_uniq_inst | 15.
 
   Lemma typed_place_ex_plain_t_shared E L f l (ty : type rt) x κ K `{!TCDone (K ≠ [])} T :
-    (∀ r, introduce_with_hooks E L (P.(inv_P_shr) f.1 κ r x) (λ L2,
+    (∀ r, introduce_with_hooks E L true (P.(inv_P_shr) f.1 κ r x) (λ L2,
       typed_place E L2 f l (ShadowedLtype (◁ ty) #r (◁ (∃; P, ty))) (#x) UpdStrong (Shared κ) K
         (λ L3 κs li b2 bmin' rti ltyi ri updcx,
           T L3 κs li b2 bmin' rti ltyi ri

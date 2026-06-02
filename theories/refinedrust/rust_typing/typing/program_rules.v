@@ -622,7 +622,7 @@ Section iterate.
       match g with
       | None => T L StripGuarded
       | Some (prepaid, P) =>
-          introduce_with_hooks E L (guarded prepaid P) (λ L2,
+          introduce_with_hooks E L true (guarded prepaid P) (λ L2,
             iterate_with_hooks E L2 StripGuarded T)
       end))
     ⊢ iterate_with_hooks E L StripGuarded T.
@@ -642,9 +642,9 @@ Section introduce.
   Context `{!typeGS Σ}.
 
   (** Introduce with Hooks *)
-  Lemma introduce_with_hooks_sep E L P1 P2 T :
-    introduce_with_hooks E L P1 (λ L', introduce_with_hooks E L' P2 T) ⊢
-    introduce_with_hooks E L (P1 ∗ P2) T.
+  Lemma introduce_with_hooks_sep E L learn P1 P2 T :
+    introduce_with_hooks E L learn P1 (λ L', introduce_with_hooks E L' learn P2 T) ⊢
+    introduce_with_hooks E L learn (P1 ∗ P2) T.
   Proof.
     iIntros "Ha" (F ?) "#CTX #HE HL [HP1 HP2]".
     iMod ("Ha" with "[//] CTX HE HL HP1") as "(%L' & HL & Ha)".
@@ -653,9 +653,9 @@ Section introduce.
   Definition introduce_with_hooks_sep_inst := [instance @introduce_with_hooks_sep].
   Global Existing Instance introduce_with_hooks_sep_inst.
 
-  Lemma introduce_with_hooks_exists {X} E L (Φ : X → iProp Σ) T :
-    (∀ x, introduce_with_hooks E L (Φ x) T) ⊢
-    introduce_with_hooks E L (∃ x, Φ x) T.
+  Lemma introduce_with_hooks_exists {X} E L learn (Φ : X → iProp Σ) T :
+    (∀ x, introduce_with_hooks E L learn (Φ x) T) ⊢
+    introduce_with_hooks E L learn (∃ x, Φ x) T.
   Proof.
     iIntros "Ha" (F ?) "#CTX #HE HL (%x & HP)".
     iApply ("Ha" with "[//] CTX HE HL HP").
@@ -664,9 +664,9 @@ Section introduce.
   Global Existing Instance introduce_with_hooks_exists_inst.
 
   (* Simplify *)
-  Lemma introduce_with_hooks_simplify_hyp E L P `{SH : !SimplifyHyp P (Some 0%N)} T :
-    introduce_with_hooks E L (SH.(simplify_hyp_Q)) T ⊢
-    introduce_with_hooks E L P T.
+  Lemma introduce_with_hooks_simplify_hyp E L learn P `{SH : !SimplifyHyp P (Some 0%N)} T :
+    introduce_with_hooks E L learn (SH.(simplify_hyp_Q)) T ⊢
+    introduce_with_hooks E L learn P T.
   Proof.
     iIntros "HT" (??) "CTX HE HL HP".
     iPoseProof (simplify_hyp_proof with "HP") as "HQ".
@@ -677,8 +677,8 @@ Section introduce.
 
   (* low priority base instances so that other more specialized instances trigger first *)
   Lemma introduce_with_hooks_base_learnable E L P `{HP : !LearnFromHyp P} T :
-    (P -∗ introduce_with_hooks E L (HP.(learn_from_hyp_Q)) T) ⊢
-    introduce_with_hooks E L P T.
+    (P -∗ introduce_with_hooks E L true (HP.(learn_from_hyp_Q)) T) ⊢
+    introduce_with_hooks E L true P T.
   Proof.
     iIntros "HT" (F ?) "#CTX #HE HL HP".
     iMod (HP.(learn_from_hyp_proof) with "[//] HP") as "(HP & Hlearn)".
@@ -688,9 +688,9 @@ Section introduce.
   Definition introduce_with_hooks_base_learnable_inst := [instance @introduce_with_hooks_base_learnable].
   Global Existing Instance introduce_with_hooks_base_learnable_inst | 100.
 
-  Lemma introduce_with_hooks_base E L P T :
+  Lemma introduce_with_hooks_base E L learn P T :
     (P -∗ T L) ⊢
-    introduce_with_hooks E L P T.
+    introduce_with_hooks E L learn P T.
   Proof.
     iIntros "HT" (F ?) "#CTX #HE HL HP".
     iSpecialize ("HT" with "HP").
@@ -699,9 +699,9 @@ Section introduce.
   Definition introduce_with_hooks_base_inst := [instance @introduce_with_hooks_base].
   Global Existing Instance introduce_with_hooks_base_inst | 101.
 
-  Lemma introduce_with_hooks_direct E L P T :
+  Lemma introduce_with_hooks_direct E L learn P T :
     (P -∗ T L) ⊢
-    introduce_with_hooks E L (introduce_direct P) T.
+    introduce_with_hooks E L learn (introduce_direct P) T.
   Proof.
     iApply introduce_with_hooks_base.
   Qed.
@@ -709,10 +709,10 @@ Section introduce.
   Global Existing Instance introduce_with_hooks_direct_inst | 1.
 
   (** credit related instances *)
-  Lemma introduce_with_hooks_credits E L n T :
+  Lemma introduce_with_hooks_credits E L learn n T :
     find_in_context (FindCreditStore) (λ '(c, a),
       credit_store (n + c) a -∗ T L) ⊢
-    introduce_with_hooks E L (£ n) T.
+    introduce_with_hooks E L learn (£ n) T.
   Proof.
     rewrite /FindCreditStore. iIntros "Ha".
     iDestruct "Ha" as ([c a]) "(Hstore & HT)". simpl.
@@ -723,10 +723,10 @@ Section introduce.
   Definition introduce_with_hooks_credits_inst := [instance @introduce_with_hooks_credits].
   Global Existing Instance introduce_with_hooks_credits_inst | 10.
 
-  Lemma introduce_with_hooks_tr E L n T :
+  Lemma introduce_with_hooks_tr E L learn n T :
     find_in_context (FindCreditStore) (λ '(c, a),
       credit_store c (n + a) -∗ T L)
-    ⊢ introduce_with_hooks E L (tr n) T.
+    ⊢ introduce_with_hooks E L learn (tr n) T.
   Proof.
     rewrite /FindCreditStore. iIntros "Ha".
     iDestruct "Ha" as ([c a]) "(Hstore & HT)". simpl.
@@ -740,14 +740,14 @@ Section introduce.
   Global Existing Instance introduce_with_hooks_tr_inst | 10.
 
   (** non-atomic token related instances *)
-  Lemma introduce_with_hooks_na_own E L π mask T :
+  Lemma introduce_with_hooks_na_own E L learn π mask T :
     find_in_context (FindOptNaOwn π) (λ res,
       match res with
       | None => na_own π mask -∗ T L
       | Some mask' =>
           ⌜mask' ## mask⌝ ∗ (na_own π (mask' ∪ mask) -∗ T L)
       end)
-    ⊢ introduce_with_hooks E L (na_own π mask) T.
+    ⊢ introduce_with_hooks E L learn (na_own π mask) T.
   Proof.
     rewrite /FindOptNaOwn. iIntros "(%res & Ha)".
     destruct res as [mask'|]; simpl; iIntros (??) "#CTX #HE HL Hna".
@@ -762,10 +762,10 @@ Section introduce.
   Definition introduce_with_hooks_na_own_inst := [instance @introduce_with_hooks_na_own].
   Global Existing Instance introduce_with_hooks_na_own_inst | 10.
 
-  Lemma introduce_with_hooks_boringly_exist E L {A} P T :
-    introduce_with_hooks E L (☒ (∃ a : A, P a)) T :-
+  Lemma introduce_with_hooks_boringly_exist E L learn {A} P T :
+    introduce_with_hooks E L learn (☒ (∃ a : A, P a)) T :-
       ∀ a,
-        return (introduce_with_hooks E L (☒ P a) T).
+        return (introduce_with_hooks E L learn (☒ P a) T).
   Proof.
     unfold introduce_with_hooks.
     iIntros "HT".
@@ -777,9 +777,9 @@ Section introduce.
   Definition introduce_with_hooks_boringly_exist_inst := [instance @introduce_with_hooks_boringly_exist].
   Global Existing Instance introduce_with_hooks_boringly_exist_inst.
 
-  Lemma introduce_with_hooks_boringly_sep E L P1 P2 T :
-    introduce_with_hooks E L (☒ (P1 ∗ P2)) T :-
-      return (introduce_with_hooks E L (☒ P1 ∗ ☒ P2) T).
+  Lemma introduce_with_hooks_boringly_sep E L learn P1 P2 T :
+    introduce_with_hooks E L learn (☒ (P1 ∗ P2)) T :-
+      return (introduce_with_hooks E L learn (☒ P1 ∗ ☒ P2) T).
   Proof.
     unfold introduce_with_hooks.
     iIntros "HT".
@@ -790,9 +790,9 @@ Section introduce.
   Definition introduce_with_hooks_boringly_sep_inst := [instance @introduce_with_hooks_boringly_sep].
   Global Existing Instance introduce_with_hooks_boringly_sep_inst.
 
-  Lemma introduce_with_hooks_boringly_persistent E L P `{!Persistent P} T :
-    introduce_with_hooks E L (☒ P) T :-
-      return (introduce_with_hooks E L P T).
+  Lemma introduce_with_hooks_boringly_persistent E L learn P `{!Persistent P} T :
+    introduce_with_hooks E L learn (☒ P) T :-
+      return (introduce_with_hooks E L learn P T).
   Proof.
     unfold introduce_with_hooks.
     iIntros "HT".
@@ -803,8 +803,8 @@ Section introduce.
   Definition introduce_with_hooks_boringly_persistent_inst := [instance @introduce_with_hooks_boringly_persistent].
   Global Existing Instance introduce_with_hooks_boringly_persistent_inst.
 
-  Lemma introduce_with_hooks_agree {A} {P' : A → iProp Σ} P `{Hag : !LiAgree P P'} E L b `{!CheckOwnInContext (P' b)} T :
-    introduce_with_hooks E L (P) T :-
+  Lemma introduce_with_hooks_agree {A} {P' : A → iProp Σ} P `{Hag : !LiAgree P P'} E L learn b `{!CheckOwnInContext (P' b)} T :
+    introduce_with_hooks E L learn (P) T :-
       exhale (P' b);
       inhale (P' b);
       inhale (⌜Hag.(li_agree_elem) = b⌝);
@@ -821,9 +821,9 @@ Section introduce.
   Global Existing Instance introduce_with_hooks_agree_inst.
 
   (** Rules to handle disjunctions in some cases where one of the sides has a guard that can be refuted *)
-  Lemma introduce_with_hooks_disj_guard_l E L guard P1 P2 `{!TCDone (¬ guard)} T :
-    introduce_with_hooks E L ((⌜guard⌝ ∗ P1) ∨ P2) T :-
-      return introduce_with_hooks E L P2 T.
+  Lemma introduce_with_hooks_disj_guard_l E L learn guard P1 P2 `{!TCDone (¬ guard)} T :
+    introduce_with_hooks E L learn ((⌜guard⌝ ∗ P1) ∨ P2) T :-
+      return introduce_with_hooks E L learn P2 T.
   Proof.
     iIntros "HT".
     iIntros (??) "CTX HE HL [(% & ?) | HP]"; first done.
@@ -831,9 +831,9 @@ Section introduce.
   Qed.
   Definition introduce_with_hooks_disj_guard_l_inst := [instance @introduce_with_hooks_disj_guard_l].
   Global Existing Instance introduce_with_hooks_disj_guard_l_inst.
-  Lemma introduce_with_hooks_disj_guard_r E L guard P1 P2 `{!TCDone (¬ guard)} T :
-    introduce_with_hooks E L (P1 ∨ (⌜guard⌝ ∗ P2)) T :-
-      return introduce_with_hooks E L P1 T.
+  Lemma introduce_with_hooks_disj_guard_r E L learn guard P1 P2 `{!TCDone (¬ guard)} T :
+    introduce_with_hooks E L learn (P1 ∨ (⌜guard⌝ ∗ P2)) T :-
+      return introduce_with_hooks E L learn P1 T.
   Proof.
     iIntros "HT".
     iIntros (??) "CTX HE HL [HP | (% & ?)]"; last done.
@@ -842,11 +842,11 @@ Section introduce.
   Definition introduce_with_hooks_disj_guard_r_inst := [instance @introduce_with_hooks_disj_guard_r].
   Global Existing Instance introduce_with_hooks_disj_guard_r_inst.
 
-  Lemma introduce_with_hooks_guarded (E : elctx) (L : llctx) (P : iProp Σ) T :
+  Lemma introduce_with_hooks_guarded (E : elctx) (L : llctx) learn (P : iProp Σ) T :
     find_in_context (FindCreditStore) (λ '(c, a),
       ⌜fast_lia_hint (1 ≤ c)⌝ ∗ (credit_store (c - 1)%nat a -∗
-        introduce_with_hooks E L P T)) ⊢
-    introduce_with_hooks E L (guarded false P) T.
+        introduce_with_hooks E L learn P T)) ⊢
+    introduce_with_hooks E L learn (guarded false P) T.
   Proof.
     rewrite /guarded/FindCreditStore/fast_lia_hint/=.
     iIntros "Ha" (??) "CTX HE HL (_ & HP)".
@@ -859,9 +859,9 @@ Section introduce.
   Definition introduce_with_hooks_guarded_inst := [instance @introduce_with_hooks_guarded].
   Global Existing Instance introduce_with_hooks_guarded_inst.
 
-  Lemma introduce_with_hooks_guarded_prepaid (E : elctx) (L : llctx) (P : iProp Σ) T :
-    introduce_with_hooks E L (tr 1 ∗ P) T ⊢
-    introduce_with_hooks E L (guarded true P) T.
+  Lemma introduce_with_hooks_guarded_prepaid (E : elctx) (L : llctx) learn (P : iProp Σ) T :
+    introduce_with_hooks E L learn (tr 1 ∗ P) T ⊢
+    introduce_with_hooks E L learn (guarded true P) T.
   Proof.
     rewrite /guarded.
     iIntros "Ha" (??) "CTX HE HL ((Hcred & Htr) & HP)".
@@ -2682,7 +2682,7 @@ Section subsume.
   Lemma typed_place_resolve_ghost {rt} f E L l (lt : ltype rt) bmin0 b γ P T :
     ⌜lctx_bor_kind_alive E L b⌝ ∗
     resolve_ghost f.1 E L ResolveAll false l lt b (PlaceGhost γ) (λ L' r R progress,
-      introduce_with_hooks E L' R (λ L'', typed_place E L'' f l lt r bmin0 b P T))
+      introduce_with_hooks E L' true R (λ L'', typed_place E L'' f l lt r bmin0 b P T))
     ⊢ typed_place E L f l lt (PlaceGhost γ) bmin0 b P T.
   Proof.
     iIntros "(%Hw & Hres)". iIntros (????) "#CTX #HE HL Hf Hl HΦ".
@@ -3209,7 +3209,7 @@ Section subsume.
   Lemma type_use m E L f ot e o (T : typed_val_expr_cont_t) :
     ⌜if o is Na2Ord then False else True⌝ ∗
       typed_read E L f e ot m (λ L2 v rt ty r,
-        introduce_with_hooks E L2 (tr 2 ∗ £ num_cred) (λ L3,
+        introduce_with_hooks E L2 true (tr 2 ∗ £ num_cred) (λ L3,
           T L3 v MetaNone rt ty r))
     ⊢ typed_val_expr E L f (Use o ot true e)%E T.
   Proof.
@@ -3247,7 +3247,7 @@ Section subsume.
   Lemma type_copy E L f ot e o (T : typed_val_expr_cont_t) :
     ⌜if o is Na2Ord then False else True⌝ ∗
       typed_read E L f e ot ReadDoCopy (λ L2 v rt ty r,
-        introduce_with_hooks E L2 (tr 2 ∗ £ num_cred) (λ L3,
+        introduce_with_hooks E L2 true (tr 2 ∗ £ num_cred) (λ L3,
           T L3 v MetaNone rt ty r))
     ⊢ typed_val_expr E L f (copy{ot, o} e)%E T.
   Proof.
@@ -3257,7 +3257,7 @@ Section subsume.
   Lemma type_move E L f ot e o (T : typed_val_expr_cont_t) :
     ⌜if o is Na2Ord then False else True⌝ ∗
       typed_read E L f e ot ReadDoMove (λ L2 v rt ty r,
-        introduce_with_hooks E L2 (tr 2 ∗ £ num_cred) (λ L3,
+        introduce_with_hooks E L2 true (tr 2 ∗ £ num_cred) (λ L3,
           T L3 v MetaNone rt ty r))
     ⊢ typed_val_expr E L f (move{ot, o} e)%E T.
   Proof.
@@ -3282,7 +3282,7 @@ Section subsume.
       ⌜m = MetaNone⌝ ∗
       ⌜if o is Na2Ord then False else True⌝ ∗
       typed_write E L' f e1 ot v ty r (λ L2,
-        introduce_with_hooks E L2 (tr 2 ∗ £ num_cred) (λ L3,
+        introduce_with_hooks E L2 true (tr 2 ∗ £ num_cred) (λ L3,
         typed_stmt E L3 f s fn R ϝ)))
     ⊢ typed_stmt E L f (e1 <-{ot, o} e2; s) fn R ϝ.
   Proof.
@@ -4442,7 +4442,7 @@ Section subsume.
 
   Lemma type_goto E L f b fn R s ϝ :
     fn.(f_code) !! b = Some s →
-    introduce_with_hooks E L (£ num_cred) (λ L2,
+    introduce_with_hooks E L true (£ num_cred) (λ L2,
       typed_stmt E L2 f s fn R ϝ)
     ⊢ typed_stmt E L f (Goto b) fn R ϝ.
   Proof.
@@ -4482,7 +4482,7 @@ Section subsume.
   Lemma typed_block_rec E L f fn R P b ϝ s :
     fn.(f_code) !! b = Some s →
     (□ ((□ typed_block E L P f b fn R ϝ) -∗
-      introduce_with_hooks E L P (λ L2,
+      introduce_with_hooks E L true P (λ L2,
         typed_stmt E L2 f s fn R ϝ)))
     ⊢ typed_block E L P f b fn R ϝ.
   Proof.
@@ -4508,7 +4508,7 @@ Section subsume.
       (* gather up the remaining ownership *)
       accu (λ Q,
       ((□ typed_block E L' (P params ∗ Q) f b fn R ϝ) -∗
-          introduce_with_hooks E L' (P params ∗ Q) (λ L2,
+          introduce_with_hooks E L' true (P params ∗ Q) (λ L2,
           typed_stmt E L2 f s fn R ϝ)))))
     ⊢ typed_stmt E L f (Goto b) fn R ϝ.
   Proof.
@@ -4539,7 +4539,7 @@ Section subsume.
       (* gather up the remaining ownership *)
       accu (λ Q,
       ((□ typed_block E L' (P r' a ∗ Q) f b fn R ϝ) -∗
-          introduce_with_hooks E L' (P r' a ∗ Q) (λ L2,
+          introduce_with_hooks E L' true (P r' a ∗ Q) (λ L2,
           typed_stmt E L2 f s fn R ϝ)))))
     ⊢ typed_stmt E L f (Goto b) fn R ϝ.
   Proof.
@@ -4615,7 +4615,7 @@ Section subsume.
 
   Lemma type_exprs E L f s e fn R ϝ :
     (typed_val_expr E L f e (λ L2 v m rt ty r,
-      introduce_with_hooks E L2 (v ◁ᵥ{f.1, m} r @ ty) (λ L3,
+      introduce_with_hooks E L2 true (v ◁ᵥ{f.1, m} r @ ty) (λ L3,
         typed_stmt E L3 f s fn R ϝ)))
     ⊢ typed_stmt E L f (ExprS e s) fn R ϝ.
   Proof.
@@ -4661,7 +4661,7 @@ Section subsume.
       find_in_context (FindLocal f x) (λ '(st, l),
       li_tactic (simplify_local_list_goal (remove_local locals x)) (λ locals',
         prove_with_subtype E L true ProveDirect (l ◁ₗ[f.1, Owned] .@ ◁ uninit st) True%I (λ L2 κs R2,
-          introduce_with_hooks E L2 R2 (λ L3,
+          introduce_with_hooks E L2 true R2 (λ L3,
           li_clear l ((allocated_locals f locals' -∗ typed_stmt E L3 f s fn R ϝ))))))
     else (allocated_locals f locals -∗ typed_stmt E L f s fn R ϝ))
     ⊢ typed_stmt E L f (local_dead x; s) fn R ϝ.
@@ -4743,9 +4743,9 @@ Section subsume.
 
   (** ** Handling of lifetime-related annotations *)
 
-  Lemma introduce_with_hooks_maybe_inherit_none E L P T :
-    introduce_with_hooks E L P T
-    ⊢ introduce_with_hooks E L (MaybeInherit None P) T.
+  Lemma introduce_with_hooks_maybe_inherit_none E L learn P T :
+    introduce_with_hooks E L learn P T
+    ⊢ introduce_with_hooks E L learn (MaybeInherit None P) T.
   Proof.
     iIntros "HT" (??) "#CTX #HE HL Hinh".
     rewrite /MaybeInherit.
@@ -4755,9 +4755,9 @@ Section subsume.
   Definition introduce_with_hooks_maybe_inherit_none_inst := [instance @introduce_with_hooks_maybe_inherit_none].
   Global Existing Instance introduce_with_hooks_maybe_inherit_none_inst.
 
-  Lemma introduce_with_hooks_maybe_inherit_some E L κ P T :
-    introduce_with_hooks E L (Inherit κ P) T
-    ⊢ introduce_with_hooks E L (MaybeInherit (Some κ) P) T.
+  Lemma introduce_with_hooks_maybe_inherit_some E L learn κ P T :
+    introduce_with_hooks E L learn (Inherit κ P) T
+    ⊢ introduce_with_hooks E L learn (MaybeInherit (Some κ) P) T.
   Proof.
     iIntros "HT" (??) "#HE HL Hinh".
     rewrite /MaybeInherit. iApply ("HT" with "[//] HE HL Hinh").
@@ -4798,7 +4798,7 @@ Section subsume.
   Definition iterate_with_hooks_find_dead_cons_inst := [instance @iterate_with_hooks_find_dead_cons].
   Global Existing Instance iterate_with_hooks_find_dead_cons_inst.
 
-  Lemma introduce_with_hooks_inherit E L κs P T :
+  Lemma introduce_with_hooks_inherit E L learn κs P T :
     iterate_with_hooks E L (IterateFindDead κs) (λ L2 m,
     match m with
     | IterateFindDead [] =>
@@ -4806,9 +4806,9 @@ Section subsume.
     | IterateFindDead (κ :: _) =>
         ⌜fast_set_hint (κ ∈ κs)⌝ ∗
         ⌜lctx_lft_dead E L2 κ⌝ ∗
-        introduce_with_hooks E L2 P T
+        introduce_with_hooks E L2 learn P T
     end)
-    ⊢ introduce_with_hooks E L (Inherit κs P) T.
+    ⊢ introduce_with_hooks E L learn (Inherit κs P) T.
   Proof.
     iIntros "HT".
     iIntros (??) "#CTX #HE HL HP".
@@ -4825,9 +4825,9 @@ Section subsume.
   Definition introduce_with_hooks_inherit_inst := [instance @introduce_with_hooks_inherit].
   Global Existing Instance introduce_with_hooks_inherit_inst.
 
-  Lemma introduce_with_hooks_lft_toks E L κs T :
+  Lemma introduce_with_hooks_lft_toks E L learn κs T :
     li_tactic (llctx_release_toks_goal L κs) T ⊢
-    introduce_with_hooks E L (llft_elt_toks κs) T.
+    introduce_with_hooks E L learn (llft_elt_toks κs) T.
   Proof.
     rewrite /li_tactic /llctx_release_toks_goal.
     iIntros "(%L' & %HL & HT)".
@@ -4838,16 +4838,16 @@ Section subsume.
   Definition introduce_with_hooks_lft_toks_inst := [instance @introduce_with_hooks_lft_toks].
   Global Existing Instance introduce_with_hooks_lft_toks_inst | 10.
 
-  Lemma introduce_with_hooks_releq rt E L γ1 γ2 T :
+  Lemma introduce_with_hooks_releq rt E L learn γ1 γ2 T :
     find_in_context (FindOptGvarPobs γ1) (λ o,
     match o with
     | inr _ =>
         RelEq (T:=rt) γ1 γ2 -∗ T L
     | inl (existT rt' r) =>
         ∃ (Heq : RT_rt rt' = RT_rt rt),
-        introduce_with_hooks E L (gvar_pobs γ2 (rew [id] Heq in r)) T
+        introduce_with_hooks E L learn (gvar_pobs γ2 (rew [id] Heq in r)) T
     end)
-    ⊢ introduce_with_hooks E L (RelEq (T:=rt) γ1 γ2) T.
+    ⊢ introduce_with_hooks E L learn (RelEq (T:=rt) γ1 γ2) T.
   Proof.
     iIntros "(%o & Hobs & HT)".
     iIntros (??) "CTX HE HL Hrel".
@@ -4861,7 +4861,7 @@ Section subsume.
   Definition introduce_with_hooks_releq_inst := [instance @introduce_with_hooks_releq].
   Global Existing Instance introduce_with_hooks_releq_inst.
 
-  Lemma introduce_with_hooks_rel2 rt1 rt2 E L (R : rt1 → rt2 → Prop) γ1 γ2 T :
+  Lemma introduce_with_hooks_rel2 rt1 rt2 E L learn (R : rt1 → rt2 → Prop) γ1 γ2 T :
     find_in_context (FindOptGvarPobs γ1) (λ o,
     match o with
     | inr _ =>
@@ -4869,9 +4869,9 @@ Section subsume.
     | inl (existT rt' r) =>
         ∃ (Heq : RT_rt rt' = rt1),
         ∀ r2,
-        introduce_with_hooks E L (⌜R (rew [id] Heq in r) r2⌝ ∗ gvar_pobs γ2 ( r2)) T
+        introduce_with_hooks E L learn (⌜R (rew [id] Heq in r) r2⌝ ∗ gvar_pobs γ2 ( r2)) T
     end)
-    ⊢ introduce_with_hooks E L (Rel2 (T1:=rt1)(T2:=rt2) γ1 γ2 R) T.
+    ⊢ introduce_with_hooks E L learn (Rel2 (T1:=rt1)(T2:=rt2) γ1 γ2 R) T.
   Proof.
     iIntros "(%o & Hobs & HT)".
     iIntros (??) "CTX HE HL Hrel".
@@ -4891,7 +4891,7 @@ Section subsume.
     (∃ M, named_lfts M ∗ li_tactic (compute_map_lookups_nofail_goal M sup_lfts) (λ κs,
       ∀ κ, named_lfts (named_lft_update n κ M) -∗
       (* add a credit -- will be used by endlft *)
-      introduce_with_hooks E ((κ ⊑ₗ{0%nat} κs) :: L) (£ num_cred) T))
+      introduce_with_hooks E ((κ ⊑ₗ{0%nat} κs) :: L) true (£ num_cred) T))
     ⊢ typed_annot_stmt π 1 (StartLftAnnot n sup_lfts) E L T.
   Proof.
     rewrite /compute_map_lookups_nofail_goal.
@@ -4948,7 +4948,7 @@ Section subsume.
       if b then
         find_in_context (FindInherit κs P) (λ _,
         ⌜lctx_lft_dead E L κ⌝ ∗
-        introduce_with_hooks E L P (λ L2,
+        introduce_with_hooks E L true P (λ L2,
         iterate_with_hooks E L2 (IterateEndlftInheritances κ ks) T))
       else iterate_with_hooks E L (IterateEndlftInheritances κ ks) T)
     ⊢ iterate_with_hooks E L (IterateEndlftInheritances κ ((κs, P) :: ks)) T.
@@ -4990,7 +4990,7 @@ Section subsume.
         (* extract observations from now-dead mutable references *)
         typed_pre_context_fold π E ((†ₗ κ) :: L2) (CtxFoldExtractAllInit κ) (λ L3,
         (* give back credits *)
-        introduce_with_hooks E L3 (R2 ∗ £num_cred ∗ tr 1) (λ L4,
+        introduce_with_hooks E L3 true (R2 ∗ £num_cred ∗ tr 1) (λ L4,
         (* resolve inheritances *)
         li_tactic (find_inheritances_goal) (λ ks,
         iterate_with_hooks E L4 (IterateEndlftInheritances κ ks) (λ L5 _, T L5))))))))))
@@ -5359,18 +5359,18 @@ Section subsume.
   (* Typing rule for [Return] *)
   Lemma type_return E L f e fn (R : typed_stmt_R_t) ϝ :
     typed_val_expr E L f e (λ L' v m rt ty r,
-      introduce_with_hooks E L' (v ◁ᵥ{f.1, m} r @ ty) (λ L2,
+      introduce_with_hooks E L' true (v ◁ᵥ{f.1, m} r @ ty) (λ L2,
       find_in_context (FindFrameLocals f) (λ locals : list var_name,
       trigger_tc (FindLocalLocs f locals) (λ locs,
       typed_context_fold (typed_context_fold_stratify_interp f.1) E L2 (CtxFoldStratifyAll StratRefoldOpened) locs ([], True%I) (λ L2 m' acc,
-        introduce_with_hooks E L2 (type_ctx_interp f.1 acc.1 ∗ acc.2) (λ L3,
+        introduce_with_hooks E L2 false (type_ctx_interp f.1 acc.1 ∗ acc.2) (λ L3,
           prove_with_subtype E L3 true ProveDirect (
             foldr (λ (e : var_name) T,
               ∃ st l,
               e is_live{f, st} l ∗
               l ◁ₗ[f.1, Owned] (#()) @ (◁ (uninit st)) ∗ T)
             True%I
-            locals) True%I (λ L3 _ R2, introduce_with_hooks E L3 R2 (λ L4,
+            locals) True%I (λ L3 _ R2, introduce_with_hooks E L3 true R2 (λ L4,
             (* important: when proving the postcondition [R v], we already have the ownership obtained by deinitializing the local variables [R2] available. *)
             R v L4
             ))))))))
@@ -5532,7 +5532,7 @@ Notation "'typed_place' E L f l lto ro b1 b2 K 'HIDDEN_CONT'" := (typed_place E 
 Notation "'subsume_full' E L wl P1 P2 'HIDDEN_CONT'" := (subsume_full wl P1 P2 E L _) (only printing): rr_hidden.
 Notation "'resolve_ghost' π E L rm f l lt k r 'HIDDEN_CONT'" := (resolve_ghost π E L rm f l lt k r _) (only printing): rr_hidden.
 Notation "'prove_with_subtype' E L wl pm P 'HIDDEN_ACC' 'HIDDEN_CONT'" := (prove_with_subtype E L wl pm P _ _) (only printing): rr_hidden.
-Notation "'introduce_with_hooks' E L P 'HIDDEN_CONT'" := (introduce_with_hooks E L P _) (only printing): rr_hidden.
+Notation "'introduce_with_hooks' E L learn P 'HIDDEN_CONT'" := (introduce_with_hooks E L learn P _) (only printing): rr_hidden.
 Notation "'stratify_ltype' π E L mdu ma m l lt r b 'HIDDEN_CONT'" := (stratify_ltype π E L mdu ma m l lt r b _) (only printing): rr_hidden.
 
 

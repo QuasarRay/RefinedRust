@@ -155,7 +155,7 @@ We don't allow [retty] to depend on [exty], since [exty] should not quantify ove
           fn_init_context fn fps π f lsa sta -∗ introduce_typed_stmt E L (π, f) ϝ fn (
             λ v L2,
             prove_with_subtype E L2 true ProveDirect (fn_ret_prop π fps.(fp_fr) v) True%I (λ L3 _ R3,
-            introduce_with_hooks E L3 R3 (λ L4,
+            introduce_with_hooks E L3 true R3 (λ L4,
             (* we don't really kill it here, but just need to find it in the context *)
             li_tactic (llctx_find_llft_goal L4 ϝ LlctxFindLftFull) (λ _,
             find_in_context FindCreditStore (λ _,
@@ -223,7 +223,7 @@ Section call.
       ⌜π = f.1⌝ ∗
       (* TODO: do something to ensure invariants are closed before *)
       ⌜mask = ⊤⌝ ∗
-      introduce_with_hooks E L ([∗ list] v;t ∈ vl; tys, let '(existT rt (ty, r)) := t in v ◁ᵥ{π, MetaNone} r @ ty) (λ L',
+      introduce_with_hooks E L true ([∗ list] v;t ∈ vl; tys, let '(existT rt (ty, r)) := t in v ◁ᵥ{π, MetaNone} r @ ty) (λ L',
       (*∃ (Heq : lfts = length eκs),*)
       ∃ (κs : prod_vec lft lfts) tys,
       (* TODO: currently we instantiate evars very early to make the xt injection work. maybe move that down once we have a better design *)
@@ -258,7 +258,7 @@ Section call.
       (* postcondition *)
       ∀ v x', (* v = retval, x' = post existential *)
       (* also donate some credits we are generating here *)
-      introduce_with_hooks E L2 (£ (S num_cred) ∗ tr 2 ∗ na_own π mask ∗ R3 ∗ (fps.(fp_fr) x').(fr_R) π ∗ v ◁ᵥ{π, MetaNone} (fps.(fp_fr) x').(fr_ref) @ (fps.(fp_fr) x').(fr_ty)) (λ L3,
+      introduce_with_hooks E L2 true (£ (S num_cred) ∗ tr 2 ∗ na_own π mask ∗ R3 ∗ (fps.(fp_fr) x').(fr_R) π ∗ v ◁ᵥ{π, MetaNone} (fps.(fp_fr) x').(fr_ref) @ (fps.(fp_fr) x').(fr_ty)) (λ L3,
       T L3 v _ (fps.(fp_fr) x').(fr_ty) (fps.(fp_fr) x').(fr_ref)))))))
     ⊢ typed_call E L f eκs etys v (v ◁ᵥ{π, m} l @ function_ptr sta (eqp, fp)) vl tys T.
   Proof.

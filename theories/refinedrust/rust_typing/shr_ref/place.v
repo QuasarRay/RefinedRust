@@ -9,7 +9,7 @@ Section place.
   Context `{!typeGS Σ}.
 
   Lemma typed_place_shr_owned {rto} f κ (lt2 : ltype rto) P E L l r bmin0 (T : place_cont_t (place_rfn rto) bmin0) :
-   introduce_with_hooks E L (£1) (λ L1,
+   introduce_with_hooks E L true (£1) (λ L1,
      ∀ l', typed_place E L1 f l' lt2 r bmin0 (Shared κ) P
         (λ L' κs l2 b2 bmin rti tyli ri updcx,
           T L' (κs) l2 b2 bmin rti tyli ri
@@ -58,7 +58,7 @@ iMod ("HR" with "[] [$] HE HL [Hcred]") as "(%L1 & HL & HR)"; first done.
 
   Lemma typed_place_shr_uniq {rto} f κ (lt2 : ltype rto) P E L l r κ' γ bmin0 (T : place_cont_t (place_rfn rto) bmin0) :
     li_tactic (lctx_lft_alive_count_goal E L κ') (λ '(κs, L1),
-      introduce_with_hooks E L1 (£1) (λ L2,
+      introduce_with_hooks E L1 true (£1) (λ L2,
       (∀ l', typed_place E L2 f l' lt2 r (bmin0) (Shared κ) P
         (λ L3 κs' l2 b2 bmin rti tyli ri updcx,
           T L3 (κs') l2 b2 bmin rti tyli ri
@@ -146,7 +146,7 @@ iMod ("HR" with "[] [$] HE HL [Hcred]") as "(%L1 & HL & HR)"; first done.
 
   Lemma typed_place_shr_shared {rto} f E L (lt2 : ltype rto) P l r κ κ' bmin0 (T : place_cont_t (place_rfn rto) bmin0) :
     li_tactic (lctx_lft_alive_count_goal E L κ') (λ '(κs, L'),
-      introduce_with_hooks E L' (£1) (λ L1,
+      introduce_with_hooks E L' true (£1) (λ L1,
       (∀ l', typed_place E L1 f l' lt2 r bmin0 (Shared κ) P
         (λ L2 κs' l2 b2 bmin rti tyli ri updcx,
           T L2 κs' l2 b2 bmin rti tyli ri

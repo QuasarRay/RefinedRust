@@ -475,7 +475,7 @@ Section na_subtype.
   Qed.
 
   Lemma typed_place_na_ex_plain_t_owned E L f l (ty : type rt) x K `{!TCDone (K ≠ [])} T :
-    (∀ r, introduce_with_hooks E L (P.(na_inv_P) f.1 r x)
+    (∀ r, introduce_with_hooks E L true (P.(na_inv_P) f.1 r x)
       (λ L2, typed_place E L2 f l
               (OpenedLtype (◁ ty) (◁ ty) (◁ (∃na; P, ty)) (λ (r : rt) (x : X), P.(na_inv_P) f.1 r x) (λ r x, True))
               (#r) UpdStrong (Owned) K
@@ -566,7 +566,7 @@ Section na_subtype.
       ⌜↑shrN.@l ⊆ mask⌝ ∗
       prove_with_subtype E L false ProveDirect (£ 1) True%I (λ L1 _ R, R -∗
         li_tactic (lctx_lft_alive_count_goal E L1 κ) (λ '(κs, L2),
-          ∀ r, introduce_with_hooks E L2
+          ∀ r, introduce_with_hooks E L2 true
             (P.(na_inv_P) f.1 r x ∗
             l ◁ₗ[f.1, Owned] (#r) @
               (OpenedNaLtype (◁ ty) (◁ ty)
