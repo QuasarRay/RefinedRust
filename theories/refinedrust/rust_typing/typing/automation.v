@@ -950,7 +950,6 @@ Ltac liRStepCore :=
 Ltac liRStep :=
   liEnsureInvariant;
   try liRIntroduceLetInGoal;
-  liSimpl;
   first [liRStepCore | simpl; liRStepCore ]
 .
 

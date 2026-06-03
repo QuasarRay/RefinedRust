@@ -653,6 +653,25 @@ Section introduce.
   Definition introduce_with_hooks_sep_inst := [instance @introduce_with_hooks_sep].
   Global Existing Instance introduce_with_hooks_sep_inst.
 
+  Lemma introduce_with_hooks_big_sep_cons E L learn {A} (x : A) (xs : list A) (Φ : nat → A → iProp Σ) T :
+    introduce_with_hooks E L learn (Φ 0 x) (λ L', introduce_with_hooks E L' learn ([∗ list] i ↦ x ∈ xs, Φ (S i) x) T) ⊢
+    introduce_with_hooks E L learn ([∗ list] i ↦ x ∈ x :: xs, Φ i x) T.
+  Proof.
+    simpl. iApply introduce_with_hooks_sep.
+  Qed.
+  Definition introduce_with_hooks_big_sep_cons_inst := [instance @introduce_with_hooks_big_sep_cons].
+  Global Existing Instance introduce_with_hooks_big_sep_cons_inst | 80.
+
+  Lemma introduce_with_hooks_big_sep_nil E L learn {A} (Φ : nat → A → iProp Σ) T :
+    T L ⊢
+    introduce_with_hooks E L learn ([∗ list] i ↦ x ∈ [], Φ i x) T.
+  Proof.
+    iIntros "HT".
+    iIntros (??) "#CTX #HE HL _". by iFrame.
+  Qed.
+  Definition introduce_with_hooks_big_sep_nil_inst := [instance @introduce_with_hooks_big_sep_nil].
+  Global Existing Instance introduce_with_hooks_big_sep_nil_inst | 81.
+
   Lemma introduce_with_hooks_exists {X} E L learn (Φ : X → iProp Σ) T :
     (∀ x, introduce_with_hooks E L learn (Φ x) T) ⊢
     introduce_with_hooks E L learn (∃ x, Φ x) T.
