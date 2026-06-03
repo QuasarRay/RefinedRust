@@ -46,7 +46,7 @@ Proof.
   liInst Hevar_Inv (λ _ l '( *[p]), ⌜0 ≤ p.cur⌝ ∗ ⌜int_elem_of_it (p.cur + Z.of_nat ( length l))%Z USize⌝)%I.
   rep <-! liRStep; liShow.
   opose proof (inductive_lemma clos_states _ _ _ _ _ _) as Heq; [done.. | ].
-  assert (r'1 = γ) as -> by shelve_sidecond.
+  assert (x6 = γ) as -> by shelve_sidecond.
   rep liRStep; liShow.
   (* !end proof *)
 

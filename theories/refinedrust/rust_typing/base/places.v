@@ -234,6 +234,8 @@ Section place.
     | UpdStrong => false
     | _ => true
     end.
+  Global Arguments place_update_kind_rt_same : simpl never.
+
   Definition opt_place_update_eq (upd : place_update_kind) (rt1 rt2 : RT) : Prop :=
     if place_update_kind_rt_same upd then rt1 = rt2 else True.
   Definition opt_place_update_eq_refl `{upd : !place_update_kind} `{rt : !RT} : opt_place_update_eq upd rt rt.

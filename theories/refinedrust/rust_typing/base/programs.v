@@ -759,9 +759,9 @@ Section judgments.
       R v L' -∗
       logical_step ⊤ (Φ v)).
 
-  (* [Q]: the current function body,
+  (* [rf]: the current function body,
      [ϝ]: the function lifetime
-     [R] is a relation on the result value of this statement and its type: we require that the result value is a well-typed [R]-value at this type.
+     [R] is a relation on the result value of this function.
   *)
   Definition typed_stmt (E : elctx) (L : llctx) (f : frame_path) (s : stmt) (rf : function) (R : typed_stmt_R_t) (ϝ : lft) : iProp Σ :=
     (∀ (Φ : val → iProp Σ),
