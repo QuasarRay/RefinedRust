@@ -228,6 +228,17 @@ Section value.
       + left. eexists. split; done.
       + done.
   Qed.
+  Next Obligation.
+    intros typed st ot Hot. simpl in Hot.
+    unfold is_value_ot.
+    exists ot. split_and!.
+    - unfold use_op_alg_typed. destruct typed; done.
+    - by apply is_value_ot_core_refl.
+    - destruct typed.
+      + by eapply use_op_alg_layout_alg.
+      + apply syn_type_has_layout_untyped_inv.
+        by eapply use_op_alg_layout_alg.
+  Qed.
 
   Global Instance value_copy typed st : Copyable (value_t typed st).
   Proof. apply _. Qed.
@@ -1198,6 +1209,13 @@ Section typed_value.
   Next Obligation.
     intros st ly Hst. simpl.
     by apply (_ty_has_op_type_untyped _ (value_t true st)).
+  Qed.
+  Next Obligation.
+    intros st ot mt Hot Hmt. simpl.
+    exists ot. split_and!.
+    - done.
+    - by apply is_value_ot_core_refl.
+    - by eapply use_op_alg_layout_alg.
   Qed.
 
   Global Instance typed_value_copy st : Copyable (typed_value_t st).

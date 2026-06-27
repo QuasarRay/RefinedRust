@@ -298,6 +298,13 @@ Section array.
     (* TODO maybe the second case should really change once we support an ArrayOpType? *)
   Qed.
   Next Obligation.
+    intros len ty ot _ Hot. unfold use_op_alg in Hot.
+    destruct (use_layout_alg (ArraySynType (st_of ty MetaNone) len)) as [ly|] eqn:Hly; simpl in Hot; last done.
+    unfold is_array_ot.
+    inversion Hot; subst.
+    done.
+  Qed.
+  Next Obligation.
     intros len ty ly _ Hst.
     done.
     (*

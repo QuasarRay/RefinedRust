@@ -134,6 +134,10 @@ Section shr_ref.
     rewrite /mem_cast Hv//.
   Qed.
   Next Obligation.
+    intros ??? ot _ Hot. simpl in Hot.
+    by inversion Hot.
+  Qed.
+  Next Obligation.
     intros ??? ly _ Hst. apply syn_type_has_layout_ptr_inv in Hst as ->.
     done.
   Qed.

@@ -43,6 +43,13 @@ Section uninit.
     apply syn_type_has_layout_untyped_inv in Hst.
     exists ly. done.
   Qed.
+  Next Obligation.
+    intros st ot Hot.
+    apply use_op_alg_untyped_inv in Hot as (ly & Hly & ->).
+    apply syn_type_has_layout_untyped_inv in Hly.
+    exists ly. split; first done.
+    done.
+  Qed.
 
   Global Instance uninit_copy st : Copyable (uninit st).
   Proof. apply _. Qed.

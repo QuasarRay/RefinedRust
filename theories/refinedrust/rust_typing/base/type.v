@@ -324,12 +324,12 @@ Record type `{!typeGS Σ} (rt : RT) := {
     ty_own_val π r m v -∗
     ty_own_val π r m (mem_cast v ot st);
 
-  (* TODO this would be a good property to have, but currently uninit doesn't satisfy it. *)
-  (* we require that ops at least as given by the "canonical" optype obtained by [use_op_alg] are allowed *)
-  (*ty_has_op_type_compat ot mt : *)
-    (*use_op_alg ty_syn_type = Some ot →*)
-    (*mt ≠ MCId →*)
-    (*ty_has_op_type ot mt;*)
+  (** We require that ops as given by the canonical optype
+    obtained by [use_op_alg] are allowed for no-metadata types. *)
+  _ty_has_op_type_compat ot :
+    ty_metadata_kind = MetadataNone →
+    use_op_alg (ty_syn_type MetaNone) = Some ot →
+    _ty_has_op_type ot;
 
   (** Untyped operations are always allowed  *)
   _ty_has_op_type_untyped ly :
@@ -376,6 +376,12 @@ Definition ty_has_op_type_aux `{!typeGS Σ} : seal (@_ty_has_op_type _ _). Proof
 Definition ty_has_op_type `{!typeGS Σ} := ty_has_op_type_aux.(unseal).
 Definition ty_has_op_type_unfold `{!typeGS Σ} : ty_has_op_type = _ty_has_op_type := ty_has_op_type_aux.(seal_eq).
 Arguments ty_has_op_type {_ _ _}.
+
+Lemma ty_has_op_type_compat `{!typeGS Σ} {rt} (ty : type rt) ot :
+  ty.(ty_metadata_kind) = MetadataNone →
+  use_op_alg (ty.(ty_syn_type) MetaNone) = Some ot →
+  ty_has_op_type ty ot.
+Proof. rewrite ty_has_op_type_unfold. apply _ty_has_op_type_compat. Qed.
 
 Lemma ty_op_type_stable `{!typeGS Σ} {rt} (ty : type rt) ot :
   ty_has_op_type ty ot →
@@ -533,10 +539,9 @@ Record simple_type `{!typeGS Σ} (rt : RT) :=
       syn_type_has_layout st_syn_type ly →
       st_has_op_type (UntypedOp ly) ;
 
-    (*st_has_op_type_compat ot mt :*)
-      (*use_op_alg st_syn_type = Some ot →*)
-      (*mt ≠ MCId →*)
-      (*st_has_op_type ot mt;*)
+    st_has_op_type_compat ot :
+      use_op_alg st_syn_type = Some ot →
+      st_has_op_type ot;
   }.
 #[export] Existing Instance st_xt_inhabited.
 #[export] Instance: Params (@st_own) 4 := {}.
@@ -622,11 +627,11 @@ Next Obligation.
   iR. by iApply (st_memcast_compat).
 Qed.
 Next Obligation.
+  intros. by apply st_has_op_type_compat.
+Qed.
+Next Obligation.
   intros. by apply st_has_op_type_untyped.
 Qed.
-(*Next Obligation.*)
-  (*intros. apply st_has_op_type_compat; done.*)
-(*Qed.*)
 
 Coercion ty_of_st : simple_type >-> type.
 
@@ -751,6 +756,11 @@ Section ofe.
     (* ty_memcast_compat *)
     (∀ ot st π r m v, x.1.1.1.2 ot → x.1.1.1.1.1.1.1.1 π r m v -∗
       x.1.1.1.1.1.1.1.1 π r m (mem_cast v ot st)) ∧
+    (* ty_has_op_type_compat *)
+    (∀ ot,
+      x.1.1.1.1.1.2 = MetadataNone →
+      use_op_alg (x.1.1.1.1.2 MetaNone) = Some ot →
+      x.1.1.1.2 ot) ∧
     (* ty_has_op_type_untyped *)
     (∀ (ly : layout) m,
       x.1.1.1.1.1.2 = MetadataNone →
@@ -887,7 +897,11 @@ Section st_ofe.
     (∀ π r v, Persistent (x.1.1 π r v)) ∧
     (* ty_memcast_compat *)
     (∀ ot st π r v, x.2 ot → x.1.1 π r v -∗
-      x.1.1 π r (mem_cast v ot st)).
+      x.1.1 π r (mem_cast v ot st)) ∧
+    (* st_has_op_type_compat *)
+    (∀ ot , use_op_alg x.1.2 = Some ot → x.2 ot) ∧
+    (* st_has_op_type_untyped *)
+    (∀ ly, syn_type_has_layout x.1.2 ly → x.2 (UntypedOp ly)).
 
   (* to handle the let destruct in an acceptable way *)
   Local Set Program Cases.

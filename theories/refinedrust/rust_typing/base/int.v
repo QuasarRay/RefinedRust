@@ -51,6 +51,9 @@ Section int.
     intros ?? Hst. apply syn_type_has_layout_int_inv in Hst as ->.
     done.
   Qed.
+  Next Obligation.
+    intros it ot Hot. simpl in Hot. inversion Hot. subst. done.
+  Qed.
 
   Lemma ty_own_int_in_range l π n it m : l ◁ᵥ{π, m} n @ int it -∗ ⌜m = MetaNone⌝ ∗ ⌜n ∈ it⌝.
   Proof. rewrite /ty_own_val /= int_own_val_unfold. iIntros "(-> & %Hl)". iR. iPureIntro. by eapply val_to_Z_in_range. Qed.
@@ -117,6 +120,9 @@ Section boolean.
     intros ? Hst. apply syn_type_has_layout_bool_inv in Hst as ->.
     done.
   Qed.
+  Next Obligation.
+    intros ot Hot. simpl in Hot. inversion Hot. subst. done.
+  Qed.
 
   Lemma bool_own_val_eq v π b m :
     (v ◁ᵥ{π, m} b @ bool_t)%I ≡ (⌜m = MetaNone⌝ ∗ ⌜val_to_bool v = Some b⌝)%I.
@@ -171,6 +177,9 @@ Section char.
   Next Obligation.
     intros ? Hst. apply syn_type_has_layout_char_inv in Hst as ->.
     done.
+  Qed.
+  Next Obligation.
+    intros ot Hot. simpl in Hot. inversion Hot. subst. done.
   Qed.
 
   Lemma char_own_val_eq v π m z :

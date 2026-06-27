@@ -160,6 +160,9 @@ Section def.
     destruct ot as [ | | | | ly' | ]; try done.
   Qed.
   Next Obligation.
+    intros ty ot Hmeta Hot. discriminate Hmeta.
+  Qed.
+  Next Obligation.
     intros ty ly ? Hst.
     simpl.
     done.
