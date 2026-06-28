@@ -36,6 +36,92 @@ Lemma is_struct_ot_layout `{typeGS Σ} sls sl {rts} (tys : hlist type rts) ot :
   is_struct_ot sls tys ot → ot_layout ot = sl.
 Proof. move => ? ?. destruct ot => //; naive_solver. Qed.
 
+Definition sls_field_def (s : list (string * syn_type)) (n : var_name) : option (nat * (string * syn_type)) :=
+  list_find (λ x, x.1 = n) s.
+Definition pad_struct_mem {A} (sls : struct_layout_spec) (ls : list A) (def : layout → A) (mem : option var_name * layout) : option (A * option syn_type) :=
+  match mem with 
+  | (None, ly) => Some (def ly, None)
+  | (Some x, ly) =>
+    '(idx, (_, st)) ← sls_field_def sls.(sls_fields) x;
+    a ← ls !! idx;
+    Some (a, Some st)
+  end.
+(* Later: struct_own_el_val etc can use the option syn_type and optionally require it to be equal to the type's syntype *)
+
+Lemma pad_struct_mem_lookup_Some {A} (sls : struct_layout_spec) (ls : list A) (def : layout → A) (mem : option var_name * layout) x mst: 
+  pad_struct_mem sls ls def mem = Some (x, mst) ↔ 
+    ((∃ n idx defn, mem.1 = Some n ∧ sls_field_def sls.(sls_fields) n = Some (idx, defn) ∧ ls !! idx = Some x ∧ mst = Some defn.2) ∨
+     (mem.1 = None ∧ x = def mem.2 ∧ mst = None)).
+Proof.
+  destruct mem as [[n | ] ly]; simpl.
+  - rewrite bind_Some.
+    split.
+    + intros ([idx [n' st]] & Hdef & Hlook). 
+      apply bind_Some in Hlook as (a & Hlook & Heq).
+      simplify_eq/=.
+      left. eexists _, _, _. split_and!; try done.
+    + intros [(n' & idx & []& [= <-] & Hdef & Hlook & ->) | ([=] & _)].
+      eexists (_, _). split; first done. simpl. apply bind_Some. eauto.
+  - split. 
+    + intros [= <- <-]. by right.
+    + intros [(? & ? & ? & [=] & _) | (_ & -> & ->)].
+    done.
+Qed.
+
+(* TODO: problem: this isn't really inductive now anymore, because the order of the els can be different *)
+Local Lemma pad_struct_mem_focus' {A} (els : list A) fields (make_uninit : layout → A) (Φ : nat → A → iProp Σ) (i0 : nat) :
+  length els = length (named_fields fields) →
+  NoDup (field_names fields) →
+  ([∗ list] i ↦ mem ∈ fields, 
+    ∃ x mst, 
+      ⌜pad_struct_mem sls els make_uninit mem = Some (x, mst)⌝ ∗
+    Φ (i + i0)%nat (x, mst)) -∗
+  (* get just the named fields *)
+  ([∗ list] i ↦ x ∈ els, 
+    ∃ j ly n, 
+      ⌜fields !! j = Some (Some n, ly)⌝ ∗ 
+      ⌜sls_field_def sls.(sls_fields) = Some (i, 
+      ⌜named_fields fields !! (i)%nat = Some (n, ly)⌝ ∗ 
+      Φ (j + i0)%nat x) ∗
+  (* and separately the ownership of the unnamed fields *)
+  ([∗ list] i ↦ x ∈ pad_struct fields (replicate (length els) None) Some,
+    from_option (λ ly, Φ (i + i0)%nat (make_uninit ly, None)) True x).
+Proof.
+  iIntros (Hlen Hnd) "Ha".
+  iInduction fields as [ | [n ly] fields] "IH" forall (els Hlen i0 Hnd); simpl.
+  { simpl in Hlen. destruct els; last done. simpl. iSplitR; first done. done. }
+  destruct n as [ n | ]; simpl.
+  - simpl in Hlen. destruct els as [ | el els]; first done; simpl in *.
+    iDestruct "Ha" as "(Ha & Hb)".
+    iPoseProof ("IH" $! els with "[] [] [Hb]") as "(Hb & Hpad)".
+    { iPureIntro. lia. }
+    { inversion Hnd. done. }
+    { setoid_rewrite <-Nat.add_succ_r. iApply "Hb". }
+    iSplitL "Ha Hb".
+    { (* show the split *)
+      iSplitL "Ha".
+      { iExists 0%nat, _, _. iSplitR; first done. iSplitR; done. }
+      iApply (big_sepL_impl with "Hb"). iModIntro. iIntros (k x Hlook).
+      iIntros "(%j & % & % & %Hlook1 & %Hlook2 & Ha)".
+      iExists (S j), _, _. simpl. rewrite Nat.add_succ_r. iSplitR; first done. iSplitR; done. }
+    iSplitR; first done. iApply (big_sepL_wand with "Hpad").
+    iApply big_sepL_intro. iModIntro. iIntros (???).
+    destruct x; simpl; try rewrite Nat.add_succ_r; eauto.
+  - simpl in *.
+    iDestruct "Ha" as "(Ha & Hb)".
+    iPoseProof ("IH" with "[//] [//] [Hb]") as "(Hb & Hpad)".
+    { setoid_rewrite <-Nat.add_succ_r. done. }
+    iSplitL "Hb".
+    { iApply (big_sepL_wand with "Hb"). iApply big_sepL_intro.
+      iModIntro. iIntros (k x Hlook) "(%j & % & % & ? & ? & ?)".
+      iExists (S j). rewrite Nat.add_succ_r. eauto with iFrame. }
+    iFrame. iApply (big_sepL_wand with "Hpad").
+    iApply big_sepL_intro. iModIntro. iIntros (???).
+    destruct x; simpl; try rewrite Nat.add_succ_r; eauto.
+Qed.
+
+(*pad_struct_focus_no_uninit*)
+
 (** ** Full structs *)
 Section structs.
   Context `{!typeGS Σ}.
@@ -77,15 +163,29 @@ Section structs.
     use_struct_layout_alg sls = Some sl →
     length tys = length (sls_fields sls) →
     loc_in_bounds l 0 (ly_size sl) -∗
-    ([∗ list] i↦a;x ∈ pad_struct (sl_members sl) tys struct_make_uninit_type;ys,
-      struct_own_el_loc' π q x.1 i (sl_members sl) l (projT2 a).2 (projT2 a).1 x.2) -∗
+    ([∗ list] i↦mem;x ∈ sl.(sl_members);ys,
+      ∃ ty mst, 
+      ⌜pad_struct_mem sls tys struct_make_uninit_type mem = Some (ty, mst)⌝ ∗
+      struct_own_el_loc' π q x.1 i (sl_members sl) l (projT2 ty).2 (projT2 ty).1 x.2) -∗
     l ↦{q} (mjoin ys.*1) ∗ ⌜Forall2 (λ (v : val) (ly : layout), v `has_layout_val` ly) ys.*1 ((sl_members sl).*2)⌝ ∗
-      ([∗ list] i↦v';ty ∈ reshape (ly_size <$> (sl_members sl).*2) (mjoin ys.*1);
-            pad_struct (sl_members sl) tys (λ ly0 : layout, existT (unit : RT) (uninit (LiteralSynType ly0), # ())),
-      struct_own_el_val π i sl.(sl_members) v' (projT2 ty).2 (projT2 ty).1).
+      ([∗ list] i↦v';mem ∈ reshape (ly_size <$> (sl_members sl).*2) (mjoin ys.*1); sl.(sl_members),
+        ∃ ty mst, 
+        ⌜pad_struct_mem sls tys struct_make_uninit_type mem = Some (ty, mst)⌝ ∗
+        struct_own_el_val π i sl.(sl_members) v' (projT2 ty).2 (projT2 ty).1).
   Proof.
     iIntros (??) "#Hlb Hl".
 
+    iAssert (([∗ list] i↦mem;x ∈ sl.(sl_members);ys, 
+      ∃ ty mst, ⌜pad_struct_mem sls tys struct_make_uninit_type mem = Some (ty, mst)⌝ ∗
+      ⌜x.1 `has_layout_val` x.2⌝ ∗
+      ⌜snd <$> sl.(sl_members) !! i = Some x.2⌝ ∗
+      (l +ₗ offset_of_idx sl.(sl_members) i) ↦{q} x.1 ∗
+      ∃ (r' : _), place_rfn_interp_owned (projT2 ty).2 r' ∗
+        ⌜syn_type_has_layout (ty_syn_type (projT2 ty).1 MetaNone) x.2⌝ ∗
+        ty_sidecond (projT2 ty).1 ∗
+        x.1 ◁ᵥ{ π, MetaNone} r' @ (projT2 ty).1))%I  with "[Hl]" as "Hl".
+
+(*
     do 3 rewrite big_sepL2_sep. iDestruct "Hl" as "(Hlyv & Hsl & Hl & Hb)".
     rewrite !big_sepL2_elim_l.
     iDestruct "Hlyv" as "%Hlyv". iDestruct "Hsl" as "%Hsl".
@@ -138,25 +238,33 @@ Section structs.
     iModIntro. iIntros (?? [? []] ? ?). iIntros "(% & % & ? & ? & ? & ? & ?)".
     rewrite /struct_own_el_val.
     eauto with iFrame.
-  Qed.
+    *)
+  Admitted.
 
   Lemma struct_own_val_extract_pointsto π q sls sl l (tys : list (sigT (λ rt, type rt * place_rfn rt)%type)) :
     use_struct_layout_alg sls = Some sl →
     length tys = length (sls_fields sls) →
     loc_in_bounds l 0 (ly_size sl) -∗
-    ([∗ list] i↦ty ∈ pad_struct (sl_members sl) tys struct_make_uninit_type,
-      ∃ v, struct_own_el_loc π q v i sl.(sl_members) l (projT2 ty).2 (projT2 ty).1) -∗
+    ([∗ list] i↦mem ∈ sl.(sl_members),
+      ∃ v, 
+      ∃ ty mst, 
+        ⌜pad_struct_mem sls tys struct_make_uninit_type mem = Some (ty, mst)⌝ ∗
+      struct_own_el_loc π q v i sl.(sl_members) l (projT2 ty).2 (projT2 ty).1) -∗
     ∃ v : val, l ↦{q} v ∗ ⌜v `has_layout_val` sl⌝ ∗
-      ([∗ list] i↦v';ty ∈ reshape (ly_size <$> (sl_members sl).*2) v; pad_struct (sl_members sl) tys struct_make_uninit_type,
+      ([∗ list] i↦v';mem ∈ reshape (ly_size <$> (sl_members sl).*2) v; sl.(sl_members),
+      ∃ ty mst, 
+        ⌜pad_struct_mem sls tys struct_make_uninit_type mem = Some (ty, mst)⌝ ∗
       struct_own_el_val π i sl.(sl_members) v' (projT2 ty).2 (projT2 ty).1).
   Proof.
     iIntros (??) "#Hlb Hl".
     iAssert (
-      [∗ list] i↦ty ∈ pad_struct (sl_members sl) tys (λ ly0, existT (unit : RT) (uninit (LiteralSynType ly0), # ())),
+      [∗ list] i↦mem ∈ sl.(sl_members),
       ∃ (y : val * layout),
+      ∃ ty mst, 
+        ⌜pad_struct_mem sls tys struct_make_uninit_type mem = Some (ty, mst)⌝ ∗
       struct_own_el_loc' π q y.1 i sl.(sl_members) l (projT2 ty).2 (projT2 ty).1 y.2)%I with "[Hl]" as "Hl".
     { iApply (big_sepL_wand with "Hl"). iApply big_sepL_intro.
-      iModIntro. iIntros (k [? []] Hlook). iIntros "(%v & % & %ly0 & ? & ? & ? & ? & ? & ? & ?)".
+      iModIntro. iIntros (k [? []] Hlook). iIntros "(%v & %ty1 & %mst & %Hpad & % & %ly0 & ? & ? & ? & ? & ? & ? & ?)".
       iExists (v, ly0). rewrite /struct_own_el_loc'. eauto with iFrame. }
     rewrite big_sepL_exists. iDestruct "Hl" as "(%ys & Hl)".
     iExists (mjoin ys.*1).
@@ -169,26 +277,32 @@ Section structs.
     length tys = length (sls_fields sls) →
     v `has_layout_val` sl →
     l ↦{q} v -∗
-    ([∗ list] i↦v';ty ∈ reshape (ly_size <$> (sl_members sl).*2) v; pad_struct (sl_members sl) tys struct_make_uninit_type,
+    ([∗ list] i↦v';mem ∈ reshape (ly_size <$> (sl_members sl).*2) v; sl.(sl_members),
+        ∃ ty mst, 
+        ⌜pad_struct_mem sls tys struct_make_uninit_type mem = Some (ty, mst)⌝ ∗ 
         struct_own_el_val π i sl.(sl_members) v' (projT2 ty).2 (projT2 ty).1) -∗
-    ([∗ list] i↦ty ∈ pad_struct (sl_members sl) tys struct_make_uninit_type,
-      ∃ v, struct_own_el_loc π q v i sl.(sl_members) l (projT2 ty).2 (projT2 ty).1).
+    ([∗ list] i↦mem ∈ sl.(sl_members),
+      ∃ v, 
+      ∃ ty mst, 
+        ⌜pad_struct_mem sls tys struct_make_uninit_type mem = Some (ty, mst)⌝ ∗ 
+      struct_own_el_loc π q v i sl.(sl_members) l (projT2 ty).2 (projT2 ty).1).
   Proof.
     iIntros (???) "Hl Hv".
     rewrite heap_pointsto_reshape_sl; last done.
     iDestruct "Hl" as "(_ & Hp)".
-    iPoseProof (big_sepL_extend_r (pad_struct (sl_members sl) tys struct_make_uninit_type) with "Hp") as "Hp".
-    { rewrite pad_struct_length length_reshape !length_fmap//. }
+    iPoseProof (big_sepL_extend_r sl.(sl_members) with "Hp") as "Hp".
+    { rewrite length_reshape !length_fmap//. }
     iPoseProof (big_sepL2_sep_1 with "Hv Hp") as "Ha".
     iApply big_sepL2_elim_l. iApply (big_sepL2_wand with "Ha").
     iApply big_sepL2_intro.
-    { rewrite pad_struct_length length_reshape !length_fmap//. }
+    { rewrite length_reshape !length_fmap//. }
     iModIntro. iIntros (k v' [rt [ty r']] Hlook1 Hlook2).
-    iIntros "((%r'' & %ly' & Hrfn & %Hlook3 & %Hst & Hv) & Hp)".
-    iExists v', r'', ly'. iPoseProof (ty_own_val_sidecond with "Hv") as "#$".
+    iIntros "((%ty1 & %mst & %Hpad & %r'' & %ly' & Hrfn & %Hlook3 & %Hst & Hv) & Hp)".
+    iExists v', ty1, mst. iR. iExists r'', ly'. iPoseProof (ty_own_val_sidecond with "Hv") as "#$".
     iPoseProof (ty_own_val_has_layout with "Hv") as "%Hlyv"; first done.
     iFrame. done.
   Qed.
+        
 
   (** We use a [hlist] for the list of types and a [plist] for the refinement, to work around universe problems.
      See also the [ltype] definition. Using just [hlist] will cause universe problems, while using [plist] in the [lty]
@@ -201,7 +315,9 @@ Section structs.
       ⌜length rts = length sls.(sls_fields)⌝ ∗
       ⌜v `has_layout_val` sl⌝ ∗
       (* the padding fields get the uninit type *)
-      [∗ list] i ↦ v';ty ∈ reshape (ly_size <$> sl.(sl_members).*2) v; pad_struct sl.(sl_members) (hpzipl rts tys r) struct_make_uninit_type,
+      [∗ list] i ↦ v';mem ∈ reshape (ly_size <$> sl.(sl_members).*2) v; sl.(sl_members), 
+        ∃ ty mst, 
+        ⌜pad_struct_mem sls (hpzipl rts tys r) struct_make_uninit_type mem = Some (ty, mst)⌝ ∗ 
         struct_own_el_val π i sl.(sl_members) v' (projT2 ty).2 (projT2 ty).1
         )%I.
   Definition struct_t_own_val_aux : seal (@struct_t_own_val_def).
@@ -216,7 +332,9 @@ Section structs.
       ⌜length rts = length sls.(sls_fields)⌝ ∗
       ⌜l `has_layout_loc` sl⌝ ∗
       loc_in_bounds l 0 (ly_size sl) ∗
-      [∗ list] i ↦ ty ∈ pad_struct sl.(sl_members) (hpzipl rts tys r) struct_make_uninit_type,
+      [∗ list] i ↦ mem ∈ sl.(sl_members),
+        ∃ ty mst, 
+        ⌜pad_struct_mem sls (hpzipl rts tys r) struct_make_uninit_type mem = Some (ty, mst)⌝ ∗ 
         struct_own_el_shr π κ i sl.(sl_members) l (projT2 ty).2 (projT2 ty).1)%I.
   Definition struct_t_shr_aux : seal (@struct_t_shr_def).
   Proof. by eexists. Qed.
@@ -291,8 +409,11 @@ Section structs.
 
     (* reshape the borrow - we must not freeze the existential over v to initiate recursive sharing *)
     iPoseProof (bor_iff _ _ (∃ sl, ⌜m = MetaNone⌝ ∗ ⌜use_struct_layout_alg sls = Some sl⌝ ∗ ⌜length rts = length (sls_fields sls)⌝ ∗
-      [∗ list] i↦ty ∈ pad_struct (sl_members sl) (hpzipl rts tys r) struct_make_uninit_type,
-        ∃ v, struct_own_el_loc π 1 v i sl.(sl_members) l (projT2 ty).2 (projT2 ty).1)%I with "[] Hl") as "Hb".
+      [∗ list] i↦mem ∈ sl.(sl_members),
+        ∃ v, 
+          ∃ ty mst, 
+          ⌜pad_struct_mem sls (hpzipl rts tys r) struct_make_uninit_type mem = Some (ty, mst)⌝ ∗ 
+          struct_own_el_loc π 1 v i sl.(sl_members) l (projT2 ty).2 (projT2 ty).1)%I with "[] Hl") as "Hb".
     { iNext. iModIntro. iSplit.
       - iIntros "(%v & Hl & %sl & -> & %Hst' & %Hlen & %Hv & Hv)".
         iExists sl. iR. iR. iR.
@@ -322,48 +443,68 @@ Section structs.
     set (len := length (sl_members sl)).
     set (κ' := lft_intersect_list (mjoin ((λ ty, ty_lfts (projT2 ty)) <$> hzipl rts tys))).
     iPoseProof (Fractional_split_big_sepL (λ q, q.[_]%I) len with "Htok") as "(%qs & %Hlen' & Htoks & Hcl_toks)".
-    iAssert ([∗ list] i ↦ ty; q' ∈ (pad_struct (sl_members sl) (hpzipl rts tys r) struct_make_uninit_type); qs,
-      &{κ} ((∃ (r' : (projT1 ty : RT)) (ly : layout), place_rfn_interp_owned (projT2 ty).2 r' ∗ ⌜snd <$> sl.(sl_members) !! i = Some ly⌝ ∗ ⌜syn_type_has_layout (ty_syn_type (projT2 ty).1 MetaNone) ly⌝ ∗ ty_sidecond (projT2 ty).1 ∗ ∃ v, (l +ₗ offset_of_idx sl.(sl_members) i) ↦ v ∗ ⌜v `has_layout_val` ly⌝ ∗ v ◁ᵥ{ π, MetaNone} r' @ (projT2 ty).1)) ∗
+    iAssert ([∗ list] i ↦ mem; q' ∈ sl.(sl_members); qs,
+      &{κ} (
+        ∃ ty mst, 
+          ⌜pad_struct_mem sls (hpzipl rts tys r) struct_make_uninit_type mem = Some (ty, mst)⌝ ∗ 
+        (∃ (r' : (projT1 ty : RT)) (ly : layout), 
+          place_rfn_interp_owned (projT2 ty).2 r' ∗ 
+          ⌜snd <$> sl.(sl_members) !! i = Some ly⌝ ∗ 
+          ⌜syn_type_has_layout (ty_syn_type (projT2 ty).1 MetaNone) ly⌝ ∗ 
+          ty_sidecond (projT2 ty).1 ∗ 
+          ∃ v, (l +ₗ offset_of_idx sl.(sl_members) i) ↦ v ∗ ⌜v `has_layout_val` ly⌝ ∗ v ◁ᵥ{ π, MetaNone} r' @ (projT2 ty).1)) ∗
       q'.[κ ⊓ κ'])%I with "[Htoks Hb]" as "Hb".
     { iApply big_sepL2_sep_sepL_r; iFrame. iApply big_sepL2_const_sepL_l.
-      iSplitR. { rewrite pad_struct_length Hlen' //. }
+      iSplitR. { rewrite Hlen' //. }
       (* we also need to push down the existential over v *)
       iApply (big_sepL_wand with "Hb"); iApply big_sepL_intro.
       iModIntro. iIntros (? [? []] ?) "Ha". iApply (bor_iff with "[] Ha").
       iNext. iModIntro. iSplit.
-      - iIntros "(%v & % & % & ? & ? & ? & ? & ? & ? & ?)". eauto with iFrame.
-      - iIntros "(% & % & ? & ? & ? & ? & Hl)". iDestruct "Hl" as "(%v & ? & ? & ?)".
+      - iIntros "(%v & %ty & %mst & % & % & % & ? & ? & ? & ? & ? & ? & ?)". eauto with iFrame.
+      - iIntros "(% & %ty1 & %mst & % & % & ? & ? & ? & ? & Hl)". iDestruct "Hl" as "(%v & ? & ? & ?)".
         rewrite /struct_own_el_loc; eauto with iFrame.
     }
 
     assert (ly = sl) as ->.
     { apply use_struct_layout_alg_Some_inv in Hst'. by eapply syn_type_has_layout_inj. }
-    iAssert ([∗ list] i ↦ ty; q' ∈ (pad_struct (sl_members sl) (hpzipl rts tys r) struct_make_uninit_type); qs,
+    iAssert ([∗ list] i ↦ mem; q' ∈ sl.(sl_members); qs,
       logical_step E (
-        struct_own_el_shr π κ i sl.(sl_members) l (projT2 ty).2 (projT2 ty).1 ∗ q'.[κ ⊓ κ']))%I with "[Hb]" as "Hb".
+        (∃ ty mst, 
+          ⌜pad_struct_mem sls (hpzipl rts tys r) struct_make_uninit_type mem = Some (ty, mst)⌝ ∗ 
+        struct_own_el_shr π κ i sl.(sl_members) l (projT2 ty).2 (projT2 ty).1) ∗ q'.[κ ⊓ κ']))%I with "[Hb]" as "Hb".
     { iApply (big_sepL2_wand with "Hb"). iApply big_sepL2_intro.
-      { rewrite pad_struct_length Hlen' //. }
-      iModIntro. iIntros (k x q0 Hlook1 Hlook2) "(Hb & Htok)".
+      { rewrite Hlen' //. }
+      iModIntro. iIntros (k [ident ly] q0 Hlook1 Hlook2) "(Hb & Htok)".
       iApply fupd_logical_step.
-      destruct x as [rt [ty r']]. set (κ'' := lft_intersect_list (ty_lfts ty)).
+
+      rewrite -{1}lft_tok_sep. iDestruct "Htok" as "(Htok1 & Htok2)".
+      iMod (bor_exists_tok with "LFT Hb Htok1") as "(%x & Hb & Htok1)"; first done.
+      iMod (bor_exists_tok with "LFT Hb Htok1") as "(%mst & Hb & Htok1)"; first done.
+      iMod (bor_sep with "LFT Hb") as "(Hpad & Hb)"; first done.
+      iMod (bor_persistent with "LFT Hpad Htok1") as "(>%Hpad & Htok1)"; first done.
+      destruct x as [rt [ty r']]. 
+
+      iCombine "Htok1 Htok2" as "Htok". rewrite lft_tok_sep.
+      set (κ'' := lft_intersect_list (ty_lfts ty)).
       iMod (lft_incl_acc _ _ (κ ⊓ κ'') with "[] Htok") as "(%q' & Htok & Hvs)"; first done.
-      { iApply lft_intersect_mono; first iApply lft_incl_refl.
-        rewrite /κ' /κ''.
+      { rewrite /κ' /κ''.
+        iApply lft_intersect_mono; first iApply lft_incl_refl.
+
         iApply list_incl_lft_incl_list.
-        apply pad_struct_lookup_Some in Hlook1; first last.
-        { rewrite length_hpzipl Hlen. erewrite struct_layout_spec_has_layout_fields_length; done. }
-        destruct Hlook1 as (n & ly & ? & [ (? & Hlook) | (-> & Heq)]).
+        apply pad_struct_mem_lookup_Some in Hpad. 
+        destruct Hpad as [(n & idx & defn & Heq1 & Hlook' & Hlook & ->) | (Heq1 &  Heq & ->)].
         - simpl in Hlook.
           apply (hpzipl_lookup_inv_hzipl_pzipl _ _ r) in Hlook as (Hlook & _).
           apply list_subseteq_mjoin. apply list_elem_of_fmap.
           exists (existT _ ty). split; first done.
           apply list_elem_of_lookup_2 in Hlook. done.
-        - injection Heq => Heq1 Heq2 ?. subst.
-          apply existT_inj in Heq1 as ->.
-          apply existT_inj in Heq2 as ->.
+        - injection Heq => Heq1' Heq2' ?. subst.
+          apply existT_inj in Heq1' as ->.
+          apply existT_inj in Heq2' as ->.
           rewrite ty_lfts_unfold; simpl.
           set_solver.
       }
+
       rewrite -{1}lft_tok_sep. iDestruct "Htok" as "(Htok1 & Htok2)".
       iMod (bor_exists_tok with "LFT Hb Htok1") as "(%r'' & Hb & Htok1)"; first done.
       iMod (bor_exists_tok with "LFT Hb Htok1") as "(%ly' & Hb & Htok1)"; first done.
@@ -392,9 +533,7 @@ Section structs.
       - iApply logical_step_fupd.
         iApply (logical_step_wand with "Hb"). iIntros "(? & Htok)".
         iMod ("Hvs" with "Htok").
-        iFrame. iModIntro. simpl.
-        by iExists _.
-    }
+        by iFrame "∗%". }
     iPoseProof (logical_step_big_sepL2 with "Hb") as "Hb".
     iModIntro. iApply (logical_step_wand with "Hb"). iIntros "Hb".
     iPoseProof (big_sepL2_sep_sepL_r with "Hb") as "(Hb & Htok)".
@@ -408,8 +547,10 @@ Section structs.
     iIntros (rts sls tys κ κ' π r m l) "#Hincl (%sl & -> & %Hsl & %Hlen & %Hly & Hlb & Hb)".
     iExists sl. do 4 iR. iFrame.
     iApply (big_sepL_wand with "Hb"). iApply big_sepL_intro.
-    iModIntro. iIntros (k [rt [ty r']] Hlook).
-    iIntros "(%r'' & %ly & ? & ? & ? & ? & Hb)".
+    iModIntro. iIntros (k mem Hlook).
+    iIntros  "(%ty & %mst & %Hpad & %r'' & %ly & ? & ? & ? & ? & Hb)".
+    destruct ty as [rt [ty r']].
+    iExists _, _. iR. 
     iExists _, _. iFrame.
     iApply (ty_shr_mono with "Hincl Hb").
   Qed.

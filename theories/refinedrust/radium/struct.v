@@ -12,12 +12,14 @@ Definition field_members (s : field_list) : list (var_name * layout) :=
 Definition field_names (s : field_list) : list var_name := omap fst s.
 Definition offset_of_idx (s : field_list) (i : nat) : nat :=
   sum_list (take i (ly_size <$> s.*2)).
+(* Index of the given field in the list of fields, including padding *)
 Definition index_of (s : field_list) (n : var_name) : option nat :=
   fst <$> list_find (λ x, x.1 = Some n) s.
 Definition offset_of (s : field_list) (n : var_name) : option nat :=
   (λ idx, offset_of_idx s idx) <$> index_of s n.
 Definition field_idx_of_idx (s : field_list) (i : nat) : nat :=
   length (field_names (take i s)).
+(* Index of the given field in the list of fields, not counting padding fields *)
 Fixpoint field_index_of (s : field_list) (n : var_name) : option nat :=
   match s with
   | [] => None
