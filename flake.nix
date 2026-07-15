@@ -9,6 +9,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    ACE-RISCV = {
+      url = "github:IBM/ACE-RISCV?ref=refinedrust-main";
+      flake = false;
+    };
+
     SMTCoq = {
       url = "github:SMTCoq/SMTCoq";
       inputs = {
@@ -31,6 +36,7 @@
 
   outputs =
     inputs@{
+      ACE-RISCV,
       crane,
       creusot,
       flake-parts,
@@ -362,7 +368,12 @@
                 inherit channel;
 
                 build = self.lib.rust.mkToolchain pkgs channel components;
-                dev = self.lib.rust.mkToolchain pkgs channel (components ++ devComponents);
+                dev = pkgs.rust-bin.fromRustupToolchain {
+                  inherit channel;
+                  components = components ++ devComponents;
+                  profile = "minimal";
+                  targets = [ "riscv64gc-unknown-none-elf" ];
+                };
               };
 
               envBuilder = self.lib.rust.overrideToolchain pkgs toolchain.build;
@@ -511,10 +522,15 @@
               devcontainer =
                 let
                   cargoVendorDir = rust.envBuilder.vendorMultipleCargoDeps {
-                    inherit (rust.envBuilder.findCargoFiles ./rr_frontend) cargoConfigs;
+                    cargoConfigs =
+                      (rust.envBuilder.findCargoFiles ./rr_frontend).cargoConfigs
+                      ++ (rust.envBuilder.findCargoFiles "${ACE-RISCV}/security-monitor").cargoConfigs;
 
                     cargoLockList = [
                       ./rr_frontend/Cargo.lock
+                      ./stdlib/num/Cargo.lock
+                      ./stdlib/spin/Cargo.lock
+                      "${ACE-RISCV}/security-monitor/Cargo.lock"
                       "${rust.toolchain.dev.availableComponents.rust-src}/lib/rustlib/src/rust/library/Cargo.lock"
                     ];
                   };
@@ -522,6 +538,8 @@
                 self.lib.mkDevContainer pkgs [
                   pkgs.gcc
                   pkgs.gnumake
+                  pkgs.libclang.lib
+                  pkgs.pkgsCross.riscv64.stdenv.cc
                   rust.toolchain.dev
                   cargoVendorDir
                   (self.lib.mkDuneWrapper pkgs packages.refinedrust-smtcoq)

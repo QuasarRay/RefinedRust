@@ -1,5 +1,22 @@
 {
   "nodes": {
+    "ACE-RISCV": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1784044216,
+        "narHash": "sha256-KZq61yc4zMNl6WuhdC65r4aoI7E2cDjGSdJebijoZZw=",
+        "owner": "IBM",
+        "repo": "ACE-RISCV",
+        "rev": "c1a441637efe3329d68b5b8e9d2964687116f528",
+        "type": "github"
+      },
+      "original": {
+        "owner": "IBM",
+        "ref": "refinedrust-main",
+        "repo": "ACE-RISCV",
+        "type": "github"
+      }
+    },
     "SMTCoq": {
       "inputs": {
         "flake-parts": [
@@ -192,6 +209,7 @@
     },
     "root": {
       "inputs": {
+        "ACE-RISCV": "ACE-RISCV",
         "SMTCoq": "SMTCoq",
         "crane": "crane",
         "creusot": "creusot",

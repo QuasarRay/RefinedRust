@@ -38,7 +38,11 @@ pkgs.dockerTools.buildLayeredImage {
     Env = [
       "HOME=/root"
       "USER=root"
+      "CROSS_COMPILE=${pkgs.pkgsCross.riscv64.stdenv.cc.targetPrefix}"
+      "GENFLAGS=-std=gnu17"
+      "LIBCLANG_PATH=${pkgs.lib.makeLibraryPath [ pkgs.libclang.lib ]}"
       "OCAMLPATH=/lib/ocaml/${pkgs.rocqPackages.rocq-core.ocamlPackages.ocaml.version}/site-lib"
+      "RISCV_GNU_TOOLCHAIN_WORK_DIR=${pkgs.pkgsCross.riscv64.stdenv.cc}"
       "ROCQPATH=/lib/coq/${pkgs.rocqPackages.rocq-core.rocq-version}/user-contrib"
       "VSCODE_SERVER_CUSTOM_GLIBC_LINKER=${pkgs.stdenv.cc.bintools.dynamicLinker}"
       "VSCODE_SERVER_CUSTOM_GLIBC_PATH=${pkgs.glibc.outPath}/lib:${pkgs.libgcc.lib.outPath}/lib"
