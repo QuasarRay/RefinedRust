@@ -15,6 +15,8 @@ let
     pkgs.python3
     pkgs.rocqPackages.vsrocq-language-server
     pkgs.tokei
+    pkgs.vim
+    pkgs.hyperfine
     pkgs.vscode-extensions.rocq-prover.vsrocq
     rustAnalyzerExtension
   ];
@@ -22,7 +24,6 @@ in
 pkgs.dockerTools.buildLayeredImage {
   name = "refinedrust-devcontainer";
   tag = "latest";
-
   contents = [
     os-release
     pkgs.bash
@@ -43,6 +44,7 @@ pkgs.dockerTools.buildLayeredImage {
       "LIBCLANG_PATH=${pkgs.lib.makeLibraryPath [ pkgs.libclang.lib ]}"
       "OCAMLPATH=/lib/ocaml/${pkgs.rocqPackages.rocq-core.ocamlPackages.ocaml.version}/site-lib"
       "RISCV_GNU_TOOLCHAIN_WORK_DIR=${pkgs.pkgsCross.riscv64.stdenv.cc}"
+      "DUNE_DIR_LOCATIONS=why3find:lib:/share/why3find/"
       "ROCQPATH=/lib/coq/${pkgs.rocqPackages.rocq-core.rocq-version}/user-contrib"
       "VSCODE_SERVER_CUSTOM_GLIBC_LINKER=${pkgs.stdenv.cc.bintools.dynamicLinker}"
       "VSCODE_SERVER_CUSTOM_GLIBC_PATH=${pkgs.glibc.outPath}/lib:${pkgs.libgcc.lib.outPath}/lib"

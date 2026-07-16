@@ -544,6 +544,7 @@
                   cargoVendorDir
                   (self.lib.mkDuneWrapper pkgs packages.refinedrust-smtcoq)
                   (pkgs.creusot.mkWhy3Framework { isFree = false; })
+		  pkgs.creusot.prelude
                 ] rust.toolchain.dev;
             }
             // lib.fix (f: self.lib.mapToAttrs mkStdlib (stdlib f));
