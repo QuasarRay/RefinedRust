@@ -424,6 +424,41 @@
                 );
             in
             {
+              opensbi = pkgs.pkgsCross.riscv64.opensbi.overrideAttrs (prev: rec {
+                version = "92e8affb31b21ddc5d1193cf754ce644db7b460a";
+
+                nativeBuildInputs = (prev.nativeBuildInputs or [ ]) ++ [ pkgs.coreutils ];
+
+                src = pkgs.fetchFromGitHub {
+                  owner = "riscv-software-src";
+                  repo = "opensbi";
+                  rev = version;
+                  hash = "sha256-82DE+lLeaUdscl5sH/KZDr91s8rEsy+/WVsrr3vI+SM=";
+                };
+
+                postPatch = (prev.postPatch or "") + ''
+                  substituteInPlace Makefile \
+                    --replace-fail \
+                      "-g -Wall -Werror -ffreestanding" \
+                      "-std=gnu17 -g -Wall -Werror -ffreestanding"
+                '';
+
+                makeFlags = [
+                  "PLATFORM=generic"
+                  "PLATFORM_RISCV_ABI=lp64d"
+                  "PLATFORM_RISCV_ISA=rv64gc"
+                  "PLATFORM_RISCV_XLEN=64"
+                  "CROSS_COMPILE=riscv64-unknown-linux-gnu-"
+                  "READLINK=${pkgs.coreutils}/bin/readlink"
+                ];
+
+                installFlags = [ "I=$(out)/opensbi-rust-bindings" ];
+
+                postInstall = ''
+                  ln -s $out/opensbi-rust-bindings/{lib64,lib}
+                '';
+              });
+
               refinedrust = pkgs.rocqPackages.mkRocqDerivation {
                 inherit meta version;
 
@@ -532,6 +567,7 @@
                       ./stdlib/spin/Cargo.lock
                       "${ACE-RISCV}/security-monitor/Cargo.lock"
                       "${rust.toolchain.dev.availableComponents.rust-src}/lib/rustlib/src/rust/library/Cargo.lock"
+                      "${rust.toolchain.dev.availableComponents.rustc-dev}/lib/rustlib/rustc-src/rust/Cargo.lock"
                     ];
                   };
                 in
@@ -540,12 +576,13 @@
                   pkgs.gnumake
                   pkgs.libclang.lib
                   pkgs.pkgsCross.riscv64.stdenv.cc
+                  packages.opensbi
                   rust.toolchain.dev
                   cargoVendorDir
                   (self.lib.mkDuneWrapper pkgs packages.refinedrust-smtcoq)
                   (pkgs.creusot.mkWhy3Framework { isFree = false; })
-		  pkgs.creusot.prelude
-                ] rust.toolchain.dev;
+                  pkgs.creusot.prelude
+                ] rust.toolchain.dev [ "INSTALL_DIR=${packages.opensbi}" ];
             }
             // lib.fix (f: self.lib.mapToAttrs mkStdlib (stdlib f));
 

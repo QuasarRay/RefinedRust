@@ -1,4 +1,4 @@
-pkgs: drvs: rustAnalyzer:
+pkgs: drvs: rustAnalyzer: extraEnv:
 
 let
   rustAnalyzerExtension = pkgs.vscode-extensions.rust-lang.rust-analyzer.override {
@@ -49,7 +49,8 @@ pkgs.dockerTools.buildLayeredImage {
       "VSCODE_SERVER_CUSTOM_GLIBC_LINKER=${pkgs.stdenv.cc.bintools.dynamicLinker}"
       "VSCODE_SERVER_CUSTOM_GLIBC_PATH=${pkgs.glibc.outPath}/lib:${pkgs.libgcc.lib.outPath}/lib"
       "VSCODE_SERVER_PATCHELF_PATH=${pkgs.patchelf.outPath}/bin/patchelf"
-    ];
+    ]
+    ++ extraEnv;
   };
 
   enableFakechroot = true;
