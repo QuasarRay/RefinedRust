@@ -1,6 +1,7 @@
 {
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-26.05";
+    nixpkgs-unstable.url = "nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
 
     crane.url = "github:ipetkov/crane";
@@ -41,6 +42,7 @@
       creusot,
       flake-parts,
       nixpkgs,
+      nixpkgs-unstable,
       rust-overlay,
       self,
       SMTCoq,
@@ -335,10 +337,21 @@
         overlays = {
           deps = import ./nix/deps pins;
 
+          dune = final: prev: {
+            dune_3 = nixpkgs-unstable.legacyPackages.${final.stdenv.hostPlatform.system}.dune_3;
+            rocqPackages = prev.rocqPackages.overrideScope (
+              _final: rocqPrev: {
+                inherit (final) dune_3;
+                mkRocqDerivation = rocqPrev.mkRocqDerivation.override { dune = final.dune_3; };
+              }
+            );
+          };
+
           default = nixpkgs.lib.composeManyExtensions [
             rust-overlay.overlays.default
             creusot.overlays.default
             SMTCoq.overlays.default
+            self.overlays.dune
             self.overlays.deps
           ];
         };
