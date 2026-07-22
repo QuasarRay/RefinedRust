@@ -337,6 +337,12 @@
         overlays = {
           deps = import ./nix/deps pins;
 
+          ocaml = _final: prev: {
+            ocamlPackages = prev.ocaml-ng.ocamlPackages_4_14.overrideScope (_: prev: {
+              ocaml = prev.ocaml.override { flambdaSupport = true; };
+            });
+          };
+
           dune = final: prev: {
             dune_3 = nixpkgs-unstable.legacyPackages.${final.stdenv.hostPlatform.system}.dune_3;
             rocqPackages = prev.rocqPackages.overrideScope (
@@ -351,6 +357,7 @@
             rust-overlay.overlays.default
             creusot.overlays.default
             SMTCoq.overlays.default
+            self.overlays.ocaml
             self.overlays.dune
             self.overlays.deps
           ];
