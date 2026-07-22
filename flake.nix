@@ -551,7 +551,7 @@
                         pkgs.gcc
                         packages.frontend
                         toolchain
-                        (self.lib.mkDuneWrapper pkgs packages.stdlib)
+                        (self.lib.mkDuneWrapper pkgs [ packages.stdlib ])
                       ];
 
                       nativeBuildInputs = [ pkgs.makeWrapper ];
@@ -575,6 +575,11 @@
 
               devcontainer =
                 let
+                  localTheoryPackages = [
+                    packages.refinedrust
+                    packages.refinedrust-smtcoq
+                  ];
+
                   cargoVendorDir = rust.envBuilder.vendorMultipleCargoDeps {
                     cargoConfigs =
                       (rust.envBuilder.findCargoFiles ./rr_frontend).cargoConfigs
@@ -598,7 +603,11 @@
                   packages.opensbi
                   rust.toolchain.dev
                   cargoVendorDir
-                  (self.lib.mkDuneWrapper pkgs packages.refinedrust-smtcoq)
+                  (self.lib.mkDuneWrapper pkgs (
+                    pkgs.lib.filter (drv: ! builtins.elem drv localTheoryPackages) (
+                      pkgs.lib.concatMap (drv: drv.propagatedBuildInputs) localTheoryPackages
+                    )
+                  ))
                   (pkgs.creusot.mkWhy3Framework { isFree = false; })
                   pkgs.creusot.prelude
                 ] rust.toolchain.dev [ "INSTALL_DIR=${packages.opensbi}" ];
