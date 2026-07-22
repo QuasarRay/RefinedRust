@@ -344,11 +344,10 @@
           };
 
           dune = final: prev: {
-            dune_3 = nixpkgs-unstable.legacyPackages.${final.stdenv.hostPlatform.system}.dune_3;
             rocqPackages = prev.rocqPackages.overrideScope (
-              _final: rocqPrev: {
-                inherit (final) dune_3;
-                mkRocqDerivation = rocqPrev.mkRocqDerivation.override { dune = final.dune_3; };
+              rocqFinal: rocqPrev: {
+                dune_3 = nixpkgs-unstable.legacyPackages.${final.stdenv.hostPlatform.system}.dune_3;
+                mkRocqDerivation = rocqPrev.mkRocqDerivation.override { dune = rocqFinal.dune_3; };
               }
             );
           };
