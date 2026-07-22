@@ -338,9 +338,11 @@
           deps = import ./nix/deps pins;
 
           ocaml = _final: prev: {
-            ocamlPackages = prev.ocaml-ng.ocamlPackages_4_14.overrideScope (_: prev: {
-              ocaml = prev.ocaml.override { flambdaSupport = true; };
-            });
+            ocamlPackages = prev.ocaml-ng.ocamlPackages_4_14.overrideScope (
+              _: prev: {
+                ocaml = prev.ocaml.override { flambdaSupport = true; };
+              }
+            );
           };
 
           dune = final: prev: {
@@ -604,7 +606,7 @@
                   rust.toolchain.dev
                   cargoVendorDir
                   (self.lib.mkDuneWrapper pkgs (
-                    pkgs.lib.filter (drv: ! builtins.elem drv localTheoryPackages) (
+                    pkgs.lib.filter (drv: !builtins.elem drv localTheoryPackages) (
                       pkgs.lib.concatMap (drv: drv.propagatedBuildInputs) localTheoryPackages
                     )
                   ))
