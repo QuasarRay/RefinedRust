@@ -348,7 +348,20 @@
             rocqPackages = prev.rocqPackages.overrideScope (
               rocqFinal: rocqPrev: {
                 dune_3 = nixpkgs-unstable.legacyPackages.${final.stdenv.hostPlatform.system}.dune_3;
-                rocq-core = rocqPrev.rocq-core.override { dune = rocqFinal.dune_3; };
+                ocamlPackages = rocqPrev.rocq-core.ocamlPackages.overrideScope (
+                  _ocamlFinal: _ocamlPrev: {
+                    dune_3 = rocqFinal.dune_3;
+                  }
+                );
+                rocq-core = rocqPrev.rocq-core.override {
+                  dune = rocqFinal.dune_3;
+                  customOCamlPackages = rocqFinal.ocamlPackages;
+                };
+                coq = prev.coq.override {
+                  dune = rocqFinal.dune_3;
+                  customOCamlPackages = rocqFinal.ocamlPackages;
+                  rocqPackages = rocqFinal;
+                };
                 mkRocqDerivation = rocqPrev.mkRocqDerivation.override { dune = rocqFinal.dune_3; };
               }
             );
