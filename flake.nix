@@ -53,7 +53,6 @@
       version = "0.1.0";
 
       meta = {
-        homepage = "https://gitlab.mpi-sws.org/lgaeher/refinedrust-dev";
         license = nixpkgs.lib.licenses.bsd3;
       };
 

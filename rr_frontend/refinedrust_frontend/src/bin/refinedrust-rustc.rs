@@ -16,7 +16,7 @@ use log::{debug, info};
 use rr_rustc_interface::middle::{ty, util};
 use rr_rustc_interface::{driver, interface, session, span};
 
-const BUG_REPORT_URL: &str = "https://gitlab.mpi-sws.org/lgaeher/refinedrust-dev/-/issues/new";
+const BUG_REPORT_URL: &str = "anonymized";
 
 /// Callbacks for the `RefinedRust` frontend.
 struct RRCompilerCalls;
