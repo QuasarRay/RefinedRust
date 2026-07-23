@@ -50,7 +50,7 @@ Section Formatter_sls.
 End Formatter_sls.
 
 Section code.
-Context `{RRGS : !refinedrustGS Σ}.
+Context `{!LayoutAlg}.
 Open Scope printing_sugar.
 
 Program Definition ResultTEasstd_clone_Clone_clone_def (Clone_E_clone_loc: loc) (Clone_T_clone_loc: loc) (T_st: syn_type) (E_st: syn_type) : function :=

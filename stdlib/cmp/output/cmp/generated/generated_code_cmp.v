@@ -36,7 +36,7 @@ Section Ordering_els.
 End Ordering_els.
 
 Section code.
-Context `{RRGS : !refinedrustGS Σ}.
+Context `{!LayoutAlg}.
 Open Scope printing_sugar.
 
 Program Definition Eq_assert_fields_are_eq_def (Self_st: syn_type) : function :=

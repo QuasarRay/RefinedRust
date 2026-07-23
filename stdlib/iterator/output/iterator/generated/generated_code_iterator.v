@@ -52,7 +52,7 @@ Section adapters_take_Take_sls.
 End adapters_take_Take_sls.
 
 Section code.
-Context `{RRGS : !refinedrustGS Σ}.
+Context `{!LayoutAlg}.
 Open Scope printing_sugar.
 
 Program Definition Iastraits_iterator_IntoIterator_into_iter_def (I_st: syn_type) (traits_iterator_Iterator_I_Item_st: syn_type) : function :=

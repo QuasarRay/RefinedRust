@@ -26,7 +26,7 @@ Section unique_Unique_sls.
 End unique_Unique_sls.
 
 Section code.
-Context `{RRGS : !refinedrustGS Σ}.
+Context `{!LayoutAlg}.
 Open Scope printing_sugar.
 
 Program Definition nonnull_NonNullTasstd_clone_Clone_clone_def (T_st: syn_type) : function :=

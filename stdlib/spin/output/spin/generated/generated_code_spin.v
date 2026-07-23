@@ -56,7 +56,7 @@ Section rwlock_RwLockWriteGuard_sls.
 End rwlock_RwLockWriteGuard_sls.
 
 Section code.
-Context `{RRGS : !refinedrustGS Σ}.
+Context `{!LayoutAlg}.
 Open Scope printing_sugar.
 
 Program Definition drop_glue_rwlock_RwLockWriteGuard_def (DropGlue_R_drop_glue_loc: loc) (T_st: syn_type) (R_st: syn_type) : function :=

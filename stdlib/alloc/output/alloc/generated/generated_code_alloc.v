@@ -33,7 +33,7 @@ Section layout_Layout_sls.
 End layout_Layout_sls.
 
 Section code.
-Context `{RRGS : !refinedrustGS Σ}.
+Context `{!LayoutAlg}.
 Open Scope printing_sugar.
 
 Program Definition layout_Layout_align_def (alignment_Alignment_as_usize_loc: loc) : function :=

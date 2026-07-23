@@ -475,7 +475,7 @@ Section alignment_Alignment_sls.
 End alignment_Alignment_sls.
 
 Section code.
-Context `{RRGS : !refinedrustGS Σ}.
+Context `{!LayoutAlg}.
 Open Scope printing_sugar.
 
 Program Definition alignment_AlignmentEnumasstd_clone_Clone_clone_def  : function :=

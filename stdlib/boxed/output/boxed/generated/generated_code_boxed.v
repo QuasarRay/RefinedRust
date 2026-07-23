@@ -19,7 +19,7 @@ Section Box_sls.
 End Box_sls.
 
 Section code.
-Context `{RRGS : !refinedrustGS Σ}.
+Context `{!LayoutAlg}.
 Open Scope printing_sugar.
 
 Program Definition Box_TA_from_raw_in_def (unique_Unique_T_new_unchecked_T_loc: loc) (T_st: syn_type) (A_st: syn_type) : function :=

@@ -31,7 +31,7 @@ Section Option_els.
 End Option_els.
 
 Section code.
-Context `{RRGS : !refinedrustGS Σ}.
+Context `{!LayoutAlg}.
 Open Scope printing_sugar.
 
 Program Definition OptionTasstd_clone_Clone_clone_def (Clone_T_clone_loc: loc) (T_st: syn_type) : function :=

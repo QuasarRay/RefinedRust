@@ -2,7 +2,7 @@ From radium Require Import lang notation.
 From refinedrust Require Import typing shims.
 From rrstd.sized.sized.generated Require Export generated_specs_sized.
 Section code.
-Context `{RRGS : !refinedrustGS Σ}.
+Context `{!LayoutAlg}.
 Open Scope printing_sugar.
 
 Program Definition Clone_clone_from_def (Clone_Self_clone_loc: loc) (DropGlue_Self_drop_glue_loc: loc) (Self_st: syn_type) : function :=

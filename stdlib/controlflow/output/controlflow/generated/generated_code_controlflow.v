@@ -43,7 +43,7 @@ Section ControlFlow_els.
 End ControlFlow_els.
 
 Section code.
-Context `{RRGS : !refinedrustGS Σ}.
+Context `{!LayoutAlg}.
 Open Scope printing_sugar.
 
 Program Definition ControlFlowBCasFromResidualControlFlowBconvert_Infallible_from_residual_def (B_st: syn_type) (C_st: syn_type) : function :=
