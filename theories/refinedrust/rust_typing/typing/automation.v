@@ -1365,11 +1365,35 @@ Lemma ty_wf_E_unfold_lem `{!typeGS Σ} {rt} (ty : type rt) :
 Proof. rewrite ty_wf_E_unfold. done. Qed.
 
 (** Enum-related tactic calls *)
+Ltac destruct_match_scrutinees_in H :=
+  repeat lazymatch type of H with
+  | context [match ?x with _ => _ end] =>
+      is_var x;
+      destruct x;
+      simpl in H |- *
+  end.
+
+Ltac destruct_match_scrutinees :=
+  repeat lazymatch goal with
+  | |- context [match ?x with _ => _ end] =>
+      is_var x;
+      destruct x;
+      simpl
+  end.
+
 Ltac solve_mk_enum_tag_consistent :=
   simpl; intro_adt_params;
-  intros [] ? [=<-]; eexists _; done.
+  let r := fresh "r" in
+  let variant := fresh "variant" in
+  let Htag := fresh "Htag" in
+  intros r variant Htag;
+  destruct r;
+  destruct_match_scrutinees_in Htag;
+  try discriminate Htag;
+  inversion Htag; subst; eexists _; done.
 
-Ltac enum_contractive_solve_eq := intros; simpl; done.
+Ltac enum_contractive_solve_eq :=
+  intros; simpl; destruct_match_scrutinees; done.
 Ltac enum_contractive_solve_dist :=
     repeat match goal with
     | |- ∀ (_ : type _), _ => intros ?
@@ -1388,7 +1412,7 @@ Ltac enum_contractive_solve_dist :=
         lazymatch P with
         | ?F _ =>
             eapply (type_contractive_dist _ _ (λ ty, enum_ty (F ty) r));
-            [ destruct r; simpl; apply _
+            [ destruct r; unfold enum_ty; simpl; destruct_match_scrutinees; simpl; apply _
             | first [apply _ | done ] ]
         end
     | Hdist : TypeDistLater2 ?n ?ty ?ty' |-
@@ -1397,7 +1421,7 @@ Ltac enum_contractive_solve_dist :=
         lazymatch P with
         | ?F _ =>
             eapply (type_contractive_dist2 _ _ (λ ty, enum_ty (F ty) r));
-            [ destruct r; simpl; apply _
+            [ destruct r; unfold enum_ty; simpl; destruct_match_scrutinees; simpl; apply _
             | first [apply _ | done ] ]
         end
     end.
