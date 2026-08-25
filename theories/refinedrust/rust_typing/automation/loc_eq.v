@@ -31,7 +31,7 @@ Ltac simplify_layout_goal_noshelve :=
   unshelve simplify_layout_goal;
   [ normalize_aggressively; solve_goal.. | ].
 
-(** Turns an equality over locations into an equality over physical addresses
+(** Turns an equality over locations into an equality over numerical addresses
 (in type [Z]) that has been simplified with [autorewrite]. This tactics only
 succeeds if the compared locations have convertible allocation ids. *)
 Ltac prepare_loc_eq :=

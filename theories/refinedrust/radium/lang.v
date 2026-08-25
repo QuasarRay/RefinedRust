@@ -1,7 +1,7 @@
 From iris.program_logic Require Export language ectx_language ectxi_language.
 From stdpp Require Export strings.
 From stdpp Require Import gmap list.
-From radium Require Export base byte layout int_type loc val heap struct enum validity.
+From radium Require Export base byte layout int_type loc val heap struct enum validity events.
 Set Default Proof Using "Type".
 
 (** * Definition of the language *)
@@ -108,7 +108,6 @@ Record function := {
   f_args_nodup : NoDup f_args.*1;
 }.
 
-Definition thread_id := nat.
 Record call_frame := {
   cf_locals : gmap var_name (loc * layout);
 }.
@@ -556,7 +555,7 @@ Inductive check_un_op : un_op → op_type → val → bool → Prop :=
 
 (*** Evaluation of Expressions *)
 
-Inductive expr_step : expr → thread_id → state → list Empty_set → runtime_expr → state → list runtime_expr → Prop :=
+Inductive expr_step : expr → thread_id → state → list radium_event → runtime_expr → state → list runtime_expr → Prop :=
 | SkipES v σ π:
     expr_step (SkipE (Val v)) π σ [] (RTVal v) σ []
 | UnOpS op v σ π v' ot:
@@ -660,7 +659,7 @@ comparing pointers? (see lambda rust) *)
 Section configured_language.
 Context `{RC : RadiumConfig}.
 
-Inductive stmt_step : stmt → thread_id → function → state → list Empty_set → runtime_expr → state → list runtime_expr → Prop :=
+Inductive stmt_step : stmt → thread_id → function → state → list radium_event → runtime_expr → state → list runtime_expr → Prop :=
 | CallS π caller lsa σ hs' ts ts' vf vs f fn a destination normal unwind:
     val_to_loc vf = Some f →
     f = fn_loc a →
@@ -775,7 +774,7 @@ Inductive stmt_step : stmt → thread_id → function → state → list Empty_s
 .
 
 (*** Evaluation of runtime_expr *)
-Inductive runtime_step (config : RadiumConfig) : runtime_expr → state → list Empty_set → runtime_expr → state → list runtime_expr → Prop :=
+Inductive runtime_step (config : RadiumConfig) : runtime_expr → state → list radium_event → runtime_expr → state → list runtime_expr → Prop :=
 | ExprStep e π σ κs e' σ' efs:
     expr_step e π σ κs e' σ' efs →
     runtime_step config (to_rtexpr π e) σ κs e' σ' efs

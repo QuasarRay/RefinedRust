@@ -9,7 +9,7 @@ Declare Scope loc_scope.
 Delimit Scope loc_scope with L.
 Global Open Scope loc_scope.
 
-(** Physical address. *)
+(** Numerical address. *)
 Abbreviation addr := Z (only parsing).
 
 (** Allocation identifier (unique to an allocation), see [heap.v]. *)
