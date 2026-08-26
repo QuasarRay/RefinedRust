@@ -8,8 +8,12 @@ Definition string_to_varname (s : string) : var_name := s.
 Coercion string_to_varname : string >-> var_name.
 Coercion it_layout : int_type >-> layout.
 Notation "☠" := MPoison : val_scope.
-Notation "!{ ot , o } e" := (Deref o ot e%E) (at level 9, format "!{ ot ,  o } e") : expr_scope.
-Notation "!{ ot } e" := (Deref Na1Ord ot e%E) (at level 9, format "!{ ot } e") : expr_scope.
+Notation "!{ ot , o , desc } e" := (Deref desc o ot e%E)
+  (at level 9, format "!{ ot ,  o ,  desc } e") : expr_scope.
+Notation "!{ ot , o } e" := (Deref normal_nonatomic_access o ot e%E)
+  (at level 9, format "!{ ot ,  o } e") : expr_scope.
+Notation "!{ ot } e" := (Deref normal_nonatomic_access Na1Ord ot e%E)
+  (at level 9, format "!{ ot } e") : expr_scope.
 (* − is a unicode minus, not the normal minus to prevent parsing conflicts *)
 Notation "'−' '{' ot } e" := (UnOp NegOp ot e%E)
   (at level 40, format "'−' '{' ot }  e") : expr_scope.
@@ -138,26 +142,38 @@ Global Typeclasses Opaque LocalDeadSt.
 Notation "'local_dead' x ';' s" := (LocalDeadSt x s%E) (at level 80, s at level 200, format "'[v' 'local_dead'  x ';' '/' s ']'") : expr_scope.
 
 (** This has a skip in order to facilitate unblocking. *)
-Definition Use (o : order) (ot : op_type) (e : expr) := Deref o ot (SkipE e).
+Definition Use (desc : memory_access_desc) (o : order) (ot : op_type) (e : expr) :=
+  Deref desc o ot (SkipE e).
 
 Definition Copy := Use.
-Notation "'copy{' ot , o } e" := (Copy o ot e%E) (at level 9, format "'copy{' ot ,  o }  e") : expr_scope.
-Notation "'copy{' ot } e" := (Copy Na1Ord ot e%E) (at level 9, format "'copy{' ot }  e") : expr_scope.
+Notation "'copy{' ot , o , desc } e" := (Copy desc o ot e%E)
+  (at level 9, format "'copy{' ot ,  o ,  desc }  e") : expr_scope.
+Notation "'copy{' ot , o } e" := (Copy normal_nonatomic_access o ot e%E)
+  (at level 9, format "'copy{' ot ,  o }  e") : expr_scope.
+Notation "'copy{' ot } e" := (Copy normal_nonatomic_access Na1Ord ot e%E)
+  (at level 9, format "'copy{' ot }  e") : expr_scope.
 Arguments Copy : simpl never.
 Global Typeclasses Opaque Copy.
 
 Definition Move := Use.
-Notation "'move{' ot , o } e" := (Move o ot e%E) (at level 9, format "'move{' ot ,  o }  e") : expr_scope.
-Notation "'move{' ot } e" := (Move Na1Ord ot e%E) (at level 9, format "'move{' ot }  e") : expr_scope.
+Notation "'move{' ot , o , desc } e" := (Move desc o ot e%E)
+  (at level 9, format "'move{' ot ,  o ,  desc }  e") : expr_scope.
+Notation "'move{' ot , o } e" := (Move normal_nonatomic_access o ot e%E)
+  (at level 9, format "'move{' ot ,  o }  e") : expr_scope.
+Notation "'move{' ot } e" := (Move normal_nonatomic_access Na1Ord ot e%E)
+  (at level 9, format "'move{' ot }  e") : expr_scope.
 Arguments Move : simpl never.
 Global Typeclasses Opaque Move.
 
 (* These skips provide logical steps for unblocking and preparing the write. *)
-Definition AssignSE o ot e1 e2 s := Assign o ot (SkipE (SkipE e1)) e2 s.
+Definition AssignSE desc o ot e1 e2 s :=
+  Assign desc o ot (SkipE (SkipE e1)) e2 s.
 (* The unicode ← is already part of the notation "_ ← _; _" for bind. *)
-Notation "e1 <-{ ot , o } e2 ; s" := (AssignSE o ot e1%E e2%E s%E)
+Notation "e1 <-{ ot , o , desc } e2 ; s" := (AssignSE desc o ot e1%E e2%E s%E)
+  (at level 80, s at level 200, format "'[v' e1  '<-{' ot ',' o ',' desc '}'  e2 ';' '/' s ']'") : expr_scope.
+Notation "e1 <-{ ot , o } e2 ; s" := (AssignSE normal_nonatomic_access o ot e1%E e2%E s%E)
   (at level 80, s at level 200, format "'[v' e1  '<-{' ot ',' o '}'  e2 ';' '/' s ']'") : expr_scope.
-Notation "e1 <-{ ot } e2 ; s" := (AssignSE Na1Ord ot e1%E e2%E s%E)
+Notation "e1 <-{ ot } e2 ; s" := (AssignSE normal_nonatomic_access Na1Ord ot e1%E e2%E s%E)
   (at level 80, s at level 200, format "'[v' e1  '<-{' ot '}'  e2 ';' '/' s ']'") : expr_scope.
 Arguments AssignSE : simpl never.
 Global Typeclasses Opaque AssignSE.
@@ -318,7 +334,7 @@ Global Typeclasses Opaque EnumInit.
 Arguments EnumInit : simpl never.
 
 Definition EnumDiscriminant `{!LayoutAlg} (els : enum_layout_spec) (e : expr) : expr :=
-  (Use Na1Ord (IntOp (els.(els_tag_it))) e)%E.
+  (Use normal_nonatomic_access Na1Ord (IntOp (els.(els_tag_it))) e)%E.
 Global Typeclasses Opaque EnumDiscriminant.
 Arguments EnumDiscriminant : simpl never.
 
@@ -375,10 +391,15 @@ Abbreviation zst_val := ([] : val).
 (*** Tests *)
 Example test1 (l : loc) ly ot :
   (l <-{ly} copy{ot}(&raw{Mut} l +{PtrOp, IntOp USize} (l ={PtrOp, PtrOp, I32} l)); l <-{ly, ScOrd} l; Goto "a")%E =
-  (AssignSE Na1Ord ly l (Copy Na1Ord ot (BinOp AddOp PtrOp (IntOp USize) (Raw PRaw Mut l) (BinOp (EqOp I32) PtrOp PtrOp l l))))
-      ((AssignSE ScOrd ly l l) (Goto "a")).
+  (AssignSE normal_nonatomic_access Na1Ord ly l
+    (Copy normal_nonatomic_access Na1Ord ot
+      (BinOp AddOp PtrOp (IntOp USize) (Raw PRaw Mut l)
+        (BinOp (EqOp I32) PtrOp PtrOp l l))))
+      ((AssignSE normal_nonatomic_access ScOrd ly l l) (Goto "a")).
 Proof. simpl. reflexivity. Abort.
 
 Example test_get_member `{!LayoutAlg} (l : loc) (sls : struct_layout_spec) ot :
-  (!{ot} (!{ot, ScOrd} l) at{sls} "a")%E = GetMember (Deref Na1Ord ot (Deref ScOrd ot l%E)) sls "a".
+  (!{ot} (!{ot, ScOrd} l) at{sls} "a")%E =
+    GetMember (Deref normal_nonatomic_access Na1Ord ot
+      (Deref normal_nonatomic_access ScOrd ot l%E)) sls "a".
 Proof. simpl. reflexivity. Abort.

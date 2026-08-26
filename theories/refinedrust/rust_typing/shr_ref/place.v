@@ -8,7 +8,9 @@ From refinedrust Require Import options.
 Section place.
   Context `{!typeGS Σ}.
 
-  Lemma typed_place_shr_owned {rto} f κ (lt2 : ltype rto) P E L l r bmin0 (T : place_cont_t (place_rfn rto) bmin0) :
+  Lemma typed_place_shr_owned {rto} f κ (lt2 : ltype rto) P E L l r bmin0 desc
+    `{Hnonatomic : !TCDone (desc.(access_atomicity) = NonAtomicAccess)}
+    (T : place_cont_t (place_rfn rto) bmin0) :
    introduce_with_hooks E L (£1) (λ L1,
      ∀ l', typed_place E L1 f l' lt2 r bmin0 (Shared κ) P
         (λ L' κs l2 b2 bmin rti tyli ri updcx,
@@ -22,7 +24,8 @@ Section place.
             (upd').(pupd_performed)
             (opt_place_update_eq_lift place_rfnRT (upd').(pupd_eq_1))
             (opt_place_update_eq_lift place_rfnRT (upd').(pupd_eq_2)))))))
-    ⊢ typed_place E L f l (ShrLtype lt2 κ) (#r) bmin0 (Owned) (DerefPCtx Na1Ord RefOp :: P) T.
+    ⊢ typed_place E L f l (ShrLtype lt2 κ) (#r) bmin0 (Owned)
+      (DerefPCtx desc Na1Ord RefOp :: P) T.
   Proof.
     iIntros "HR" (Φ F ??).
     iIntros "#(LFT & LLCTX) #HE HL Hf HP HΦ/=".
@@ -31,10 +34,13 @@ Section place.
     iMod "Hb" as "(%l' & (%vi & Hl & %Hdec) & Hb & Hcl)". iMod "HclF" as "_". iModIntro.
     iPoseProof (loc_in_bounds_in_range_usize with "Hlb") as "%".
     iApply wpe_fupd.
-    iApply (wp_deref with "Hl") => //; [solve_ndisj | | | ].
-    { intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v. }
-    { intros st. exists (OVPtr l'). apply Hdec. }
-    iApply physical_step_intro_lc. iIntros "Hcred !> !>".
+    iApply (wp_deref with "Hl").
+    - apply done_proof.
+    - solve_ndisj.
+    - intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v.
+    - exact Hly.
+    - intros st. exists (OVPtr l'). apply Hdec.
+    - iApply physical_step_intro_lc. iIntros "Hcred !> !>".
     iIntros (st ov) "%Hdec' Hl". iMod (fupd_mask_subseteq F) as "HclF"; first done.
     pose proof (Hdec st) as Hdec_st. rewrite Hdec_st in Hdec'. injection Hdec' as <-.
     iPoseProof (ltype_own_addr_in_usize with "Hb") as "%".
@@ -58,7 +64,9 @@ Section place.
   Definition typed_place_shr_owned_inst := [instance @typed_place_shr_owned].
   Global Existing Instance typed_place_shr_owned_inst | 30.
 
-  Lemma typed_place_shr_uniq {rto} f κ (lt2 : ltype rto) P E L l r κ' γ bmin0 (T : place_cont_t (place_rfn rto) bmin0) :
+  Lemma typed_place_shr_uniq {rto} f κ (lt2 : ltype rto) P E L l r κ' γ bmin0 desc
+    `{Hnonatomic : !TCDone (desc.(access_atomicity) = NonAtomicAccess)}
+    (T : place_cont_t (place_rfn rto) bmin0) :
     li_tactic (lctx_lft_alive_count_goal E L κ') (λ '(κs, L1),
       introduce_with_hooks E L1 (£1) (λ L2,
       (∀ l', typed_place E L2 f l' lt2 r (bmin0) (Shared κ) P
@@ -90,7 +98,8 @@ Section place.
                   (opt_place_update_eq_lift place_rfnRT (upd').(pupd_eq_2)))
               )))
         ))))
-    ⊢ typed_place E L f l (ShrLtype lt2 κ) (#r) bmin0 (Uniq κ' γ) (DerefPCtx Na1Ord RefOp :: P) T.
+    ⊢ typed_place E L f l (ShrLtype lt2 κ) (#r) bmin0 (Uniq κ' γ)
+      (DerefPCtx desc Na1Ord RefOp :: P) T.
   Proof.
     rewrite /lctx_lft_alive_count_goal.
     iIntros "(%κs & %L2 & %Hal & HT)".
@@ -104,10 +113,13 @@ Section place.
     iPoseProof (loc_in_bounds_in_range_usize with "Hlb") as "%".
     iApply wpe_fupd.
     iApply (wpe_logical_step with "Hcl"); [solve_ndisj.. | ].
-    iApply (wp_deref with "Hl") => //; [solve_ndisj | | | ].
-    { intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v. }
-    { intros st. exists (OVPtr l'). apply Hdec. }
-    iApply physical_step_intro_lc. iIntros "Hcred !> !>".
+    iApply (wp_deref with "Hl").
+    - apply done_proof.
+    - solve_ndisj.
+    - intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v.
+    - exact Hly.
+    - intros st. exists (OVPtr l'). apply Hdec.
+    - iApply physical_step_intro_lc. iIntros "Hcred !> !>".
     iIntros (st ov) "%Hdec' Hl Hc". iMod (fupd_mask_subseteq F) as "HclF"; first done.
     pose proof (Hdec st) as Hdec_st. rewrite Hdec_st in Hdec'. injection Hdec' as <-.
     iPoseProof (ltype_own_addr_in_usize with "Hb") as "%".
@@ -125,7 +137,7 @@ Section place.
     unfold check_llctx_place_update_kind_incl_goal.
     iDestruct "HT" as (b Hb) "HT".
     destruct b; simpl.
-    - (* weak *)
+    + (* weak *)
       iDestruct "Hc" as "[Hc _]". simpl.
       iPoseProof (lctx_place_update_kind_incl_use with "HE HL") as "#Hincl2"; first apply Hb.
       iPoseProof (pupd_performed_incl_uniq_rt with "Hincl2") as "%Heq".
@@ -136,7 +148,7 @@ Section place.
       { done. }
       iFrame. simpl. iFrame.
       done.
-    - (* strong *)
+    + (* strong *)
       iDestruct "HT" as "(-> & HT)".
       iDestruct "Hc" as "[_ Hc]".
       iPoseProof (typed_place_cond_syn_type_eq with "[$] Hcond") as "%Hsteq".
@@ -149,7 +161,9 @@ Section place.
   Definition typed_place_shr_uniq_inst := [instance @typed_place_shr_uniq].
   Global Existing Instance typed_place_shr_uniq_inst | 30.
 
-  Lemma typed_place_shr_shared {rto} f E L (lt2 : ltype rto) P l r κ κ' bmin0 (T : place_cont_t (place_rfn rto) bmin0) :
+  Lemma typed_place_shr_shared {rto} f E L (lt2 : ltype rto) P l r κ κ' bmin0 desc
+    `{Hnonatomic : !TCDone (desc.(access_atomicity) = NonAtomicAccess)}
+    (T : place_cont_t (place_rfn rto) bmin0) :
     li_tactic (lctx_lft_alive_count_goal E L κ') (λ '(κs, L'),
       introduce_with_hooks E L' (£1) (λ L1,
       (∀ l', typed_place E L1 f l' lt2 r bmin0 (Shared κ) P
@@ -165,7 +179,8 @@ Section place.
               (opt_place_update_eq_lift place_rfnRT (upd').(pupd_eq_1))
               (opt_place_update_eq_lift place_rfnRT (upd').(pupd_eq_2)))
             ))))))
-    ⊢ typed_place E L f l (ShrLtype lt2 κ) (#r) bmin0 (Shared κ') (DerefPCtx Na1Ord RefOp :: P) T.
+    ⊢ typed_place E L f l (ShrLtype lt2 κ) (#r) bmin0 (Shared κ')
+      (DerefPCtx desc Na1Ord RefOp :: P) T.
   Proof.
     rewrite /lctx_lft_alive_count_goal.
     iIntros "(%κs & %L2 & %Hal & HT)".
@@ -178,10 +193,13 @@ Section place.
     iMod "Hb" as "(%vi & %li & %q' & Hl & %Hdec & >Hb & Hcl)". iMod "HclF" as "_".
     iPoseProof (loc_in_bounds_in_range_usize with "Hlb") as "%".
     iModIntro. iApply wpe_fupd.
-    iApply (wp_deref with "Hl") => //; [solve_ndisj | | | ].
-    { intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v. }
-    { intros st. exists (OVPtr li). apply Hdec. }
-    iApply physical_step_intro_lc. iIntros "Hcred !>!>".
+    iApply (wp_deref with "Hl").
+    - apply done_proof.
+    - solve_ndisj.
+    - intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v.
+    - exact Hly.
+    - intros st. exists (OVPtr li). apply Hdec.
+    - iApply physical_step_intro_lc. iIntros "Hcred !>!>".
     iIntros (st ov) "%Hdec' Hl". iMod (fupd_mask_mono with "Hb") as "#Hb"; first done.
     pose proof (Hdec st) as Hdec_st. rewrite Hdec_st in Hdec'. injection Hdec' as <-.
     iExists li.

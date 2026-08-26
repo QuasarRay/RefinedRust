@@ -200,7 +200,8 @@ Global Instance cas_atomic `{!RadiumConfig} π s ot (v1 v2 v3 : val) : Atomic s 
 Proof. solve_atomic. Qed.
 Global Instance skipe_atomic `{!RadiumConfig} π s (v : val) : Atomic s (to_rtexpr π (SkipE v)).
 Proof. solve_atomic. Qed.
-Global Instance deref_atomic `{!RadiumConfig} π s (l : loc) ly : Atomic s (to_rtexpr π (Deref ScOrd ly l)).
+Global Instance deref_atomic `{!RadiumConfig} π s desc (l : loc) ly :
+  Atomic s (to_rtexpr π (Deref desc ScOrd ly l)).
 Proof. solve_atomic. Qed.
 (*Global Instance use_atomic s (l : loc) ly : Atomic s (coerce_rtexpr (Use ScOrd ly l)).*)
 (*Proof. solve_atomic. Qed.*)
@@ -780,15 +781,16 @@ Proof.
   by iIntros (b <-%H).
 Qed.
 
-Lemma wp_deref v Φ vl l ot q π E o:
+Lemma wp_deref v Φ vl l ot q π E desc o:
+  desc.(access_atomicity) = NonAtomicAccess →
   o = ScOrd ∨ o = Na1Ord →
   (∀ st, decode_op_val vl PtrOp st = Some $ OVPtr l) →
   l `has_layout_loc` ot_layout ot →
   (∀ st, ∃ ov, decode_op_val v ot st = Some ov) →
   l↦{q}v -∗ (|={E}⧗=> (∀ st ov, ⌜decode_op_val v ot st = Some ov⌝ -∗ l ↦{q} v -∗ Φ (encode_op_val ov))) -∗
-  WPe{π} !{ot, o} (Val vl) @ E {{ Φ }}.
+  WPe{π} !{ot, o, desc} (Val vl) @ E {{ Φ }}.
 Proof.
-  iIntros (Ho Hl Hll Hdecv) "Hmt HΦ".
+  iIntros (Hnonatomic Ho Hl Hll Hdecv) "Hmt HΦ".
   have Hlv : v `has_layout_val` ot_layout ot.
   { destruct (Hdecv inhabitant) as (ov & Hdec). by eapply decode_op_val_has_layout. }
   rewrite expr_wp_unfold.
@@ -816,7 +818,7 @@ Proof.
     iSplit => //. unfold end_st, end_expr.
     have ? : (v = v') by apply: heap_at_inj_val. subst v'.
     iFrame => /=. iSplit; first done.
-    iApply (wp_lift_expr_step _ _ (Deref Na2Ord ot (Val vl))); auto.
+    iApply (wp_lift_expr_step _ _ (Deref desc Na2Ord ot (Val vl))); auto.
     iIntros ([[h2 ub2] fn2]) "((%&Hhctx&Hactx)&Hfctx)/=".
     iMod ("Hσclose" with "Hhctx") as (?) "(Hσ & Hv)".
     iModIntro; iSplit; first by destruct (Hdecv {| hs_heap := h2; hs_allocs := ub2 |}) as (? & ?); eauto 11 using DerefS.
@@ -2349,17 +2351,19 @@ Proof.
   by iApply ("HWP" with "[//] Hresult").
 Qed.
 
-Lemma wps_assign π Q Ψ Ψunwind vl ot vr s l o:
+Lemma wps_assign π Q Ψ Ψunwind vl ot vr s l desc o:
   let E := if o is ScOrd then ∅ else ⊤ in
+  desc.(access_atomicity) = NonAtomicAccess →
   o = ScOrd ∨ o = Na1Ord →
   (∀ st, decode_op_val vl PtrOp st = Some (OVPtr l)) →
   op_type_wf ot →
   (|={⊤,E}=> ⌜∀ st, ∃ ov, decode_op_val vr ot st = Some ov⌝ ∗ l↦|ot_layout ot| ∗
     |={E}⧗=> (∀ st ov, ⌜decode_op_val vr ot st = Some ov⌝ -∗
       l↦(encode_op_val ov) ={E,⊤}=∗ WPs{π} s {{Q, Ψ | Ψunwind}})) -∗
-  WPs{π} (Assign o ot (Val vl) (Val vr) s) {{ Q , Ψ | Ψunwind }}.
+  WPs{π} (Assign desc o ot (Val vl) (Val vr) s) {{ Q , Ψ | Ψunwind }}.
 Proof.
-  iIntros (E Ho Hvl Hwf) "HWP". rewrite !stmt_wp_eq. iIntros (??? ->) "Hresult".
+  iIntros (E Hnonatomic Ho Hvl Hwf) "HWP". rewrite !stmt_wp_eq.
+  iIntros (??? ->) "Hresult".
   iApply wp_lift_stmt_step_fupd. iIntros ([[h1 ub] fn]) "((%&Hhctx&Hfctx)&?) /=". iMod "HWP" as (Hdecvr) "[Hl HWP]".
   have Hly : vr `has_layout_val` ot_layout ot.
   { destruct (Hdecvr inhabitant) as (ov & Hdec). by eapply decode_op_val_has_layout. }

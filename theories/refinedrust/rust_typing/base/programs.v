@@ -1865,7 +1865,7 @@ Section place.
   W.ectx_item because of BinOpPCtx since there the root of the place
   expression is not in evaluation position. *)
   Inductive place_ectx_item :=
-  | DerefPCtx (o : lang.order) (ot : op_type)
+  | DerefPCtx (desc : memory_access_desc) (o : lang.order) (ot : op_type)
   | GetMemberPCtx (sls : struct_layout_spec) (m : var_name)
   | GetMemberUnionPCtx (uls : union_layout_spec) (m : var_name)
   | AnnotExprPCtx (n : nat) {A} (x : A)
@@ -1880,7 +1880,8 @@ Section place.
   applied to the location l. *)
   Definition place_item_to_wp (f : frame_path) (Ki : place_ectx_item) (Φ : loc → iProp Σ) (l : loc) : iProp Σ :=
     match Ki with
-    | DerefPCtx o ot => WPe{f.1} !{ot, o} l {{ λ v, ∃ l' : loc, ⌜val_to_loc v = Some l'⌝ ∗ Φ l' }}
+    | DerefPCtx desc o ot =>
+        WPe{f.1} !{ot, o, desc} l {{ λ v, ∃ l' : loc, ⌜val_to_loc v = Some l'⌝ ∗ Φ l' }}
     | GetMemberPCtx sls m => WPe{f.1} l at{sls} m {{ λ v, ∃ l' : loc, ⌜val_to_loc v = Some l'⌝ ∗ Φ l' }}
     | GetMemberUnionPCtx uls m => WPe{f.1} l at_union{uls} m {{ λ v, ∃ l' : loc, ⌜val_to_loc v = Some l'⌝ ∗ Φ l' }}
     | AnnotExprPCtx n x => WPe{f.1} AnnotExpr n x l {{ λ v, ∃ l' : loc, ⌜val_to_loc v = Some l'⌝ ∗ Φ l' }}
@@ -1928,7 +1929,7 @@ Section place.
   Lemma place_item_to_wp_mono f K Φ1 Φ2 l:
     place_item_to_wp f K Φ1 l -∗ (∀ l, Φ1 l -∗ Φ2 l) -∗ place_item_to_wp f K Φ2 l.
   Proof.
-    iIntros "HP HΦ". move: K => [o ly |sls m|uls m |n A x|op ot v m rt ty r|op | els variant]//=.
+    iIntros "HP HΦ". move: K => [desc o ly |sls m|uls m |n A x|op ot v m rt ty r|op | els variant]//=.
     5: iIntros "Hv".
     1-4,6-7: iApply (@wpe_wand with "HP").
     7: iApply (@wpe_wand with "[Hv HP]"); first by iApply "HP".
@@ -1958,8 +1959,9 @@ Section place.
   Fixpoint find_place_ctx (E : elctx) (f : frame_path) (e : W.expr) : option (llctx → (llctx → list place_ectx_item → loc → iProp Σ) → iProp Σ) :=
     match e with
     | W.Loc l => Some (λ L T, T L [] l)
-    | W.Deref o ot e =>
-      T' ← find_place_ctx E f e; Some (λ L T, T' L (λ L' K l, T L' (K ++ [DerefPCtx o ot]) l))
+    | W.Deref desc o ot e =>
+      T' ← find_place_ctx E f e;
+      Some (λ L T, T' L (λ L' K l, T L' (K ++ [DerefPCtx desc o ot]) l))
     | W.GetMember e sls m => T' ← find_place_ctx E f e; Some (λ L T, T' L (λ L' K l, T L' (K ++ [GetMemberPCtx sls m]) l))
     | W.GetMemberUnion e uls m => T' ← find_place_ctx E f e; Some (λ L T, T' L (λ L' K l, T L' (K ++ [GetMemberUnionPCtx uls m]) l))
     | W.EnumData els variant e => T' ← find_place_ctx E f e; Some (λ L T, T' L (λ L' K l, T L' (K ++ [EnumDataPCtx els variant]) l))
@@ -2232,7 +2234,8 @@ Section laws.
   (* intentionally not an instance -- since [eqltype] is transitive, that would not be a good idea. *)
 
   (* generic instance constructors for descending below ofty *)
-  Lemma typed_place_ofty_access_val_owned E L (f : frame_path) {rt} l (ty : type rt) (r : rt) bmin0 ot
+  Lemma typed_place_ofty_access_val_owned E L (f : frame_path) {rt} l (ty : type rt) (r : rt) bmin0 desc ot
+      `{Hnonatomic : !TCDone (desc.(access_atomicity) = NonAtomicAccess)}
       `{Hop : !TCOr (TCDone (ot = PtrOp)) (TCDone (ot = RefOp))} P T :
     ty_has_op_type ty PtrOp →
     (∀ v, v ◁ᵥ{f.1, MetaNone} r @ ty -∗
@@ -2251,7 +2254,8 @@ Section laws.
               UpdBot opt_place_update_eq_refl opt_place_update_eq_refl)))
         ))
       ⊢
-    typed_place E L f l (◁ ty) (#r) bmin0 (Owned) (DerefPCtx Na1Ord ot :: P) T.
+    typed_place E L f l (◁ ty) (#r) bmin0 (Owned)
+      (DerefPCtx desc Na1Ord ot :: P) T.
   Proof.
     iIntros (Hot) "(Hnonnull & HT)".
     iIntros (????) "#CTX #HE HL Hf Hl Hcont". iApply fupd_place_to_wp.
@@ -2268,7 +2272,7 @@ Section laws.
     { iApply ("Hnonnull" with "Hv"). }
     pose proof (val_decodes_to_loc_ptr_ref _ _ ot Hdec_ptr Hnonnull_li) as Hdecode.
     iPoseProof (loc_in_bounds_in_range_usize with "Hlb") as "%".
-    iApply (wp_deref with "Hl"); [by right | | done | | ].
+    iApply (wp_deref with "Hl"); [apply done_proof | by right | | done | | ].
     { intros. apply val_to_loc_decode. apply val_to_of_loc. by apply val_of_loc_Some_l2v. }
     { intros st. exists (OVPtr li). apply Hdecode. }
     iApply physical_step_intro. iNext.
@@ -2295,7 +2299,8 @@ Section laws.
   Qed.
 
   (* TODO generalize this similarly as the one above? *)
-  Lemma typed_place_ofty_access_val_uniq E L f {rt} l (ty : type rt) (r : rt) bmin0 κ γ ot
+  Lemma typed_place_ofty_access_val_uniq E L f {rt} l (ty : type rt) (r : rt) bmin0 κ γ desc ot
+      `{Hnonatomic : !TCDone (desc.(access_atomicity) = NonAtomicAccess)}
       `{Hop : !TCOr (TCDone (ot = PtrOp)) (TCDone (ot = RefOp))} P T :
     ty_has_op_type ty PtrOp →
     ⌜lctx_lft_alive E L κ⌝ ∗
@@ -2312,7 +2317,8 @@ Section laws.
               (l2 ◁ₗ[f.1, b2] upd'.(pupd_rfn) @ upd'.(pupd_lt) ∗ upd'.(pupd_R))
               UpdBot opt_place_update_eq_refl opt_place_update_eq_refl)))
         ))
-    ⊢ typed_place E L f l (◁ ty) (#r) bmin0 (Uniq κ γ) (DerefPCtx Na1Ord ot :: P) T.
+    ⊢ typed_place E L f l (◁ ty) (#r) bmin0 (Uniq κ γ)
+      (DerefPCtx desc Na1Ord ot :: P) T.
   Proof.
     iIntros (Hot) "(%Hal & Hnonnull & HT)".
     iIntros (????) "#CTX #HE HL Hf Hl Hcont". iApply fupd_place_to_wp.
@@ -2333,7 +2339,7 @@ Section laws.
     { iApply ("Hnonnull" with "Hv"). }
     pose proof (val_decodes_to_loc_ptr_ref _ _ ot Hdec_ptr Hnonnull_li) as Hdecode.
     iPoseProof (loc_in_bounds_in_range_usize with "Hlb") as "%".
-    iApply (wp_deref with "Hl"); [by right | | done | | ].
+    iApply (wp_deref with "Hl"); [apply done_proof | by right | | done | | ].
     { intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v. }
     { intros st. exists (OVPtr li). apply Hdecode. }
     iApply physical_step_intro. iNext.
@@ -2361,7 +2367,8 @@ Section laws.
   Qed.
 
   (* NOTE: we need to require it to be a simple type to get this generic lemma *)
-  Lemma typed_place_ofty_access_val_shared E L f {rt} l (ty : simple_type rt) (r : rt) bmin0 κ ot
+  Lemma typed_place_ofty_access_val_shared E L f {rt} l (ty : simple_type rt) (r : rt) bmin0 κ desc ot
+      `{Hnonatomic : !TCDone (desc.(access_atomicity) = NonAtomicAccess)}
       `{Hop : !TCOr (TCDone (ot = PtrOp)) (TCDone (ot = RefOp))} P T :
     ty_has_op_type ty PtrOp →
     ⌜lctx_lft_alive E L κ⌝ ∗
@@ -2377,7 +2384,8 @@ Section laws.
             cont (mkPUpd _ _ _ (◁ ty) (# r)
               (l2 ◁ₗ[f.1, b2] (upd').(pupd_rfn) @ (upd').(pupd_lt) ∗ (upd').(pupd_R))
               UpdBot opt_place_update_eq_refl opt_place_update_eq_refl)))))
-    ⊢ typed_place E L f l (◁ ty) (# r) bmin0 (Shared κ) (DerefPCtx Na1Ord ot :: P) T.
+    ⊢ typed_place E L f l (◁ ty) (# r) bmin0 (Shared κ)
+      (DerefPCtx desc Na1Ord ot :: P) T.
   Proof.
     iIntros (Hot) "(%Hal & Hnonnull & HT)".
     iIntros (????) "#CTX #HE HL Hf #Hl Hcont". iApply fupd_place_to_wp.
@@ -2398,7 +2406,7 @@ Section laws.
     pose proof (val_decodes_to_loc_ptr_ref _ _ ot Hdec_ptr Hnonnull_li) as Hdecode.
     iApply wpe_fupd.
     iPoseProof (loc_in_bounds_in_range_usize with "Hlb") as "%".
-    iApply (wp_deref with "Hloc"); [by right | | done | | ].
+    iApply (wp_deref with "Hloc"); [apply done_proof | by right | | done | | ].
     { intros. apply val_to_loc_decode. by rewrite val_to_loc_Some_l2v. }
     { intros st. exists (OVPtr li). apply Hdecode. }
     iApply physical_step_intro. iNext.

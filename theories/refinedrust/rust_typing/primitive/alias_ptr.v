@@ -422,7 +422,8 @@ End cast.
 Section place.
   Context `{!typeGS Σ}.
 
-  Lemma typed_place_ofty_alias_ptr_owned pk E L f l l2 bmin0 ot
+  Lemma typed_place_ofty_alias_ptr_owned pk E L f l l2 bmin0 desc ot
+      `{Hnonatomic : !TCDone (desc.(access_atomicity) = NonAtomicAccess)}
       `{Hop : !TCOr (TCDone (ot = PtrOp)) (TCDone (ot = RefOp))} P T :
     find_in_context (FindLoc l2) (λ '(existT rt2 (lt2, r2, b2, π2)),
       ⌜π2 = f.1⌝ ∗
@@ -433,13 +434,15 @@ Section place.
               (l2 ◁ₗ[f.1, b2] (upd').(pupd_rfn) @ (upd').(pupd_lt) ∗ (upd').(pupd_R))
               UpdBot opt_place_update_eq_refl opt_place_update_eq_refl)))
           ))
-    ⊢ typed_place E L f l (◁ alias_ptr_kind_t pk) (#l2) bmin0 (Owned) (DerefPCtx Na1Ord ot :: P) T.
+    ⊢ typed_place E L f l (◁ alias_ptr_kind_t pk) (#l2) bmin0 (Owned)
+      (DerefPCtx desc Na1Ord ot :: P) T.
   Proof.
     iDestruct 1 as ((rt2 & [[[lt2 r2] b2] π2])) "(Hl2 & -> & HP)". simpl.
     iPoseProof (ltype_own_has_layout with "Hl2") as "(%ly2 & %Hst2 & %Hly2)".
     iPoseProof (ltype_own_loc_in_bounds with "Hl2") as "#Hlb2"; first done.
     iPoseProof (loc_in_bounds_nonnull with "Hlb2") as "%Hnonnull".
-    iApply typed_place_ofty_access_val_owned. { rewrite ty_has_op_type_unfold; done. }
+    iApply typed_place_ofty_access_val_owned.
+    { rewrite ty_has_op_type_unfold; done. }
     iSplitR.
     { iIntros (v) "Hv". rewrite /ty_own_val /=.
       iDestruct "Hv" as "(_ & Hv)".
@@ -455,7 +458,8 @@ Section place.
   Definition typed_place_ofty_alias_ptr_owned_inst := [instance @typed_place_ofty_alias_ptr_owned].
   Global Existing Instance typed_place_ofty_alias_ptr_owned_inst | 30.
 
-  Lemma typed_place_ofty_alias_ptr_uniq pk E L f l l2 bmin0 κ γ ot
+  Lemma typed_place_ofty_alias_ptr_uniq pk E L f l l2 bmin0 κ γ desc ot
+      `{Hnonatomic : !TCDone (desc.(access_atomicity) = NonAtomicAccess)}
       `{Hop : !TCOr (TCDone (ot = PtrOp)) (TCDone (ot = RefOp))} P T :
     ⌜lctx_lft_alive E L κ⌝ ∗
     find_in_context (FindLoc l2) (λ '(existT rt2 (lt2, r2, b2, π2)),
@@ -467,13 +471,15 @@ Section place.
               (l2 ◁ₗ[f.1, b2] (upd').(pupd_rfn) @ (upd').(pupd_lt) ∗ (upd').(pupd_R))
               UpdBot opt_place_update_eq_refl opt_place_update_eq_refl)))
           ))
-    ⊢ typed_place E L f l (◁ alias_ptr_kind_t pk) (#l2) bmin0 (Uniq κ γ) (DerefPCtx Na1Ord ot :: P) T.
+    ⊢ typed_place E L f l (◁ alias_ptr_kind_t pk) (#l2) bmin0 (Uniq κ γ)
+      (DerefPCtx desc Na1Ord ot :: P) T.
   Proof.
     iDestruct 1 as (Hal (rt2 & [[[lt2 r2] b2] π2])) "(Hl2 & -> & HP)". simpl.
     iPoseProof (ltype_own_has_layout with "Hl2") as "(%ly2 & %Hst2 & %Hly2)".
     iPoseProof (ltype_own_loc_in_bounds with "Hl2") as "#Hlb2"; first done.
     iPoseProof (loc_in_bounds_nonnull with "Hlb2") as "%Hnonnull".
-    iApply typed_place_ofty_access_val_uniq. { rewrite ty_has_op_type_unfold; done. }
+    iApply typed_place_ofty_access_val_uniq.
+    { rewrite ty_has_op_type_unfold; done. }
     iSplitR; first done. iSplitR.
     { iIntros (v) "Hv". rewrite /ty_own_val /=.
       iDestruct "Hv" as "(_ & Hv)".
@@ -489,7 +495,8 @@ Section place.
   Definition typed_place_ofty_alias_ptr_uniq_inst := [instance @typed_place_ofty_alias_ptr_uniq].
   Global Existing Instance typed_place_ofty_alias_ptr_uniq_inst | 30.
 
-  Lemma typed_place_ofty_alias_ptr_shared pk E L f l l2 bmin0 κ ot
+  Lemma typed_place_ofty_alias_ptr_shared pk E L f l l2 bmin0 κ desc ot
+      `{Hnonatomic : !TCDone (desc.(access_atomicity) = NonAtomicAccess)}
       `{Hop : !TCOr (TCDone (ot = PtrOp)) (TCDone (ot = RefOp))} P T :
     ⌜lctx_lft_alive E L κ⌝ ∗
     find_in_context (FindLoc l2) (λ '(existT rt2 (lt2, r2, b2, π2)),
@@ -501,13 +508,15 @@ Section place.
               (l2 ◁ₗ[f.1, b2] (upd').(pupd_rfn) @ (upd').(pupd_lt) ∗ (upd').(pupd_R))
               UpdBot opt_place_update_eq_refl opt_place_update_eq_refl)))
           ))
-    ⊢ typed_place E L f l (◁ alias_ptr_kind_t pk) (#l2) bmin0 (Shared κ) (DerefPCtx Na1Ord ot :: P) T.
+    ⊢ typed_place E L f l (◁ alias_ptr_kind_t pk) (#l2) bmin0 (Shared κ)
+      (DerefPCtx desc Na1Ord ot :: P) T.
   Proof.
     iDestruct 1 as (Hal (rt2 & [[[lt2 r2] b2] π2])) "(Hl2 & -> & HP)". simpl.
     iPoseProof (ltype_own_has_layout with "Hl2") as "(%ly2 & %Hst2 & %Hly2)".
     iPoseProof (ltype_own_loc_in_bounds with "Hl2") as "#Hlb2"; first done.
     iPoseProof (loc_in_bounds_nonnull with "Hlb2") as "%Hnonnull".
-    iApply typed_place_ofty_access_val_shared. { rewrite ty_has_op_type_unfold; done. }
+    iApply typed_place_ofty_access_val_shared.
+    { rewrite ty_has_op_type_unfold; done. }
     iSplitR; first done. iSplitR.
     { iIntros (v) "Hv". rewrite /ty_own_val /=.
       iDestruct "Hv" as "(_ & Hv)".

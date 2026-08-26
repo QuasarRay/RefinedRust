@@ -7,7 +7,8 @@ From refinedrust Require Import options.
 Section place.
   Context `{!typeGS Σ}.
 
-  Lemma typed_place_mut_owned {rto} f κ (lt2 : ltype rto) P E L γ l r bmin0
+  Lemma typed_place_mut_owned {rto} f κ (lt2 : ltype rto) P E L γ l r bmin0 desc
+    `{Hnonatomic : !TCDone (desc.(access_atomicity) = NonAtomicAccess)}
     (T : place_cont_t ((place_rfn rto) * gname)%type bmin0) :
     (∀ l', typed_place E L f l' lt2 r bmin0 (Uniq κ γ) P
         (λ L' κs l2 b2 bmin rti tyli ri updcx,
@@ -22,7 +23,8 @@ Section place.
               (opt_place_update_eq_lift (λ rt, place_rfnRT rt * gname)%type (upd').(pupd_eq_1))
               (opt_place_update_eq_lift (λ rt, place_rfnRT rt * gname)%type (upd').(pupd_eq_2)))))
           ))
-    ⊢ typed_place E L f l (MutLtype lt2 κ) (#(r, γ)) bmin0 (Owned) (DerefPCtx Na1Ord RefOp :: P) T.
+    ⊢ typed_place E L f l (MutLtype lt2 κ) (#(r, γ)) bmin0 (Owned)
+      (DerefPCtx desc Na1Ord RefOp :: P) T.
   Proof.
     iIntros "HR" (Φ F ??).
     rewrite /li_tactic /lctx_lft_alive_count_goal.
@@ -35,6 +37,7 @@ Section place.
     iPoseProof (loc_in_bounds_in_range_usize with "Hlb") as "%".
     iPoseProof (ltype_own_addr_in_usize with "Hb") as "%Haddr".
     iApply (wp_deref with "Hl").
+    - apply done_proof.
     - solve_ndisj.
     - intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v.
     - exact Hly.
@@ -60,7 +63,9 @@ Section place.
   Definition typed_place_mut_owned_inst := [instance @typed_place_mut_owned].
   Global Existing Instance typed_place_mut_owned_inst | 30.
 
-  Lemma typed_place_mut_uniq {rto} E L f (lt2 : ltype rto) P l r κ γ κ' γ' bmin0 (T : place_cont_t (place_rfn rto * gname)%type bmin0) :
+  Lemma typed_place_mut_uniq {rto} E L f (lt2 : ltype rto) P l r κ γ κ' γ' bmin0 desc
+    `{Hnonatomic : !TCDone (desc.(access_atomicity) = NonAtomicAccess)}
+    (T : place_cont_t (place_rfn rto * gname)%type bmin0) :
     li_tactic (lctx_lft_alive_count_goal E L κ') (λ '(κs, L'),
       (∀ l', typed_place E L' f l' lt2 r bmin0 (Uniq κ γ) P
         (λ L'' κs' l2 b2 bmin rti tyli ri updcx,
@@ -91,7 +96,8 @@ Section place.
                   (opt_place_update_eq_lift (λ rt, place_rfnRT rt * gname)%type (upd').(pupd_eq_2)))
               )))
             )))
-    ⊢ typed_place E L f l (MutLtype lt2 κ) (#(r, γ)) bmin0 (Uniq κ' γ') (DerefPCtx Na1Ord RefOp :: P) T.
+    ⊢ typed_place E L f l (MutLtype lt2 κ) (#(r, γ)) bmin0 (Uniq κ' γ')
+      (DerefPCtx desc Na1Ord RefOp :: P) T.
   Proof.
     rewrite /lctx_lft_alive_count_goal.
     iIntros "(%κs & %L2 & %Hal & HT)".
@@ -106,6 +112,7 @@ Section place.
     iPoseProof (loc_in_bounds_in_range_usize with "Hlb") as "%".
     iPoseProof (ltype_own_addr_in_usize with "Hb") as "%Haddr".
     iApply (wp_deref with "Hl").
+    - apply done_proof.
     - solve_ndisj.
     - intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v.
     - exact Hly.
@@ -150,7 +157,9 @@ Section place.
   Definition typed_place_mut_uniq_inst := [instance @typed_place_mut_uniq].
   Global Existing Instance typed_place_mut_uniq_inst | 30.
 
-  Lemma typed_place_mut_shared {rto} E L f (lt2 : ltype rto) P l r κ γ κ' bmin0 (T : place_cont_t (place_rfn rto * gname)%type bmin0) :
+  Lemma typed_place_mut_shared {rto} E L f (lt2 : ltype rto) P l r κ γ κ' bmin0 desc
+    `{Hnonatomic : !TCDone (desc.(access_atomicity) = NonAtomicAccess)}
+    (T : place_cont_t (place_rfn rto * gname)%type bmin0) :
     li_tactic (lctx_lft_alive_count_goal E L κ') (λ '(κs, L'),
       (∀ l', typed_place E L' f l' lt2 r bmin0 (Shared (κ ⊓ κ')) P
         (λ L'' κs' l2 b2 bmin rti tyli ri updcx,
@@ -165,7 +174,8 @@ Section place.
               (opt_place_update_eq_lift (λ rt, place_rfnRT rt * gname)%type (upd').(pupd_eq_1))
               (opt_place_update_eq_lift (λ rt, place_rfnRT rt * gname)%type (upd').(pupd_eq_2)))))
             )))
-    ⊢ typed_place E L f l (MutLtype lt2 κ) (#(r, γ)) bmin0 (Shared κ') (DerefPCtx Na1Ord RefOp :: P) T.
+    ⊢ typed_place E L f l (MutLtype lt2 κ) (#(r, γ)) bmin0 (Shared κ')
+      (DerefPCtx desc Na1Ord RefOp :: P) T.
   Proof.
     rewrite /lctx_lft_alive_count_goal.
     iIntros "(%κs & %L2 & %Hal & HT)".
@@ -179,6 +189,7 @@ Section place.
     iModIntro. iApply wpe_fupd.
     iPoseProof (loc_in_bounds_in_range_usize with "Hlb") as "%".
     iApply (wp_deref with "Hl").
+    - apply done_proof.
     - solve_ndisj.
     - intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v.
     - exact Hly.

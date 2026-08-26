@@ -3292,7 +3292,10 @@ Section subsume.
               destination normal unwind (λ L v rt ty r,
                 match destination with
                 | Some (o, ret_ot, destination) =>
-                    typed_stmt E L f (AssignSE o ret_ot destination (Val v) normal) fn R U ϝ
+                    typed_stmt E L f
+                      (AssignSE normal_nonatomic_access o ret_ot destination
+                        (Val v) normal)
+                      fn R U ϝ
                 | None => typed_stmt E L f normal fn R U ϝ
                 end)
               (λ L,
@@ -3473,14 +3476,15 @@ Section subsume.
   (** Similar to type_assign, use is formulated with a skip over the expression, in order to allow
     on-demand unblocking. We can't just use any of the potential place access steps, because there might not be any (if it's just a location). So we can't easily use any of the other steps around.
    *)
-  Lemma type_use m E L f ot e o (T : typed_val_expr_cont_t) :
+  Lemma type_use m E L f ot e desc o (T : typed_val_expr_cont_t) :
+    ⌜desc.(access_atomicity) = NonAtomicAccess⌝ ∗
     ⌜if o is Na2Ord then False else True⌝ ∗
       typed_read E L f e ot m (λ L2 v rt ty r,
         introduce_with_hooks E L2 (tr 2 ∗ £ num_cred) (λ L3,
           T L3 v MetaNone rt ty r))
-    ⊢ typed_val_expr E L f (Use o ot e)%E T.
+    ⊢ typed_val_expr E L f (Use desc o ot e)%E T.
   Proof.
-    iIntros "[% Hread]" (Φ) "#(LFT & LLCTX) #HE HL Hf HΦ".
+    iIntros "(%Hnonatomic & % & Hread)" (Φ) "#(LFT & LLCTX) #HE HL Hf HΦ".
     unfold Use.
     wpe_bind.
     iApply ("Hread" $! _ ⊤ with "[//] [//] [//] [//] [$LFT $LLCTX] HE HL Hf").
@@ -3498,6 +3502,7 @@ Section subsume.
     iPoseProof (heap_pointsto_loc_in_bounds with "Hl") as "#Hlb".
     iPoseProof (loc_in_bounds_in_range_usize with "Hlb") as "%".
     iApply (wp_deref with "Hl").
+    - done.
     - destruct o; naive_solver.
     - intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v.
     - done.
@@ -3513,22 +3518,24 @@ Section subsume.
           simpl. unfold num_laters_per_step, num_cred; lia. }
       by iApply ("HΦ" with "HL Hf Hv HT").
   Qed.
-  Lemma type_copy E L f ot e o (T : typed_val_expr_cont_t) :
+  Lemma type_copy E L f ot e desc o (T : typed_val_expr_cont_t) :
+    ⌜desc.(access_atomicity) = NonAtomicAccess⌝ ∗
     ⌜if o is Na2Ord then False else True⌝ ∗
       typed_read E L f e ot ReadDoCopy (λ L2 v rt ty r,
         introduce_with_hooks E L2 (tr 2 ∗ £ num_cred) (λ L3,
           T L3 v MetaNone rt ty r))
-    ⊢ typed_val_expr E L f (copy{ot, o} e)%E T.
+    ⊢ typed_val_expr E L f (copy{ot, o, desc} e)%E T.
   Proof.
     unfold Copy.
     apply type_use.
   Qed.
-  Lemma type_move E L f ot e o (T : typed_val_expr_cont_t) :
+  Lemma type_move E L f ot e desc o (T : typed_val_expr_cont_t) :
+    ⌜desc.(access_atomicity) = NonAtomicAccess⌝ ∗
     ⌜if o is Na2Ord then False else True⌝ ∗
       typed_read E L f e ot ReadDoMove (λ L2 v rt ty r,
         introduce_with_hooks E L2 (tr 2 ∗ £ num_cred) (λ L3,
           T L3 v MetaNone rt ty r))
-    ⊢ typed_val_expr E L f (move{ot, o} e)%E T.
+    ⊢ typed_val_expr E L f (move{ot, o, desc} e)%E T.
   Proof.
     unfold Move.
     apply type_use.
@@ -3545,17 +3552,19 @@ Section subsume.
      We might need to unblock e1 and then prepare it for writing before getting
      access to the location that justifies the actual write. Neither can use the
      actual write step or the place access itself, which might not take a step.
-      *)
-  Lemma type_assign E L f ot e1 e2 s fn R U o ϝ :
+     *)
+  Lemma type_assign E L f ot e1 e2 s fn R U desc o ϝ :
+    ⌜desc.(access_atomicity) = NonAtomicAccess⌝ ∗
     typed_val_expr E L f e2 (λ L' v m rt ty r,
       ⌜m = MetaNone⌝ ∗
       ⌜if o is Na2Ord then False else True⌝ ∗
       typed_write E L' f e1 ot v ty r (λ L2,
         introduce_with_hooks E L2 (tr 2 ∗ £ num_cred) (λ L3,
         typed_stmt E L3 f s fn R U ϝ)))
-    ⊢ typed_stmt E L f (e1 <-{ot, o} e2; s) fn R U ϝ.
+    ⊢ typed_stmt E L f (e1 <-{ot, o, desc} e2; s) fn R U ϝ.
   Proof.
-    iIntros "He". iIntros (Φ Φunwind) "#(LFT & LLCTX) #HE HL Hf Hcont".
+    iIntros "(%Hnonatomic & He)". iIntros (Φ Φunwind)
+      "#(LFT & LLCTX) #HE HL Hf Hcont".
     wps_bind. iApply ("He" with "[$LFT $LLCTX] HE HL Hf").
     iIntros (L' v rt ty r m) "HL Hf Hv (-> & % & He1)".
     wps_bind. iApply ("He1" $! _ ⊤ with "[//] [//] [//] [//] [$LFT $LLCTX] HE HL Hf"). iIntros (l) "HT".
@@ -3575,6 +3584,7 @@ Section subsume.
     iPoseProof (heap_pointsto_loc_in_bounds with "Hl") as "#Hlb".
     iPoseProof (loc_in_bounds_in_range_usize with "Hlb") as "%".
     iApply wps_assign.
+    { done. }
     { destruct o; naive_solver. }
     { intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v. }
     { done. }

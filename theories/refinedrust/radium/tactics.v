@@ -14,7 +14,7 @@ Inductive expr :=
 | CheckUnOp (op : un_op) (ot : op_type) (e : expr)
 | CheckBinOp (op : bin_op) (ot1 ot2 : op_type) (e1 e2 : expr)
 | CopyAllocId (ot1 : op_type) (e1 e2 : expr)
-| Deref (o : order) (ot : op_type) (e : expr)
+| Deref (desc : memory_access_desc) (o : order) (ot : op_type) (e : expr)
 | CAS (ot : op_type) (e1 e2 e3 : expr)
 | Concat (es : list expr)
 | Repeat (st : syn_type) (e : expr) (n : nat)
@@ -25,8 +25,8 @@ Inductive expr :=
 (* new constructors *)
 | LogicalAnd (ot1 ot2 : op_type) (rit : int_type) (e1 e2 : expr)
 | LogicalOr (ot1 ot2 : op_type) (rit : int_type) (e1 e2 : expr)
-| Move (o : order) (ot : op_type) (e : expr)
-| Copy (o : order) (ot : op_type) (e : expr)
+| Move (desc : memory_access_desc) (o : order) (ot : op_type) (e : expr)
+| Copy (desc : memory_access_desc) (o : order) (ot : op_type) (e : expr)
 | Raw (pk : ptr_kind) (m : mutability) (e : expr)
 | GetMember (e : expr) (s : struct_layout_spec) (m : var_name)
 | GetMemberUnion (e : expr) (ul : union_layout_spec) (m : var_name)
@@ -55,7 +55,7 @@ Fixpoint to_expr `{!LayoutAlg} (e : expr) : lang.expr :=
   | CheckUnOp op ot e  => lang.CheckUnOp op ot (to_expr e)
   | CheckBinOp op ot1 ot2 e1 e2 => lang.CheckBinOp op ot1 ot2 (to_expr e1) (to_expr e2)
   | CopyAllocId ot1 e1 e2 => lang.CopyAllocId ot1 (to_expr e1) (to_expr e2)
-  | Deref o ot e => lang.Deref o ot (to_expr e)
+  | Deref desc o ot e => lang.Deref desc o ot (to_expr e)
   | CAS ot e1 e2 e3 => lang.CAS ot (to_expr e1) (to_expr e2) (to_expr e3)
   | Concat es => lang.Concat (to_expr <$> es)
   | Repeat st e n => notation.RepeatSt st (to_expr e) n
@@ -65,8 +65,8 @@ Fixpoint to_expr `{!LayoutAlg} (e : expr) : lang.expr :=
   | StuckE => lang.StuckE
   | LogicalAnd ot1 ot2 rit e1 e2 => notation.LogicalAnd ot1 ot2 rit (to_expr e1) (to_expr e2)
   | LogicalOr ot1 ot2 rit e1 e2 => notation.LogicalOr ot1 ot2 rit (to_expr e1) (to_expr e2)
-  | Move o ot e => notation.Move o ot (to_expr e)
-  | Copy o ot e => notation.Copy o ot (to_expr e)
+  | Move desc o ot e => notation.Move desc o ot (to_expr e)
+  | Copy desc o ot e => notation.Copy desc o ot (to_expr e)
   | Raw pk m e => notation.Raw pk m (to_expr e)
   | AnnotExpr n a e => notation.AnnotExpr n a (to_expr e)
   | LocInfoE a e => notation.LocInfo a (to_expr e)
@@ -124,10 +124,10 @@ Ltac of_expr e :=
     let e1 := of_expr e1 in
     let e2 := of_expr e2 in
     constr:(LogicalOr ot1 ot2 rit e1 e2)
-  | notation.Move ?o ?ot ?e =>
-    let e := of_expr e in constr:(Move o ot e)
-  | notation.Copy ?o ?ot ?e =>
-    let e := of_expr e in constr:(Copy o ot e)
+  | notation.Move ?desc ?o ?ot ?e =>
+    let e := of_expr e in constr:(Move desc o ot e)
+  | notation.Copy ?desc ?o ?ot ?e =>
+    let e := of_expr e in constr:(Copy desc o ot e)
   | lang.Val ?x => constr:(Val x)
   | lang.Var ?x => constr:(Var x)
   | lang.UnOp ?op ?ot ?e =>
@@ -140,8 +140,8 @@ Ltac of_expr e :=
     let e1 := of_expr e1 in let e2 := of_expr e2 in constr:(CheckBinOp op ot1 ot2 e1 e2)
   | lang.CopyAllocId ?ot1 ?e1 ?e2 =>
     let e1 := of_expr e1 in let e2 := of_expr e2 in constr:(CopyAllocId ot1 e1 e2)
-  | lang.Deref ?o ?ot ?e =>
-    let e := of_expr e in constr:(Deref o ot e)
+  | lang.Deref ?desc ?o ?ot ?e =>
+    let e := of_expr e in constr:(Deref desc o ot e)
   | lang.CAS ?ot ?e1 ?e2 ?e3 =>
     let e1 := of_expr e1 in let e2 := of_expr e2 in let e3 := of_expr e3 in constr:(CAS ot e1 e2 e3)
   | lang.Concat ?es =>
@@ -180,7 +180,7 @@ Inductive ectx_item :=
 | CheckBinOpRCtx (op : bin_op) (ot1 ot2 : op_type) (v1 : val)
 | CopyAllocIdLCtx (ot1 : op_type) (e2 : expr)
 | CopyAllocIdRCtx (ot1 : op_type) (v1 : val)
-| DerefCtx (o : order) (l : op_type)
+| DerefCtx (desc : memory_access_desc) (o : order) (l : op_type)
 | CASLCtx (ot : op_type) (e2 e3 : expr)
 | CASMCtx (ot : op_type) (v1 : val) (e3 : expr)
 | CASRCtx (ot : op_type) (v1 v2 : val)
@@ -191,8 +191,8 @@ Inductive ectx_item :=
 | AllocRCtx (v_size : val)
 | SkipECtx
 (* new constructors *)
-| MoveCtx (o : order) (ot : op_type)
-| CopyCtx (o : order) (ot : op_type)
+| MoveCtx (desc : memory_access_desc) (o : order) (ot : op_type)
+| CopyCtx (desc : memory_access_desc) (o : order) (ot : op_type)
 | RawCtx (pk : ptr_kind) (m : mutability)
 | AnnotExprCtx (n : nat) {A} (a : A)
 | LocInfoECtx (a : location_info)
@@ -216,7 +216,7 @@ Definition fill_item (Ki : ectx_item) (e : expr) : expr :=
   | CheckBinOpRCtx op ot1 ot2 v1 => CheckBinOp op ot1 ot2 (Val v1) e
   | CopyAllocIdLCtx ot1 e2 => CopyAllocId ot1 e e2
   | CopyAllocIdRCtx ot1 v1 => CopyAllocId ot1 (Val v1) e
-  | DerefCtx o l => Deref o l e
+  | DerefCtx desc o l => Deref desc o l e
   | CASLCtx ot e2 e3 => CAS ot e e2 e3
   | CASMCtx ot v1 e3 => CAS ot (Val v1) e e3
   | CASRCtx ot v1 v2 => CAS ot (Val v1) (Val v2) e
@@ -226,8 +226,8 @@ Definition fill_item (Ki : ectx_item) (e : expr) : expr :=
   | AllocLCtx e_align => Alloc e e_align
   | AllocRCtx v_size => Alloc (Val v_size) e
   | SkipECtx => SkipE e
-  | MoveCtx o l => Move o l e
-  | CopyCtx o l => Copy o l e
+  | MoveCtx desc o l => Move desc o l e
+  | CopyCtx desc o l => Copy desc o l e
   | RawCtx pk m => Raw pk m e
   | AnnotExprCtx n a => AnnotExpr n a e
   | LocInfoECtx a => LocInfoE a e
@@ -296,12 +296,12 @@ Fixpoint find_expr_fill (e : expr) (bind_val : bool) : option (list ectx_item * 
   | SkipE e1 =>
     if find_expr_fill e1 bind_val is Some (Ks, e') then
       Some (Ks ++ [SkipECtx], e') else Some ([], e)
-  | Deref o ly e1 => if find_expr_fill e1 bind_val is Some (Ks, e') then
-      Some (Ks ++ [DerefCtx o ly ], e') else Some ([], e)
-  | Move o ly e1 => if find_expr_fill e1 bind_val is Some (Ks, e') then
-      Some (Ks ++ [MoveCtx o ly ], e') else Some ([], e)
-  | Copy o ly e1 => if find_expr_fill e1 bind_val is Some (Ks, e') then
-      Some (Ks ++ [CopyCtx o ly ], e') else Some ([], e)
+  | Deref desc o ly e1 => if find_expr_fill e1 bind_val is Some (Ks, e') then
+      Some (Ks ++ [DerefCtx desc o ly ], e') else Some ([], e)
+  | Move desc o ly e1 => if find_expr_fill e1 bind_val is Some (Ks, e') then
+      Some (Ks ++ [MoveCtx desc o ly ], e') else Some ([], e)
+  | Copy desc o ly e1 => if find_expr_fill e1 bind_val is Some (Ks, e') then
+      Some (Ks ++ [CopyCtx desc o ly ], e') else Some ([], e)
   | Raw pk m e1 => if find_expr_fill e1 bind_val is Some (Ks, e') then
       Some (Ks ++ [RawCtx pk m], e') else Some ([], e)
   | AnnotExpr n a e1 => if find_expr_fill e1 bind_val is Some (Ks, e') then
@@ -347,7 +347,7 @@ Proof.
     apply: [lang.CheckBinOpRCtx _ _ _ _]|
     apply: [lang.CopyAllocIdLCtx _ _]|
     apply: [lang.CopyAllocIdRCtx _ _]|
-    apply: [lang.DerefCtx _ _]|
+    apply: [lang.DerefCtx _ _ _]|
     apply: [lang.CASLCtx _ _ _]|
     apply: [lang.CASMCtx _ _ _]|
     apply: [lang.CASRCtx _ _ _]|
@@ -357,15 +357,15 @@ Proof.
     apply: [lang.AllocLCtx _]|
     apply: [lang.AllocRCtx _]|
     apply: [lang.SkipECtx]|
-    apply: [lang.SkipECtx; lang.DerefCtx _ _]|
-    apply: [lang.SkipECtx; lang.DerefCtx _ _]|
+    apply: [lang.SkipECtx; lang.DerefCtx _ _ _]|
+    apply: [lang.SkipECtx; lang.DerefCtx _ _ _]|
     apply: [lang.SkipECtx]|
     apply: (replicate n lang.SkipECtx)|
     apply: []|
     apply: [lang.SkipECtx; lang.SkipECtx]|
     apply: [lang.BinOpRCtx _ _ _ _]|
     apply: []|
-    apply: [lang.SkipECtx; lang.DerefCtx _ _]|
+    apply: [lang.SkipECtx; lang.DerefCtx _ _ _]|
     apply: [lang.BinOpRCtx _ _ _ _]|..
   ]).
   destruct K => //=.
@@ -403,8 +403,10 @@ Inductive stmt :=
 | Switch (it : int_type) (e : expr) (m : gmap Z nat) (bs : list stmt) (def : stmt)
 | Call (f : expr) (eκs : list string) (etys : list rust_type) (args : list expr)
     (destination : option (order * op_type * expr)) (normal unwind : stmt)
-| Assign (o : order) (ot : op_type) (e1 e2 : expr) (s : stmt)
-| AssignSE (o : order) (ot : op_type) (e1 e2 : expr) (s : stmt)
+| Assign (desc : memory_access_desc) (o : order) (ot : op_type)
+    (e1 e2 : expr) (s : stmt)
+| AssignSE (desc : memory_access_desc) (o : order) (ot : op_type)
+    (e1 e2 : expr) (s : stmt)
 | Free (e_size : expr) (e_align : expr) (e : expr) (s : stmt)
 | SkipS (s : stmt)
 | StuckS
@@ -429,8 +431,10 @@ Lemma stmt_ind (P : stmt → Prop):
   (∀ (f : expr) (eκs : list string) (etys : list rust_type) (args : list expr)
       (destination : option (order * op_type * expr)) (normal : stmt), P normal →
       ∀ unwind : stmt, P unwind → P (Call f eκs etys args destination normal unwind)) →
-  (∀ (o : order) (ot : op_type) (e1 e2 : expr) (s : stmt), P s → P (Assign o ot e1 e2 s)) →
-  (∀ (o : order) (ot : op_type) (e1 e2 : expr) (s : stmt), P s → P (AssignSE o ot e1 e2 s)) →
+  (∀ (desc : memory_access_desc) (o : order) (ot : op_type)
+      (e1 e2 : expr) (s : stmt), P s → P (Assign desc o ot e1 e2 s)) →
+  (∀ (desc : memory_access_desc) (o : order) (ot : op_type)
+      (e1 e2 : expr) (s : stmt), P s → P (AssignSE desc o ot e1 e2 s)) →
   (∀ (e_size : expr) (e_align : expr) (e : expr) (s : stmt), P s → P (Free e_size e_align e s)) →
   (∀ s : stmt, P s → P (SkipS s)) →
   (P StuckS) →
@@ -462,8 +466,10 @@ Fixpoint to_stmt `{LayoutAlg} (s : stmt) : lang.stmt :=
   | Call f eκs etys args destination normal unwind =>
       notation.CallS (to_expr f) eκs etys (to_expr <$> args)
         (to_call_destination destination) (to_stmt normal) (to_stmt unwind)
-  | Assign o ot e1 e2 s => lang.Assign o ot (to_expr e1) (to_expr e2) (to_stmt s)
-  | AssignSE o ot e1 e2 s => notation.AssignSE o ot (to_expr e1) (to_expr e2) (to_stmt s)
+  | Assign desc o ot e1 e2 s =>
+      lang.Assign desc o ot (to_expr e1) (to_expr e2) (to_stmt s)
+  | AssignSE desc o ot e1 e2 s =>
+      notation.AssignSE desc o ot (to_expr e1) (to_expr e2) (to_stmt s)
   | Free e_size e_align e s => lang.Free (to_expr e_size) (to_expr e_align) (to_expr e) (to_stmt s)
   | SkipS s => lang.SkipS (to_stmt s)
   | StuckS => lang.StuckS
@@ -529,16 +535,16 @@ Ltac of_stmt s :=
     let normal := of_stmt normal in
     let unwind := of_stmt unwind in
     constr:(Call f eκs etys args destination normal unwind)
-  | lang.Assign ?o ?ot ?e1 ?e2 ?s =>
+  | lang.Assign ?desc ?o ?ot ?e1 ?e2 ?s =>
     let e1 := of_expr e1 in
     let e2 := of_expr e2 in
     let s := of_stmt s in
-    constr:(Assign o ot e1 e2 s)
-  | notation.AssignSE ?o ?ot ?e1 ?e2 ?s =>
+    constr:(Assign desc o ot e1 e2 s)
+  | notation.AssignSE ?desc ?o ?ot ?e1 ?e2 ?s =>
     let e1 := of_expr e1 in
     let e2 := of_expr e2 in
     let s := of_stmt s in
-    constr:(AssignSE o ot e1 e2 s)
+    constr:(AssignSE desc o ot e1 e2 s)
   | lang.Free ?e_size ?e_align ?e ?s =>
     let e_size := of_expr e_size in
     let e_align := of_expr e_align in
@@ -557,10 +563,14 @@ Ltac of_stmt s :=
   end.
 
 Inductive stmt_ectx :=
-| AssignRCtx (o : order) (ot : op_type) (e1 : expr) (s : stmt)
-| AssignLCtx (o : order) (ot : op_type) (v2 : val) (s : stmt)
-| AssignSERCtx (o : order) (ot : op_type) (e1 : expr) (s : stmt)
-| AssignSELCtx (o : order) (ot : op_type) (v2 : val) (s : stmt)
+| AssignRCtx (desc : memory_access_desc) (o : order) (ot : op_type)
+    (e1 : expr) (s : stmt)
+| AssignLCtx (desc : memory_access_desc) (o : order) (ot : op_type)
+    (v2 : val) (s : stmt)
+| AssignSERCtx (desc : memory_access_desc) (o : order) (ot : op_type)
+    (e1 : expr) (s : stmt)
+| AssignSELCtx (desc : memory_access_desc) (o : order) (ot : op_type)
+    (v2 : val) (s : stmt)
 | ReturnCtx
 | IfSCtx (ot : op_type) (s1 s2 : stmt)
 | SwitchCtx (it : int_type) (m: gmap Z nat) (bs : list stmt) (def : stmt)
@@ -577,10 +587,10 @@ Inductive stmt_ectx :=
 
 Definition stmt_fill (Ki : stmt_ectx) (e : expr) : stmt :=
   match Ki with
-  | AssignRCtx o ot e1 s => Assign o ot e1 e s
-  | AssignLCtx o ot v2 s => Assign o ot e (Val v2) s
-  | AssignSERCtx o ot e1 s => AssignSE o ot e1 e s
-  | AssignSELCtx o ot v2 s => AssignSE o ot e (Val v2) s
+  | AssignRCtx desc o ot e1 s => Assign desc o ot e1 e s
+  | AssignLCtx desc o ot v2 s => Assign desc o ot e (Val v2) s
+  | AssignSERCtx desc o ot e1 s => AssignSE desc o ot e1 e s
+  | AssignSELCtx desc o ot v2 s => AssignSE desc o ot e (Val v2) s
   | ReturnCtx => Return e
   | ExprSCtx s => ExprS e s
   | IfSCtx ot s1 s2 => IfS ot e s1 s2
@@ -605,8 +615,8 @@ Definition find_stmt_fill (s : stmt) : option (stmt_ectx * expr) :=
   | Call f eκs etys args destination normal unwind =>
       if f is Val _ then None
       else Some (CallLCtx eκs etys args destination normal unwind, f)
-  | Assign o ot e1 e2 s => if e2 is (Val v) then if e1 is (Val v) then None else Some (AssignLCtx o ot v s, e1) else Some (AssignRCtx o ot e1 s, e2)
-  | AssignSE o ot e1 e2 s => if e2 is (Val v) then if e1 is (Val v) then None else Some (AssignSELCtx o ot v s, e1) else Some (AssignSERCtx o ot e1 s, e2)
+  | Assign desc o ot e1 e2 s => if e2 is (Val v) then if e1 is (Val v) then None else Some (AssignLCtx desc o ot v s, e1) else Some (AssignRCtx desc o ot e1 s, e2)
+  | AssignSE desc o ot e1 e2 s => if e2 is (Val v) then if e1 is (Val v) then None else Some (AssignSELCtx desc o ot v s, e1) else Some (AssignSERCtx desc o ot e1 s, e2)
   | Assert ot e s => if e is (Val v) then None else Some (AssertCtx ot s, e)
   | Free e_size e_align e s =>
       if e_size is (Val v_size) then
@@ -627,10 +637,11 @@ Lemma stmt_fill_correct `{!LayoutAlg} `{!RadiumConfig} Ks π rf:
   ∃ Ks', ∀ e, to_rtstmt π rf (to_stmt (stmt_fill Ks e)) = ectxi_language.fill Ks' (to_rtexpr π (to_expr e)).
 Proof.
   (move: Ks => [] *; [
-  eexists ([StmtCtx (lang.AssignRCtx _ _ _ _) π rf])|
-  eexists ([StmtCtx (lang.AssignLCtx _ _ _ _) π rf])|
-  eexists ([StmtCtx (lang.AssignRCtx _ _ _ _) π rf])|
-  eexists ([ExprCtx lang.SkipECtx π; ExprCtx lang.SkipECtx π; StmtCtx (lang.AssignLCtx _ _ _ _) π rf])|
+  eexists ([StmtCtx (lang.AssignRCtx _ _ _ _ _) π rf])|
+  eexists ([StmtCtx (lang.AssignLCtx _ _ _ _ _) π rf])|
+  eexists ([StmtCtx (lang.AssignRCtx _ _ _ _ _) π rf])|
+  eexists ([ExprCtx lang.SkipECtx π; ExprCtx lang.SkipECtx π;
+    StmtCtx (lang.AssignLCtx _ _ _ _ _) π rf])|
   eexists ([StmtCtx (lang.ReturnCtx) π rf])|
   eexists ([StmtCtx (lang.IfSCtx _ _ _) π rf])|
   eexists ([StmtCtx (lang.SwitchCtx _ _ _ _) π rf])|
