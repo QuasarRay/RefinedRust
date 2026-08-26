@@ -45,15 +45,7 @@ let
         # NOTE: Remove `lambda-rust` when available in Nix's `RocqPackages`
         lambda-rust = final.callPackage ./lambda-rust.nix lambda-rust;
 
-        smtcoq = final.lib.overrideRocqDerivation {
-          defaultVersion = smtcoq.version;
-          release.${smtcoq.version}.sha256 = smtcoq.sha256;
-        } prev.smtcoq;
-
-        sniper = final.lib.overrideRocqDerivation {
-          defaultVersion = sniper.version;
-          release.${sniper.version}.sha256 = sniper.sha256;
-        } prev.sniper;
+        trakt = prev.trakt.overrideAttrs { doCheck = false; };
       }
     );
 in

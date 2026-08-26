@@ -17,11 +17,11 @@
         "trakt": "trakt"
       },
       "locked": {
-        "lastModified": 1784280250,
-        "narHash": "sha256-RCzx9UuwLkkfu819x9VU6+OpmcxZxRsbs/GmJ79oqac=",
+        "lastModified": 1787687321,
+        "narHash": "sha256-xVFh3uJ/fk2CpjY0E3BehIIK1yBOXTku4tyyWDqFCEs=",
         "owner": "SMTCoq",
         "repo": "SMTCoq",
-        "rev": "cdddf26c36887d6a06080764187fb6b174b97c8c",
+        "rev": "34720c4bb233bcb8cf5243cb7fe047258eb26dbc",
         "type": "github"
       },
       "original": {
@@ -41,17 +41,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1785181426,
-        "narHash": "sha256-CazBsE3jE+tcj6YVi8Lfh4fEdovNxVSKfDDAuZfXD0s=",
-        "owner": "SMTCoq",
-        "repo": "Sniper",
-        "rev": "e743fadcd9e6da909d3cb7161d612bdcaeb554fb",
-        "type": "github"
+        "lastModified": 1787735845,
+        "narHash": "sha256-pfyx7bw9dHuvhElPbJCA5Qit37uHq0FLhxt+P788xVw=",
+        "ref": "refs/heads/main",
+        "rev": "a51790aa438bfc6749298573409717db71713fa2",
+        "revCount": 1004,
+        "type": "git",
+        "url": "file:///home/user/internship/rust/smtcoq/sniper"
       },
       "original": {
-        "owner": "SMTCoq",
-        "repo": "Sniper",
-        "type": "github"
+        "type": "git",
+        "url": "file:///home/user/internship/rust/smtcoq/sniper"
       }
     },
     "crane": {
@@ -180,17 +180,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1783585727,
-        "narHash": "sha256-GRKihDcL+6ySSS2FUHa1cjJnCk8RztXq5TvwYFfb0lY=",
-        "ref": "refs/heads/main",
-        "rev": "f3e509c4fb9f4a0fbc1f3282f5a493e07bb55565",
-        "revCount": 3,
-        "type": "git",
-        "url": "https://codeberg.org/lafeychine/rocq-utils"
+        "lastModified": 1787575763,
+        "narHash": "sha256-15nttb8eIUZynYXDZBuphktiUvlAtSlcMuiUwt1CpZY=",
+        "owner": "lafeychine",
+        "repo": "rocq-utils",
+        "rev": "8c5b523502c83e940cf102f9b7956d738fbd8517",
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "https://codeberg.org/lafeychine/rocq-utils"
+        "owner": "lafeychine",
+        "repo": "rocq-utils",
+        "type": "github"
       }
     },
     "root": {
@@ -230,11 +230,11 @@
         "rocq-utils": "rocq-utils"
       },
       "locked": {
-        "lastModified": 1783668179,
-        "narHash": "sha256-DGQIizTV52DUG7IsQ8QOSB+EgPJkj3+0gP7sMKviDEg=",
+        "lastModified": 1787580542,
+        "narHash": "sha256-1Zsy2of4SupbMjhQTZ3KC1r1zqarf41cdKSlefbWMTc=",
         "owner": "rocq-trakt",
         "repo": "trakt",
-        "rev": "abc90bb42fdb6de022375187d8b0bacd63641c90",
+        "rev": "b245940ea5d942828c6bc00e42155931805d9474",
         "type": "github"
       },
       "original": {

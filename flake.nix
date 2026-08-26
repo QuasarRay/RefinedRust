@@ -10,7 +10,7 @@
     };
 
     Sniper = {
-      url = "github:SMTCoq/Sniper";
+      url = "git+file:///home/user/internship/rust/smtcoq/sniper";
       inputs = {
         nixpkgs.follows = "nixpkgs";
         flake-parts.follows = "flake-parts";
@@ -80,8 +80,8 @@
         };
 
         sniper = {
-          version = "14fd1f02104f6e1214ad436d21eaacfb0d71db19";
-          sha256 = "sha256-bFjwYVVP2/SNixSrThp3c8RYrmSmLb7NdjzpNtcDyAk=";
+          version = "master";
+          sha256 = "sha256-iv8gAuLnPanHBVFINOSkM+hXwrqbOJA844FJj1sQA2U=";
         };
       };
 
@@ -395,7 +395,7 @@
                     withStdlib = false;
                     generateFiles = false;
                     useDune = true;
-                    propagatedBuildInputs = [ packages.refinedrust-smtcoq ];
+                    propagatedBuildInputs = [ packages.refinedrust ];
 
                     preBuild = ''
                       find . -name dune -exec sed -i -e 's/(package refinedrust-stdlib)/(package ${opam-name})/g' {} \;
@@ -539,7 +539,7 @@
 
                     src = ./case_studies/extra_proofs;
 
-                    buildInputs = [ packages.refinedrust-smtcoq ];
+                    propagatedBuildInputs = [ packages.refinedrust-smtcoq ];
                     useDune = true;
                   };
                 in
@@ -586,23 +586,44 @@
             }
             // self.lib.mapToAttrs mkCaseStudies case_studies;
 
-          devShells.default = pkgs.mkShell {
-            inputsFrom = with packages; [
-              frontend
-              refinedrust
-            ];
+          devShells = {
+            default = pkgs.mkShell {
+              inputsFrom = with packages; [
+                frontend
+                refinedrust
+              ];
 
-            packages = with pkgs; [
-              cargo-deny
-              cargo-machete
-              gnumake
-              rust.toolchain.dev
-              pkgs.rocqPackages.sniper
-            ];
+              packages = with pkgs; [
+                cargo-deny
+                cargo-machete
+                gnumake
+                rust.toolchain.dev
+              ];
 
-            LD_LIBRARY_PATH = lib.makeLibraryPath [ rust.toolchain.dev ];
-            DYLD_FALLBACK_LIBRARY_PATH = lib.makeLibraryPath [ rust.toolchain.dev ];
-            LIBCLANG_PATH = lib.makeLibraryPath [ pkgs.libclang.lib ];
+              LD_LIBRARY_PATH = lib.makeLibraryPath [ rust.toolchain.dev ];
+              DYLD_FALLBACK_LIBRARY_PATH = lib.makeLibraryPath [ rust.toolchain.dev ];
+              LIBCLANG_PATH = lib.makeLibraryPath [ pkgs.libclang.lib ];
+            };
+
+            smtcoq = let
+              dune = self.lib.mkDuneWrapper pkgs packages.stdlib;
+            in pkgs.mkShell {
+              packages = [
+                dune
+                pkgs.gcc
+                packages.frontend
+                rust.toolchain.build
+                pkgs.rocqPackages.sniper
+              ];
+              dontDetectOcamlConflicts = true;
+
+              LD_LIBRARY_PATH = lib.makeLibraryPath [ rust.toolchain.build ];
+              DYLD_FALLBACK_LIBRARY_PATH = lib.makeLibraryPath [ rust.toolchain.build ];
+
+              OCAMLPATH = "${dune}/lib/ocaml/${pkgs.rocqPackages.rocq-core.ocamlPackages.ocaml.version}/site-lib";
+              ROCQPATH = "${dune}/lib/coq/${pkgs.rocqPackages.rocq-core.rocq-version}/user-contrib";
+              RR_NIX_STDLIB = dune;
+            };
           };
 
           formatter = pkgs.nixfmt-tree;
