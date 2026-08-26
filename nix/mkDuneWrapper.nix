@@ -1,4 +1,4 @@
-pkgs: drv:
+pkgs: drvs:
 
 let
   fetchRocqDeps =
@@ -11,7 +11,7 @@ pkgs.symlinkJoin {
     pkgs.rocqPackages.rocq-core
   ]
   ++ pkgs.rocqPackages.rocq-core.nativeBuildInputs
-  ++ fetchRocqDeps drv;
+  ++ pkgs.lib.flatten (map fetchRocqDeps drvs);
 
   nativeBuildInputs = [ pkgs.makeWrapper ];
   postBuild = ''

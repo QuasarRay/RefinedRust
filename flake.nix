@@ -606,7 +606,7 @@
             };
 
             smtcoq = let
-              dune = self.lib.mkDuneWrapper pkgs packages.stdlib;
+              dune = self.lib.mkDuneWrapper pkgs [ packages.stdlib pkgs.rocqPackages.sniper ];
             in pkgs.mkShell {
               packages = [
                 dune
