@@ -76,30 +76,31 @@ Section accessors.
         lty_of_ty_own (int el.(el_tag_it)) (Shared κ) π
           (PlaceIn (els_lookup_tag en.(enum_els) v.(eltv_tag))) l ∗
         (l +ₗ data_offset) ◁ₗ[π, Shared κ] #v.(eltv_rfn) @ v.(eltv_ltype) ∗
-        (∀ rte' (lte' : ltype rte') (re' : rte') r',
-          ⌜enum_tag en r' = Some v.(eltv_tag)⌝ -∗
+        (∀ rte' (lte' : ltype rte') (re' : rte'),
           ⌜syn_type_has_layout (ltype_st lte') variant_ly⌝ -∗
           lty_of_ty_own (int el.(el_tag_it)) (Shared κ) π
             (PlaceIn (els_lookup_tag en.(enum_els) v.(eltv_tag))) l -∗
           (l +ₗ data_offset) ◁ₗ[π, Shared κ] #re' @ lte' ={F}=∗
-          l ◁ₗ[π, Shared κ] #r' @
+          l ◁ₗ[π, Shared κ] #r @
             EnumLtype en (Some (mk_enum_ltype_variant v.(eltv_tag) rte' lte' re'))).
   Proof.
     iIntros (?) "Hb". rewrite ltype_own_enum_unfold /enum_ltype_own.
-    iDestruct "Hb" as "(%el & %Halg & %Hly & #Hlb & %r' & -> & #Hb)".
+    iDestruct "Hb" as "(%el & %Halg & %Hly & #Hlb & %Hconc & %r' & -> & #Hb)".
     iExists el. do 2 (iSplitR; first done). iSplitR ""; first iFrame "Hlb".
     iMod (fupd_mask_mono with "Hb") as "Hb'"; first done.
     iModIntro.
-    iDestruct "Hb'" as "(%variant_ly & %Hvariant & %Hst & %Htag & #Htag & #Htag_pad & #Hpayload & #Htail)".
+    iDestruct "Hb'" as "(%Hxrfn & %variant_ly & %Hvariant & %Hst & %Htag & #Htag & #Htag_pad & #Hpayload & #Htail)".
     iExists variant_ly. do 3 (iSplitR; first done).
     iSplitR; first iFrame "Htag".
     iSplitR; first iFrame "Hpayload".
-    iIntros (rte' lte' re' rnew) "%Htag_new %Hst_new #Htag' #Hpayload'".
+    iIntros (rte' lte' re') "%Hst_new #Htag' #Hpayload'".
     iModIntro.
     rewrite ltype_own_enum_unfold /enum_ltype_own.
     iExists el. do 2 (iSplitR; first done). iSplitR; first iFrame "Hlb".
-    iExists rnew. iSplitR; first done.
+    iSplitR. { iPureIntro. apply place_rfn_is_concrete_in. }
+    iExists r'. iSplitR; first done.
     iModIntro. iModIntro.
+    iSplitR; first done.
     iEval (rewrite /interp_enum_ltype_variant decide_True //).
     iExists variant_ly. do 3 (iSplitR; first done). iFrame "#".
   Qed.

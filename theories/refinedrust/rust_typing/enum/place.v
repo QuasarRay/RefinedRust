@@ -189,8 +189,7 @@ Section rules.
     iPoseProof (typed_place_cond_syn_type_compat with "Hcond") as "%Hst_compat".
     pose proof (Hst_compat _ Hst) as Hst_new.
     iEval (rewrite /GetEnumDataLocSt /use_enum_layout_alg' Halg /=) in "Hl2".
-    iMod ("Hcl" $! _ upd'.(pupd_lt) re' r with "[] [] Htag Hl2") as "Hl".
-    { done. }
+    iMod ("Hcl" $! _ upd'.(pupd_lt) re' with "[] Htag Hl2") as "Hl".
     { done. }
     iModIntro. iExists (mkPUpd _ bmin0 _
       (EnumLtype en (Some (mk_enum_ltype_variant

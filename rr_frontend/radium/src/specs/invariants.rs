@@ -284,7 +284,7 @@ impl Spec {
                 write!(
                     body,
                     "{scope} mk_pers_ex_inv_def\n\
-                       {indent}{indent}({inv})%I _ _\n\
+                       {indent}{indent}({inv})%I _ _ _\n\
                        {indent}",
                 )
                 .unwrap();
@@ -305,6 +305,7 @@ impl Spec {
                             {indent}{indent}({own_inv})%I\n\
                             {indent}{indent}({gd})%I\n\
                             {indent}{indent}({trivial_drop})\n\
+                            {indent}{indent}_\n\
                             {indent}{indent}({lft_outlives})\n\
                             {indent}{indent}({lft_wf_elctx})\n\
                             {indent}{indent}_ _ _ _\n\
@@ -317,6 +318,7 @@ impl Spec {
                             "{scope} mk_auto_ex_inv_def\n\
                             {indent}{indent}({own_inv})%I\n\
                             {indent}{indent}({trivial_drop})\n\
+                            {indent}{indent}_\n\
                             {indent}{indent}({lft_outlives})\n\
                             {indent}{indent}({lft_wf_elctx})\n\
                             {indent}{indent}_ _ _ _\n\
@@ -407,13 +409,18 @@ impl Spec {
                 if self.invariants.iter().all(|(_, mode)| *mode == Mode::All) {
                     Self::push_obligation(
                         &mut out,
-                        coq::ltac::LTac::Literal("ex_plain_t_solve_shr_auto".to_owned()),
+                        coq::ltac::LTac::Literal(format!("{attr_intro}ex_plain_t_solve_is_xrfn")),
+                        coq::proof::Terminator::Qed,
+                    );
+                    Self::push_obligation(
+                        &mut out,
+                        coq::ltac::LTac::Literal(format!("{attr_intro}ex_plain_t_solve_shr_auto")),
                         coq::proof::Terminator::Defined,
                     );
                     if self.ty_ghost_drop.is_some() {
                         Self::push_obligation(
                             &mut out,
-                            coq::ltac::LTac::Literal("ex_t_solve_persistent".to_owned()),
+                            coq::ltac::LTac::Literal(format!("{attr_intro}ex_t_solve_persistent")),
                             coq::proof::Terminator::Qed,
                         );
                         Self::push_obligation(
@@ -429,12 +436,12 @@ impl Spec {
                     } else {
                         Self::push_obligation(
                             &mut out,
-                            coq::ltac::LTac::Literal("ex_plain_t_solve_ghost_drop_auto".to_owned()),
+                            coq::ltac::LTac::Literal(format!("{attr_intro}ex_plain_t_solve_ghost_drop_auto")),
                             coq::proof::Terminator::Defined,
                         );
                         Self::push_obligation(
                             &mut out,
-                            coq::ltac::LTac::Literal("ex_t_solve_persistent".to_owned()),
+                            coq::ltac::LTac::Literal(format!("{attr_intro}ex_t_solve_persistent")),
                             coq::proof::Terminator::Qed,
                         );
                         Self::push_obligation(
@@ -444,6 +451,11 @@ impl Spec {
                         );
                     }
                 } else if self.ty_ghost_drop.is_some() {
+                    Self::push_obligation(
+                        &mut out,
+                        coq::ltac::LTac::Literal(format!("{attr_intro}ex_plain_t_solve_is_xrfn")),
+                        coq::proof::Terminator::Qed,
+                    );
                     Self::push_obligation(
                         &mut out,
                         coq::ltac::LTac::Literal("ex_t_solve_persistent".to_owned()),
@@ -467,12 +479,17 @@ impl Spec {
                 } else {
                     Self::push_obligation(
                         &mut out,
-                        coq::ltac::LTac::Literal("ex_plain_t_solve_ghost_drop_auto".to_owned()),
+                        coq::ltac::LTac::Literal(format!("{attr_intro}ex_plain_t_solve_ghost_drop_auto")),
                         coq::proof::Terminator::Defined,
                     );
                     Self::push_obligation(
                         &mut out,
-                        coq::ltac::LTac::Literal("ex_t_solve_persistent".to_owned()),
+                        coq::ltac::LTac::Literal(format!("{attr_intro}ex_plain_t_solve_is_xrfn")),
+                        coq::proof::Terminator::Qed,
+                    );
+                    Self::push_obligation(
+                        &mut out,
+                        coq::ltac::LTac::Literal(format!("{attr_intro}ex_t_solve_persistent")),
                         coq::proof::Terminator::Qed,
                     );
                     Self::push_obligation(
