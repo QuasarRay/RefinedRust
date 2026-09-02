@@ -15,6 +15,19 @@ Program Definition ptr_write `{!LayoutAlg} (T_st : syn_type) : function := {|
 |}.
 Next Obligation. solve_fn_vars_nodup. Qed.
 
+Program Definition ptr_write_volatile `{!LayoutAlg} (T_st : syn_type) : function := {|
+  f_args := [("dst", void* ); ("src", use_layout_alg' T_st)];
+  f_code :=
+    <["_bb0" :=
+      !{PtrOp} "dst" <-{use_op_alg' T_st, Na1Ord, volatile_nonatomic_access}
+        move{use_op_alg' T_st} "src";
+      return zst_val
+    ]>%E $
+    ∅;
+  f_init := "_bb0";
+|}.
+Next Obligation. solve_fn_vars_nodup. Qed.
+
 
 Program Definition ptr_read `{!LayoutAlg} (T_st : syn_type) : function := {|
   f_args := [("src", void* )];
@@ -22,6 +35,20 @@ Program Definition ptr_read `{!LayoutAlg} (T_st : syn_type) : function := {|
     <["_bb0" :=
       local_live{T_st} "tmp";
       "tmp" <-{use_op_alg' T_st} copy{use_op_alg' T_st} (!{PtrOp} "src");
+      return (move{use_op_alg' T_st} "tmp")
+    ]>%E $
+    ∅;
+  f_init := "_bb0";
+|}.
+Next Obligation. solve_fn_vars_nodup. Qed.
+
+Program Definition ptr_read_volatile `{!LayoutAlg} (T_st : syn_type) : function := {|
+  f_args := [("src", void* )];
+  f_code :=
+    <["_bb0" :=
+      local_live{T_st} "tmp";
+      "tmp" <-{use_op_alg' T_st}
+        copy{use_op_alg' T_st, Na1Ord, volatile_nonatomic_access} (!{PtrOp} "src");
       return (move{use_op_alg' T_st} "tmp")
     ]>%E $
     ∅;

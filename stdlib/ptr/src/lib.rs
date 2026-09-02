@@ -65,6 +65,7 @@ pub const fn read<T>(src: *const T) -> T {
 }
 
 #[rr::export_as(core::ptr::write_volatile)]
+#[rr::code_shim("ptr_write_volatile")]
 #[rr::requires(#type "dst" : "()" @ "uninit {st_of T}")]
 #[rr::ensures(#type "dst" : "$# src" @ "{ty_of T}")]
 pub const fn write_volatile<T>(dst: *mut T, src:T) {
@@ -72,6 +73,7 @@ pub const fn write_volatile<T>(dst: *mut T, src:T) {
 }
 
 #[rr::export_as(core::ptr::read_volatile)]
+#[rr::code_shim("ptr_read_volatile")]
 #[rr::params("k", "ty" : "xtype")]
 #[rr::unsafe_elctx("bor_kind_outlives_elctx k ϝ")]
 #[rr::requires(#iris "src ◁ₗ[π, k] # ($# ty.(xtype_rfn)) @ ◁ ty.(xtype_ty)")]
