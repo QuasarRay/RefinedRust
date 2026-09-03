@@ -76,10 +76,15 @@ Section Iter_inv_t.
           (λ π inner_rfn (_ty_rfn : RT_rt ((list ((T_rt)))%type : RT)),
                   let 'xs := _ty_rfn in ∃ (x: name_hint_ty "x" (_)%Z) (y: name_hint_ty "y" (_)%Z), ⌜inner_rfn = -[#(x); #(y)]⌝ ∗ True)%I
           (true)
+          _
           ([])
           ([])
           _ _ _ _
         .
+  Next Obligation.
+    ex_plain_t_solve_is_xrfn.
+  Qed.
+
   Next Obligation.
     ex_plain_t_solve_shr_auto.
   Defined.
@@ -151,10 +156,15 @@ Section IterMut_inv_t.
           (λ π inner_rfn (_ty_rfn : RT_rt (((list ((T_rt) * gname))%type)%type : RT)),
                   let 'xs := _ty_rfn in ∃ (x: name_hint_ty "x" ((loc))%Z) (y: name_hint_ty "y" ((loc))%Z), ⌜inner_rfn = -[#(x); #(y); #(tt)]⌝ ∗ True)%I
           (true)
+          _
           ([])
           ([])
           _ _ _ _
         .
+  Next Obligation.
+    ex_plain_t_solve_is_xrfn.
+  Qed.
+
   Next Obligation.
     ex_plain_t_solve_shr_auto.
   Defined.
@@ -224,22 +234,27 @@ Section IntoIter_inv_t.
   Program Definition IntoIter_inv_t_inv_spec (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) : (spec_with 0 [(T_rt); (A_rt)] ((ex_inv_def ((IntoIter_rt (T_rt) (A_rt)))%type ((list ((T_rt))))%type))) :=
     spec! ( *[]) : 0 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), mk_auto_ex_inv_def
           (λ π inner_rfn (_ty_rfn : RT_rt ((list ((T_rt)))%type : RT)),
-                  let 'xs := _ty_rfn in ∃ (x: name_hint_ty "x" (_)%Z) (y: name_hint_ty "y" (_)%Z), ⌜inner_rfn = -[#(x); #(y)]⌝ ∗ True)%I
+                  let 'xs := _ty_rfn in ∃ (x: name_hint_ty "x" (_)%Z) (y: name_hint_ty "y" (_)%Z), ⌜inner_rfn = -[#(x); #($# y)]⌝ ∗ True)%I
           (false)
+          _
           ([])
           ([])
           _ _ _ _
         .
   Next Obligation.
-    ex_plain_t_solve_shr_auto.
+    intros ?; ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    intros ?; ex_plain_t_solve_shr_auto.
   Defined.
 
   Next Obligation.
-    ex_plain_t_solve_ghost_drop_auto.
+    intros ?; ex_plain_t_solve_ghost_drop_auto.
   Defined.
 
   Next Obligation.
-    ex_t_solve_persistent.
+    intros ?; ex_t_solve_persistent.
   Qed.
 
   Next Obligation.
@@ -301,20 +316,25 @@ Section RawVecInner_inv_t.
           (λ π inner_rfn (_ty_rfn : RT_rt (((loc * nat * (A_rt) : RT)%type)%type : RT)),
                   let '(l, cap, alloc) := _ty_rfn in ⌜inner_rfn = -[#(l); #(Z.of_nat cap); #(alloc)]⌝ ∗ True)%I
           (false)
+          _
           ([])
           ([])
           _ _ _ _
         .
   Next Obligation.
-    ex_plain_t_solve_shr_auto.
+    intros ?; ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    intros ?; ex_plain_t_solve_shr_auto.
   Defined.
 
   Next Obligation.
-    ex_plain_t_solve_ghost_drop_auto.
+    intros ?; ex_plain_t_solve_ghost_drop_auto.
   Defined.
 
   Next Obligation.
-    ex_t_solve_persistent.
+    intros ?; ex_t_solve_persistent.
   Qed.
 
   Next Obligation.
@@ -376,20 +396,25 @@ Section RawVec_inv_t.
           (λ π inner_rfn (_ty_rfn : RT_rt (((loc * nat * list (place_rfn (option (place_rfn (T_rt))))))%type : RT)),
                   let '(l, cap, els) := _ty_rfn in ∃ (a: name_hint_ty "a" (_)%Z), ⌜inner_rfn = -[#((l, cap, $# a)); #(tt)]⌝ ∗ guarded true (l ◁ₗ[π, Owned] #(els) @ (◁ array_t cap (maybe_uninit T_ty))) ∗ Allocator_A_spec_attrs.(Allocator_FreeablePerm) a l (size_of_array_in_bytes (ty_syn_type T_ty MetaNone) cap) ∗ True)%I
           (false)
+          _
           ([] ++ (ty_lfts (T_ty)))
           ([] ++ (ty_wf_E (T_ty)))
           _ _ _ _
         .
   Next Obligation.
-    ex_plain_t_solve_shr_auto.
+    intros ?; ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    intros ?; ex_plain_t_solve_shr_auto.
   Defined.
 
   Next Obligation.
-    ex_plain_t_solve_ghost_drop_auto.
+    intros ?; ex_plain_t_solve_ghost_drop_auto.
   Defined.
 
   Next Obligation.
-    ex_t_solve_persistent.
+    intros ?; ex_t_solve_persistent.
   Qed.
 
   Next Obligation.
@@ -503,20 +528,25 @@ Section Vec_inv_t.
   Program Definition Vec_inv_t_inv_spec (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) : (spec_with 0 [(T_rt); (A_rt)] ((ex_inv_def ((Vec_rt (T_rt) (A_rt)))%type ((list (place_rfn (T_rt))))%type))) :=
     spec! ( *[]) : 0 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), mk_ex_inv_def_auto_shr
           (λ π inner_rfn (_ty_rfn : RT_rt ((list (place_rfn (T_rt)))%type : RT)),
-                  let 'xs := _ty_rfn in ∃ (cap: name_hint_ty "cap" ((nat))%Z) (l: name_hint_ty "l" ((loc))%Z) (len: name_hint_ty "len" ((nat))%Z) (els: name_hint_ty "els" (_)%Z), ⌜inner_rfn = -[#((l, cap, els)); #(Z.of_nat len)]⌝ ∗ ⌜(name_hint "Hxs" (xs = project_vec_els len els)%Z)%Z⌝ ∗ ⌜(name_hint "Hlook_1" (∀ i, (0 ≤ i < len)%nat → els !! i = Some (#(Some (xs !!! i))))%Z)%Z⌝ ∗ ⌜(name_hint "Hlook_2" (∀ i, (len ≤ i < cap)%nat → els !! i = Some (#None))%Z)%Z⌝ ∗ ⌜(name_hint "Hlen_eq" (len = length xs)%Z)%Z⌝ ∗ ⌜(name_hint "Hcap" (len ≤ cap)%Z)%Z⌝ ∗ ⌜(name_hint "Hbound" (len ≤ MaxInt usize)%Z)%Z⌝ ∗ ⌜(if decide (size_of_st (ty_syn_type T_ty MetaNone) = 0%nat) then cap = Z.to_nat (MaxInt USize) else (size_of_array_in_bytes (ty_syn_type T_ty MetaNone) cap ≤ MaxInt ISize)%Z)%Z⌝ ∗ True)%I
+                  let 'xs := _ty_rfn in ∃ (cap: name_hint_ty "cap" ((nat))%Z) (l: name_hint_ty "l" ((loc))%Z) (len: name_hint_ty "len" ((nat))%Z) (els: name_hint_ty "els" (_)%Z), ⌜inner_rfn = -[#((l, cap, els)); #(Z.of_nat len)]⌝ ∗ ⌜(name_hint "Hxs" (xs = project_vec_els len els)%Z)%Z⌝ ∗ ⌜(name_hint "Hlook_1" (∀ i, (0 ≤ i < len)%nat → els !! i = Some (#(Some (xs !!! i))))%Z)%Z⌝ ∗ ⌜(name_hint "Hlook_2" (∀ i, (len ≤ i < cap)%nat → els !! i = Some (#None))%Z)%Z⌝ ∗ ⌜(name_hint "Hlen_eq" (len = length xs)%Z)%Z⌝ ∗ ⌜(name_hint "Hcap" (len ≤ cap)%Z)%Z⌝ ∗ ⌜(name_hint "Hbound" (len ≤ MaxInt usize)%Z)%Z⌝ ∗ ⌜(if decide (size_of_st (ty_syn_type T_ty MetaNone) = 0%nat) then cap = Z.to_nat (MaxInt USize) else (size_of_array_in_bytes (ty_syn_type T_ty MetaNone) cap ≤ MaxInt ISize)%Z)%Z⌝ ∗ ⌜(length els = cap)%Z⌝ ∗ True)%I
           (λ π _ (_rfn_binder : RT_rt ((list (place_rfn (T_rt)))%type : RT)),
                   let 'xs := _rfn_binder in ([∗ list] x ∈ xs, ∃ r, place_rfn_interp_owned x r ∗ ty_ghost_drop T_ty π r) ∗ True)%I
           (false)
+          _
           ([])
           ([])
           _ _ _ _
         .
   Next Obligation.
-    ex_plain_t_solve_shr_auto.
+    intros ?; ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    intros ?; ex_plain_t_solve_shr_auto.
   Defined.
 
   Next Obligation.
-    ex_t_solve_persistent.
+    intros ?; ex_t_solve_persistent.
   Qed.
 
   Next Obligation.
@@ -917,6 +947,7 @@ Proof.
   - solve_goal.
   - lia.
   - rewrite Hst''. solve_goal.
+  - solve_goal.
   - done.
 Qed.
 

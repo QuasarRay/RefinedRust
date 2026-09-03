@@ -47,10 +47,15 @@ Section Option_ty.
         (λ rfn, match rfn with | None => *[]| (Some (x)) => *[x] end)
         ([("None", mk_enum_tag_sem _ (Option_None_ty -[] -[T_ty]) (λ '( *[]), None)); ("Some", mk_enum_tag_sem _ (Option_Some_ty -[] -[T_ty]) (λ '( *[x]), (Some (x))))])
         _
+        _
         _.
     Next Obligation.
       solve_inhabited.
     Defined.
+
+    Next Obligation.
+      solve_enum_is_xrfn_congr.
+    Qed.
 
     Next Obligation.
       done.
@@ -159,8 +164,11 @@ Proof.
   iIntros "Ha". unfold Option_ty.
   rewrite /ty_shr/=. simpl. 
   rewrite enum_shr_unfold/=/enum_shr_def.
+  iDestruct "Ha" as "(_ & Ha)".
   simpl.
-  rewrite Hst. done.
+  rewrite Hst. 
+  iSplitR. { iPureIntro. apply is_xrfn_proof. }
+  done.
 Qed.
 Definition Option_ty_weak_subtype_None_inst := [instance Option_ty_weak_subtype_None].
 #[export] Existing Instance Option_ty_weak_subtype_None_inst.

@@ -67,10 +67,15 @@ Section rwlock_RwLockReadGuard_inv_t.
           (λ π inner_rfn (_ty_rfn : RT_rt (((T_rt))%type : RT)),
                   let 'x := _ty_rfn in ⌜inner_rfn = -[#(#x)]⌝ ∗ True)%I
           (true)
+          _
           ([])
           ([])
           _ _ _ _
         .
+  Next Obligation.
+    ex_plain_t_solve_is_xrfn.
+  Qed.
+
   Next Obligation.
     ex_plain_t_solve_shr_auto.
   Defined.
@@ -154,10 +159,15 @@ Section once_Once_inv_t.
           (λ π inner_rfn (_ty_rfn : RT_rt ((gname)%type : RT)),
                   let 'η := _ty_rfn in ∃ (x: name_hint_ty "x" (_)%Z) (y: name_hint_ty "y" (_)%Z), ⌜inner_rfn = -[#(x); #(y)]⌝ ∗ True)%I
           (true)
+          _
           ([])
           ([])
           _ _ _ _
         .
+  Next Obligation.
+    ex_plain_t_solve_is_xrfn.
+  Qed.
+
   Next Obligation.
     ex_plain_t_solve_shr_auto.
   Defined.
@@ -229,10 +239,15 @@ Section rwlock_RwLock_inv_t.
           (λ π inner_rfn (_ty_rfn : RT_rt ((unit)%type : RT)),
                   let '() := _ty_rfn in ∃ (x: name_hint_ty "x" (_)%Z) (y: name_hint_ty "y" (_)%Z), ⌜inner_rfn = -[#(y); #(x)]⌝ ∗ True)%I
           (true)
+          _
           ([])
           ([])
           _ _ _ _
         .
+  Next Obligation.
+    ex_plain_t_solve_is_xrfn.
+  Qed.
+
   Next Obligation.
     ex_plain_t_solve_shr_auto.
   Defined.
@@ -302,12 +317,17 @@ Section rwlock_RwLockWriteGuard_inv_t.
   Program Definition rwlock_RwLockWriteGuard_inv_t_inv_spec  : (spec_with 1 [(T_rt); (R_rt)] ((ex_inv_def ((rwlock_RwLockWriteGuard_rt (T_rt) (R_rt)))%type ((place_rfn (T_rt)))%type))) :=
     spec! ( *[ulft_a]) : 1 | ( *[T_ty; R_ty]) : ([T_rt; R_rt] : list RT), mk_auto_ex_inv_def
           (λ π inner_rfn (_ty_rfn : RT_rt ((place_rfn (T_rt))%type : RT)),
-                  let 'x := _ty_rfn in ∃ (y: name_hint_ty "y" (_)%Z), ⌜inner_rfn = -[#(#tt); #(y)]⌝ ∗ True)%I
+                  let 'x := _ty_rfn in ∃ (y: name_hint_ty "y" (_)%Z), ⌜inner_rfn = -[#(#tt); #($# y)]⌝ ∗ True)%I
           (false)
+          _
           ([])
           ([])
           _ _ _ _
         .
+  Next Obligation.
+    ex_plain_t_solve_is_xrfn.
+  Qed.
+
   Next Obligation.
     ex_plain_t_solve_shr_auto.
   Defined.

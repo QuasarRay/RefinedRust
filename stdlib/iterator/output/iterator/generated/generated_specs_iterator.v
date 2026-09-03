@@ -128,10 +128,15 @@ Section adapters_map_Map_inv_t.
           (λ π inner_rfn (_ty_rfn : RT_rt ((MapXRT (I_rt) (F_rt))%type : RT)),
                   let 'x := _ty_rfn in ⌜inner_rfn = -[#($# x.(map_it)); #($# x.(map_clos))]⌝ ∗ True)%I
           (false)
+          _
           ([])
           ([])
           _ _ _ _
         .
+  Next Obligation.
+    ex_plain_t_solve_is_xrfn.
+  Qed.
+
   Next Obligation.
     ex_plain_t_solve_shr_auto.
   Defined.
@@ -203,10 +208,15 @@ Section adapters_skip_Skip_inv_t.
           (λ π inner_rfn (_ty_rfn : RT_rt (((_ * nat))%type : RT)),
                   let '(it, n) := _ty_rfn in ⌜inner_rfn = -[#(it); #(Z.of_nat n)]⌝ ∗ True)%I
           (false)
+          _
           ([])
           ([])
           _ _ _ _
         .
+  Next Obligation.
+    ex_plain_t_solve_is_xrfn.
+  Qed.
+
   Next Obligation.
     ex_plain_t_solve_shr_auto.
   Defined.
@@ -278,10 +288,15 @@ Section adapters_step_by_StepBy_inv_t.
           (λ π inner_rfn (_ty_rfn : RT_rt ((StepByXRT (I_rt))%type : RT)),
                   let 'x := _ty_rfn in ⌜inner_rfn = -[#($# x.(step_by_it)); #(Z.of_nat x.(step_by_n)); #(x.(step_by_first))]⌝ ∗ True)%I
           (false)
+          _
           ([])
           ([])
           _ _ _ _
         .
+  Next Obligation.
+    ex_plain_t_solve_is_xrfn.
+  Qed.
+
   Next Obligation.
     ex_plain_t_solve_shr_auto.
   Defined.
@@ -353,10 +368,15 @@ Section adapters_take_Take_inv_t.
           (λ π inner_rfn (_ty_rfn : RT_rt (((_ * nat))%type : RT)),
                   let '(it, n) := _ty_rfn in ⌜inner_rfn = -[#(it); #(Z.of_nat n)]⌝ ∗ True)%I
           (false)
+          _
           ([])
           ([])
           _ _ _ _
         .
+  Next Obligation.
+    ex_plain_t_solve_is_xrfn.
+  Qed.
+
   Next Obligation.
     ex_plain_t_solve_shr_auto.
   Defined.
