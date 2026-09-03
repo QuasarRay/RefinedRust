@@ -1007,7 +1007,8 @@ Tactic Notation "liRStepUntil" open_constr(id) :=
   end; liShow.
 
 (** * Tactics for starting a function *)
-Ltac prepare_initial_coq_context :=
+(* Compared to the version in [automation/existentials.v], adds the [fn_A _] case. *)
+Ltac prepare_initial_coq_context ::=
   (* The automation assumes that all products in the context are destructed, see liForall *)
   repeat match goal with
   (*| H : struct_xt _ |- _ => unfold struct_xt in H; simpl in H*)
@@ -1018,8 +1019,8 @@ Ltac prepare_initial_coq_context :=
                       (*destruct H as [tmp];*)
                       (*rename_by_string tmp n*)
   | H : unit |- _ => destruct H
-  | H : fn_A _ |- _ => progress (simpl in H)
   | H : RT_xt _ |- _ => progress (simpl in H)
+  | H : fn_A _ |- _ => progress (simpl in H)
   end.
 
 Section tac.
@@ -1399,6 +1400,11 @@ Lemma ty_wf_E_unfold_lem `{!typeGS Σ} {rt} (ty : type rt) :
   ty_wf_E ty = _ty_wf_E _ ty.
 Proof. rewrite ty_wf_E_unfold. done. Qed.
 
+Global Hint Extern 100 (IsXrfn _) =>
+  progress invert_is_xrfn_assumptions; solve_is_xrfn : typeclass_instances.
+Global Hint Extern 100 (IsXrfnImplies _ _) =>
+  constructor; intros; solve_is_xrfn : typeclass_instances.
+
 (** Enum-related tactic calls *)
 Ltac solve_mk_enum_tag_consistent :=
   simpl; intro_adt_params;
@@ -1572,15 +1578,11 @@ Ltac solve_enum_layout_spec_discriminant_in_range :=
   init_cache; repeat first [econstructor | solve_goal ]; unsafe_unfold_common_radium_defs; simpl; lia.
 (** Solver for [is_xrfn] equivalence *)
 Ltac solve_enum_is_xrfn_case :=
-  intros (x & ?);
+  intros (xr & Heq);
   prepare_initial_coq_context;
-  (try destruct x; simpl in *; try done);
-  simplify_eq/=;
-  repeat match goal with
-  | H : _ = _ |- _ =>
-    injection H; clear H; intros; subst
-  end;
-  apply is_xrfn_proof
+  (try destruct xr; simpl in *; try done);
+  invert_is_xrfn_assumptions;
+  solve_is_xrfn
   .
 Ltac solve_enum_is_xrfn_congr :=
   intro_adt_params;
@@ -1727,7 +1729,7 @@ Ltac sidecond_hook_init :=
 Ltac sidecond_hook_core :=
   lazymatch goal with
   | |- is_xrfn _ =>
-      apply is_xrfn_proof
+      solve_is_xrfn
   | |- lctx_lft_alive ?E ?L ?κ =>
       solve_lft_alive
   | |- Forall (lctx_lft_alive ?E ?L) ?κs =>
@@ -1969,7 +1971,7 @@ Ltac sidecond_solver :=
   prepare_sideconditions;
   liSimpl;
   (* This should not stay around for unsolved goals. *)
-  try solve[sidecond_hook].
+  try solve[first [solve_is_xrfn | sidecond_hook]].
 
 (** Lithium hooks for [solve_goal]: called for remaining sideconditions *)
 Lemma unfold_int_elem_of_it (z : Z) (it : int_type) :
