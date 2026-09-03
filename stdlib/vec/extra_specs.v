@@ -318,6 +318,7 @@ Proof.
   - solve_goal.
   - lia.
   - rewrite Hst''. solve_goal.
+  - solve_goal.
   - done.
 Qed.
 

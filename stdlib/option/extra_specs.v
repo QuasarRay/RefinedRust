@@ -34,8 +34,11 @@ Proof.
   iIntros "Ha". unfold Option_ty.
   rewrite /ty_shr/=. simpl. 
   rewrite enum_shr_unfold/=/enum_shr_def.
+  iDestruct "Ha" as "(_ & Ha)".
   simpl.
-  rewrite Hst. done.
+  rewrite Hst. 
+  iSplitR. { iPureIntro. apply is_xrfn_proof. }
+  done.
 Qed.
 Definition Option_ty_weak_subtype_None_inst := [instance Option_ty_weak_subtype_None].
 #[export] Existing Instance Option_ty_weak_subtype_None_inst.

@@ -30,7 +30,7 @@ pub struct RwLockReadGuard<'a, T: 'a + ?Sized> {
 pub struct RwLockWriteGuard<'a, T: 'a + ?Sized, R = Spin> {
     #[rr::field("#tt")]
     _l: &'a RwLock<T>,
-    #[rr::field("y")]
+    #[rr::field("$# y")]
     _r: R,
 }
 
