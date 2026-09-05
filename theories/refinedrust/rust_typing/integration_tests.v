@@ -466,6 +466,7 @@ Section std_option_Option_ty.
     _
     _
     _
+    _
   .
   Next Obligation.
     solve_inhabited.
@@ -478,6 +479,9 @@ Section std_option_Option_ty.
   Qed.
   Next Obligation.
     solve_mk_enum_tag_consistent.
+  Defined.
+  Next Obligation.
+    solve_mk_enum_tag_inj_roundtrip.
   Defined.
 
   Definition std_option_Option_ty : type _ := enum_t std_option_Option_enum.
@@ -837,6 +841,7 @@ Section rectypes_List_ty.
         ([("Nil", mk_enum_tag_sem _ (rectypes_List_Nil_ty -[] -[T_ty]) (λ '( *[]), [])); ("Cons", mk_enum_tag_sem _ (rectypes_List_Cons_inv_t -[] -[T_ty]) (λ '( (x, xs)), (cons (x) (xs))))])
         _
         _
+        _
         _.
     Next Obligation.
       solve_inhabited.
@@ -849,6 +854,9 @@ Section rectypes_List_ty.
     Qed.
     Next Obligation.
       solve_mk_enum_tag_consistent.
+    Defined.
+    Next Obligation.
+      solve_mk_enum_tag_inj_roundtrip.
     Defined.
 
     #[global] Arguments rectypes_List_enum_pre : simpl never.
