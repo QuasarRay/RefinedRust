@@ -3478,13 +3478,14 @@ Section subsume.
    *)
   Lemma type_use m E L f ot e desc o (T : typed_val_expr_cont_t) :
     ⌜desc.(access_atomicity) = NonAtomicAccess⌝ ∗
+    ⌜desc.(access_kind) = NormalAccess⌝ ∗
     ⌜if o is Na2Ord then False else True⌝ ∗
       typed_read E L f e ot m (λ L2 v rt ty r,
         introduce_with_hooks E L2 (tr 2 ∗ £ num_cred) (λ L3,
           T L3 v MetaNone rt ty r))
     ⊢ typed_val_expr E L f (Use desc o ot e)%E T.
   Proof.
-    iIntros "(%Hnonatomic & % & Hread)" (Φ) "#(LFT & LLCTX) #HE HL Hf HΦ".
+    iIntros "(%Hnonatomic & %Hnormal & % & Hread)" (Φ) "#(LFT & LLCTX) #HE HL Hf HΦ".
     unfold Use.
     wpe_bind.
     iApply ("Hread" $! _ ⊤ with "[//] [//] [//] [//] [$LFT $LLCTX] HE HL Hf").
@@ -3503,6 +3504,7 @@ Section subsume.
     iPoseProof (loc_in_bounds_in_range_usize with "Hlb") as "%".
     iApply (wp_deref with "Hl").
     - done.
+    - done.
     - destruct o; naive_solver.
     - intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v.
     - done.
@@ -3520,6 +3522,7 @@ Section subsume.
   Qed.
   Lemma type_copy E L f ot e desc o (T : typed_val_expr_cont_t) :
     ⌜desc.(access_atomicity) = NonAtomicAccess⌝ ∗
+    ⌜desc.(access_kind) = NormalAccess⌝ ∗
     ⌜if o is Na2Ord then False else True⌝ ∗
       typed_read E L f e ot ReadDoCopy (λ L2 v rt ty r,
         introduce_with_hooks E L2 (tr 2 ∗ £ num_cred) (λ L3,
@@ -3531,6 +3534,7 @@ Section subsume.
   Qed.
   Lemma type_move E L f ot e desc o (T : typed_val_expr_cont_t) :
     ⌜desc.(access_atomicity) = NonAtomicAccess⌝ ∗
+    ⌜desc.(access_kind) = NormalAccess⌝ ∗
     ⌜if o is Na2Ord then False else True⌝ ∗
       typed_read E L f e ot ReadDoMove (λ L2 v rt ty r,
         introduce_with_hooks E L2 (tr 2 ∗ £ num_cred) (λ L3,
@@ -3555,6 +3559,7 @@ Section subsume.
      *)
   Lemma type_assign E L f ot e1 e2 s fn R U desc o ϝ :
     ⌜desc.(access_atomicity) = NonAtomicAccess⌝ ∗
+    ⌜desc.(access_kind) = NormalAccess⌝ ∗
     typed_val_expr E L f e2 (λ L' v m rt ty r,
       ⌜m = MetaNone⌝ ∗
       ⌜if o is Na2Ord then False else True⌝ ∗
@@ -3563,7 +3568,7 @@ Section subsume.
         typed_stmt E L3 f s fn R U ϝ)))
     ⊢ typed_stmt E L f (e1 <-{ot, o, desc} e2; s) fn R U ϝ.
   Proof.
-    iIntros "(%Hnonatomic & He)". iIntros (Φ Φunwind)
+    iIntros "(%Hnonatomic & %Hnormal & He)". iIntros (Φ Φunwind)
       "#(LFT & LLCTX) #HE HL Hf Hcont".
     wps_bind. iApply ("He" with "[$LFT $LLCTX] HE HL Hf").
     iIntros (L' v rt ty r m) "HL Hf Hv (-> & % & He1)".
@@ -3584,6 +3589,7 @@ Section subsume.
     iPoseProof (heap_pointsto_loc_in_bounds with "Hl") as "#Hlb".
     iPoseProof (loc_in_bounds_in_range_usize with "Hlb") as "%".
     iApply wps_assign.
+    { done. }
     { done. }
     { destruct o; naive_solver. }
     { intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v. }

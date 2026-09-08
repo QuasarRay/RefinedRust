@@ -9,6 +9,7 @@ Section place.
 
   Lemma typed_place_mut_owned {rto} f κ (lt2 : ltype rto) P E L γ l r bmin0 desc
     `{Hnonatomic : !TCDone (desc.(access_atomicity) = NonAtomicAccess)}
+    `{Hnormal : !TCDone (desc.(access_kind) = NormalAccess)}
     (T : place_cont_t ((place_rfn rto) * gname)%type bmin0) :
     (∀ l', typed_place E L f l' lt2 r bmin0 (Uniq κ γ) P
         (λ L' κs l2 b2 bmin rti tyli ri updcx,
@@ -38,6 +39,7 @@ Section place.
     iPoseProof (ltype_own_addr_in_usize with "Hb") as "%Haddr".
     iApply (wp_deref with "Hl").
     - apply done_proof.
+    - apply done_proof.
     - solve_ndisj.
     - intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v.
     - exact Hly.
@@ -65,6 +67,7 @@ Section place.
 
   Lemma typed_place_mut_uniq {rto} E L f (lt2 : ltype rto) P l r κ γ κ' γ' bmin0 desc
     `{Hnonatomic : !TCDone (desc.(access_atomicity) = NonAtomicAccess)}
+    `{Hnormal : !TCDone (desc.(access_kind) = NormalAccess)}
     (T : place_cont_t (place_rfn rto * gname)%type bmin0) :
     li_tactic (lctx_lft_alive_count_goal E L κ') (λ '(κs, L'),
       (∀ l', typed_place E L' f l' lt2 r bmin0 (Uniq κ γ) P
@@ -113,6 +116,7 @@ Section place.
     iPoseProof (ltype_own_addr_in_usize with "Hb") as "%Haddr".
     iApply (wp_deref with "Hl").
     - apply done_proof.
+    - apply done_proof.
     - solve_ndisj.
     - intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v.
     - exact Hly.
@@ -159,6 +163,7 @@ Section place.
 
   Lemma typed_place_mut_shared {rto} E L f (lt2 : ltype rto) P l r κ γ κ' bmin0 desc
     `{Hnonatomic : !TCDone (desc.(access_atomicity) = NonAtomicAccess)}
+    `{Hnormal : !TCDone (desc.(access_kind) = NormalAccess)}
     (T : place_cont_t (place_rfn rto * gname)%type bmin0) :
     li_tactic (lctx_lft_alive_count_goal E L κ') (λ '(κs, L'),
       (∀ l', typed_place E L' f l' lt2 r bmin0 (Shared (κ ⊓ κ')) P
@@ -189,6 +194,7 @@ Section place.
     iModIntro. iApply wpe_fupd.
     iPoseProof (loc_in_bounds_in_range_usize with "Hlb") as "%".
     iApply (wp_deref with "Hl").
+    - apply done_proof.
     - apply done_proof.
     - solve_ndisj.
     - intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v.

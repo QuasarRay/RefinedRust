@@ -2236,6 +2236,7 @@ Section laws.
   (* generic instance constructors for descending below ofty *)
   Lemma typed_place_ofty_access_val_owned E L (f : frame_path) {rt} l (ty : type rt) (r : rt) bmin0 desc ot
       `{Hnonatomic : !TCDone (desc.(access_atomicity) = NonAtomicAccess)}
+      `{Hnormal : !TCDone (desc.(access_kind) = NormalAccess)}
       `{Hop : !TCOr (TCDone (ot = PtrOp)) (TCDone (ot = RefOp))} P T :
     ty_has_op_type ty PtrOp →
     (∀ v, v ◁ᵥ{f.1, MetaNone} r @ ty -∗
@@ -2272,7 +2273,7 @@ Section laws.
     { iApply ("Hnonnull" with "Hv"). }
     pose proof (val_decodes_to_loc_ptr_ref _ _ ot Hdec_ptr Hnonnull_li) as Hdecode.
     iPoseProof (loc_in_bounds_in_range_usize with "Hlb") as "%".
-    iApply (wp_deref with "Hl"); [apply done_proof | by right | | done | | ].
+    iApply (wp_deref with "Hl"); [apply done_proof | apply done_proof | by right | | done | | ].
     { intros. apply val_to_loc_decode. apply val_to_of_loc. by apply val_of_loc_Some_l2v. }
     { intros st. exists (OVPtr li). apply Hdecode. }
     iApply physical_step_intro. iNext.
@@ -2301,6 +2302,7 @@ Section laws.
   (* TODO generalize this similarly as the one above? *)
   Lemma typed_place_ofty_access_val_uniq E L f {rt} l (ty : type rt) (r : rt) bmin0 κ γ desc ot
       `{Hnonatomic : !TCDone (desc.(access_atomicity) = NonAtomicAccess)}
+      `{Hnormal : !TCDone (desc.(access_kind) = NormalAccess)}
       `{Hop : !TCOr (TCDone (ot = PtrOp)) (TCDone (ot = RefOp))} P T :
     ty_has_op_type ty PtrOp →
     ⌜lctx_lft_alive E L κ⌝ ∗
@@ -2339,7 +2341,7 @@ Section laws.
     { iApply ("Hnonnull" with "Hv"). }
     pose proof (val_decodes_to_loc_ptr_ref _ _ ot Hdec_ptr Hnonnull_li) as Hdecode.
     iPoseProof (loc_in_bounds_in_range_usize with "Hlb") as "%".
-    iApply (wp_deref with "Hl"); [apply done_proof | by right | | done | | ].
+    iApply (wp_deref with "Hl"); [apply done_proof | apply done_proof | by right | | done | | ].
     { intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v. }
     { intros st. exists (OVPtr li). apply Hdecode. }
     iApply physical_step_intro. iNext.
@@ -2369,6 +2371,7 @@ Section laws.
   (* NOTE: we need to require it to be a simple type to get this generic lemma *)
   Lemma typed_place_ofty_access_val_shared E L f {rt} l (ty : simple_type rt) (r : rt) bmin0 κ desc ot
       `{Hnonatomic : !TCDone (desc.(access_atomicity) = NonAtomicAccess)}
+      `{Hnormal : !TCDone (desc.(access_kind) = NormalAccess)}
       `{Hop : !TCOr (TCDone (ot = PtrOp)) (TCDone (ot = RefOp))} P T :
     ty_has_op_type ty PtrOp →
     ⌜lctx_lft_alive E L κ⌝ ∗
@@ -2406,7 +2409,7 @@ Section laws.
     pose proof (val_decodes_to_loc_ptr_ref _ _ ot Hdec_ptr Hnonnull_li) as Hdecode.
     iApply wpe_fupd.
     iPoseProof (loc_in_bounds_in_range_usize with "Hlb") as "%".
-    iApply (wp_deref with "Hloc"); [apply done_proof | by right | | done | | ].
+    iApply (wp_deref with "Hloc"); [apply done_proof | apply done_proof | by right | | done | | ].
     { intros. apply val_to_loc_decode. by rewrite val_to_loc_Some_l2v. }
     { intros st. exists (OVPtr li). apply Hdecode. }
     iApply physical_step_intro. iNext.

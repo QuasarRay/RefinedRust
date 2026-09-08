@@ -783,6 +783,7 @@ Qed.
 
 Lemma wp_deref v Φ vl l ot q π E desc o:
   desc.(access_atomicity) = NonAtomicAccess →
+  desc.(access_kind) = NormalAccess →
   o = ScOrd ∨ o = Na1Ord →
   (∀ st, decode_op_val vl PtrOp st = Some $ OVPtr l) →
   l `has_layout_loc` ot_layout ot →
@@ -790,7 +791,7 @@ Lemma wp_deref v Φ vl l ot q π E desc o:
   l↦{q}v -∗ (|={E}⧗=> (∀ st ov, ⌜decode_op_val v ot st = Some ov⌝ -∗ l ↦{q} v -∗ Φ (encode_op_val ov))) -∗
   WPe{π} !{ot, o, desc} (Val vl) @ E {{ Φ }}.
 Proof.
-  iIntros (Hnonatomic Ho Hl Hll Hdecv) "Hmt HΦ".
+  iIntros (Hnonatomic Hnormal Ho Hl Hll Hdecv) "Hmt HΦ".
   have Hlv : v `has_layout_val` ot_layout ot.
   { destruct (Hdecv inhabitant) as (ov & Hdec). by eapply decode_op_val_has_layout. }
   rewrite expr_wp_unfold.
@@ -799,10 +800,11 @@ Proof.
   iDestruct (heap_pointsto_is_alloc with "Hmt") as %Haid.
   destruct o; try by destruct Ho.
   - iModIntro. iDestruct (heap_pointsto_lookup_q (λ st, ∃ n, st = RSt n) with "Hhctx Hmt") as %Hat. { naive_solver. }
-    iSplit; first by destruct (Hdecv {| hs_heap := h; hs_allocs := ub |}) as (? & ?); eauto 11 using DerefS.
+    iSplit; first by destruct (Hdecv {| hs_heap := h; hs_allocs := ub |}) as (? & ?); eauto 12 using DerefS.
     iIntros (? e2 σ2 efs Hst ?). inv_expr_step.
-    rename select (decode_op_val vl PtrOp _ = Some (OVPtr _)) into Hdecl.
-    rewrite Hl in Hdecl. simplify_eq/=.
+    all: rename select (decode_op_val vl PtrOp _ = Some (OVPtr _)) into Hdecl;
+      rewrite Hl in Hdecl; simplify_eq/=.
+    2: congruence.
     iApply (physical_step_wand with "HΦ"). iIntros "HΦ".
     iSplit => //. unfold end_st, end_expr.
     have Heq : (v = v') by apply: heap_at_inj_val. subst v'.
@@ -810,10 +812,11 @@ Proof.
     iFrame. iSplit; first done. iApply wp_value.
     by iApply ("HΦ" with "[] Hmt").
   - iMod (heap_read_na with "Hhctx Hmt") as "(% & Hσ & Hσclose)" => //. iModIntro.
-    iSplit; first by destruct (Hdecv {| hs_heap := h; hs_allocs := ub |}) as (? & ?); eauto 11 using DerefS.
+    iSplit; first by destruct (Hdecv {| hs_heap := h; hs_allocs := ub |}) as (? & ?); eauto 12 using DerefS.
     iIntros (? e2 σ2 efs Hst ?). inv_expr_step.
-    rename select (decode_op_val vl PtrOp _ = Some (OVPtr _)) into Hdecl.
-    rewrite Hl in Hdecl. simplify_eq/=.
+    all: rename select (decode_op_val vl PtrOp _ = Some (OVPtr _)) into Hdecl;
+      rewrite Hl in Hdecl; simplify_eq/=.
+    2: congruence.
     iApply (physical_step_wand with "HΦ"). iIntros "HΦ".
     iSplit => //. unfold end_st, end_expr.
     have ? : (v = v') by apply: heap_at_inj_val. subst v'.
@@ -821,12 +824,13 @@ Proof.
     iApply (wp_lift_expr_step _ _ (Deref desc Na2Ord ot (Val vl))); auto.
     iIntros ([[h2 ub2] fn2]) "((%&Hhctx&Hactx)&Hfctx)/=".
     iMod ("Hσclose" with "Hhctx") as (?) "(Hσ & Hv)".
-    iModIntro; iSplit; first by destruct (Hdecv {| hs_heap := h2; hs_allocs := ub2 |}) as (? & ?); eauto 11 using DerefS.
+    iModIntro; iSplit; first by destruct (Hdecv {| hs_heap := h2; hs_allocs := ub2 |}) as (? & ?); eauto 12 using DerefS.
     iIntros (? e2 σ2 efs Hst ?).
     iApply physical_step_intro.
     inv_expr_step.
-    rename select (decode_op_val vl PtrOp _ = Some (OVPtr _)) into Hdecl.
-    rewrite Hl in Hdecl. simplify_eq/=.
+    all: rename select (decode_op_val vl PtrOp _ = Some (OVPtr _)) into Hdecl;
+      rewrite Hl in Hdecl; simplify_eq/=.
+    2: congruence.
     iSplit => //.
     have ? : (v = v') by apply: (heap_at_inj_val _ _ h2). subst.
     iFrame. iSplit; first done.
@@ -2354,6 +2358,7 @@ Qed.
 Lemma wps_assign π Q Ψ Ψunwind vl ot vr s l desc o:
   let E := if o is ScOrd then ∅ else ⊤ in
   desc.(access_atomicity) = NonAtomicAccess →
+  desc.(access_kind) = NormalAccess →
   o = ScOrd ∨ o = Na1Ord →
   (∀ st, decode_op_val vl PtrOp st = Some (OVPtr l)) →
   op_type_wf ot →
@@ -2362,7 +2367,7 @@ Lemma wps_assign π Q Ψ Ψunwind vl ot vr s l desc o:
       l↦(encode_op_val ov) ={E,⊤}=∗ WPs{π} s {{Q, Ψ | Ψunwind}})) -∗
   WPs{π} (Assign desc o ot (Val vl) (Val vr) s) {{ Q , Ψ | Ψunwind }}.
 Proof.
-  iIntros (E Hnonatomic Ho Hvl Hwf) "HWP". rewrite !stmt_wp_eq.
+  iIntros (E Hnonatomic Hnormal Ho Hvl Hwf) "HWP". rewrite !stmt_wp_eq.
   iIntros (??? ->) "Hresult".
   iApply wp_lift_stmt_step_fupd. iIntros ([[h1 ub] fn]) "((%&Hhctx&Hfctx)&?) /=". iMod "HWP" as (Hdecvr) "[Hl HWP]".
   have Hly : vr `has_layout_val` ot_layout ot.
@@ -2373,10 +2378,12 @@ Proof.
   unfold E. case: Ho => ->.
   - iModIntro.
     iDestruct (heap_pointsto_lookup_1 (λ st : lock_state, st = RSt 0%nat) with "Hhctx Hl") as %? => //.
-    iSplit; first by destruct (Hdecvr {| hs_heap := h1; hs_allocs := ub |}) as (? & ?); eauto 12 using AssignS.
-    iIntros (? e2 σ2 efs Hstep ?). inv_stmt_step. unfold end_val.
-    rename select (decode_op_val vl PtrOp _ = Some _) into Hdec.
-    rewrite Hvl in Hdec. simplify_eq/=.
+    iSplit; first by destruct (Hdecvr {| hs_heap := h1; hs_allocs := ub |}) as (? & ?); eauto 13 using AssignS.
+    iIntros (? e2 σ2 efs Hstep ?). inv_stmt_step.
+    all: rename select (decode_op_val vl PtrOp _ = Some _) into Hdec;
+      rewrite Hvl in Hdec; simplify_eq/=.
+    2: congruence.
+    unfold end_val.
     iApply (physical_step_wand with "HWP"). iIntros "HWP".
     have Hlen : length v' = length (encode_op_val ov).
     { rewrite Hlyv'. symmetry. eapply encode_op_val_length; first done.
@@ -2390,10 +2397,11 @@ Proof.
     { rewrite Hlyv'. symmetry. eapply encode_op_val_length; first done.
       by eapply decode_op_val_has_type. }
     iMod (heap_write_na _ _ _ (encode_op_val ov) with "Hhctx Hl") as (?) "[Hhctx Hc]" => //.
-    iModIntro. iSplit; first by eauto 12 using AssignS.
+    iModIntro. iSplit; first by eauto 13 using AssignS.
     iIntros (? e2 σ2 efs Hst ?). inv_stmt_step.
-    rename select (decode_op_val vl PtrOp _ = Some _) into Hdec.
-    rewrite Hvl in Hdec. simplify_eq/=.
+    all: rename select (decode_op_val vl PtrOp _ = Some _) into Hdec;
+      rewrite Hvl in Hdec; simplify_eq/=.
+    2: congruence.
     have ? : (v' = v'0) by [apply: heap_at_inj_val]; subst v'0.
     iFrame => /=. iMod "HE" as "_".
     iApply (physical_step_wand with "HWP"). iIntros "HWP".
@@ -2405,10 +2413,11 @@ Proof.
     iApply wp_lift_stmt_step.
     iIntros ([[h2 ub2] fn2]) "((%&Hhctx&Hfctx)&?)" => /=.
     iMod ("Hc" with "Hhctx") as (?) "[Hhctx Hmt]".
-    iModIntro. iSplit; first by destruct (Hdecvr {| hs_heap := h2; hs_allocs := ub2 |}) as (? & ?); eauto 12 using AssignS. unfold end_stmt.
+    iModIntro. iSplit; first by destruct (Hdecvr {| hs_heap := h2; hs_allocs := ub2 |}) as (? & ?); eauto 13 using AssignS. unfold end_stmt.
     iIntros (? e2 σ2 efs Hst ?). inv_stmt_step.
-    rename select (decode_op_val vl PtrOp _ = Some _) into Hdec.
-    rewrite Hvl in Hdec. simplify_eq/=.
+    all: rename select (decode_op_val vl PtrOp _ = Some _) into Hdec;
+      rewrite Hvl in Hdec; simplify_eq/=.
+    2: congruence.
 
     rename select (decode_op_val vr ot _ = Some _) into Hdecvr2.
     have Hstable := decode_op_val_stable vr ot

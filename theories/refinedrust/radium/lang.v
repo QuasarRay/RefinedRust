@@ -596,11 +596,27 @@ Inductive expr_step : expr → thread_id → state → list radium_event → run
       else
         Val (encode_op_val ov) in
     desc.(access_atomicity) = NonAtomicAccess →
+    desc.(access_kind) = NormalAccess →
     decode_op_val v PtrOp σ.(st_heap) = Some (OVPtr l) →
     heap_at l (ot_layout ot) v' start_st σ.(st_heap).(hs_heap) →
     decode_op_val v' ot (σ.(st_heap)) = Some ov →
     expr_step (Deref desc o ot (Val v)) π σ [] (to_rtexpr π end_expr)
       (heap_fmap (heap_upd l v' end_st) σ) []
+| ExternalDerefS desc o v l ot v' ov σ π :
+    let end_expr :=
+      if o is Na1Ord then
+        Deref desc Na2Ord ot (Val v)
+      else
+        Val (encode_op_val ov) in
+    desc.(access_atomicity) = NonAtomicAccess →
+    desc.(access_kind) = VolatileAccess →
+    decode_op_val v PtrOp σ.(st_heap) = Some (OVPtr l) →
+    decode_op_val v' ot σ.(st_heap) = Some ov →
+    expr_step (Deref desc o ot (Val v)) π σ
+      (if o is Na1Ord then [] else
+        [MemoryRead (make_memory_access π desc l (ot_layout ot)) v'])
+      (to_rtexpr π end_expr)
+      σ []
 (* TODO: look at CAS and see whether it makes sense. Also allow
 comparing pointers? (see lambda rust) *)
 (* corresponds to atomic_compare_exchange_strong, see https://en.cppreference.com/w/c/atomic/atomic_compare_exchange *)
@@ -701,6 +717,7 @@ Inductive stmt_step : stmt → thread_id → function → state → list radium_
     let end_val  := if o is Na1Ord then v' else encode_op_val ov in
     let end_stmt :=
       if o is Na1Ord then Assign desc Na2Ord ot (Val v1) (Val v2) s else s in
+    desc.(access_kind) = NormalAccess →
     desc.(access_atomicity) = NonAtomicAccess →
     decode_op_val v1 PtrOp σ.(st_heap) = Some (OVPtr l) →
     op_type_wf ot →
@@ -708,6 +725,19 @@ Inductive stmt_step : stmt → thread_id → function → state → list radium_
     heap_at l (ot_layout ot) v' start_st σ.(st_heap).(hs_heap) →
     stmt_step (Assign desc o ot (Val v1) (Val v2) s) π rf σ []
       (to_rtstmt π rf end_stmt) (heap_fmap (heap_upd l end_val end_st) σ) []
+| ExternalAssignS desc (o : order) π rf σ s v1 v2 l ot ov:
+    let end_stmt :=
+      if o is Na1Ord then Assign desc Na2Ord ot (Val v1) (Val v2) s else s in
+    desc.(access_kind) = VolatileAccess →
+    desc.(access_atomicity) = NonAtomicAccess →
+    decode_op_val v1 PtrOp σ.(st_heap) = Some (OVPtr l) →
+    op_type_wf ot →
+    decode_op_val v2 ot σ.(st_heap) = Some ov →
+    stmt_step (Assign desc o ot (Val v1) (Val v2) s) π rf σ
+      (if o is Na1Ord then [] else
+        [MemoryWrite (make_memory_access π desc l (ot_layout ot)) (encode_op_val ov)])
+      (to_rtstmt π rf end_stmt)
+      σ []
 | IfSS ot v s1 s2 π rf σ b:
     cast_to_bool ot v σ.(st_heap) = Some b →
     stmt_step (IfS ot (Val v) s1 s2) π rf σ [] (to_rtstmt π rf ((if b then s1 else s2))) σ []

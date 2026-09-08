@@ -10,6 +10,7 @@ Section place.
 
   Lemma typed_place_shr_owned {rto} f κ (lt2 : ltype rto) P E L l r bmin0 desc
     `{Hnonatomic : !TCDone (desc.(access_atomicity) = NonAtomicAccess)}
+    `{Hnormal : !TCDone (desc.(access_kind) = NormalAccess)}
     (T : place_cont_t (place_rfn rto) bmin0) :
    introduce_with_hooks E L (£1) (λ L1,
      ∀ l', typed_place E L1 f l' lt2 r bmin0 (Shared κ) P
@@ -35,6 +36,7 @@ Section place.
     iPoseProof (loc_in_bounds_in_range_usize with "Hlb") as "%".
     iApply wpe_fupd.
     iApply (wp_deref with "Hl").
+    - apply done_proof.
     - apply done_proof.
     - solve_ndisj.
     - intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v.
@@ -66,6 +68,7 @@ Section place.
 
   Lemma typed_place_shr_uniq {rto} f κ (lt2 : ltype rto) P E L l r κ' γ bmin0 desc
     `{Hnonatomic : !TCDone (desc.(access_atomicity) = NonAtomicAccess)}
+    `{Hnormal : !TCDone (desc.(access_kind) = NormalAccess)}
     (T : place_cont_t (place_rfn rto) bmin0) :
     li_tactic (lctx_lft_alive_count_goal E L κ') (λ '(κs, L1),
       introduce_with_hooks E L1 (£1) (λ L2,
@@ -115,6 +118,7 @@ Section place.
     iApply (wpe_logical_step with "Hcl"); [solve_ndisj.. | ].
     iApply (wp_deref with "Hl").
     - apply done_proof.
+    - apply done_proof.
     - solve_ndisj.
     - intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v.
     - exact Hly.
@@ -163,6 +167,7 @@ Section place.
 
   Lemma typed_place_shr_shared {rto} f E L (lt2 : ltype rto) P l r κ κ' bmin0 desc
     `{Hnonatomic : !TCDone (desc.(access_atomicity) = NonAtomicAccess)}
+    `{Hnormal : !TCDone (desc.(access_kind) = NormalAccess)}
     (T : place_cont_t (place_rfn rto) bmin0) :
     li_tactic (lctx_lft_alive_count_goal E L κ') (λ '(κs, L'),
       introduce_with_hooks E L' (£1) (λ L1,
@@ -194,6 +199,7 @@ Section place.
     iPoseProof (loc_in_bounds_in_range_usize with "Hlb") as "%".
     iModIntro. iApply wpe_fupd.
     iApply (wp_deref with "Hl").
+    - apply done_proof.
     - apply done_proof.
     - solve_ndisj.
     - intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v.

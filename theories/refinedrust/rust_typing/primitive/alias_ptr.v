@@ -424,6 +424,7 @@ Section place.
 
   Lemma typed_place_ofty_alias_ptr_owned pk E L f l l2 bmin0 desc ot
       `{Hnonatomic : !TCDone (desc.(access_atomicity) = NonAtomicAccess)}
+      `{Hnormal : !TCDone (desc.(access_kind) = NormalAccess)}
       `{Hop : !TCOr (TCDone (ot = PtrOp)) (TCDone (ot = RefOp))} P T :
     find_in_context (FindLoc l2) (λ '(existT rt2 (lt2, r2, b2, π2)),
       ⌜π2 = f.1⌝ ∗
@@ -460,6 +461,7 @@ Section place.
 
   Lemma typed_place_ofty_alias_ptr_uniq pk E L f l l2 bmin0 κ γ desc ot
       `{Hnonatomic : !TCDone (desc.(access_atomicity) = NonAtomicAccess)}
+      `{Hnormal : !TCDone (desc.(access_kind) = NormalAccess)}
       `{Hop : !TCOr (TCDone (ot = PtrOp)) (TCDone (ot = RefOp))} P T :
     ⌜lctx_lft_alive E L κ⌝ ∗
     find_in_context (FindLoc l2) (λ '(existT rt2 (lt2, r2, b2, π2)),
@@ -497,6 +499,7 @@ Section place.
 
   Lemma typed_place_ofty_alias_ptr_shared pk E L f l l2 bmin0 κ desc ot
       `{Hnonatomic : !TCDone (desc.(access_atomicity) = NonAtomicAccess)}
+      `{Hnormal : !TCDone (desc.(access_kind) = NormalAccess)}
       `{Hop : !TCOr (TCDone (ot = PtrOp)) (TCDone (ot = RefOp))} P T :
     ⌜lctx_lft_alive E L κ⌝ ∗
     find_in_context (FindLoc l2) (λ '(existT rt2 (lt2, r2, b2, π2)),
