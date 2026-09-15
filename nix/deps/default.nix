@@ -4,7 +4,6 @@
   iris,
   iris-contrib,
   lambda-rust,
-  smtcoq,
   sniper,
   verit,
 }:
@@ -44,11 +43,6 @@ let
 
         # NOTE: Remove `lambda-rust` when available in Nix's `RocqPackages`
         lambda-rust = final.callPackage ./lambda-rust.nix lambda-rust;
-
-        smtcoq = final.lib.overrideRocqDerivation {
-          defaultVersion = smtcoq.version;
-          release.${smtcoq.version}.sha256 = smtcoq.sha256;
-        } prev.smtcoq;
 
         sniper = final.lib.overrideRocqDerivation {
           defaultVersion = sniper.version;

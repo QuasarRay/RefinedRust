@@ -44,11 +44,9 @@ Ltac2 my_Zeven_goal_trigger () :=
   TContains (TGoal, NotArg) (TConstant (Init.Some "Zeven") NotArg).
 
 Ltac2 Set sniper_transformations as st := fun () =>
-  ((my_Zeven_hyp_trigger (), Init.false, Init.None), "my_Zeven_rewrite_hyps", trivial_filter) ::
-  ((my_Zeven_goal_trigger (), Init.false, Init.None), "my_Zeven_rewrite_goal", trivial_filter) ::
+  ((my_Zeven_hyp_trigger (), Init.false, Init.None), "my_Zeven_rewrite_hyps", trivial_filter, "Rewrite Rocq's Zeven as a predicate", "Given a hypothesis that contains Zeven, this step rewrites it as an existantial predicate") ::
+  ((my_Zeven_goal_trigger (), Init.false, Init.None), "my_Zeven_rewrite_goal", trivial_filter, "Rewrite Rocq's Zeven as a predicate", "Given a goal that contains Zeven, this step rewrites it as an existantial predicate") ::
   (st ()).
-
-
 
 (** The proof *)
 
@@ -72,8 +70,11 @@ Proof.
     | H : rr_config_strict_resolution |- _ => clear H
     end.
     1: snipe.
-    (* TODO: hmm, the negated elem_of seems to be a problem for the current normalization of snipe *)
-    1: sidecond_hammer.
+    { (* H14: Fails with scope *)
+      clear -H13 H4 H3.
+      scope.
+      (* H13: Fails with smt *)
+      sidecond_hammer. }
 
   Unshelve. all: print_remaining_sidecond.
 Qed.

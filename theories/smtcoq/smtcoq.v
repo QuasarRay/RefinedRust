@@ -58,11 +58,11 @@ Ltac2 my_unfolder_trigger constant :=
 
 Ltac2 Set sniper_transformations as st := fun () =>
   (* simplify bool_decide *)
-  ((my_bool_decide_trigger (), Init.false, Init.None), "my_bool_decide_rewrite", trivial_filter) ::
+  ((my_bool_decide_trigger (), Init.false, Init.None), "my_bool_decide_rewrite", trivial_filter, "Rewrite stdpp's bool_decide into a proposition", "Given a hypothesis or the goal that contains bool_decide, this step applies the bool_decide_eq_true lemma") ::
   (* unfold elem_of *)
-  ((my_unfolder_trigger "elem_of", Init.false, Init.None), "my_unfolder_hyps", trivial_filter) ::
+  ((my_unfolder_trigger "elem_of", Init.false, Init.None), "my_unfolder_hyps", trivial_filter, "Unfold the stdpp's elem_of", "Given a hypothesis that contains elem_of, this step unfold the stdpp's elem_of") ::
   (* unfold int_elem_of_it *)
-  ((my_unfolder_trigger "int_elem_of_it", Init.false, Init.None), "my_unfolder_hyps", trivial_filter) ::
+  ((my_unfolder_trigger "int_elem_of_it", Init.false, Init.None), "my_unfolder_hyps", trivial_filter, "Unfold the RefinedRust's int_elem_of_it", "Given a hypothesis that contains int_elem_of_it, this step unfold the RefinedRust's int_elem_of_it") ::
   (st ()).
 
 

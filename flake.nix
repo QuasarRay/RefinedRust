@@ -69,19 +69,14 @@
           sha256 = "sha256-iQqxhPMSo/ktfhANwFlDV1Vpl4yWr9k0s/t2tFFAkpo=";
         };
 
-        smtcoq = {
-          version = "6de39db2a996cdc663634cb79193b9d75f95b48a";
-          sha256 = "sha256-adhKClONIp3tltToQcoDO1wfqGzBCe/UE/WyBIPYlis=";
-        };
-
         verit = {
           version = "6348b82f16c7cd2eb2a0b8f2b48d3f35cbb62b90";
           src = verit;
         };
 
         sniper = {
-          version = "14fd1f02104f6e1214ad436d21eaacfb0d71db19";
-          sha256 = "sha256-bFjwYVVP2/SNixSrThp3c8RYrmSmLb7NdjzpNtcDyAk=";
+          version = "795f00d79dbc835578d71eb7a81a6b3a006fafaf";
+          sha256 = "sha256-6vUs86wr/5+Kvh0y1KeMfXSbzt9J8JsNTY9v5b/7NRA=";
         };
       };
 
