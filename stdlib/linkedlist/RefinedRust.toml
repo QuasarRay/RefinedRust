@@ -1,0 +1,5 @@
+extra_specs = "extra_specs.v"
+generate_dune_project = false
+lib_load_paths = ["../alloc", "../iterator", "../range", "../option", "../rr_internal", "../index", "../closures", "../cmp", "../ptr", "../ptr_advanced", "../clone", "../controlflow", "../sized", "../boxed", "../mem", "../num"]
+output_dir = "output"
+dump_borrowck_info = true
