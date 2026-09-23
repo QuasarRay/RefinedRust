@@ -1071,12 +1071,13 @@ Section test.
       _
       ([])
       ([])
-      _ _ _ _
+      _ _ _ _ _
     .
     Next Obligation.
       intros π x [l cap]. iIntros "(%Heq & $)". iSplit; first done.
       iPureIntro. intros _. subst. exists *[l; Z.of_nat cap; tt]. done.
     Qed.
+    Next Obligation. ex_plain_t_solve_to_xrfn. Qed.
     Next Obligation. ex_t_solve_persistent. Qed.
     Next Obligation.
       ex_plain_t_solve_shr_mono.
@@ -1109,6 +1110,24 @@ Section test.
     Context {T_rt : RT}.
     Context (T_ty : type (T_rt)).
 
+    Local Definition Vec_inv_t_canonicalizable_P
+        (inner_rfn : Vec_rt) (len : nat) : iProp Σ :=
+      (∃ (cap : nat) (l : loc),
+        ⌜inner_rfn = *[#(l, cap); #(Z.of_nat len)]⌝ ∗
+        ⌜len ≤ cap⌝ ∗ True)%I.
+
+    #[local] Instance Vec_inv_t_xt_inhabited :
+        Inhabited (RT_xt (place_rfnRT T_rt)) := ty_xt_inhabited T_ty.
+
+    #[local] Instance Vec_inv_t_canonicalizable
+        (ty : type Vec_rt) (π : thread_id)
+        (inner_rfn : Vec_rt) (xs : list (place_rfn T_rt)) :
+      Canonicalizable π (ty_lfts T_ty) ty inner_rfn xs
+        (Vec_inv_t_canonicalizable_P inner_rfn (length xs))
+        (λ inner_rfn' xs',
+          Vec_inv_t_canonicalizable_P inner_rfn' (length xs')).
+    Proof. apply canonicalizable_list_length. Qed.
+
     Program Definition Vec_inv_t_inv_spec : ex_inv_def ((Vec_rt)) (list (place_rfn T_rt)) := mk_ex_inv_def
       (λ π (inner_rfn : Vec_rt) 'xs, ∃ (cap : nat) (l : loc), ⌜inner_rfn = *[#((l, cap)); #(Z.of_nat $ length xs)]⌝ ∗ ⌜length xs ≤ cap⌝ ∗ True)%I
       (λ π κ inner_rfn 'xs, ∃ (cap : nat) (l : loc), ⌜inner_rfn = *[#((l, cap)); #(Z.of_nat $ length xs)]⌝ ∗ ⌜length xs ≤ cap⌝ ∗ True)%I
@@ -1117,13 +1136,12 @@ Section test.
       _
       ([] ++ (ty_lfts T_ty))
       ([] ++ (ty_wf_E T_ty))
-      _ _ _ _
+      _ _ _ _ _
     .
     Next Obligation.
-      intros. iIntros "Hinv". iDestruct "Hinv" as (cap l) "(%Heq & Hcap & Hinv)".
-      iSplitL "Hcap Hinv". { iExists cap, l. by iFrame. }
-      iPureIntro. intros _. subst. exists *[(l, cap); Z.of_nat (length y)]. done.
+      ex_plain_t_solve_is_xrfn.
     Qed.
+    Next Obligation. ex_plain_t_solve_to_xrfn. Qed.
     Next Obligation.
       ex_t_solve_persistent.
     Qed.

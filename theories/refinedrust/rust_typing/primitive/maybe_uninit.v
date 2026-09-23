@@ -76,6 +76,18 @@ Section type.
       + iPoseProof (ty_shr_aligned with "Hl") as "Ha".
         done.
     - iIntros (κ π r m l) "($ & _)".
+    - rewrite maybe_uninit_own_val_unfold /maybe_uninit_own_val_def.
+      iIntros (F π r m v q HF) "#CTX Htok Hown".
+      destruct r as [r | ].
+      + iDestruct "Hown" as "(%r' & Hrfn & Hown)".
+        iPoseProof (ty_own_val_to_xrfn T F π r' m v q with
+          "CTX Htok Hown") as "Hstep"; first done.
+        iApply (logical_step_wand with "Hstep").
+        iIntros "((%xr & Hown) & Htok)".
+        iFrame "Htok". iExists (Some xr). simpl.
+        iExists ($# xr). simpl. iFrame. done.
+      + iApply logical_step_intro. iFrame "Htok".
+        iExists None. done.
     - iIntros (E κ l ly π r m ? HE Hxr) "#CTX #Hna Htok %Hst %Hly #Hlb Hb".
       destruct Hxr as [xr ->]. destruct xr as [xr | ]; simpl.
       +

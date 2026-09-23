@@ -28,6 +28,10 @@ Section unit.
   Qed.
   Next Obligation. unfold TCNoResolve. apply _. Qed.
   Next Obligation.
+    iIntros (F π r v ?) "Hown".
+    iApply logical_step_intro. iExists r. done.
+  Qed.
+  Next Obligation.
     simpl. iIntros (ot st π [] v Hot ->).
     destruct ot; simpl in Hot; try done.
     - destruct Hot as [-> ->]. iExists (OVStruct unit_sl []). iPureIntro.

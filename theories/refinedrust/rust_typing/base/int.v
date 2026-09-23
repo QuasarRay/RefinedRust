@@ -47,6 +47,10 @@ Section int.
   Qed.
   Next Obligation. rewrite int_own_val_unfold. unfold TCNoResolve. apply _. Qed.
   Next Obligation.
+    iIntros (it F π r v ?) "Hown".
+    iApply logical_step_intro. iExists r. done.
+  Qed.
+  Next Obligation.
     intros it ot st π r v Hot.
     rewrite int_own_val_unfold.
     simpl.
@@ -133,6 +137,10 @@ Section boolean.
   Qed.
   Next Obligation. rewrite bool_own_val_unfold. unfold TCNoResolve. apply _. Qed.
   Next Obligation.
+    iIntros (F π r v ?) "Hown".
+    iApply logical_step_intro. iExists r. done.
+  Qed.
+  Next Obligation.
     intros ot st π r v Hot.
     rewrite bool_own_val_unfold.
     simpl.
@@ -209,6 +217,10 @@ Section char.
   Qed.
   Next Obligation. intros. destruct ot; try done. Qed.
   Next Obligation. rewrite char_own_val_unfold. unfold TCNoResolve. apply _. Qed.
+  Next Obligation.
+    iIntros (F π r v ?) "Hown".
+    iApply logical_step_intro. iExists r. done.
+  Qed.
   Next Obligation.
     intros ot st π r v Hot.
     rewrite char_own_val_unfold.

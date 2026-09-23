@@ -33,6 +33,28 @@ Section discriminant.
   Qed.
   Next Obligation. unfold TCNoResolve. apply _. Qed.
   Next Obligation.
+    simpl. iIntros (rt en F π r v ?)
+      "(%tag & %Htag & Hv)".
+    destruct (enum_tag_compat _ en r tag Htag) as [vinj Hfind].
+    pose proof (enum_tag_ty_find_elem _ _ _ Hfind) as Hmem.
+    set (x := $# (@inhabitant _ (ty_xt_inhabited (enum_ty en r)))).
+    destruct (enum_tag_inj_roundtrip en tag
+      (mk_enum_tag_sem (enum_rt en r) (enum_ty en r) vinj) Hmem x)
+      as [Htag' HeqRT Hr].
+    set (r' := vinj x) in *.
+    assert (is_xrfn (enum_r en r')) as Hpayload.
+    { rewrite Hr.
+      assert (eq_rect _ RT_rt x _ HeqRT =
+        eq_rect _ id x _ (f_equal RT_rt HeqRT)) as Htransport.
+      { clear Hr. destruct HeqRT. done. }
+      rewrite Htransport.
+      apply (proj1 (is_xrfn_transport_iff HeqRT (f_equal RT_rt HeqRT) x)).
+      unfold x, is_xrfn. eauto. }
+    pose proof (proj2 (enum_r_is_xrfn en r') Hpayload) as [xr Hxr].
+    iApply logical_step_intro. iExists xr. rewrite -Hxr.
+    iExists tag. iFrame. done.
+  Qed.
+  Next Obligation.
     simpl. intros rt en ot st π r v Hot. iIntros "(%tag & %Htag & Hv)".
     iPoseProof (ty_decodable _ (int en.(enum_els).(els_tag_it)) ot st π _ v with "Hv") as (ov) "%Hdec"; [| ].
     { rewrite ty_has_op_type_unfold. exact Hot. }

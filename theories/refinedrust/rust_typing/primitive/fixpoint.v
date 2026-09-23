@@ -182,6 +182,25 @@ Section fixpoint_def.
       + eapply bi.limit_preserving_entails; first apply _.
         intros ? [] [] Heq. f_equiv. eapply Heq.
       + intros ?. simpl. eapply ty_shr_is_xrfn.
+    - intros E π r m v q HE.
+      unfold F_ty_own_val_ty_shr_fixpoint.
+      eapply @limit_preserving_compl.
+      + eapply bi.limit_preserving_entails; first apply _.
+        intros n [] [] [Hown Hshr]. simpl in *.
+        repeat f_equiv; apply Hown.
+      + intros n. simpl.
+        iIntros "#CTX Htok Hown".
+        iApply fupd_logical_step.
+        iPoseProof (Fn_lfts_const_0 (3+n)) as "[_ Hincl]".
+        iMod (lft_incl_acc with "Hincl Htok") as "(%q' & Htok' & Hclose_tok)";
+          first done.
+        iPoseProof (ty_own_val_to_xrfn (Fn (3+n)) E π r m v q' with
+          "CTX Htok' Hown") as "Hstep"; first done.
+        iModIntro. iApply logical_step_fupd.
+        iApply (logical_step_wand with "Hstep").
+        iIntros "((%xr & Hown) & Htok')".
+        iMod ("Hclose_tok" with "Htok'") as "Htok".
+        iModIntro. iFrame.
     - intros E κ l ly π r m q HE Hxr. unfold F_ty_own_val_ty_shr_fixpoint.
       eapply @limit_preserving_compl.
       + eapply bi.limit_preserving_entails; first apply _.

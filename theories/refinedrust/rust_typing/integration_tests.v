@@ -391,8 +391,9 @@ Section test.
 
   (* The subtype of positive integers *)
   Local Definition P_a := λ (x : Z) (y : Z), (∃ z : Z, ⌜x = (y + z)%Z⌝ ∗ ⌜(0 < x)%Z⌝)%I : iProp Σ.
-  Local Program Definition Pdef := mk_pers_ex_inv_def P_a true _ _ _.
+  Local Program Definition Pdef := mk_pers_ex_inv_def P_a true _ _ _ _.
   Next Obligation. intros. iIntros "$". iPureIntro. intros _. eexists. done. Qed.
+  Next Obligation. ex_plain_t_solve_to_xrfn. Qed.
   Next Obligation. ex_t_solve_persistent. Qed.
   Next Obligation. ex_t_solve_timeless. Qed.
   Local Definition Pty := (∃; Pdef, int I32)%I.
@@ -403,15 +404,17 @@ Section test.
   Local Definition P_b := λ (π : thread_id) (x : Z) (y : Z), (∃ (z : Z) (l : loc), ⌜x = (y + z)%Z⌝ ∗ ⌜(0 < x)%Z⌝ ∗ guarded true (l ◁ₗ[π, Owned] #42%Z @ (◁ int I32)))%I : iProp Σ.
   Local Definition S_b := λ (π : thread_id) (κ : lft) (x : Z) (y : Z), (∃ (z : Z) (l : loc), ⌜x = (y + z)%Z⌝ ∗ ⌜(0 < x)%Z⌝ ∗ guarded false (l ◁ₗ[π, Shared κ] #42%Z @ (◁ int I32)))%I : iProp Σ.
 
-  Local Program Definition Adef := mk_ex_inv_def_auto_ghost_drop P_b S_b _ false _ [] [] _ _ _.
+  Local Program Definition Adef := mk_ex_inv_def_auto_ghost_drop P_b S_b _ false _ [] [] _ _ _ _.
   Next Obligation. ex_plain_t_solve_ghost_drop_auto. Defined.
   Next Obligation. ex_plain_t_solve_is_xrfn. Qed.
+  Next Obligation. ex_plain_t_solve_to_xrfn. Qed.
   Next Obligation. ex_t_solve_persistent. Qed.
   Next Obligation. rewrite /S_b. ex_plain_t_solve_shr_mono. Qed.
   Next Obligation. rewrite /P_b /S_b. ex_plain_t_solve_shr. Qed.
 
-  Local Program Definition Bdef := mk_auto_ex_inv_def P_b false _ [] [] _ _ _ _.
+  Local Program Definition Bdef := mk_auto_ex_inv_def P_b false _ [] [] _ _ _ _ _.
   Next Obligation. ex_plain_t_solve_is_xrfn. Qed.
+  Next Obligation. ex_plain_t_solve_to_xrfn. Qed.
   Next Obligation. ex_plain_t_solve_shr_auto. Defined.
   Next Obligation. ex_plain_t_solve_ghost_drop_auto. Defined.
   Next Obligation. ex_t_solve_persistent. Qed.
@@ -623,9 +626,10 @@ Section test_box.
       _
       ([] ++ ty_lfts T_ty)
       ([] ++ ty_wf_E T_ty)
-      _ _ _ _
+      _ _ _ _ _
     .
     Next Obligation. ex_plain_t_solve_is_xrfn. Qed.
+    Next Obligation. ex_plain_t_solve_to_xrfn. Qed.
     Next Obligation. ex_plain_t_solve_shr_auto. Defined.
     Next Obligation. ex_t_solve_persistent. Qed.
     Next Obligation. intros ?; ex_plain_t_solve_shr_mono. Qed.
@@ -683,11 +687,12 @@ Section test_rectypes.
 
   Local Program Definition unit_abs_inv {X : RT} : ex_inv_def X unitRT :=
     mk_ex_inv_def (λ _ x _, ⌜is_xrfn x⌝)%I (λ _ _ x _, ⌜is_xrfn x⌝)%I (λ _ _ _, True)%I
-      true _ [] [] _ _ _ _.
+      true _ [] [] _ _ _ _ _.
   Next Obligation.
     intros. iIntros "%Hxr". iSplit; first done.
     iPureIntro. intros _. exact Hxr.
   Qed.
+  Next Obligation. ex_plain_t_solve_to_xrfn. Qed.
   Next Obligation. intros. unfold TCNoResolve. apply _. Qed.
   Next Obligation. eauto. Qed.
   Next Obligation.
@@ -791,10 +796,18 @@ Section rectypes_List_ty.
             _
             ([])
             ([])
-            _ _ _ _
+            _ _ _ _ _
           .
     Next Obligation.
       ex_plain_t_solve_is_xrfn.
+    Qed.
+    Next Obligation.
+      intros ? ? T_ty ? ty π x y. rewrite /TCNoResolve.
+      eapply canonicalizable_from_repr.
+      intros xrs. destruct xrs as [xh xrs].
+      destruct xrs as [xl xrs]. destruct xrs.
+      iIntros "_".
+      iExists (xh, xl). simpl. done.
     Qed.
     Next Obligation.
       ex_plain_t_solve_shr_auto.

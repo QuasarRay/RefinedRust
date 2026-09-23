@@ -183,6 +183,30 @@ Section structs.
       ⌜snd <$> fields !! i = Some ly0⌝ ∗
       ⌜syn_type_has_layout (ty_syn_type ty MetaNone) ly0⌝ ∗
       v ◁ᵥ{ π, MetaNone} r' @ ty.
+  Definition struct_own_el_focused (π : thread_id) (fields : field_list) (vs : list val)
+      (i : nat) (x : sigT (λ rt : RT, (type rt * place_rfn rt)%type)) : iProp Σ :=
+    ∃ j ly n, ⌜fields !! j = Some (Some n, ly)⌝ ∗
+      ⌜named_fields fields !! i = Some (n, ly)⌝ ∗
+      ∃ v, ⌜vs !! j = Some v⌝ ∗
+        struct_own_el_val π j fields v (projT2 x).2 (projT2 x).1.
+
+  Lemma struct_own_el_focused_xrfn {rts : list RT} (tys : hlist type rts)
+      (r : plist (RT_rt ∘ place_rfnRT) rts) π fields vs k :
+    ([∗ list] i ↦ x ∈ hpzipl rts tys r,
+      ∃ xr : RT_xt (projT1 x),
+        struct_own_el_focused π fields vs (k + i)%nat
+          (existT _ ((projT2 x).1, PlaceIn (RT_xrt (projT1 x) xr)))) -∗
+    ∃ rs' : RT_xt (plistRT rts),
+      [∗ list] i ↦ x ∈ hpzipl rts tys (RT_xrt (plistRT rts) rs'),
+        struct_own_el_focused π fields vs (k + i)%nat x.
+  Proof.
+    revert k. induction rts as [|rt rts IH]; inv_hlist tys; destruct r; intros k; simpl.
+    - iIntros "_". iExists (@pnil RT (RT_xt ∘ place_rfnRT)). done.
+    - intros tys koff. iIntros "((%xr & Hx) & Hxs)".
+      setoid_rewrite Nat.add_succ_r.
+      iPoseProof (IH tys _ (S koff) with "Hxs") as "(%xrs & Hxs)".
+      iExists (xr -:: xrs). iFrame.
+  Qed.
   Definition struct_own_el_loc (π : thread_id) (q : Qp) (v : val) (i : nat) (fields : field_list) (l : loc) {rt} (r : place_rfn rt) (ty : type rt) : iProp Σ :=
     ∃ (r' : rt) (ly : layout), place_rfn_interp_owned r r' ∗
       ⌜snd <$> fields !! i = Some ly⌝ ∗
@@ -542,6 +566,87 @@ Section structs.
       iExists sl. iSplitR; first done. iPureIntro.
       by apply use_struct_layout_alg_Some_inv.
     - rewrite struct_t_shr_unfold. iIntros (κ π r m l) "($ & _)".
+    - rewrite struct_t_own_val_unfold.
+      iIntros (F π r m v q HF) "#[LFT TIME] Htok (%sl & -> & %Halg & %Hlen & %Hly & Hown)".
+      simpl.
+      iPoseProof (big_sepL2_length with "Hown") as "%Hlen_own".
+      set (vs := reshape (ly_size <$> (sl_members sl).*2) v).
+      iPoseProof (big_sepL2_to_big_sepL_lookup_l with "Hown") as "Hown".
+      iPoseProof (pad_struct_focus_no_uninit with "Hown") as "(Hown & Hclose)".
+      { rewrite length_hpzipl. rewrite named_fields_field_names_length
+          (struct_layout_spec_has_layout_fields_length sls); done. }
+      { specialize (sl_nodup sl). rewrite bool_decide_spec. done. }
+      iAssert ([∗ list] i ↦ x ∈ hpzipl rts tys r,
+        struct_own_el_focused π (sl_members sl) vs i x)%I
+        with "[Hown]" as "Hown".
+      { iApply (big_sepL_mono with "Hown").
+        iIntros (i x Hlook) "(%j & %ly & %n & %Hfield & %Hnamed & %v' & %Hv & Hfield)".
+        rewrite /struct_own_el_focused. iExists j, ly, n. iFrame.
+        done. }
+
+      set (κ := lft_intersect_list
+        (mjoin ((λ ty, ty_lfts (projT2 ty)) <$> hzipl rts tys))).
+      iPoseProof (Fractional_split_big_sepL (λ q, q.[κ])%I
+        (length (hpzipl rts tys r)) with "Htok") as
+        "(%qs & %Hlen_qs & Htoks & Hclose_toks)".
+      iAssert ([∗ list] i ↦ x; q' ∈ hpzipl rts tys r; qs,
+        logical_step F
+          ((∃ xr : RT_xt (projT1 x),
+            struct_own_el_focused π (sl_members sl) vs i
+              (existT _ ((projT2 x).1, PlaceIn (RT_xrt (projT1 x) xr)))) ∗
+            q'.[κ]))%I with "[Hown Htoks]" as "Hsteps".
+      { iApply (big_sepL2_wand with "[Hown Htoks]").
+        { iApply big_sepL2_sep_sepL_r; iFrame.
+          iApply big_sepL2_const_sepL_l. iSplitR; last done.
+          rewrite Hlen_qs. done. }
+        iApply big_sepL2_intro; first done.
+        iModIntro. iIntros (i [rt [ty ri]] q' Hlook Hlookq) "(Hfield & Htok)".
+        iApply fupd_logical_step.
+        rewrite /struct_own_el_focused /struct_own_el_val.
+        iDestruct "Hfield" as
+          "(%j & %ly & %n & %Hfield & %Hnamed & %v' & %Hv & %ri' & %ly' & Hrfn & %Hfield' & %Hst & Hown)".
+        iMod (lft_incl_acc _ _ (lft_intersect_list (ty_lfts ty))
+          with "[] Htok") as "(%q'' & Htok' & Hclose_tok)"; first done.
+        { iApply list_incl_lft_incl_list.
+          apply list_subseteq_mjoin. apply list_elem_of_fmap.
+          apply (hpzipl_lookup_inv_hzipl_pzipl _ _ r) in Hlook as (Hlook & _).
+          exists (existT _ ty). split; first done.
+          by apply list_elem_of_lookup_2 in Hlook. }
+        iPoseProof (ty_own_val_to_xrfn ty F π ri' MetaNone v' q''
+          with "[$LFT $TIME] Htok' Hown") as "Hstep"; first done.
+        iModIntro. iApply logical_step_fupd.
+        iApply (logical_step_wand with "Hstep").
+        iIntros "((%xr & Hown) & Htok')".
+        iMod ("Hclose_tok" with "Htok'") as "Htok".
+        iModIntro. iFrame "Htok".
+        iExists xr. rewrite /struct_own_el_focused /struct_own_el_val.
+        iExists j, ly, n. do 2 (iSplitR; first done). iExists v'. iSplitR; first done.
+        iExists ($# xr), ly'. simpl. iFrame. done. }
+      iPoseProof (logical_step_big_sepL2 with "Hsteps") as "Hsteps".
+      iApply (logical_step_wand with "Hsteps").
+      iIntros "Hfields".
+      iPoseProof (big_sepL2_sep_sepL_r with "Hfields") as "(Hfields & Htoks)".
+      iPoseProof ("Hclose_toks" with "Htoks") as "Htok".
+      iPoseProof (big_sepL2_const_sepL_l with "Hfields") as "(_ & Hfields)".
+      iPoseProof (struct_own_el_focused_xrfn tys r π (sl_members sl) vs 0
+        with "Hfields") as "(%xrs & Hfields)".
+      set (r' := pmap (F := RT_xt ∘ place_rfnRT) (G := RT_rt ∘ place_rfnRT)
+        (λ rt xr, PlaceIn (RT_xrt rt xr)) xrs).
+      iEval (simpl; unfold struct_own_el_focused, r') in "Hfields".
+      iSpecialize ("Hclose" $! (hpzipl rts tys r') with "[] Hfields").
+      { rewrite !length_hpzipl. done. }
+      assert (Hr' : r' = RT_xrt (plistRT rts) xrs) by reflexivity.
+      subst r'.
+      iAssert ([∗ list] i ↦ v'; x ∈ vs;
+          pad_struct (sl_members sl) (hpzipl rts tys ($# xrs)) struct_make_uninit_type,
+          struct_own_el_val π i (sl_members sl) v' (projT2 x).2 (projT2 x).1)%I
+        with "[Hclose]" as "Hown".
+      { iApply big_sepL2_from_big_sepL_lookup_l.
+        { rewrite /vs Hlen_own !pad_struct_length. done. }
+        iExact "Hclose". }
+      iSplitR "Htok".
+      { iExists xrs, sl. iFrame "Hown". done. }
+      done.
     -
     (* sharing *)
     rewrite struct_t_shr_unfold struct_t_own_val_unfold.

@@ -76,6 +76,18 @@ Record na_ex_inv_def `{!typeGS Σ} (X : RT) (Y : RT) : Type := na_mk_ex_inv_def'
 
   na_inv_P_lfts : list lft;
   na_inv_P_wf_E : elctx;
+
+  na_inv_P_own_val_to_xrfn :
+    ∀ (ty : type X) F π x y m v q,
+    lftE ⊆ F →
+    rrust_ctx -∗
+    let κ := lft_intersect_list (na_inv_P_lfts ++ ty_lfts ty) in
+    q.[κ] -∗
+    na_inv_P π x y ∗ ty_own_val ty π x m v -∗
+    logical_step F (
+      (∃ x' (yr : RT_xt Y),
+        na_inv_P π x' (RT_xrt Y yr) ∗ ty_own_val ty π x' m v) ∗
+      q.[κ]);
 }.
 
 (* Stop Typeclass resolution for the [inv_P_pers] argument, to make it more deterministic. *)
@@ -84,13 +96,19 @@ Definition na_mk_ex_inv_def `{!typeGS Σ} {X Y : RT} `{!Inhabited (RT_xt Y)}
   (inv_trivial_drop : bool)
   inv_P_lfts
   (inv_P_wf_E : elctx)
+  (Hcanon : ∀ ty π x y,
+    TCNoResolve (Canonicalizable π inv_P_lfts ty x y
+      (inv_P π x y) (inv_P π)))
   := na_mk_ex_inv_def' _ _ _ _ _
-       inv_trivial_drop inv_P inv_P_lfts inv_P_wf_E.
+       inv_trivial_drop inv_P inv_P_lfts inv_P_wf_E
+       (λ ty F π x y m v q HF,
+         (Hcanon ty π x y).(canonicalizable_proof) F m v q HF).
 
 Global Arguments na_inv_P {_ _ _ _}.
 Global Arguments na_inv_trivial_drop {_ _ _ _}.
 Global Arguments na_inv_P_lfts {_ _ _ _}.
 Global Arguments na_inv_P_wf_E {_ _ _ _}.
+Global Arguments na_inv_P_own_val_to_xrfn {_ _ _ _ _}.
 Global Arguments na_inv_P : simpl never.
 
 (** Smart constructor for persistent and timeless [P] *)
@@ -98,8 +116,10 @@ Program Definition na_mk_pers_ex_inv_def
   `{!typeGS Σ} {X : RT} {Y : RT}
   `{!Inhabited (RT_xt Y)}
   (P : X → Y → iProp Σ)
-  (inv_trivial_drop : bool) :=
-    na_mk_ex_inv_def (λ _, P) inv_trivial_drop [] [] (* _ *).
+  (inv_trivial_drop : bool)
+  (Hcanon : ∀ ty π x y,
+    TCNoResolve (Canonicalizable π [] ty x y (P x y) P)) :=
+    na_mk_ex_inv_def (λ _, P) inv_trivial_drop [] [] Hcanon.
 
 Class NaExInvDefNonExpansive `{!typeGS Σ} {rt X Y : RT} (F : type rt → na_ex_inv_def X Y) : Type := {
   ex_inv_def_ne_val_own :
@@ -181,6 +201,12 @@ Section na_ex.
     - iIntros (κ π l r m) "(_ & _ &  _ & (%ly & % & %))".
       eauto.
     - iIntros (κ π r m l) "($ & _)".
+    - iIntros (F π r m v q HF) "#CTX Htok (%x & HP & Hown)".
+      iPoseProof (P.(na_inv_P_own_val_to_xrfn) ty F π x r m v q HF
+        with "CTX Htok [$HP $Hown]") as "Hstep".
+      iApply (logical_step_wand with "Hstep").
+      iIntros "((%x' & %xr & HP & Hown) & Htok)".
+      iFrame "Htok". iExists xr, x'. iFrame.
     - iIntros (E κ l ly π r m q ? Hxr) "#(LFT & LLCTX) #Hna Htok %Halg %Hly Hlb Hbor".
       iEval (setoid_rewrite bi.sep_exist_l) in "Hbor".
       iEval (setoid_rewrite bi_exist_comm) in "Hbor".

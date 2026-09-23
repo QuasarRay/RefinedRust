@@ -67,7 +67,304 @@ Ltac solve_is_xrfn :=
   first
     [ solve_is_xrfn_with_instances
     | progress invert_is_xrfn_assumptions; solve_is_xrfn_with_instances
-    ].
+     ].
+
+(** Owned canonicalization automation. The fallback instance is deliberately
+    restricted to an already-canonical outer refinement: it preserves the
+    coupled representation index and invariant unchanged. *)
+Lemma canonicalizable_is_xrfn_proof `{!typeGS Σ} {X Y : RT}
+    (π : thread_id) (κs : list lft) (ty : type X) (x : X) (y : Y)
+    (Q : X → Y → iProp Σ) `{!IsXrfn y} :
+    ∀ F m v q,
+    lftE ⊆ F →
+    rrust_ctx -∗
+    q.[lft_intersect_list κs] -∗
+    Q x y ∗ ty_own_val ty π x m v -∗
+    logical_step F (
+      (∃ x' (yr : RT_xt Y),
+        Q x' (RT_xrt Y yr) ∗ ty_own_val ty π x' m v) ∗
+      q.[lft_intersect_list κs]).
+Proof.
+  intros F m v q HF.
+  destruct (@is_xrfn_proof Y y IsXrfn0) as [yr ->].
+  iIntros "#CTX Htok (HQ & Hown)".
+  iApply logical_step_intro. iFrame "Htok".
+  iExists x, yr. iFrame.
+Qed.
+
+Global Instance canonicalizable_is_xrfn `{!typeGS Σ} {X Y : RT}
+    (π : thread_id) (κs : list lft) (ty : type X) (x : X) (y : Y)
+    (Q : X → Y → iProp Σ) `{!IsXrfn y} :
+    Canonicalizable π κs ty x y (Q x y) Q.
+Proof.
+  unshelve econstructor.
+  exact (@canonicalizable_is_xrfn_proof Σ typeGS0 X Y π
+    (κs ++ ty_lfts ty) ty x y Q IsXrfn0).
+Qed.
+
+Class OuterIndependent {Σ : gFunctors} {X Y : Type}
+    (Q : X → Y → iProp Σ) :=
+  outer_independent x y y' : Q x y -∗ Q x y'.
+Global Hint Mode OuterIndependent + + + + : typeclass_instances.
+
+Global Instance outer_independent_const {Σ : gFunctors} {X Y : Type}
+    (P : X → iProp Σ) :
+    OuterIndependent (λ (x : X) (_ : Y), P x).
+Proof.
+  intros x y y'. iIntros "$".
+Qed.
+
+Global Instance canonicalizable_outer_independent `{!typeGS Σ} {X Y : RT}
+    `{!Inhabited (RT_xt Y)} (Q : X → Y → iProp Σ)
+    `{!OuterIndependent Q}
+    (π : thread_id) (κs : list lft) (ty : type X) (x : X) (y : Y) :
+    Canonicalizable π κs ty x y (Q x y) Q.
+Proof.
+  constructor. intros F m v q HF.
+  iIntros "#CTX Htok (HQ & Hown)".
+  iPoseProof (outer_independent x y (RT_xrt Y inhabitant) with "HQ") as "HQ".
+  iApply logical_step_intro. iFrame "Htok".
+  iExists x, inhabitant. iFrame.
+Qed.
+
+Global Instance canonicalizable_exists `{!typeGS Σ} {X Y : RT} {A : Type}
+    (π : thread_id) (κs : list lft) (ty : type X) (x : X) (y : Y)
+    (P : A → iProp Σ) (Q : A → X → Y → iProp Σ)
+    (Hcanonical : ∀ a, Canonicalizable π κs ty x y (P a) (Q a)) :
+    Canonicalizable π κs ty x y (∃ a, P a)%I
+      (λ x' y', ∃ a, Q a x' y')%I.
+Proof.
+  constructor. intros F m v q HF.
+  iIntros "#CTX Htok ((%a & HP) & Hown)".
+  iPoseProof ((Hcanonical a).(canonicalizable_proof) F m v q HF
+    with "CTX Htok [HP Hown]")
+    as "Hstep"; first iFrame.
+  iApply (logical_step_wand with "Hstep").
+  iIntros "((%x' & %yr & HQ & Hown) & Htok)".
+  iSplitR "Htok"; last done.
+  iExists x', yr. iFrame "Hown".
+  iExists a. iExact "HQ".
+Qed.
+
+Global Instance canonicalizable_guarded_owned_ofty `{!typeGS Σ} {X rt : RT}
+    (π : thread_id) (inner_ty : type rt) (repr_ty : type X)
+    (x : X) (y : place_rfn rt) (l : loc)
+    (P1 P2 : X → iProp Σ) :
+    Canonicalizable π (ty_lfts inner_ty) repr_ty x y
+      (P1 x ∗ (guarded true (l ◁ₗ[π, Owned] y @ ◁ inner_ty) ∗ P2 x))%I
+      (λ x' y', P1 x' ∗
+        (guarded true (l ◁ₗ[π, Owned] y' @ ◁ inner_ty) ∗ P2 x'))%I.
+Proof.
+  constructor. intros F m v q HF.
+  iIntros "#CTX Htok ((HP1 & Hg & HP2) & Hrepr)".
+  rewrite lft_intersect_list_app -lft_tok_sep.
+  iDestruct "Htok" as "(Htoki & Htokr)".
+  rewrite /guarded /maybe_creds /have_creds /num_cred.
+  iDestruct "Hg" as "((Hcreds & Hat) & Hl)".
+  iDestruct "Hcreds" as "(Hc & Hcreds)".
+  iApply fupd_logical_step.
+  iApply (lc_fupd_add_later with "Hc"). iNext.
+  rewrite ltype_own_ofty_unfold /lty_of_ty_own.
+  iDestruct "Hl" as
+    "(%ly & %Hst & %Hly & #Hsc & #Hlb & %ri & Hrfn & Hown)".
+  iMod (fupd_mask_mono with "Hown") as "(%w & Hl & Hown)"; first done.
+  iPoseProof
+    (ty_own_val_to_xrfn inner_ty F π ri MetaNone w q
+      with "CTX Htoki Hown") as "Hstep"; first done.
+  iModIntro.
+  iApply logical_step_fupd.
+  iApply (logical_step_compose with "Hstep").
+  iApply (logical_step_intro_tr with "Hat").
+  iIntros "Hat Hnewcreds". iModIntro.
+  iIntros "((%xr & Hown) & Htoki)".
+  iSplitR "Htoki Htokr".
+  - iExists x, xr. simpl.
+    iSplitR "Hrepr"; last done.
+    iFrame "HP1 HP2".
+    rewrite /guarded /maybe_creds /have_creds /num_cred.
+    iSplitL "Hnewcreds Hat".
+    { iFrame. iApply tr_weaken; last done.
+      simpl. unfold num_laters_per_step. lia. }
+    iModIntro. iNext.
+    rewrite ltype_own_ofty_unfold /lty_of_ty_own.
+    iExists ly. iFrame "#%".
+    iExists (RT_xrt rt xr).
+    iSplitR "Hl Hown"; first done.
+    iModIntro. iExists w. iFrame.
+  - iModIntro. iFrame.
+Qed.
+
+Global Instance canonicalizable_guarded_owned_ofty_eq `{!typeGS Σ} {X rt : RT}
+    (π : thread_id) (inner_ty : type rt) (repr_ty : type X)
+    (x r : X) (y : place_rfn rt) (l : loc) (R : iProp Σ) :
+    Canonicalizable π (ty_lfts inner_ty) repr_ty x y
+      (⌜x = r⌝ ∗ guarded true (l ◁ₗ[π, Owned] y @ ◁ inner_ty) ∗ R)%I
+      (λ x' y', ⌜x' = r⌝ ∗
+        guarded true (l ◁ₗ[π, Owned] y' @ ◁ inner_ty) ∗ R)%I.
+Proof.
+  apply (canonicalizable_guarded_owned_ofty π inner_ty repr_ty x y l
+    (λ x', ⌜x' = r⌝)%I (λ _, R)%I).
+Qed.
+
+(** A canonical pullback records that every canonical refinement of the
+    representation shape determines a canonical abstract refinement. *)
+Class CanonicalPullback {X Y : RT} (encode : Y → X) := {
+  canonical_pullback : RT_xt X → RT_xt Y;
+  canonical_pullback_spec xr :
+    encode (RT_xrt Y (canonical_pullback xr)) = RT_xrt X xr;
+}.
+Global Arguments canonical_pullback {_ _ _ _} _.
+Global Arguments canonical_pullback_spec {_ _ _ _} _.
+
+Global Instance canonical_pullback_id {rt : RT} :
+    CanonicalPullback (λ y : rt, y).
+Proof.
+  unshelve econstructor.
+  - exact id.
+  - done.
+Qed.
+
+Global Instance canonical_pullback_place {rt : RT} :
+    CanonicalPullback (λ y : rt, #y).
+Proof.
+  unshelve econstructor.
+  - exact id.
+  - done.
+Qed.
+
+Global Instance canonical_pullback_plist_nil :
+    CanonicalPullback (λ _ : unitRT, (@pnil RT (RT_rt ∘ place_rfnRT))).
+Proof.
+  unshelve econstructor.
+  - intros _. exact tt.
+  - intros xr. destruct xr. done.
+Qed.
+
+Global Instance canonical_pullback_plist_singleton {rt : RT} :
+    CanonicalPullback (λ y : rt, -[#y]).
+Proof.
+  unshelve econstructor.
+  - intros xr. destruct xr as [xh xr]. destruct xr. exact xh.
+  - intros xr. destruct xr as [xh xr]. destruct xr. done.
+Qed.
+
+Global Instance canonical_pullback_plist_singleton_map {rt Y : RT}
+    (encode : Y → rt) `{!CanonicalPullback encode} :
+    CanonicalPullback (λ y : Y, -[#(encode y)]).
+Proof.
+  unshelve econstructor.
+  - intros xr. destruct xr as [xh xr]. destruct xr.
+    exact (@canonical_pullback rt Y encode CanonicalPullback0 xh).
+  - intros xr. destruct xr as [xh xr]. destruct xr. simpl.
+    rewrite (@canonical_pullback_spec rt Y encode CanonicalPullback0). done.
+Qed.
+
+Global Instance canonical_pullback_plist_cons {rt : RT} {rts : list RT}
+    {Y : RT} (encode : Y → plistRT rts) `{!CanonicalPullback encode} :
+    CanonicalPullback (λ y : prodRT rt Y, (#y.1) -:: encode y.2).
+Proof.
+  unshelve econstructor.
+  - intros xr. destruct xr as [xh xr].
+    exact (xh, canonical_pullback xr).
+  - intros xr. destruct xr as [xh xr]. simpl.
+    rewrite canonical_pullback_spec. done.
+Qed.
+
+(** Rocq does not infer the tail encoder from an expanded two-element plist
+    lambda. This is only a syntactic adapter for the recursive instances. *)
+Global Instance canonical_pullback_plist_pair {rt1 rt2 : RT} :
+    CanonicalPullback
+      (λ y : prodRT rt1 rt2, -[#y.1; #y.2]).
+Proof.
+  unshelve econstructor.
+  - intros xr. destruct xr as [xr1 xr]. destruct xr as [xr2 xr].
+    destruct xr. exact (xr1, xr2).
+  - intros xr. destruct xr as [xr1 xr]. destruct xr as [xr2 xr].
+    destruct xr. done.
+Qed.
+
+Class CanonicalizeWithRepr {Σ : gFunctors} {X Y : RT}
+    (Q : X → Y → iProp Σ) :=
+  canonicalize_with_repr x y (xr : RT_xt X) :
+    Q x y -∗ ∃ yr : RT_xt Y, Q (RT_xrt X xr) (RT_xrt Y yr).
+Global Hint Mode CanonicalizeWithRepr + + + + : typeclass_instances.
+
+Global Instance canonicalize_with_repr_eq {Σ : gFunctors} {X Y : RT}
+    (encode : Y → X) `{!CanonicalPullback encode} (R : iProp Σ) :
+    CanonicalizeWithRepr
+      (λ x y, (⌜x = encode y⌝ ∗ R)%I).
+Proof.
+  intros x y xr. iIntros "(_ & HR)".
+  iExists (canonical_pullback xr). iFrame.
+  iPureIntro. symmetry. apply canonical_pullback_spec.
+Qed.
+
+(** Generated tuple invariants use pair-pattern lambdas. This adapter only
+    normalizes that presentation; the actual shape conversion is still
+    provided by [CanonicalPullback]. *)
+Global Instance canonicalize_with_repr_eq_prod {Σ : gFunctors}
+    {X Y1 Y2 : RT} (encode : Y1 → Y2 → X)
+    `{!CanonicalPullback (λ y : prodRT Y1 Y2, encode y.1 y.2)}
+    (R : iProp Σ) :
+    CanonicalizeWithRepr
+      (λ x '(y1, y2), (⌜x = encode y1 y2⌝ ∗ R)%I).
+Proof.
+  intros x [y1 y2] xr. iIntros "(_ & HR)".
+  iExists (canonical_pullback xr). iFrame.
+  iPureIntro. symmetry.
+  change ((λ y : prodRT Y1 Y2, encode y.1 y.2)
+    (RT_xrt (prodRT Y1 Y2) (canonical_pullback xr)) = RT_xrt X xr).
+  apply canonical_pullback_spec.
+Qed.
+
+Lemma canonicalizable_from_repr `{!typeGS Σ} {X Y : RT}
+    (π : thread_id) (ty : type X) (x : X) (y : Y)
+    (P : iProp Σ) (Q : X → Y → iProp Σ) :
+    (∀ xr : RT_xt X, P -∗ ∃ yr : RT_xt Y,
+      Q (RT_xrt X xr) (RT_xrt Y yr)) →
+    Canonicalizable π [] ty x y P Q.
+Proof.
+  intros Hcanonical. constructor. intros F m v q HF.
+  iIntros "#CTX Htok (HP & Hown)".
+  iPoseProof (ty_own_val_to_xrfn ty F π x m v q
+    with "CTX Htok Hown") as "Hstep"; first done.
+  iApply (logical_step_wand with "Hstep").
+  iIntros "((%xr & Hown) & Htok)".
+  iPoseProof (Hcanonical xr with "HP") as "(%yr & HQ)".
+  iFrame "Htok". iExists ($# xr), yr. iFrame "Hown". iExact "HQ".
+Qed.
+
+Global Instance canonicalizable_with_repr `{!typeGS Σ} {X Y : RT}
+    (π : thread_id) (ty : type X) (x : X) (y : Y)
+    (Q : X → Y → iProp Σ) `{!CanonicalizeWithRepr Q} :
+    Canonicalizable π [] ty x y (Q x y) Q.
+Proof.
+  apply canonicalizable_from_repr. apply canonicalize_with_repr.
+Qed.
+
+Global Program Instance canonicalizable_list_length `{!typeGS Σ} {X Y : RT}
+    `{!Inhabited (RT_xt Y)}
+    (π : thread_id) (κs : list lft) (ty : type X) (x : X)
+    (ys : listRT Y) (Q : X → nat → iProp Σ) :
+    Canonicalizable π κs ty x ys (Q x (length ys))
+      (λ x' ys', Q x' (length ys')).
+Next Obligation.
+  intros Σ typeGS0 X Y Hinh π κs ty x ys Q F m v q HF.
+  iIntros "#CTX Htok (HQ & Hown)".
+  iApply logical_step_intro. iFrame "Htok".
+  iExists x, (replicate (length ys) inhabitant).
+  simpl. rewrite length_fmap length_replicate. iFrame.
+Qed.
+
+Ltac ex_plain_t_solve_to_xrfn :=
+  intro_adt_params;
+  intros; rewrite /TCNoResolve; simpl in *;
+  prepare_initial_coq_context;
+  lazymatch goal with
+  | |- @Canonicalizable ?Σ ?GS ?X ?Y ?π ?κs ?ty ?x ?y _ ?Q =>
+      change (@Canonicalizable Σ GS X Y π κs ty x y (Q x y) Q)
+  end;
+  apply _.
 
 (** ** Solve [Persistent]/[Timeless] assumptions. *)
 Ltac ex_t_solve_persistent ::=

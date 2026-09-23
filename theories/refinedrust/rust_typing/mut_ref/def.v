@@ -93,6 +93,51 @@ Section mut_ref.
     - rewrite mut_ref_shr_unfold.
       iIntros (κ' π [r γ] m l) "(%vi & %li & %ly & %r' & %Hxr & _)".
       done.
+    - rewrite mut_ref_own_val_unfold.
+      iIntros (F π [r γ] m v q ?) "#[LFT TIME] Htok
+        (%l & %ly & -> & %Hdec & %Halg & %Hly & #Hlb & #Hsc & Hrfn & Hcreds & Hb)".
+      simpl. rewrite -lft_tok_sep. iDestruct "Htok" as "(Htokκ & Htoki)".
+      rewrite /have_creds /num_cred.
+      iDestruct "Hcreds" as "(Hcreds & Hat)".
+      assert (5 = 2 + 3) as -> by lia.
+      iDestruct "Hcreds" as "(Hfirst & Hrest)".
+      iDestruct "Hfirst" as "(Hlater & Hclose)".
+      iApply fupd_logical_step.
+      iMod (fupd_mask_subseteq lftE) as "HclF"; first done.
+      iMod "Hb".
+      iMod (pinned_bor_acc_strong lftE with "LFT Hb Htokκ")
+        as "(%κ' & #Hincl & Hb & Hret & Hclose_bor)"; first done.
+      iMod "HclF" as "_".
+      iApply (lc_fupd_add_later with "Hlater"). iNext.
+      iDestruct "Hb" as (ri) "(Hauth & Hown)".
+      iMod (fupd_mask_mono with "Hown") as (w) "(Hl & Hown)"; first done.
+      iMod (place_rfn_interp_mut_owned with "Hrfn Hauth")
+        as "(Hrfn & Hobs & Hauth)".
+      iPoseProof (ty_own_val_to_xrfn inner F π ri MetaNone w q
+        with "[$LFT $TIME] Htoki Hown") as "Hstep"; first done.
+      iModIntro. iApply logical_step_fupd.
+      iApply (logical_step_compose with "Hstep").
+      iApply (logical_step_intro_tr with "Hat").
+      iIntros "Hat Hnewcreds". iModIntro.
+      iIntros "((%xr & Hown) & Htoki)".
+      iMod (gvar_update ($# xr) with "Hauth Hobs") as "(Hauth & Hobs)".
+      iMod (fupd_mask_subseteq lftE) as "HclF"; first done.
+      iMod ("Hclose_bor" $! (∃ ri, gvar_auth γ ri ∗
+          |={lftE}=> l ↦: inner.(ty_own_val) π ri MetaNone)%I
+        with "Hret Hclose [Hauth Hl Hown]") as "(Hb & Htokκ)".
+      { iNext. iExists ($# xr). iFrame. iModIntro. done. }
+      iPoseProof (pinned_bor_shorten with "Hincl Hb") as "Hb".
+      iMod "HclF" as "_". iModIntro.
+      iSplitR "Htokκ Htoki".
+      { iExists (xr, γ), l, ly. simpl.
+        iSplitR; first done. iSplitR; first done.
+        iSplitR; first done. iSplitR; first done.
+        iFrame "Hlb Hsc Hobs".
+        iSplitL "Hnewcreds Hat".
+        { rewrite /have_creds /num_cred. iFrame.
+          iApply tr_weaken; last done. lia. }
+        iModIntro. done. }
+      iFrame.
     - (* initiate sharing *)
     (*
        Plan:
