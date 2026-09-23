@@ -35,10 +35,14 @@ Section RwLock_inv_t.
           _
           ([])
           ([])
-          _ _ _ _
+          _ _ _ _ _
         .
   Next Obligation.
     ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.
@@ -115,10 +119,14 @@ Section RwLockReadGuard_inv_t.
           _
           ([])
           ([])
-          _ _ _ _
+          _ _ _ _ _
         .
   Next Obligation.
     ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.
@@ -195,10 +203,14 @@ Section PoisonError_inv_t.
           _
           ([])
           ([])
-          _ _ _ _
+          _ _ _ _ _
         .
   Next Obligation.
     ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.
@@ -275,10 +287,14 @@ Section RwLockWriteGuard_inv_t.
           _
           ([])
           ([])
-          _ _ _ _
+          _ _ _ _ _
         .
   Next Obligation.
     ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.

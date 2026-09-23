@@ -48,6 +48,7 @@ Section Option_ty.
         ([("None", mk_enum_tag_sem _ (Option_None_ty -[] -[T_ty]) (λ '( *[]), None)); ("Some", mk_enum_tag_sem _ (Option_Some_ty -[] -[T_ty]) (λ '( *[x]), (Some (x))))])
         _
         _
+        _
         _.
     Next Obligation.
       solve_inhabited.
@@ -63,6 +64,10 @@ Section Option_ty.
 
     Next Obligation.
       solve_mk_enum_tag_consistent.
+    Defined.
+
+    Next Obligation.
+      solve_mk_enum_tag_inj_roundtrip.
     Defined.
 
     #[global] Arguments Option_enum : simpl never.

@@ -4,7 +4,7 @@ From rrstd.clone.clone.generated Require Export generated_specs_clone.
 From rrstd.closures.closures.generated Require Export generated_specs_closures.
 From rrstd.cmp.cmp.generated Require Export generated_specs_cmp.
 From rrstd.controlflow.controlflow.generated Require Export generated_specs_controlflow.
-From rrstd.iterator.theories Require Export iterator map step step_by.
+From rrstd.iterator.theories Require Export iterator map skip step step_by take.
 From rrstd.option.option.generated Require Export generated_specs_option.
 From rrstd.range.range.generated Require Export generated_specs_range.
 From rrstd.result.result.generated Require Export generated_specs_result.
@@ -131,10 +131,14 @@ Section adapters_map_Map_inv_t.
           _
           ([])
           ([])
-          _ _ _ _
+          _ _ _ _ _
         .
   Next Obligation.
     ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.
@@ -203,18 +207,22 @@ End adapters_skip_Skip_ty.
 Section adapters_skip_Skip_inv_t.
   Context `{RRGS : !(refinedrustGS Σ)}.
   Context {I_rt : RT}.
-  Program Definition adapters_skip_Skip_inv_t_inv_spec  : (spec_with 0 [(I_rt)] ((ex_inv_def ((adapters_skip_Skip_rt (I_rt)))%type (((_ * nat)))%type))) :=
+  Program Definition adapters_skip_Skip_inv_t_inv_spec  : (spec_with 0 [(I_rt)] ((ex_inv_def ((adapters_skip_Skip_rt (I_rt)))%type ((SkipXRT (I_rt)))%type))) :=
     spec! ( *[]) : 0 | ( *[I_ty]) : ([I_rt] : list RT), mk_auto_ex_inv_def
-          (λ π inner_rfn (_ty_rfn : RT_rt (((_ * nat))%type : RT)),
-                  let '(it, n) := _ty_rfn in ⌜inner_rfn = -[#(it); #(Z.of_nat n)]⌝ ∗ True)%I
+          (λ π inner_rfn (_ty_rfn : RT_rt ((SkipXRT (I_rt))%type : RT)),
+                  let 'x := _ty_rfn in ⌜inner_rfn = -[#($# x.(skip_it)); #(Z.of_nat x.(skip_n))]⌝ ∗ True)%I
           (false)
           _
           ([])
           ([])
-          _ _ _ _
+          _ _ _ _ _
         .
   Next Obligation.
     ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.
@@ -233,7 +241,7 @@ Section adapters_skip_Skip_inv_t.
     ex_plain_t_solve_shr_mono.
   Qed.
 
-  Definition adapters_skip_Skip_inv_t  : (spec_with 0 [(I_rt)] ((type ((((_ * nat)))%type)))) :=
+  Definition adapters_skip_Skip_inv_t  : (spec_with 0 [(I_rt)] ((type (((SkipXRT (I_rt)))%type)))) :=
     spec! ( *[]) : 0 | ( *[I_ty]) : ([I_rt] : list RT), ex_plain_t _ _ (adapters_skip_Skip_inv_t_inv_spec  -[] -[I_ty]) ((adapters_skip_Skip_ty (I_rt)) -[] -[I_ty]).
   #[global] Arguments adapters_skip_Skip_inv_t_inv_spec : simpl never.
 
@@ -291,10 +299,14 @@ Section adapters_step_by_StepBy_inv_t.
           _
           ([])
           ([])
-          _ _ _ _
+          _ _ _ _ _
         .
   Next Obligation.
     ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.
@@ -363,18 +375,22 @@ End adapters_take_Take_ty.
 Section adapters_take_Take_inv_t.
   Context `{RRGS : !(refinedrustGS Σ)}.
   Context {I_rt : RT}.
-  Program Definition adapters_take_Take_inv_t_inv_spec  : (spec_with 0 [(I_rt)] ((ex_inv_def ((adapters_take_Take_rt (I_rt)))%type (((_ * nat)))%type))) :=
+  Program Definition adapters_take_Take_inv_t_inv_spec  : (spec_with 0 [(I_rt)] ((ex_inv_def ((adapters_take_Take_rt (I_rt)))%type ((TakeXRT (I_rt)))%type))) :=
     spec! ( *[]) : 0 | ( *[I_ty]) : ([I_rt] : list RT), mk_auto_ex_inv_def
-          (λ π inner_rfn (_ty_rfn : RT_rt (((_ * nat))%type : RT)),
-                  let '(it, n) := _ty_rfn in ⌜inner_rfn = -[#(it); #(Z.of_nat n)]⌝ ∗ True)%I
+          (λ π inner_rfn (_ty_rfn : RT_rt ((TakeXRT (I_rt))%type : RT)),
+                  let 'x := _ty_rfn in ⌜inner_rfn = -[#($# x.(take_it)); #(Z.of_nat x.(take_n))]⌝ ∗ True)%I
           (false)
           _
           ([])
           ([])
-          _ _ _ _
+          _ _ _ _ _
         .
   Next Obligation.
     ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.
@@ -393,7 +409,7 @@ Section adapters_take_Take_inv_t.
     ex_plain_t_solve_shr_mono.
   Qed.
 
-  Definition adapters_take_Take_inv_t  : (spec_with 0 [(I_rt)] ((type ((((_ * nat)))%type)))) :=
+  Definition adapters_take_Take_inv_t  : (spec_with 0 [(I_rt)] ((type (((TakeXRT (I_rt)))%type)))) :=
     spec! ( *[]) : 0 | ( *[I_ty]) : ([I_rt] : list RT), ex_plain_t _ _ (adapters_take_Take_inv_t_inv_spec  -[] -[I_ty]) ((adapters_take_Take_ty (I_rt)) -[] -[I_ty]).
   #[global] Arguments adapters_take_Take_inv_t_inv_spec : simpl never.
 
@@ -447,19 +463,19 @@ Program Definition adapters_skip_SkipMIastraits_iterator_Iterator_spec_attrs `{R
     traits_iterator_Iterator_Params  :=
       (traits_iterator_Iterator_MI_spec_attrs.(traits_iterator_Iterator_Params)) : ((traits_iterator_Iterator_Params_sig (((adapters_skip_Skip_inv_t_rt ((MI_rt))))) ((traits_iterator_Iterator_MI_Item_rt))));
     traits_iterator_Iterator_Inv  :=
-      (λ π p s, traits_iterator_Iterator_MI_spec_attrs.(traits_iterator_Iterator_Inv) π p s.1) : ((traits_iterator_Iterator_Inv_sig (((adapters_skip_Skip_inv_t_rt ((MI_rt))))) ((traits_iterator_Iterator_MI_Item_rt)) (_)));
+      (λ π p s, traits_iterator_Iterator_MI_spec_attrs.(traits_iterator_Iterator_Inv) π p s.(skip_it)) : ((traits_iterator_Iterator_Inv_sig (((adapters_skip_Skip_inv_t_rt ((MI_rt))))) ((traits_iterator_Iterator_MI_Item_rt)) (_)));
     traits_iterator_Iterator_Next  :=
       ((λ π p_inner s1 e s2, 
                 if_iNone e (
                      ∃ seq s2_inner, 
-                        ⌜length seq ≤ s1.2⌝ ∗ ⌜s2.2 = 0%nat⌝∗ 
-                        IteratorNextFusedTrans traits_iterator_Iterator_MI_spec_attrs π p_inner s1.1 seq s2_inner ∗
-                        traits_iterator_Iterator_MI_spec_attrs.(traits_iterator_Iterator_Next) π p_inner s2_inner None s2.1) ∗ 
+                        ⌜length seq ≤ s1.(skip_n)⌝ ∗ ⌜s2.(skip_n) = 0%nat⌝∗ 
+                        IteratorNextFusedTrans traits_iterator_Iterator_MI_spec_attrs π p_inner s1.(skip_it) seq s2_inner ∗
+                        traits_iterator_Iterator_MI_spec_attrs.(traits_iterator_Iterator_Next) π p_inner s2_inner None s2.(skip_it)) ∗ 
                 if_iSome e (λ e, 
                     ∃ seq s2_inner, 
-                        ⌜length seq = s1.2⌝ ∗ ⌜s2.2 = 0%nat⌝∗ 
-                        IteratorNextFusedTrans traits_iterator_Iterator_MI_spec_attrs π p_inner s1.1 seq s2_inner ∗
-                        traits_iterator_Iterator_MI_spec_attrs.(traits_iterator_Iterator_Next) π p_inner s2_inner (Some e) s2.1))%I) : ((traits_iterator_Iterator_Next_sig (((adapters_skip_Skip_inv_t_rt ((MI_rt))))) ((traits_iterator_Iterator_MI_Item_rt)) (_) (_)));
+                        ⌜length seq = s1.(skip_n)⌝ ∗ ⌜s2.(skip_n) = 0%nat⌝∗ 
+                        IteratorNextFusedTrans traits_iterator_Iterator_MI_spec_attrs π p_inner s1.(skip_it) seq s2_inner ∗
+                        traits_iterator_Iterator_MI_spec_attrs.(traits_iterator_Iterator_Next) π p_inner s2_inner (Some e) s2.(skip_it)))%I) : ((traits_iterator_Iterator_Next_sig (((adapters_skip_Skip_inv_t_rt ((MI_rt))))) ((traits_iterator_Iterator_MI_Item_rt)) (_) (_)));
   |}
 .
 
@@ -504,12 +520,12 @@ Program Definition adapters_take_TakeMIastraits_iterator_Iterator_spec_attrs `{R
     traits_iterator_Iterator_Params  :=
       (traits_iterator_Iterator_MI_spec_attrs.(traits_iterator_Iterator_Params)) : ((traits_iterator_Iterator_Params_sig (((adapters_take_Take_inv_t_rt ((MI_rt))))) ((traits_iterator_Iterator_MI_Item_rt))));
     traits_iterator_Iterator_Inv  :=
-      (λ π p s, traits_iterator_Iterator_MI_spec_attrs.(traits_iterator_Iterator_Inv) π p s.1) : ((traits_iterator_Iterator_Inv_sig (((adapters_take_Take_inv_t_rt ((MI_rt))))) ((traits_iterator_Iterator_MI_Item_rt)) (_)));
+      (λ π p s, traits_iterator_Iterator_MI_spec_attrs.(traits_iterator_Iterator_Inv) π p s.(take_it)) : ((traits_iterator_Iterator_Inv_sig (((adapters_take_Take_inv_t_rt ((MI_rt))))) ((traits_iterator_Iterator_MI_Item_rt)) (_)));
     traits_iterator_Iterator_Next  :=
       ((λ π p_inner s1 e s2, 
                 if_iNone e (
-                    (⌜s1.2 = 0%nat⌝ ∗ True) ∨ (⌜s1.2 ≠ 0%nat⌝ ∗ ⌜s2.2 = (s1.2 - 1)%nat⌝ ∗ traits_iterator_Iterator_MI_spec_attrs.(traits_iterator_Iterator_Next) π p_inner s1.1 None s2.1)) ∗ 
-                if_iSome e (λ e, ⌜s1.2 > 0%nat⌝ ∗ ⌜s2.2 = (s1.2 - 1)%nat⌝ ∗ traits_iterator_Iterator_MI_spec_attrs.(traits_iterator_Iterator_Next) π p_inner s1.1 (Some e) s2.1))%I) : ((traits_iterator_Iterator_Next_sig (((adapters_take_Take_inv_t_rt ((MI_rt))))) ((traits_iterator_Iterator_MI_Item_rt)) (_) (_)));
+                    (⌜s1.(take_n) = 0%nat⌝ ∗ True) ∨ (⌜s1.(take_n) ≠ 0%nat⌝ ∗ ⌜s2.(take_n) = (s1.(take_n) - 1)%nat⌝ ∗ traits_iterator_Iterator_MI_spec_attrs.(traits_iterator_Iterator_Next) π p_inner s1.(take_it) None s2.(take_it))) ∗ 
+                if_iSome e (λ e, ⌜s1.(take_n) > 0%nat⌝ ∗ ⌜s2.(take_n) = (s1.(take_n) - 1)%nat⌝ ∗ traits_iterator_Iterator_MI_spec_attrs.(traits_iterator_Iterator_Next) π p_inner s1.(take_it) (Some e) s2.(take_it)))%I) : ((traits_iterator_Iterator_Next_sig (((adapters_take_Take_inv_t_rt ((MI_rt))))) ((traits_iterator_Iterator_MI_Item_rt)) (_) (_)));
   |}
 .
 
@@ -1222,8 +1238,9 @@ Section extra.
   Lemma iterator_next_fused_trans_take_inv {MI_rt Item_rt}
   (It_attrs : traits_iterator_Iterator_spec_attrs MI_rt Item_rt) π p s1 hist s2 :
     IteratorNextFusedTrans (adapters_take_TakeMIastraits_iterator_Iterator_spec_attrs MI_rt Item_rt It_attrs) π p s1 hist s2 -∗
-      IteratorNextFusedTrans It_attrs π p s1.1 hist s2.1 ∗
-      ⌜length hist ≤ s1.2⌝ ∗ ⌜s2.2 = (s1.2 - length hist)%nat⌝
+      IteratorNextFusedTrans It_attrs π p s1.(take_it) hist s2.(take_it) ∗
+      ⌜length hist ≤ s1.(take_n)⌝ ∗
+      ⌜s2.(take_n) = (s1.(take_n) - length hist)%nat⌝
   .
   Proof.
     iInduction hist as [ | a hist] "IH" forall (s1 s2); simpl.
@@ -1241,9 +1258,9 @@ Section extra.
   :
     IteratorLearnInductive (adapters_take_TakeMIastraits_iterator_Iterator_spec_attrs MI_rt Item_rt It_attrs) p := {|
       iterator_learn_inductive_Q s1 hist s2 :=
-          It_learn.(iterator_learn_inductive_Q) s1.1 hist s2.1 ∧
-          length hist ≤ s1.2 ∧
-          s2.2 = (s1.2 - length hist)%nat
+          It_learn.(iterator_learn_inductive_Q) s1.(take_it) hist s2.(take_it) ∧
+          length hist ≤ s1.(take_n) ∧
+          s2.(take_n) = (s1.(take_n) - length hist)%nat
         ;
     |}.
   Next Obligation.
@@ -1264,11 +1281,11 @@ Section extra.
   (It_attrs : traits_iterator_Iterator_spec_attrs MI_rt Item_rt) π p s1 hist s2 :
     IteratorNextFusedTrans (adapters_skip_SkipMIastraits_iterator_Iterator_spec_attrs MI_rt Item_rt It_attrs) π p s1 hist s2 -∗
       ∃ pref,
-        IteratorNextFusedTrans It_attrs π p s1.1 (pref ++ hist) s2.1 ∗
-        ⌜length pref ≤ s1.2⌝ ∗
-        ⌜s2.2 = (s1.2 - length pref)%nat⌝ ∗
+        IteratorNextFusedTrans It_attrs π p s1.(skip_it) (pref ++ hist) s2.(skip_it) ∗
+        ⌜length pref ≤ s1.(skip_n)⌝ ∗
+        ⌜s2.(skip_n) = (s1.(skip_n) - length pref)%nat⌝ ∗
         (* TODO can I find a better formulation for this? *)
-        ⌜if decide (length hist = 0%nat) then pref = [] else length pref = s1.2⌝
+        ⌜if decide (length hist = 0%nat) then pref = [] else length pref = s1.(skip_n)⌝
   .
   Proof.
     iInduction hist as [ | a hist] "IH" forall (s1 s2); simpl.
@@ -1296,11 +1313,11 @@ Section extra.
     IteratorLearnInductive (adapters_skip_SkipMIastraits_iterator_Iterator_spec_attrs MI_rt Item_rt It_attrs) p := {|
       iterator_learn_inductive_Q s1 hist s2 :=
           ∃ pref,
-          It_learn.(iterator_learn_inductive_Q) s1.1 (pref ++ hist) s2.1 ∧
-          length pref ≤ s1.2 ∧
-          s2.2 = (s1.2 - length pref)%nat ∧
+          It_learn.(iterator_learn_inductive_Q) s1.(skip_it) (pref ++ hist) s2.(skip_it) ∧
+          length pref ≤ s1.(skip_n) ∧
+          s2.(skip_n) = (s1.(skip_n) - length pref)%nat ∧
           (* TODO can I find a better formulation for this? *)
-          if decide (length hist = 0%nat) then pref = [] else length pref = s1.2
+          if decide (length hist = 0%nat) then pref = [] else length pref = s1.(skip_n)
         ;
     |}.
   Next Obligation.
@@ -1962,7 +1979,7 @@ Definition traits_iterator_Iterator_skip_base_spec (Self_rt: RT) (Item_rt: RT) (
       (* precondition. *) (λ π : thread_id, (traits_iterator_Iterator_Self_spec_attrs.(traits_iterator_Iterator_Inv) π p self)) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ (ret) : ((_)), ret @ (adapters_skip_Skip_inv_t ((Self_rt))  -[] -[Self_ty]);
-      (* postcondition *) (λ π : thread_id, (⌜(ret = (self, Z.to_nat n))%Z⌝)
+      (* postcondition *) (λ π : thread_id, (⌜(ret = mk_skip_x self (Z.to_nat n))%Z⌝)
       ∗ (traits_iterator_Iterator_Inv (adapters_skip_SkipMIastraits_iterator_Iterator_spec_attrs _ _ traits_iterator_Iterator_Self_spec_attrs) π p ret)) |
       (* unwind post... *) False.
 
@@ -1986,7 +2003,7 @@ Definition traits_iterator_Iterator_take_base_spec (Self_rt: RT) (Item_rt: RT) (
       (* precondition. *) (λ π : thread_id, (traits_iterator_Iterator_Self_spec_attrs.(traits_iterator_Iterator_Inv) π p self)) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ (ret) : ((_)), ret @ (adapters_take_Take_inv_t ((Self_rt))  -[] -[Self_ty]);
-      (* postcondition *) (λ π : thread_id, (⌜(ret = (self, Z.to_nat n))%Z⌝)
+      (* postcondition *) (λ π : thread_id, (⌜(ret = mk_take_x self (Z.to_nat n))%Z⌝)
       ∗ (traits_iterator_Iterator_Inv (adapters_take_TakeMIastraits_iterator_Iterator_spec_attrs _ _ traits_iterator_Iterator_Self_spec_attrs) π p ret)) |
       (* unwind post... *) False.
 
@@ -2506,7 +2523,7 @@ Definition type_of_adapters_skip_Skip_I_new (I_rt: RT) (I_st: syn_type) :=
       (* args......... *) iter :@: I_ty, n :@: (int USize);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
-      (* existential.. *) ∃ _ : unit, (iter, Z.to_nat n) @ (adapters_skip_Skip_inv_t ((I_rt))  -[] -[I_ty]);
+      (* existential.. *) ∃ _ : unit, mk_skip_x iter (Z.to_nat n) @ (adapters_skip_Skip_inv_t ((I_rt))  -[] -[I_ty]);
       (* postcondition *) (λ π : thread_id, True) |
       (* unwind post... *) False.
 
@@ -2534,7 +2551,7 @@ Definition type_of_adapters_take_Take_I_new (I_rt: RT) (I_st: syn_type) :=
       (* args......... *) iter :@: I_ty, n :@: (int USize);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
-      (* existential.. *) ∃ _ : unit, (iter, Z.to_nat n) @ (adapters_take_Take_inv_t ((I_rt))  -[] -[I_ty]);
+      (* existential.. *) ∃ _ : unit, mk_take_x iter (Z.to_nat n) @ (adapters_take_Take_inv_t ((I_rt))  -[] -[I_ty]);
       (* postcondition *) (λ π : thread_id, True) |
       (* unwind post... *) False.
 

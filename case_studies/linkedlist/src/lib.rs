@@ -6,6 +6,7 @@
 #![allow(unused)]
 
 #![rr::package("linkedlist")]
+#![rr::import("refinedrust.extra_proofs.linkedlist", "linkedlist")]
 #![rr::include("stdlib")]
 
 use std::marker::PhantomData;
