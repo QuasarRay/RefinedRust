@@ -190,10 +190,21 @@ Ltac liForall :=
     | S ?n' =>
       lazymatch goal with
         | |- forall x : ?A, ?P =>
-            (*simpl (A) at 1*)
           let B := eval simpl in A in
           change_no_check (forall x : B, P)
         | |- _ => idtac
+      end;
+      (* check again if there is a type hint here, for instance introduced by [SimplForall] and recursion *)
+      let _name_hint :=
+        lazymatch goal with
+        | |- forall name : name_hint_ty ?h ?T, ?P =>
+            constr:(Some h)
+        | |- _ => constr:(_name_hint)
+        end in
+      lazymatch goal with
+      | |- ∀ name : name_hint_ty ?h ?T, ?P =>
+            notypeclasses refine (@tac_remove_name_hint_ty T _ h _)
+      | |- _ => idtac
       end;
       lazymatch goal with
       (* relying on the fact that unification variables cannot contain
