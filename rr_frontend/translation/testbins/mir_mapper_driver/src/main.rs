@@ -71,6 +71,28 @@ impl Callbacks for OurCompilerCalls {
             let de = de.borrow();
             let mapping = translation::map_drop_elaborated_to_borrow_checked(tcx, bc, &de);
             println!("{}", translation::format_mapping(bc, &de, &mapping));
+            if get_attribute(tcx, local_def_id.to_def_id(), "mapper", "drop_borrows").is_some() {
+                println!();
+                println!("Synthetic drop borrows:");
+                for local in de.local_decls.indices() {
+                    if let Some(borrow) = mapping.synthetic_drop_borrow_for_local(local) {
+                        assert_eq!(
+                            mapping.synthetic_drop_borrow_for_borrow_loc(borrow.borrow_loc()),
+                            Some(borrow)
+                        );
+                        assert_eq!(
+                            mapping.synthetic_drop_borrow_for_drop_call_loc(borrow.drop_call_loc()),
+                            Some(borrow)
+                        );
+                        println!(
+                            "{local:?}: borrow {:?}, call {:?}, source drop {:?}",
+                            borrow.borrow_loc(),
+                            borrow.drop_call_loc(),
+                            borrow.source_drop_loc()
+                        );
+                    }
+                }
+            }
             if get_attribute(tcx, local_def_id.to_def_id(), "mapper", "points").is_some() {
                 let points = translation::format_inserted_terminator_point_mappings(bc, &de, &mapping);
                 if !points.is_empty() {

@@ -248,7 +248,19 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
                         )));
                     }
 
-                    let (func_expr, info) = self.translate_operand(func, false)?;
+                    // The target callable's `Self` type has erased regions. Recover it from
+                    // the borrowed place before trait resolution, just as ordinary calls
+                    // recover their callable from the borrowck source call.
+                    let ty::TyKind::FnDef(did, _) = func.ty(&self.proc.dropck_mir().local_decls, self.tcx).kind()
+                    else {
+                        bug!("synthetic Drop::drop call has non-FnDef callable at {loc:?}");
+                    };
+                    let self_ty = self.proc.synthetic_drop_borrow_referent_ty(drop_borrow);
+                    let self_ty = self.proc.ensure_region_type(self_ty, || {
+                        format!("synthetic Drop::drop Self type at {loc:?}")
+                    });
+                    let callable_ty = ty::Ty::new_fn_def(self.tcx, *did, ty::Binder::dummy([self_ty]));
+                    let (func_expr, info) = self.translate_fn_def_use(callable_ty)?;
                     let Some(ExprInfo::Call(mut call_info)) = info else {
                         unreachable!("Logic error in drop call target translation");
                     };

@@ -304,14 +304,15 @@ impl<'a, 'tcx> Mapper<'a, 'tcx> {
         None
     }
 
-    /// Infer a point for an inserted target terminator after statement folding.
+    /// Find a candidate source terminator after statement folding.
     ///
     /// When a source drop is eliminated, `align_statements` may still fold
     /// statements from the drop's normal successor into the current target
-    /// block. If the target terminator then matches the terminator immediately
-    /// after that last folded source statement, map its points directly to that
-    /// source terminator. This keeps the inference local to an already mapped
-    /// predecessor statement and avoids guessing across joins.
+    /// block. The terminator immediately after the last mapped source statement
+    /// is a candidate for either a direct match or an explicit destructor call.
+    /// Skip inserted administrative statements, such as the synthetic borrow
+    /// feeding `Drop::drop`, but do not cross unmapped locations. This keeps the
+    /// inference local to an already mapped statement and avoids guessing across joins.
     fn source_terminator_after_previous_mapped_statement(
         &self,
         bb_t: BasicBlock,
@@ -321,16 +322,17 @@ impl<'a, 'tcx> Mapper<'a, 'tcx> {
             return None;
         }
 
-        let (bb_s, idx_s) = origin_source_loc(self.target_to_source.get(&(bb_t, idx_t - 1)).copied()?)?;
+        let (bb_s, idx_s) =
+            (0..idx_t).rev().find_map(|idx| match self.target_to_source.get(&(bb_t, idx)).copied() {
+                Some(Origin::Inserted) => None,
+                origin => Some(origin.and_then(origin_source_loc)),
+            })??;
         let source_data = &self.bc.basic_blocks[bb_s];
         if idx_s + 1 != source_data.statements.len() {
             return None;
         }
 
-        let target_term = self.de.basic_blocks[bb_t].terminator();
-        let source_term = source_data.terminator();
-        self.terminator_shape_equiv(target_term, source_term)
-            .then_some((bb_s, source_data.statements.len()))
+        Some((bb_s, source_data.statements.len()))
     }
 
     /// Infer a source point for the start of an inserted target block.
@@ -577,9 +579,15 @@ impl<'a, 'tcx> Mapper<'a, 'tcx> {
         }
 
         if let Some(source_loc) = self.source_terminator_after_previous_mapped_statement(bb_t, loc_t.1) {
-            self.mark_origin(loc_t, Origin::FoldedFrom(source_loc));
-            self.recurse_direct(tt, self.bc.basic_blocks[source_loc.0].terminator());
-            return;
+            let source_term = self.bc.basic_blocks[source_loc.0].terminator();
+            if self.terminator_shape_equiv(tt, source_term) {
+                self.mark_origin(loc_t, Origin::FoldedFrom(source_loc));
+                self.recurse_direct(tt, source_term);
+                return;
+            }
+            if self.try_align_explicit_drop_call(bb_t, source_loc.0) {
+                return;
+            }
         }
 
         self.mark_origin(loc_t, Origin::Inserted);
