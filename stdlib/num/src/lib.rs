@@ -5,6 +5,7 @@
 
 #![rr::package("refinedrust-stdlib")]
 #![rr::coq_prefix("rrstd.num")]
+#![rr::include("option")]
 
 use paste::paste;
 
@@ -121,3 +122,59 @@ u_is_power_of_two_impl!(u32);
 u_is_power_of_two_impl!(u64);
 u_is_power_of_two_impl!(u128);
 u_is_power_of_two_impl!(usize);
+
+
+macro_rules! u_checked_sub_impl {
+    ($t:ty) => {
+        paste! {
+            #[rr::export_as(#method core::num::$t::checked_sub)]
+            #[rr::returns("if bool_decide (x >= rhs) then Some (x - rhs)%Z else None")]
+            pub fn [<$t _checked_sub>](x: $t, rhs: $t) -> Option<$t> {
+                // Per PR#103299, there's no advantage to the `overflowing` intrinsic
+                // for *unsigned* subtraction and we just emit the manual check anyway.
+                // Thus, rather than using `overflowing_sub` that produces a wrapping
+                // subtraction, check it ourself so we can use an unchecked one.
+
+                if x < rhs {
+                    None
+                } else {
+                    // SAFETY: just checked this can't overflow
+                    Some(unsafe { x.unchecked_sub(rhs) })
+                }
+            }
+
+            #[rr::only_spec]
+            #[rr::export_as(#method core::num::$t::unchecked_sub)]
+            #[rr::requires("(rhs ≤ x)%Z")]
+            #[rr::returns("(x - rhs)%Z")]
+            pub unsafe fn [<$t _unchecked_sub>](x : $t, rhs: $t) -> $t {
+                // SAFETY: this is guaranteed to be safe by the caller.
+                //unsafe {
+                    //intrinsics::unchecked_sub(x, rhs)
+                //}
+                unimplemented!();
+            }
+
+            #[rr::only_spec]
+            #[rr::export_as(#method core::num::$t::saturating_sub)]
+            #[rr::returns("Z.max 0%Z (x - rhs)%Z")]
+            pub fn [<$t _saturating_sub>](x: $t, rhs: $t) -> $t {
+                //intrinsics::saturating_sub(self, rhs)
+                //unimplemented!();
+                if x <= rhs {
+                    0
+                } else {
+                    unsafe { x.unchecked_sub(rhs) }
+                }
+            }
+        }
+    }
+}
+
+// Only for unsized types
+u_checked_sub_impl!(u8);
+u_checked_sub_impl!(u16);
+u_checked_sub_impl!(u32);
+u_checked_sub_impl!(u64);
+u_checked_sub_impl!(u128);
+u_checked_sub_impl!(usize);

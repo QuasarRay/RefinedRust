@@ -1,3 +1,4 @@
 generate_dune_project = false
 output_dir = "output"
 generate_linking_requirements = true
+lib_load_paths = ["../option", "../closures", "../clone", "../result"]

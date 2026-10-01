@@ -509,6 +509,24 @@ where
 
 
 // Mem
+#[rr::export_as(core::default::Default)]
+#[rr::exists("DefaultValue" : "{xt_of Self}")]
+#[rr::exists("DefaultUnwind" : "Prop")]
+pub trait Default: Sized {
+    #[rr::returns("{Self::DefaultValue}")]
+    #[rr::may_unwind_if("{Self::DefaultUnwind}")]
+    fn default() -> Self;
+}
+
+#[rr::instantiate("DefaultValue" := "0")]
+#[rr::instantiate("DefaultUnwind" := "False")]
+impl Default for usize {
+    #[rr::default_spec]
+    fn default() -> Self {
+        0
+    }
+}
+
 #[rr::only_spec]
 #[rr::export_as(core::mem::replace)]
 #[rr::returns("dest.cur")]
@@ -517,6 +535,15 @@ pub fn mem_replace<T>(dest: &mut T, src: T) -> T {
     let x = read(dest as *mut T);
     write(dest as *mut T, src);
     x
+}
+
+#[rr::only_spec]
+#[rr::export_as(core::mem::take)]
+#[rr::returns("dest.cur")]
+#[rr::observe("dest.ghost": "$# {T::DefaultValue}")]
+#[rr::may_unwind_if("{T::DefaultUnwind}")]
+pub fn mem_take<T: Default>(dest: &mut T) -> T {
+    mem_replace(dest, T::default())
 }
 
 #[rr::only_spec]

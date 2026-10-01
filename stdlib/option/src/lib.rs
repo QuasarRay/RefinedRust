@@ -94,6 +94,22 @@ impl<T> Option<T> {
         }
     }
 
+    #[rr::params("op")]
+    #[rr::requires(#iris "if_iSome self (λ _, ⌜op = None⌝)")]
+    #[rr::requires(#iris "if_iNone self (∃ p, ⌜op = Some p⌝ ∗ {F::Pre} π p f ())")]
+    #[rr::ensures(#iris "if_iSome self (λ x, ⌜ret = x⌝ ∗ ty_ghost_drop {F} π ($# f))")]
+    #[rr::ensures(#iris "if_iNone self (∃ p, ⌜op = Some p⌝ ∗ {F::Post} π p f () ret)")]
+    #[rr::may_unwind_if("if_Some self (λ _, {F::DropGlueUnwind}) ∧
+                        if_None self (∃ p, op = Some p ∧ {F::UnwindCondition} f p ())")]
+    pub fn unwrap_or_else<F>(self, f: F) -> T
+    where F: FnOnce() -> T,
+    {
+        match self {
+            Some(x) => x,
+            None => f(),
+        }
+    }
+
     #[rr::returns("match self with | Some x => Ok x | None => Err err end")]
     #[rr::may_unwind_if("is_Some self ∧ {E::DropGlueUnwind}")]
     pub fn ok_or<E>(self, err: E) -> Result<T, E> {
