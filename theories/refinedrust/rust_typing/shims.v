@@ -340,7 +340,7 @@ Section TrivialDropGlue.
     { done. }
     iPoseProof (ty_own_ghost_drop_trivial _ _ _ _ _ ⊤ with "Hv") as "Hg"; [done.. | ].
     iApply (physical_step_logical_step with "Hg").
-    iApply physical_step_intro. iNext.
+    iApply physical_step_intro. iModIntro. iNext.
     iIntros "?".
     iFrame "HL".
     rep liRStep.

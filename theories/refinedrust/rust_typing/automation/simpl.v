@@ -139,6 +139,11 @@ Global Hint Extern 50 (SimplBothRel (=) (?l !! ?j) (Some ?x) (_)) =>
       apply _
   end : typeclass_instances.
 
+Global Instance inj_placein {rt : Type}  :
+  Inj (=) (=) (PlaceIn (rt :=rt)).
+Proof.
+  intros ?? [= <-]. done.
+Qed.
 Global Instance simpl_eq_PlaceIn {rt : RT} (n m : rt) : SimplBothRel (=) (A := place_rfn rt) (#n) (#m) (n = m).
 Proof. split; naive_solver. Qed.
 Global Instance simpl_eq_PlaceGhost {rt} (γ1 γ2 : gname) : SimplBothRel (=) (A := place_rfn rt) (PlaceGhost γ1) (PlaceGhost γ2) (γ1 = γ2).

@@ -107,6 +107,24 @@ Section updateable.
     simpl. eauto.
   Qed.
 
+  Global Program Instance updateable_typed_annot_stmt {A} (a : A) f n E L T :
+    Updateable (typed_annot_stmt f n a E L T) := {|
+      updateable_E := E;
+      updateable_L := L;
+      updateable_f := f;
+      updateable_core E L := typed_annot_stmt f n a E L T;
+  |}.
+  Next Obligation.
+    iIntros (?? f n _ _ T E L).
+    iIntros "HT". rewrite /typed_annot_stmt.
+    iIntros "#CTX #HE HL".
+    iMod ("HT" with "CTX HE HL") as "(%L2 & HL & HT)".
+    iApply ("HT" with "CTX HE HL").
+  Qed.
+  Next Obligation.
+    simpl. eauto.
+  Qed.
+
   Global Program Instance updateable_updateable E L f T :
     Updateable (updateable E L f T) := {|
       updateable_E := E;
@@ -597,6 +615,12 @@ Section extra_rules.
   Lemma typed_context_fold_add_loc (l : loc) (Acc : Type) (Acc_interp : Acc → iProp Σ) {M} (E : elctx) (L : llctx) (m : M) (tctx : list loc) (acc : Acc) T :
     typed_context_fold Acc_interp E L m (l :: tctx) acc T
     ⊢ typed_context_fold Acc_interp E L m tctx acc T.
+  Proof. done. Qed.
+
+  (* Leave a location in the surrounding context instead of folding it. *)
+  Lemma typed_context_fold_remove_loc (l : loc) (Acc : Type) (Acc_interp : Acc → iProp Σ) {M} (E : elctx) (L : llctx) (m : M) (tctx : list loc) (acc : Acc) T :
+    typed_context_fold Acc_interp E L m tctx acc T
+    ⊢ typed_context_fold Acc_interp E L m (l :: tctx) acc T.
   Proof. done. Qed.
 End extra_rules.
 

@@ -3526,15 +3526,15 @@ Section subsume.
   Proof.
     iIntros "Hs". iIntros "#CTX #HE HL".
     iApply physical_stepN_intro.
-    iFrame.
+    by iFrame.
   Qed.
   Lemma type_annot_stmt E L f n {A} (a : A) s fn R U ϝ :
     typed_annot_stmt f n a E L (λ L', typed_stmt E L' f s fn R U ϝ)
     ⊢ typed_stmt E L f (annot{n} : a; s) fn R U ϝ.
   Proof.
     iIntros "Hs". iIntros (Φ Φunwind) "#CTX #HE HL Hf Hcont".
+    iMod ("Hs" with "CTX HE HL") as "Hstep".
     iApply wps_annot.
-    iPoseProof ("Hs" with "CTX HE HL") as "Hstep".
     iApply (physical_stepN_wand with "Hstep").
     iIntros "(%L' & HL & Hs)".
     by iApply ("Hs" with "CTX HE HL Hf").
@@ -5427,6 +5427,7 @@ Section subsume.
     iIntros "#(LFT & LLCTX) #HE HL".
     iMod (llctx_startlft _ _ κs with "LFT LLCTX HL") as (κ) "HL"; [solve_ndisj.. | ].
     iApply physical_step_fupd.
+    iModIntro.
     iApply physical_step_intro_lc; iIntros "Hcred"; iModIntro; iNext.
     iMod ("Hcont" with "[Hnamed] [] [$] HE HL Hcred") as "(%L2 & HL & HT)"; [ | done | ].
     { iApply named_lfts_update. done. }
@@ -5447,6 +5448,7 @@ Section subsume.
     set (κ := lft_intersect_list κs).
     iAssert (llctx_interp ((κ ≡ₗ κs) :: L))%I with "[HL]" as "HL".
     { iFrame "HL". iSplit; iApply lft_incl_refl. }
+    iModIntro.
     iApply physical_step_intro; iNext.
     iFrame.
     iApply ("Hcont" $! κ with "[Hnamed]").
@@ -5537,6 +5539,7 @@ Section subsume.
     iDestruct "Hlook" as (o) "(<- & HT)".
     destruct (lookup_iml M n) as [κ | ]; first last.
     { iIntros "#CTX #HE HL".
+      iModIntro.
       iApply physical_step_intro; iNext.
       iApply physical_step_intro; iNext.
       iFrame. by iApply "HT". }
@@ -5545,6 +5548,7 @@ Section subsume.
     { unfold simplify_lft_map_goal.
       iDestruct "HT" as "(%M' & _ & HT)".
       iIntros "#CTX #HE HL".
+      iModIntro.
       iApply physical_step_intro; iNext.
       iApply physical_step_intro; iNext.
       iFrame. iApply "HT". by iApply named_lfts_update. }
@@ -5556,6 +5560,7 @@ Section subsume.
     unfold find_implied_dying_lifetimes_goal. iDestruct "HT" as "(%implied_dying & HT)".
     iPoseProof ("HT" $! ⊤ with "[] [] [] CTX HE HL") as "Hstep"; [done.. | ].
     iApply (physical_step_step_upd with "Hstep").
+    iModIntro.
     iApply physical_step_intro. iNext.
     iIntros "(%L3 & HL & HT)".
 
@@ -5606,6 +5611,7 @@ Section subsume.
     iSpecialize ("Hs" with "Hinh").
     iAssert (llctx_interp ((κ1 ⊑ₗ κ2) :: L'))%I with "[HL]" as "HL".
     { rewrite /llctx_interp /=. iFrame "#∗". }
+    iModIntro.
     iApply physical_step_intro; iNext.
     iFrame.
     by iApply "Hs".
@@ -5697,6 +5703,7 @@ Section subsume.
     iIntros "(%M & Hnamed & %κ & _ & Hs)".
     iIntros "#CTX #HE HL".
     iMod ("Hs" with "[] CTX HE HL") as "(%L2 & % & HL & HT)"; first done.
+    iModIntro.
     iApply physical_step_intro; iNext.
     iFrame. by iApply "HT".
   Qed.
@@ -5716,6 +5723,7 @@ Section subsume.
     iIntros "(%M & Hnamed & %targetκ & _ & %sourceκ & _ & HT)".
     iIntros "#CTX #HE HL".
     iMod ("HT" with "[] CTX HE HL") as "(%L2 & % & HL & HT)"; first done.
+    iModIntro.
     iApply physical_step_intro; iNext.
     iFrame. by iApply "HT".
   Qed.
@@ -5744,6 +5752,7 @@ Section subsume.
     iIntros "(%M & Hnamed & %κ2 & _ & Hs)".
     iIntros "#CTX #HE HL".
     unfold simplify_lft_map_goal. iDestruct "Hs" as "(%M' & _ & Hs)".
+    iModIntro.
     iApply physical_step_intro; iNext.
     iFrame. by iApply "Hs".
   Qed.
@@ -5801,13 +5810,14 @@ Section subsume.
   Global Existing Instance typed_context_fold_stratify_init_inst.
 
   Lemma type_stratify_context_annot f E L T :
-    typed_pre_context_fold f.1 E L (CtxFoldStratifyAllInit StratNoRefold) T
+    typed_pre_context_fold f.1 E L (CtxFoldStratifyAllInit StratRefoldOpened) T
     ⊢ typed_annot_stmt f 1 (StratifyContextAnnot) E L T.
   Proof.
     iIntros "HT".
     iIntros "#CTX #HE HL".
     iPoseProof ("HT" $! ⊤ with "[//] [//] [//] CTX HE HL") as "Hstep".
     iApply (physical_step_step_upd with "Hstep").
+    iModIntro.
     iApply physical_step_intro; iNext.
     iIntros "(%L' & HL & HT)".
     iFrame.

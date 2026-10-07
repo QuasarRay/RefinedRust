@@ -852,7 +852,7 @@ Section judgments.
     (rrust_ctx -∗
      elctx_interp E -∗
      llctx_interp L -∗
-     |={⊤}⧗=>^n (∃ L', llctx_interp L' ∗  T L')%I).
+     |={⊤}=> |={⊤}⧗=>^n (∃ L', llctx_interp L' ∗  T L')%I).
   Class TypedAnnotStmt (f : frame_path) (n : nat) {A} (a : A) : Type :=
     typed_annot_stmt_proof E L T : iProp_to_Prop (typed_annot_stmt f n a E L T).
 
