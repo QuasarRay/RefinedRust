@@ -256,8 +256,8 @@ Section vec_array_canonicalizable.
 
   Global Program Instance shareable_vec (π : thread_id) (κ : lft) (ty : type rt)
       (inner : plist (RT_rt ∘ place_rfnRT) [prodRT locRT natRT; ZRT])
-      (xs : list (place_rfn rt)) :
-    Shareable π κ (ty_lfts ty) xs (vec_inv π ty inner xs) := {|
+      (xs : list (place_rfn rt)) (assumptions : Prop) :
+    Shareable π κ (ty_lfts ty) xs assumptions (vec_inv π ty inner xs) := {|
       shareable_prop := (∃ (cap : nat) (l : loc) (len : nat)
         (els : list (place_rfn (option (place_rfn rt)))),
         ⌜inner = -[#(l, cap); #(Z.of_nat len)]⌝ ∗
@@ -273,7 +273,7 @@ Section vec_array_canonicalizable.
         True)%I
     |}.
   Next Obligation.
-    intros π κ ty inner xs Hxsxr F G q HF.
+    intros π κ ty inner xs assumptions Hassum Hxsxr F G q HF.
     iIntros "#CTX Hna Htok1 Htok2 Hb Hcont".
     iPoseProof "CTX" as "#(LFT & LLCTX)".
     iApply fupd_logical_step.
@@ -307,5 +307,5 @@ End vec_array_canonicalizable.
 Global Hint Extern 10 (Canonicalizable _ _ _ _ _ _ _) =>
   apply canonicalizable_vec : typeclass_instances.
 
-Global Hint Extern 10 (Shareable _ _ _ _ _) =>
+Global Hint Extern 10 (Shareable _ _ _ _ _ _) =>
   apply shareable_vec : typeclass_instances.
