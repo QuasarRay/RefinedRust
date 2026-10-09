@@ -134,10 +134,14 @@ Section adapters_map_Map_inv_t.
           _
           ([])
           ([])
-          _ _ _ _
+          _ _ _ _ _
         .
   Next Obligation.
     ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.
@@ -214,10 +218,14 @@ Section adapters_skip_Skip_inv_t.
           _
           ([])
           ([])
-          _ _ _ _
+          _ _ _ _ _
         .
   Next Obligation.
     ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.
@@ -294,10 +302,14 @@ Section adapters_step_by_StepBy_inv_t.
           _
           ([])
           ([])
-          _ _ _ _
+          _ _ _ _ _
         .
   Next Obligation.
     ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.
@@ -374,10 +386,14 @@ Section adapters_take_Take_inv_t.
           _
           ([])
           ([])
-          _ _ _ _
+          _ _ _ _ _
         .
   Next Obligation.
     ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.

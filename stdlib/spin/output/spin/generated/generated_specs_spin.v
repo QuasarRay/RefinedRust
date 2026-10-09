@@ -71,10 +71,14 @@ Section rwlock_RwLockReadGuard_inv_t.
           _
           ([])
           ([])
-          _ _ _ _
+          _ _ _ _ _
         .
   Next Obligation.
     ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.
@@ -163,10 +167,14 @@ Section once_Once_inv_t.
           _
           ([])
           ([])
-          _ _ _ _
+          _ _ _ _ _
         .
   Next Obligation.
     ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.
@@ -243,10 +251,14 @@ Section rwlock_RwLock_inv_t.
           _
           ([])
           ([])
-          _ _ _ _
+          _ _ _ _ _
         .
   Next Obligation.
     ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.
@@ -323,10 +335,14 @@ Section rwlock_RwLockWriteGuard_inv_t.
           _
           ([])
           ([])
-          _ _ _ _
+          _ _ _ _ _
         .
   Next Obligation.
     ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.

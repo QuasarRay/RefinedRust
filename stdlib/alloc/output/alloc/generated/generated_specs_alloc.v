@@ -71,10 +71,14 @@ Section Global_inv_t.
           _
           ([])
           ([])
-          _ _ _ _
+          _ _ _ _ _
         .
   Next Obligation.
     ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.
@@ -191,10 +195,14 @@ Section layout_Layout_inv_t.
           _
           ([])
           ([])
-          _ _ _ _
+          _ _ _ _ _
         .
   Next Obligation.
     ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.

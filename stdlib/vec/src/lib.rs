@@ -42,7 +42,7 @@ type Cap = usize;
 ///
 /// Having this separation reduces the amount of code we need to monomorphize,
 /// as most operations don't need the actual type, just its layout.
-#[rr::refined_by("(l, cap, alloc)" : "(loc * nat * {rt_of A} : RT)%type")]
+#[rr::refined_by("(l, cap, alloc)" : "(loc * nat * directRT {xt_of A} : RT)%type")]
 #[rr::trust_me(drop_glue)]
 #[rr::derive_instantiate("DropGlueUnwind" := "{A::DropGlueUnwind}")]
 struct RawVecInner<A: Allocator = Global> {
@@ -50,7 +50,7 @@ struct RawVecInner<A: Allocator = Global> {
     ptr: Unique<u8>,
     #[rr::field("#(Z.of_nat cap)")]
     cap: Cap,
-    #[rr::field("#(alloc)")]
+    #[rr::field("#($# alloc)")]
     alloc: A,
 }
 
@@ -94,13 +94,11 @@ impl<A: Allocator> RawVecInner<A> {
 #[rr::only_spec(drop_glue)]
 #[rr::derive_instantiate("DropGlueUnwind" := "{A::DropGlueUnwind}")]
 #[rr::export_as(alloc::raw_vec::RawVec)]
-#[rr::refined_by("(l, cap, els)" : "(loc * nat * list (place_rfn (option (place_rfn {rt_of T}))))")]
+#[rr::refined_by("(l, cap)" : "(loc * nat)")]
 #[rr::exists("a")]
 #[rr::invariant(#iris "{A::FreeablePerm} a l (size_of_array_in_bytes {st_of T} cap)")]
-// Ownership needs to be here in order to allow drop glue to safely call Drop
-#[rr::invariant(#type "l" : "els" @ "array_t cap (maybe_uninit {T})")]
 pub(crate) struct RawVec<T, A: Allocator = Global> {
-    #[rr::field("#((l, cap, $# a))")]
+    #[rr::field("#((l, cap, a))")]
     inner: RawVecInner<A>,
     #[rr::field("#(tt)")]
     _marker: PhantomData<T>,
@@ -113,9 +111,10 @@ impl<T, A: Allocator> Drop for RawVec<T, A> {
     /// Frees the memory owned by the `RawVec` *without* trying to drop its contents.
     #[rr::params("l", "lmem", "cap", "els")] 
     #[rr::args("l" @ "alias_ref_t")]
-    #[rr::requires(#type "l" : "(lmem, cap, els)" @ "RawVec_inv_t T_rt A_rt Allocator_A_spec_attrs -[] -[T_ty; A_ty]")]
+    #[rr::requires(#type "l" : "(lmem, cap)" @ "RawVec_inv_t T_rt A_rt Allocator_A_spec_attrs -[] -[T_ty; A_ty]")]
+    #[rr::requires(#type "lmem" : "els" @ "array_t cap (maybe_uninit {T})")]
     #[rr::exists("a")]
-    #[rr::ensures(#type "l" : "-[ #(l, cap, a); #tt]" @ "RawVec_ty T_rt A_rt Allocator_A_spec_attrs -[] -[T_ty; A_ty]")]
+    #[rr::ensures(#type "l" : "-[ #(lmem, cap, a); #tt]" @ "RawVec_ty T_rt A_rt Allocator_A_spec_attrs -[] -[T_ty; A_ty]")]
     fn drop(&mut self) {
         // SAFETY: We are in a Drop impl, self.inner will not be used again.
         unsafe { self.inner.deallocate(T::LAYOUT) }
@@ -128,6 +127,8 @@ impl<T, A: Allocator> Drop for RawVec<T, A> {
 #[rr::export_as(alloc::vec::Vec)]
 #[rr::refined_by("xs" : "list (place_rfn {rt_of T})")]
 #[rr::exists("cap" : "nat", "l" : "loc", "len" : "nat", "els")]
+// Keep element ownership with the list invariant so both can be canonicalized together.
+#[rr::invariant(#type "l" : "els" @ "array_t cap (maybe_uninit {T})")]
 #[rr::invariant("Hxs" : "xs = project_vec_els len els")]
 #[rr::invariant("Hlook_1": "∀ i, (0 ≤ i < len)%nat → els !! i = Some (#(Some (xs !!! i)))")]
 #[rr::invariant("Hlook_2": "∀ i, (len ≤ i < cap)%nat → els !! i = Some (#None)")]
@@ -141,7 +142,7 @@ impl<T, A: Allocator> Drop for RawVec<T, A> {
 // elementwise ghost-drop
 #[rr::ghost_drop(#iris "[∗ list] x ∈ xs, ∃ r, place_rfn_interp_owned x r ∗ ty_ghost_drop {T} π r")]
 pub struct Vec<T, A: Allocator = Global> {
-    #[rr::field("#((l, cap, els))")]
+    #[rr::field("#((l, cap))")]
     buf: RawVec<T, A>,
     #[rr::field("#(Z.of_nat len)")]
     len: usize,
@@ -174,9 +175,9 @@ impl<T, A: Allocator> Drop for Vec<T, A> {
     #[rr::exists("lmem", "cap")]
     // Postcondition: ghost drop for all the elements
     #[rr::ensures(#iris "[∗ list] r ∈ xs, ty_ghost_drop {T} π ($# r)")]
-    // Postcondition: vector without its safety invariant. All the elements of the RawVec are in the
-    // uninit state.
-    #[rr::ensures(#type "l" : "-[ #(lmem, cap, replicate cap (#None)); #(Z.of_nat $ length xs)]" @ "Vec_ty T_rt A_rt Allocator_A_spec_attrs -[] -[T_ty; A_ty]")]
+    // Postcondition: vector without its safety invariant and its uninitialized backing array.
+    #[rr::ensures(#type "l" : "-[ #(lmem, cap); #(Z.of_nat $ length xs)]" @ "Vec_ty T_rt A_rt Allocator_A_spec_attrs -[] -[T_ty; A_ty]")]
+    #[rr::ensures(#type "lmem" : "replicate cap (#None)" @ "array_t cap (maybe_uninit {T})")]
     #[rr::may_unwind_if("{T::DropGlueUnwind}")]
     fn drop(&mut self) {
         /*

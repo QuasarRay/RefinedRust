@@ -346,7 +346,7 @@ Section Ordering_ty.
         (λ rfn, Some (match rfn with | Less => "Less" | Equal => "Equal" | Greater => "Greater" end))
         (Ordering_enum_rt)
         (Ordering_enum_ty -[] -[])
-        (λ rfn, match rfn as x return RT_rt (Ordering_enum_rt x) with | Less => *[]| Equal => *[]| Greater => *[] end)
+        (λ rfn, match rfn with | Less => *[]| Equal => *[]| Greater => *[] end)
         ([("Less", mk_enum_tag_sem _ (Ordering_Less_ty -[] -[]) (λ '( *[]), Less)); ("Equal", mk_enum_tag_sem _ (Ordering_Equal_ty -[] -[]) (λ '( *[]), Equal)); ("Greater", mk_enum_tag_sem _ (Ordering_Greater_ty -[] -[]) (λ '( *[]), Greater))])
         _
         _

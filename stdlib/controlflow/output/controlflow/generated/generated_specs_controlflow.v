@@ -166,7 +166,7 @@ Section ControlFlow_ty.
         (λ rfn, Some (match rfn with | (inl (x)) => "Continue" | (inr (x)) => "Break" end))
         (ControlFlow_enum_rt)
         (ControlFlow_enum_ty -[] -[B_ty; C_ty])
-        (λ rfn, match rfn as x return RT_rt (ControlFlow_enum_rt x) with | (inl (x)) => *[x]| (inr (x)) => *[x] end)
+        (λ rfn, match rfn with | (inl (x)) => *[x]| (inr (x)) => *[x] end)
         ([("Continue", mk_enum_tag_sem _ (ControlFlow_Continue_ty -[] -[B_ty; C_ty]) (λ '( *[x]), (inl (x)))); ("Break", mk_enum_tag_sem _ (ControlFlow_Break_ty -[] -[B_ty; C_ty]) (λ '( *[x]), (inr (x))))])
         _
         _

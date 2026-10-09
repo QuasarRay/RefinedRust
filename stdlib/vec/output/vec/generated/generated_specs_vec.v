@@ -79,10 +79,14 @@ Section Iter_inv_t.
           _
           ([])
           ([])
-          _ _ _ _
+          _ _ _ _ _
         .
   Next Obligation.
     ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.
@@ -159,10 +163,14 @@ Section IterMut_inv_t.
           _
           ([])
           ([])
-          _ _ _ _
+          _ _ _ _ _
         .
   Next Obligation.
     ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.
@@ -239,10 +247,14 @@ Section IntoIter_inv_t.
           _
           ([])
           ([])
-          _ _ _ _
+          _ _ _ _ _
         .
   Next Obligation.
     intros ?; ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    intros ?; ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.
@@ -311,18 +323,22 @@ End RawVecInner_ty.
 Section RawVecInner_inv_t.
   Context `{RRGS : !(refinedrustGS Σ)}.
   Context {A_rt : RT}.
-  Program Definition RawVecInner_inv_t_inv_spec (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) : (spec_with 0 [(A_rt)] ((ex_inv_def ((RawVecInner_rt (A_rt)))%type (((loc * nat * (A_rt) : RT)%type))%type))) :=
+  Program Definition RawVecInner_inv_t_inv_spec (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) : (spec_with 0 [(A_rt)] ((ex_inv_def ((RawVecInner_rt (A_rt)))%type (((loc * nat * directRT (RT_xt (A_rt)) : RT)%type))%type))) :=
     spec! ( *[]) : 0 | ( *[A_ty]) : ([A_rt] : list RT), mk_auto_ex_inv_def
-          (λ π (inner_rfn : (RawVecInner_rt (A_rt))) (_ty_rfn : RT_rt (((loc * nat * (A_rt) : RT)%type)%type : RT)),
-                  let '(l, cap, alloc) := _ty_rfn in ⌜inner_rfn = -[#(l); #(Z.of_nat cap); #(alloc)]⌝ ∗ True)%I
+          (λ π (inner_rfn : (RawVecInner_rt (A_rt))) (_ty_rfn : RT_rt (((loc * nat * directRT (RT_xt (A_rt)) : RT)%type)%type : RT)),
+                  let '(l, cap, alloc) := _ty_rfn in ⌜inner_rfn = -[#(l); #(Z.of_nat cap); #($# alloc)]⌝ ∗ True)%I
           (false)
           _
           ([])
           ([])
-          _ _ _ _
+          _ _ _ _ _
         .
   Next Obligation.
     intros ?; ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    intros ?; ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.
@@ -341,7 +357,7 @@ Section RawVecInner_inv_t.
     intros ?; ex_plain_t_solve_shr_mono.
   Qed.
 
-  Definition RawVecInner_inv_t (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) : (spec_with 0 [(A_rt)] ((type ((((loc * nat * (A_rt) : RT)%type))%type)))) :=
+  Definition RawVecInner_inv_t (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) : (spec_with 0 [(A_rt)] ((type ((((loc * nat * directRT (RT_xt (A_rt)) : RT)%type))%type)))) :=
     spec! ( *[]) : 0 | ( *[A_ty]) : ([A_rt] : list RT), ex_plain_t _ _ (RawVecInner_inv_t_inv_spec Allocator_A_spec_attrs -[] -[A_ty]) (((RawVecInner_ty (A_rt)) (Allocator_A_spec_attrs)) -[] -[A_ty]).
   #[global] Arguments RawVecInner_inv_t_inv_spec : simpl never.
 
@@ -391,18 +407,22 @@ End RawVec_ty.
 Section RawVec_inv_t.
   Context `{RRGS : !(refinedrustGS Σ)}.
   Context {T_rt : RT} {A_rt : RT}.
-  Program Definition RawVec_inv_t_inv_spec (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) : (spec_with 0 [(T_rt); (A_rt)] ((ex_inv_def ((RawVec_rt (T_rt) (A_rt)))%type (((loc * nat * list (place_rfn (option (place_rfn (T_rt)))))))%type))) :=
+  Program Definition RawVec_inv_t_inv_spec (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) : (spec_with 0 [(T_rt); (A_rt)] ((ex_inv_def ((RawVec_rt (T_rt) (A_rt)))%type (((loc * nat)))%type))) :=
     spec! ( *[]) : 0 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), mk_auto_ex_inv_def
-          (λ π (inner_rfn : (RawVec_rt (T_rt) (A_rt))) (_ty_rfn : RT_rt (((loc * nat * list (place_rfn (option (place_rfn (T_rt))))))%type : RT)),
-                  let '(l, cap, els) := _ty_rfn in ∃ (a: name_hint_ty "a" (_)%Z), ⌜inner_rfn = -[#((l, cap, $# a)); #(tt)]⌝ ∗ guarded true (l ◁ₗ[π, Owned] #(els) @ (◁ array_t cap (maybe_uninit T_ty))) ∗ Allocator_A_spec_attrs.(Allocator_FreeablePerm) a l (size_of_array_in_bytes (ty_syn_type T_ty MetaNone) cap) ∗ True)%I
+          (λ π (inner_rfn : (RawVec_rt (T_rt) (A_rt))) (_ty_rfn : RT_rt (((loc * nat))%type : RT)),
+                  let '(l, cap) := _ty_rfn in ∃ (a: name_hint_ty "a" (_)%Z), ⌜inner_rfn = -[#((l, cap, a)); #(tt)]⌝ ∗ Allocator_A_spec_attrs.(Allocator_FreeablePerm) a l (size_of_array_in_bytes (ty_syn_type T_ty MetaNone) cap) ∗ True)%I
           (false)
           _
-          ([] ++ (ty_lfts (T_ty)))
-          ([] ++ (ty_wf_E (T_ty)))
-          _ _ _ _
+          ([])
+          ([])
+          _ _ _ _ _
         .
   Next Obligation.
     intros ?; ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    intros ?; ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.
@@ -421,7 +441,7 @@ Section RawVec_inv_t.
     intros ?; ex_plain_t_solve_shr_mono.
   Qed.
 
-  Definition RawVec_inv_t (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) : (spec_with 0 [(T_rt); (A_rt)] ((type ((((loc * nat * list (place_rfn (option (place_rfn (T_rt)))))))%type)))) :=
+  Definition RawVec_inv_t (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) : (spec_with 0 [(T_rt); (A_rt)] ((type ((((loc * nat)))%type)))) :=
     spec! ( *[]) : 0 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), ex_plain_t _ _ (RawVec_inv_t_inv_spec Allocator_A_spec_attrs -[] -[T_ty; A_ty]) (((RawVec_ty (T_rt) (A_rt)) (Allocator_A_spec_attrs)) -[] -[T_ty; A_ty]).
   #[global] Arguments RawVec_inv_t_inv_spec : simpl never.
 
@@ -528,17 +548,21 @@ Section Vec_inv_t.
   Program Definition Vec_inv_t_inv_spec (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) : (spec_with 0 [(T_rt); (A_rt)] ((ex_inv_def ((Vec_rt (T_rt) (A_rt)))%type ((list (place_rfn (T_rt))))%type))) :=
     spec! ( *[]) : 0 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), mk_ex_inv_def_auto_shr
           (λ π (inner_rfn : (Vec_rt (T_rt) (A_rt))) (_ty_rfn : RT_rt ((list (place_rfn (T_rt)))%type : RT)),
-                  let 'xs := _ty_rfn in ∃ (cap: name_hint_ty "cap" ((nat))%Z) (l: name_hint_ty "l" ((loc))%Z) (len: name_hint_ty "len" ((nat))%Z) (els: name_hint_ty "els" (_)%Z), ⌜inner_rfn = -[#((l, cap, els)); #(Z.of_nat len)]⌝ ∗ ⌜(name_hint "Hxs" (xs = project_vec_els len els)%Z)%Z⌝ ∗ ⌜(name_hint "Hlook_1" (∀ i, (0 ≤ i < len)%nat → els !! i = Some (#(Some (xs !!! i))))%Z)%Z⌝ ∗ ⌜(name_hint "Hlook_2" (∀ i, (len ≤ i < cap)%nat → els !! i = Some (#None))%Z)%Z⌝ ∗ ⌜(name_hint "Hels_len" (length els = cap)%Z)%Z⌝ ∗ ⌜(name_hint "Hlen_eq" (len = length xs)%Z)%Z⌝ ∗ ⌜(name_hint "Hcap" (len ≤ cap)%Z)%Z⌝ ∗ ⌜(name_hint "Hbound" (len ≤ MaxInt usize)%Z)%Z⌝ ∗ ⌜(if decide (size_of_st (ty_syn_type T_ty MetaNone) = 0%nat) then cap = Z.to_nat (MaxInt USize) else (size_of_array_in_bytes (ty_syn_type T_ty MetaNone) cap ≤ MaxInt ISize)%Z)%Z⌝ ∗ True)%I
+                  let 'xs := _ty_rfn in ∃ (cap: name_hint_ty "cap" ((nat))%Z) (l: name_hint_ty "l" ((loc))%Z) (len: name_hint_ty "len" ((nat))%Z) (els: name_hint_ty "els" (_)%Z), ⌜inner_rfn = -[#((l, cap)); #(Z.of_nat len)]⌝ ∗ guarded true (l ◁ₗ[π, Owned] #(els) @ (◁ array_t cap (maybe_uninit T_ty))) ∗ ⌜(name_hint "Hxs" (xs = project_vec_els len els)%Z)%Z⌝ ∗ ⌜(name_hint "Hlook_1" (∀ i, (0 ≤ i < len)%nat → els !! i = Some (#(Some (xs !!! i))))%Z)%Z⌝ ∗ ⌜(name_hint "Hlook_2" (∀ i, (len ≤ i < cap)%nat → els !! i = Some (#None))%Z)%Z⌝ ∗ ⌜(name_hint "Hels_len" (length els = cap)%Z)%Z⌝ ∗ ⌜(name_hint "Hlen_eq" (len = length xs)%Z)%Z⌝ ∗ ⌜(name_hint "Hcap" (len ≤ cap)%Z)%Z⌝ ∗ ⌜(name_hint "Hbound" (len ≤ MaxInt usize)%Z)%Z⌝ ∗ ⌜(if decide (size_of_st (ty_syn_type T_ty MetaNone) = 0%nat) then cap = Z.to_nat (MaxInt USize) else (size_of_array_in_bytes (ty_syn_type T_ty MetaNone) cap ≤ MaxInt ISize)%Z)%Z⌝ ∗ True)%I
           (λ π _ (_rfn_binder : RT_rt ((list (place_rfn (T_rt)))%type : RT)),
                   let 'xs := _rfn_binder in ([∗ list] x ∈ xs, ∃ r, place_rfn_interp_owned x r ∗ ty_ghost_drop T_ty π r) ∗ True)%I
           (false)
           _
-          ([])
-          ([])
-          _ _ _ _
+          ([] ++ (ty_lfts (T_ty)))
+          ([] ++ (ty_wf_E (T_ty)))
+          _ _ _ _ _
         .
   Next Obligation.
     intros ?; ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    intros ?; ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.
@@ -687,15 +711,13 @@ Section Vec_inv_t_ne.
     TypeNonExpansive (λ ty, RawVec_inv_t T_rt A_rt Alloc <TY> (T ty) <TY> A <INST!>).
   Proof. apply _. Qed.
 
-  Instance RawVec_inv_t_dep_lft_mor rts (T_rt A_rt : RT) (A_attrs : Allocator_spec_attrs A_rt) (A_ty : type A_rt) (T : mut_types rts → type T_rt) deps :
-    DepLftMorphism deps T →
-    DepLftMorphism deps (λ x : mut_types rts, RawVec_inv_t_inv_spec T_rt A_rt A_attrs *[] *[(T x); A_ty]).
+  Instance RawVec_inv_t_dep_lft_mor rts (T_rt A_rt : RT) (A_attrs : Allocator_spec_attrs A_rt) (A_ty : type A_rt) (T : mut_types rts → type T_rt) :
+    DepLftMorphism ∅ (λ x : mut_types rts, RawVec_inv_t_inv_spec T_rt A_rt A_attrs *[] *[(T x); A_ty]).
   Proof.
     simpl.
-    intros Hdep.
-    eapply (dep_lft_morph_make_id _ T); first done.
-    - simpl. done.
-    - done.
+    eapply (mk_dep_lft_morph_const _ static []).
+    - abstract (iIntros (?); iApply lft_equiv_refl).
+    - abstract done.
   Defined.
   Global Instance RawVec_inv_t_dep_lft_mor' rts (T_rt A_rt : RT) (A_attrs : Allocator_spec_attrs A_rt) (A_ty : type A_rt) (T : mut_types rts → type T_rt) deps :
     DepLftMorphism deps T →
@@ -728,13 +750,16 @@ Section Vec_inv_t_ne.
     TypeNonExpansive (λ ty, Vec_inv_t T_rt A_rt Alloc <TY> (T ty) <TY> A <INST!>).
   Proof. apply _. Qed.
 
-  Instance Vec_inv_t_dep_lft_mor rts (T_rt A_rt : RT) (A_attrs : Allocator_spec_attrs A_rt) (A_ty : type A_rt) (T : mut_types rts → type T_rt) :
-    DepLftMorphism ∅ (λ x : mut_types rts, Vec_inv_t_inv_spec T_rt A_rt A_attrs *[] *[(T x); A_ty]).
+  Instance Vec_inv_t_dep_lft_mor rts (T_rt A_rt : RT) (A_attrs : Allocator_spec_attrs A_rt) (A_ty : type A_rt) (T : mut_types rts → type T_rt) deps :
+    DepLftMorphism deps T →
+    DepLftMorphism deps (λ x : mut_types rts, Vec_inv_t_inv_spec T_rt A_rt A_attrs *[] *[(T x); A_ty]).
   Proof.
     simpl.
-    eapply (mk_dep_lft_morph_const).
-    - simpl. abstract (iIntros (?); iApply lft_equiv_refl).
-    - simpl. abstract (done).
+    intros Hdep.
+    eapply (dep_lft_morph_make_id _ T).
+    - apply _.
+    - simpl. done.
+    - done.
   Defined.
   Global Instance Vec_inv_t_dep_lft_mor' rts (T_rt A_rt : RT) (A_attrs : Allocator_spec_attrs A_rt) (A_ty : type A_rt) (T : mut_types rts → type T_rt) deps :
     DepLftMorphism deps T →
@@ -783,7 +808,7 @@ Next Obligation.
   iDestruct "Hp" as "(% & % & % & % & % & Hp)".
   rewrite !boringly_persistent_elim.
   unfold name_hint.
-  iDestruct "Hp" as "(-> & -> & % & % & % & % & %Hlen & % & % &_ )".
+  iDestruct "Hp" as "(-> & _ & -> & % & % & % & %Hlen & % & % &_ )".
   subst. iModIntro. iPureIntro. simpl in *. lia.
 Qed.
 
@@ -807,7 +832,7 @@ Proof.
   iDestruct "Hl" as "(%v & Hl & Hv)".
 
   rewrite {1}ex_plain_t_unfold_val/=.
-  iDestruct "Hv" as "(%fields & (%cap & %l' & %len & %els & -> & %Heq1 & %Hlook1 & %Hlook2 & %Hels_len & %Hlen_eq & %Hcap & % & %Hbound & _) & Hv)".
+  iDestruct "Hv" as "(%fields & (%cap & %l' & %len & %els & -> & Hls & %Heq1 & %Hlook1 & %Hlook2 & %Hels_len & %Hlen_eq & %Hcap & % & %Hbound & _) & Hv)".
   unfold name_hint, name_hint_ty in *.
   simpl in *.
 
@@ -816,7 +841,7 @@ Proof.
   { done. }
   simpl. iDestruct "Hrfn" as "<-".
   rewrite {1}ex_plain_t_unfold_val/=.
-  iDestruct "Hv" as "(%fields' & (%a & -> & Hls & Hfreeable & _) & Hv)".
+  iDestruct "Hv" as "(%fields' & (%a & -> & Hfreeable & _) & Hv)".
 
   rewrite /guarded.
   iDestruct "Hls" as "(Hcred & Hls)".
@@ -938,13 +963,11 @@ Proof.
   iExists _. iR. iModIntro.
   iExists _. iFrame.
 
-  iPoseProof ("Hcl_raw" $! _ (RawVec_inv_t T_rt' A_rt A_attrs -[] -[T_ty'; A_ty]) (l', cap, (<#> (Some <$> <#> rs') ++ <#> replicate (cap - length rs) None))  with "[//] [Hcred Hls Hv Hfreeable]") as "Hv".
+  iPoseProof ("Hcl_raw" $! _ (RawVec_inv_t T_rt' A_rt A_attrs -[] -[T_ty'; A_ty]) (l', cap) with "[//] [Hv Hfreeable]") as "Hv".
   { rewrite ex_plain_t_unfold_val/=. iFrame.
     rewrite /inv_P/=/name_hint_ty/name_hint/=.
     rewrite Hst''.
-    rewrite /guarded.
-    iFrame. iExists _. iSplitR "Hv".
-    { iR. iNext. replace (length rs + (cap - length rs))%nat with cap by lia. done. }
+    iFrame. iExists _. iSplitR "Hv"; first done.
     iApply (struct_t_own_val_mono _ false); last iApply "Hv".
     unfold struct_t_incl_precond. simpl.
     iSplitR; first last.
@@ -968,6 +991,8 @@ Proof.
   replace (length rs + (cap - length rs))%nat with cap by lia.
   iExists _, _, len, _.
   rewrite Hlen_eq Hlen'. iR.
+  iSplitL "Hcred Hls".
+  { rewrite /guarded. iFrame. }
   iPureIntro.
   split_and!.
   - rewrite /project_vec_els. normalize_and_simpl_goal.
@@ -986,7 +1011,7 @@ Proof.
   - solve_goal.
   - lia.
   - rewrite Hst''. solve_goal.
-  - done.
+  - solve_goal.
 Qed.
 
 Lemma vec_extract_invariant {T_inner_rt T_rt A_rt} (P : ex_inv_def T_inner_rt T_rt) (T_ty : type T_inner_rt) (A_ty : type A_rt) (A_attrs : Allocator_spec_attrs A_rt) π xs l F :
@@ -1515,10 +1540,11 @@ Definition type_of_RawVecTAasstd_ops_Drop_drop (T_rt: RT) (A_rt: RT) (T_st: syn_
       (* params....... *) (l, lmem, cap, els) : ((_ * _ * _ * _)),
       (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
       (* args......... *) l :@: alias_ref_t;
-      (* precondition. *) (λ π : thread_id, (l ◁ₗ[π, Owned] #((lmem, cap, els)) @ (◁ RawVec_inv_t T_rt A_rt Allocator_A_spec_attrs -[] -[T_ty; A_ty]))) |
+      (* precondition. *) (λ π : thread_id, (l ◁ₗ[π, Owned] #((lmem, cap)) @ (◁ RawVec_inv_t T_rt A_rt Allocator_A_spec_attrs -[] -[T_ty; A_ty]))
+        ∗ (lmem ◁ₗ[π, Owned] #(els) @ (◁ array_t cap (maybe_uninit T_ty)))) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ (a, ret) : ((_ * _)), ret @ unit_t;
-      (* postcondition *) (λ π : thread_id, (l ◁ₗ[π, Owned] #(-[ #(l, cap, a); #tt]) @ (◁ RawVec_ty T_rt A_rt Allocator_A_spec_attrs -[] -[T_ty; A_ty]))) |
+      (* postcondition *) (λ π : thread_id, (l ◁ₗ[π, Owned] #(-[ #(lmem, cap, a); #tt]) @ (◁ RawVec_ty T_rt A_rt Allocator_A_spec_attrs -[] -[T_ty; A_ty]))) |
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
 
@@ -1545,7 +1571,8 @@ Definition type_of_VecTAasstd_ops_Drop_drop (T_rt: RT) (A_rt: RT) (T_st: syn_typ
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ (lmem, cap, ret) : ((_ * _ * _)), ret @ unit_t;
       (* postcondition *) (λ π : thread_id, ([∗ list] r ∈ xs, ty_ghost_drop T_ty π ($# r))
-      ∗ (l ◁ₗ[π, Owned] #(-[ #(lmem, cap, replicate cap (#None)); #(Z.of_nat $ length xs)]) @ (◁ Vec_ty T_rt A_rt Allocator_A_spec_attrs -[] -[T_ty; A_ty]))) |
+      ∗ (l ◁ₗ[π, Owned] #(-[ #(lmem, cap); #(Z.of_nat $ length xs)]) @ (◁ Vec_ty T_rt A_rt Allocator_A_spec_attrs -[] -[T_ty; A_ty]))
+      ∗ (lmem ◁ₗ[π, Owned] #(replicate cap (#None)) @ (◁ array_t cap (maybe_uninit T_ty)))) |
       (* unwind cond... *) DropGlue_T_spec_attrs.(DropGlue_DropGlueUnwind) |
       (* unwind post... *) (λ π : thread_id, True).
 

@@ -44,10 +44,14 @@ Section Box_inv_t.
           _
           ([] ++ ty_lfts T_ty)
           ([] ++ ty_wf_E T_ty)
-          _ _ _ _
+          _ _ _ _ _
         .
   Next Obligation.
     intros ?; ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    intros ?; ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.

@@ -20,15 +20,13 @@ Section Vec_inv_t_ne.
     TypeNonExpansive (λ ty, RawVec_inv_t T_rt A_rt Alloc <TY> (T ty) <TY> A <INST!>).
   Proof. apply _. Qed.
 
-  Instance RawVec_inv_t_dep_lft_mor rts (T_rt A_rt : RT) (A_attrs : Allocator_spec_attrs A_rt) (A_ty : type A_rt) (T : mut_types rts → type T_rt) deps :
-    DepLftMorphism deps T →
-    DepLftMorphism deps (λ x : mut_types rts, RawVec_inv_t_inv_spec T_rt A_rt A_attrs *[] *[(T x); A_ty]).
+  Instance RawVec_inv_t_dep_lft_mor rts (T_rt A_rt : RT) (A_attrs : Allocator_spec_attrs A_rt) (A_ty : type A_rt) (T : mut_types rts → type T_rt) :
+    DepLftMorphism ∅ (λ x : mut_types rts, RawVec_inv_t_inv_spec T_rt A_rt A_attrs *[] *[(T x); A_ty]).
   Proof.
     simpl.
-    intros Hdep.
-    eapply (dep_lft_morph_make_id _ T); first done.
-    - simpl. done.
-    - done.
+    eapply (mk_dep_lft_morph_const _ static []).
+    - abstract (iIntros (?); iApply lft_equiv_refl).
+    - abstract done.
   Defined.
   Global Instance RawVec_inv_t_dep_lft_mor' rts (T_rt A_rt : RT) (A_attrs : Allocator_spec_attrs A_rt) (A_ty : type A_rt) (T : mut_types rts → type T_rt) deps :
     DepLftMorphism deps T →
@@ -61,13 +59,16 @@ Section Vec_inv_t_ne.
     TypeNonExpansive (λ ty, Vec_inv_t T_rt A_rt Alloc <TY> (T ty) <TY> A <INST!>).
   Proof. apply _. Qed.
 
-  Instance Vec_inv_t_dep_lft_mor rts (T_rt A_rt : RT) (A_attrs : Allocator_spec_attrs A_rt) (A_ty : type A_rt) (T : mut_types rts → type T_rt) :
-    DepLftMorphism ∅ (λ x : mut_types rts, Vec_inv_t_inv_spec T_rt A_rt A_attrs *[] *[(T x); A_ty]).
+  Instance Vec_inv_t_dep_lft_mor rts (T_rt A_rt : RT) (A_attrs : Allocator_spec_attrs A_rt) (A_ty : type A_rt) (T : mut_types rts → type T_rt) deps :
+    DepLftMorphism deps T →
+    DepLftMorphism deps (λ x : mut_types rts, Vec_inv_t_inv_spec T_rt A_rt A_attrs *[] *[(T x); A_ty]).
   Proof.
     simpl.
-    eapply (mk_dep_lft_morph_const).
-    - simpl. abstract (iIntros (?); iApply lft_equiv_refl).
-    - simpl. abstract (done).
+    intros Hdep.
+    eapply (dep_lft_morph_make_id _ T).
+    - apply _.
+    - simpl. done.
+    - done.
   Defined.
   Global Instance Vec_inv_t_dep_lft_mor' rts (T_rt A_rt : RT) (A_attrs : Allocator_spec_attrs A_rt) (A_ty : type A_rt) (T : mut_types rts → type T_rt) deps :
     DepLftMorphism deps T →
@@ -116,7 +117,7 @@ Next Obligation.
   iDestruct "Hp" as "(% & % & % & % & % & Hp)".
   rewrite !boringly_persistent_elim.
   unfold name_hint.
-  iDestruct "Hp" as "(-> & -> & % & % & % & % & %Hlen & % & % &_ )".
+  iDestruct "Hp" as "(-> & _ & -> & % & % & % & %Hlen & % & % &_ )".
   subst. iModIntro. iPureIntro. simpl in *. lia.
 Qed.
 
@@ -140,7 +141,7 @@ Proof.
   iDestruct "Hl" as "(%v & Hl & Hv)".
 
   rewrite {1}ex_plain_t_unfold_val/=.
-  iDestruct "Hv" as "(%fields & (%cap & %l' & %len & %els & -> & %Heq1 & %Hlook1 & %Hlook2 & %Hels_len & %Hlen_eq & %Hcap & % & %Hbound & _) & Hv)".
+  iDestruct "Hv" as "(%fields & (%cap & %l' & %len & %els & -> & Hls & %Heq1 & %Hlook1 & %Hlook2 & %Hels_len & %Hlen_eq & %Hcap & % & %Hbound & _) & Hv)".
   unfold name_hint, name_hint_ty in *.
   simpl in *.
 
@@ -149,7 +150,7 @@ Proof.
   { done. }
   simpl. iDestruct "Hrfn" as "<-".
   rewrite {1}ex_plain_t_unfold_val/=.
-  iDestruct "Hv" as "(%fields' & (%a & -> & Hls & Hfreeable & _) & Hv)".
+  iDestruct "Hv" as "(%fields' & (%a & -> & Hfreeable & _) & Hv)".
 
   rewrite /guarded.
   iDestruct "Hls" as "(Hcred & Hls)".
@@ -271,13 +272,11 @@ Proof.
   iExists _. iR. iModIntro.
   iExists _. iFrame.
 
-  iPoseProof ("Hcl_raw" $! _ (RawVec_inv_t T_rt' A_rt A_attrs -[] -[T_ty'; A_ty]) (l', cap, (<#> (Some <$> <#> rs') ++ <#> replicate (cap - length rs) None))  with "[//] [Hcred Hls Hv Hfreeable]") as "Hv".
+  iPoseProof ("Hcl_raw" $! _ (RawVec_inv_t T_rt' A_rt A_attrs -[] -[T_ty'; A_ty]) (l', cap) with "[//] [Hv Hfreeable]") as "Hv".
   { rewrite ex_plain_t_unfold_val/=. iFrame.
     rewrite /inv_P/=/name_hint_ty/name_hint/=.
     rewrite Hst''.
-    rewrite /guarded.
-    iFrame. iExists _. iSplitR "Hv".
-    { iR. iNext. replace (length rs + (cap - length rs))%nat with cap by lia. done. }
+    iFrame. iExists _. iSplitR "Hv"; first done.
     iApply (struct_t_own_val_mono _ false); last iApply "Hv".
     unfold struct_t_incl_precond. simpl.
     iSplitR; first last.
@@ -301,6 +300,8 @@ Proof.
   replace (length rs + (cap - length rs))%nat with cap by lia.
   iExists _, _, len, _.
   rewrite Hlen_eq Hlen'. iR.
+  iSplitL "Hcred Hls".
+  { rewrite /guarded. iFrame. }
   iPureIntro.
   split_and!.
   - rewrite /project_vec_els. normalize_and_simpl_goal.
@@ -319,7 +320,7 @@ Proof.
   - solve_goal.
   - lia.
   - rewrite Hst''. solve_goal.
-  - done.
+  - solve_goal.
 Qed.
 
 Lemma vec_extract_invariant {T_inner_rt T_rt A_rt} (P : ex_inv_def T_inner_rt T_rt) (T_ty : type T_inner_rt) (A_ty : type A_rt) (A_attrs : Allocator_spec_attrs A_rt) π xs l F :

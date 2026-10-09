@@ -45,10 +45,14 @@ Section BTreeMap_inv_t.
           _
           ([])
           ([])
-          _ _ _ _
+          _ _ _ _ _
         .
   Next Obligation.
     intros ? ?; ex_plain_t_solve_is_xrfn.
+  Qed.
+
+  Next Obligation.
+    intros ? ?; ex_plain_t_solve_to_xrfn.
   Qed.
 
   Next Obligation.
