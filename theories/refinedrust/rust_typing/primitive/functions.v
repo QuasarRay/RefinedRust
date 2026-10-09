@@ -208,6 +208,10 @@ Section function.
   Qed.
   Next Obligation. unfold TCNoResolve. apply _. Qed.
   Next Obligation.
+    iIntros (lfts arg_types rts fp F π r v ?) "Hown".
+    iApply logical_step_intro. iExists r. done.
+  Qed.
+  Next Obligation.
     simpl. iIntros (lfts lya rts fp ot st π r v Hot).
     iIntros "(%fn & %Hv & Hfntbl & %Halg & Hfn)".
     iPureIntro.
@@ -1482,6 +1486,10 @@ Section inline.
     intros ??? ot Hot. destruct ot; done.
   Qed.
   Next Obligation. unfold TCNoResolve. apply _. Qed.
+  Next Obligation.
+    iIntros (arg_types lft_names fn F π r v ?) "Hown".
+    iApply logical_step_intro. iExists r. done.
+  Qed.
   Next Obligation.
     simpl. iIntros (lya lft_names fn ot st π r v Hot).
     iIntros "(%Hv & Hfntbl & %Halg)".

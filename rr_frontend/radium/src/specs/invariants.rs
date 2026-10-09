@@ -293,7 +293,7 @@ impl Spec {
                 write!(
                     body,
                     "{scope} mk_pers_ex_inv_def\n\
-                       {indent}{indent}({inv})%I _ _ _\n\
+                       {indent}{indent}({inv})%I _ _ _ _\n\
                        {indent}",
                 )
                 .unwrap();
@@ -317,7 +317,7 @@ impl Spec {
                             {indent}{indent}_\n\
                             {indent}{indent}({lft_outlives})\n\
                             {indent}{indent}({lft_wf_elctx})\n\
-                            {indent}{indent}_ _ _ _\n\
+                             {indent}{indent}_ _ _ _ _\n\
                             {indent}",
                         )
                         .unwrap();
@@ -330,7 +330,7 @@ impl Spec {
                             {indent}{indent}_\n\
                             {indent}{indent}({lft_outlives})\n\
                             {indent}{indent}({lft_wf_elctx})\n\
-                            {indent}{indent}_ _ _ _\n\
+                             {indent}{indent}_ _ _ _ _\n\
                             {indent}",
                         )
                         .unwrap();
@@ -346,7 +346,7 @@ impl Spec {
                         {indent}{indent}_\n\
                         {indent}{indent}({lft_outlives})\n\
                         {indent}{indent}({lft_wf_elctx})\n\
-                        {indent}{indent}_ _ _\n\
+                         {indent}{indent}_ _ _ _ _\n\
                         {indent}",
                     )
                     .unwrap();
@@ -356,11 +356,12 @@ impl Spec {
                         "{scope} mk_ex_inv_def_auto_ghost_drop\n\
                         {indent}{indent}({own_inv})%I\n\
                         {indent}{indent}({shr_inv})%I\n\
+                        {indent}{indent}_\n\
                         {indent}{indent}({trivial_drop})\n\
                         {indent}{indent}_\n\
                         {indent}{indent}({lft_outlives})\n\
                         {indent}{indent}({lft_wf_elctx})\n\
-                        {indent}{indent}_ _ _\n\
+                         {indent}{indent}_ _ _ _\n\
                         {indent}",
                     )
                     .unwrap();
@@ -378,6 +379,7 @@ impl Spec {
                     {indent}{indent}({trivial_drop})\n\
                     {indent}{indent}({lft_outlives})\n\
                     {indent}{indent}({lft_wf_elctx})\n\
+                    {indent}{indent}_\n\
                     {indent}",
                 )
                 .unwrap();
@@ -396,6 +398,11 @@ impl Spec {
 
         match self.flags {
             SpecFlags::Persistent => {
+                Self::push_obligation(
+                    &mut out,
+                    coq::ltac::LTac::Literal("ex_plain_t_solve_to_xrfn".to_owned()),
+                    coq::proof::Terminator::Qed,
+                );
                 Self::push_obligation(
                     &mut out,
                     coq::ltac::LTac::Literal("ex_t_solve_persistent".to_owned()),
@@ -419,6 +426,11 @@ impl Spec {
                     Self::push_obligation(
                         &mut out,
                         coq::ltac::LTac::Literal(format!("{attr_intro}ex_plain_t_solve_is_xrfn")),
+                        coq::proof::Terminator::Qed,
+                    );
+                    Self::push_obligation(
+                        &mut out,
+                        coq::ltac::LTac::Literal(format!("{attr_intro}ex_plain_t_solve_to_xrfn")),
                         coq::proof::Terminator::Qed,
                     );
                     Self::push_obligation(
@@ -467,6 +479,11 @@ impl Spec {
                     );
                     Self::push_obligation(
                         &mut out,
+                        coq::ltac::LTac::Literal(format!("{attr_intro}ex_plain_t_solve_to_xrfn")),
+                        coq::proof::Terminator::Qed,
+                    );
+                    Self::push_obligation(
+                        &mut out,
                         coq::ltac::LTac::Literal("ex_t_solve_persistent".to_owned()),
                         coq::proof::Terminator::Qed,
                     );
@@ -498,6 +515,11 @@ impl Spec {
                     );
                     Self::push_obligation(
                         &mut out,
+                        coq::ltac::LTac::Literal(format!("{attr_intro}ex_plain_t_solve_to_xrfn")),
+                        coq::proof::Terminator::Qed,
+                    );
+                    Self::push_obligation(
+                        &mut out,
                         coq::ltac::LTac::Literal(format!("{attr_intro}ex_t_solve_persistent")),
                         coq::proof::Terminator::Qed,
                     );
@@ -513,7 +535,19 @@ impl Spec {
                     );
                 }
             },
-            SpecFlags::NonAtomic => {},
+            SpecFlags::NonAtomic => {
+                let attr_binders = scope.get_all_attr_trait_parameters(IncludeSelfReq::Dont);
+                let attr_intro = if attr_binders.0.is_empty() {
+                    String::new()
+                } else {
+                    format!("intros{}; ", " ?".repeat(attr_binders.0.len()))
+                };
+                Self::push_obligation(
+                    &mut out,
+                    coq::ltac::LTac::Literal(format!("{attr_intro}ex_plain_t_solve_to_xrfn")),
+                    coq::proof::Terminator::Qed,
+                );
+            },
             _ => unreachable!(),
         }
 

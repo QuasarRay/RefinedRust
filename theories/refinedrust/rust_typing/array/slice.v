@@ -61,6 +61,16 @@ Section def.
       iExists (mk_array_layout ly len). iSplitR; first done.
       iPureIntro. by eapply syn_type_has_layout_array.
     - iIntros (κ π r m l) "($ & _)".
+    - iIntros (F π r m v q HF) "#CTX Htok (%len & %ly & -> & %Hst & %Hsz & %Hlen & %Hly & Hown)".
+      iPoseProof (array_own_el_vals_to_xrfn ty F π r
+        (reshape (replicate len (ly_size ly)) v) q with "CTX Htok Hown") as "Hstep";
+        first done.
+      iApply (logical_step_wand with "Hstep").
+      iIntros "((%xrs & Hown) & Htok)".
+      iPoseProof (big_sepL2_length with "Hown") as "%Hlen_xrs".
+      iFrame "Htok". iExists xrs, len, ly. iFrame "Hown".
+      iPureIntro. repeat split; try done.
+      rewrite Hlen_xrs length_reshape length_replicate //.
     - iIntros (E κ l ly π r m q ? Hxr).
       destruct Hxr as [xr Hxr].
       iIntros "#(LFT & LCTX) #Hna Htok %Hst %Hly #Hlb Hb".

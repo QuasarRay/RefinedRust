@@ -157,6 +157,10 @@ Section alias.
       unfold TCNoResolve; apply _.
   Qed.
   Next Obligation.
+    iIntros (pk F π r v ?) "Hown".
+    iApply logical_step_intro. iExists r. done.
+  Qed.
+  Next Obligation.
     iIntros (pk ot st π l v Hot) "Hv".
     destruct pk; unfold alias_ptr_kind_has_op_type in Hot.
     - iEval (unfold alias_ptr_kind_own_val) in "Hv".

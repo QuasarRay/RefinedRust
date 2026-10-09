@@ -291,6 +291,16 @@ Record type_props `{!typeGS Σ} (rt : RT)
   _ty_shr_is_xrfn κ π r m l :
     ty_shr κ π r m l -∗ ⌜is_xrfn r⌝;
 
+  (** Owned values can be reindexed by a concrete refinement while all
+      lifetimes on which the type depends are alive. *)
+  _ty_own_val_to_xrfn F π r m v q :
+    lftE ⊆ F →
+    rrust_ctx -∗
+    let κ := lft_intersect_list _ty_lfts in
+    q.[κ] -∗
+    ty_own_val π r m v -∗
+    logical_step F ((∃ xr : RT_xt rt, ty_own_val π (RT_xrt rt xr) m v) ∗ q.[κ]);
+
   (** We need to be able to initiate sharing *)
   _ty_share E κ l ly π r m q:
     lftE ⊆ E →
@@ -452,6 +462,61 @@ Definition ty_shr_is_xrfn_aux : seal (@ty_shr_is_xrfn_def). Proof. by eexists. Q
 Definition ty_shr_is_xrfn := ty_shr_is_xrfn_aux.(unseal).
 Definition ty_shr_is_xrfn_unfold : @ty_shr_is_xrfn = @ty_shr_is_xrfn_def := ty_shr_is_xrfn_aux.(seal_eq).
 Arguments ty_shr_is_xrfn {_ _ _}.
+
+Definition ty_own_val_to_xrfn_def `{!typeGS Σ} {rt} (ty : type rt) F π r m v q :
+  lftE ⊆ F →
+  rrust_ctx -∗
+  let κ := lft_intersect_list (ty_lfts ty) in
+  q.[κ] -∗
+  ty_own_val ty π r m v -∗
+  logical_step F ((∃ xr, ty_own_val ty π (RT_xrt rt xr) m v) ∗ q.[κ]).
+Proof.
+  rewrite ty_lfts_unfold. eapply _ty_own_val_to_xrfn. apply ty_props.
+Qed.
+Definition ty_own_val_to_xrfn_aux : seal (@ty_own_val_to_xrfn_def). Proof. by eexists. Qed.
+Definition ty_own_val_to_xrfn := ty_own_val_to_xrfn_aux.(unseal).
+Definition ty_own_val_to_xrfn_unfold : @ty_own_val_to_xrfn = @ty_own_val_to_xrfn_def :=
+  ty_own_val_to_xrfn_aux.(seal_eq).
+Arguments ty_own_val_to_xrfn {_ _ _}.
+
+Lemma ty_own_val_to_xrfn_ctx `{!typeGS Σ} {rt : RT}
+    (ty : type rt) E L F π r m v :
+  lftE ⊆ F →
+  Forall (lctx_lft_alive E L) (ty_lfts ty) →
+  rrust_ctx -∗
+  elctx_interp E -∗
+  llctx_interp L -∗
+  ty_own_val ty π r m v -∗
+  logical_step F (
+    (∃ xr, ty_own_val ty π (RT_xrt rt xr) m v) ∗ llctx_interp L).
+Proof.
+  iIntros (HF Hal) "#CTX #HE HL Hown".
+  iPoseProof (llctx_interp_acc_noend with "HL") as "(HL & Hcl_L)".
+  iApply fupd_logical_step.
+  iMod (lctx_lft_alive_tok_noend_list E L (ty_lfts ty) F 1 with "HE HL")
+    as (q) "(Htok & HL & Hcl_tok)"; [done.. |].
+  iModIntro.
+  iPoseProof (ty_own_val_to_xrfn ty F π r m v q HF
+    with "CTX Htok Hown") as "Hstep".
+  iApply logical_step_fupd.
+  iApply (logical_step_wand with "Hstep").
+  iIntros "((%xr & Hown) & Htok)".
+  iMod ("Hcl_tok" with "Htok HL") as "HL".
+  iModIntro. iFrame "Hown". iApply "Hcl_L". done.
+Qed.
+
+Corollary ty_own_val_to_xrfn_ctx_top `{!typeGS Σ} {rt : RT}
+    (ty : type rt) E L π r m v :
+  Forall (lctx_lft_alive E L) (ty_lfts ty) →
+  rrust_ctx -∗
+  elctx_interp E -∗
+  llctx_interp L -∗
+  ty_own_val ty π r m v -∗
+  logical_step ⊤ (
+    (∃ xr, ty_own_val ty π (RT_xrt rt xr) m v) ∗ llctx_interp L).
+Proof.
+  intros Hal. apply ty_own_val_to_xrfn_ctx; [set_solver | done].
+Qed.
 
 Definition ty_share_def `{!typeGS Σ} {rt} (ty : type rt) E κ l ly π r m q :
   lftE ⊆ E →
@@ -703,6 +768,11 @@ Record simple_type `{!typeGS Σ} (rt : RT) :=
     (* TCNoResolve so we can make the proof opaque *)
     _st_own_persistent π r v : TCNoResolve (Persistent (st_own π r v));
 
+    st_own_to_xrfn F π r v :
+      lftE ⊆ F →
+      st_own π r v -∗
+      logical_step F (∃ xr : RT_xt rt, st_own π (RT_xrt rt xr) v);
+
     st_decodable ot st π r v :
       st_has_op_type ot →
       st_own π r v -∗
@@ -775,6 +845,11 @@ Next Obligation.
     iExists _.
     eauto.
   - iIntros (κ π r m l) "($ & _)".
+  - iIntros (F π r m v q ?) "_ Hκ (-> & Hown)".
+    iPoseProof (st_own_to_xrfn _ _ _ _ _ with "Hown") as "Hstep"; first done.
+    iApply (logical_step_wand with "Hstep").
+    iIntros "(%xr & Hown)". iSplitR "Hκ"; last done.
+    iExists xr. by iFrame.
   - iIntros (E κ l ly π r m q ? Hxr) "#(LFT & TIME) Hna Hκ Hst Hly Hlb Hmt".
     simpl. rewrite right_id.
     iApply fupd_logical_step.
@@ -828,6 +903,10 @@ Section type_inh.
   Qed.
   Next Obligation. intros ?->. done. Qed.
   Next Obligation. unfold TCNoResolve. apply _. Qed.
+  Next Obligation.
+    iIntros (F π r v ?) "Hown".
+    iApply logical_step_intro. iExists inhabitant. done.
+  Qed.
   Next Obligation.
     simpl. intros ????? ->.
     iIntros "->".
@@ -962,6 +1041,11 @@ Section ofe.
     (∀ κ π l r m, x.1.1.1.1.1.1.1.2 κ π r m l -∗ ∃ (ly : layout), ⌜l `has_layout_loc` ly⌝ ∗ ⌜syn_type_has_layout (x.1.1.1.1.2 m) ly⌝) ∧
     (* ty_shr_is_xrfn *)
     (∀ κ π r m l, x.1.1.1.1.1.1.1.2 κ π r m l -∗ ⌜is_xrfn r⌝) ∧
+    (* ty_own_val_to_xrfn *)
+    (∀ F π r m v q, lftE ⊆ F → rrust_ctx -∗
+      let κ := lft_intersect_list x.1.2 in
+      q.[κ] -∗ x.1.1.1.1.1.1.1.1 π r m v -∗
+      logical_step F ((∃ xr, x.1.1.1.1.1.1.1.1 π (RT_xrt rt xr) m v) ∗ q.[κ])) ∧
     (* ty_share *)
     (∀ E κ l ly π r m q, lftE ⊆ E → is_xrfn r → rrust_ctx -∗
       let κ' := lft_intersect_list x.1.2 in
@@ -2890,6 +2974,18 @@ Record ex_inv_def `{!typeGS Σ} (X : RT) (Y : RT) : Type := mk_ex_inv_def' {
   inv_P_lfts : list lft;
   inv_P_wf_E : elctx;
 
+  inv_P_own_val_to_xrfn :
+    ∀ (ty : type X) F π x y m v q,
+    lftE ⊆ F →
+    rrust_ctx -∗
+    let κ := lft_intersect_list (inv_P_lfts ++ ty_lfts ty) in
+    q.[κ] -∗
+    inv_P π x y ∗ ty_own_val ty π x m v -∗
+    logical_step F (
+      (∃ x' (yr : RT_xt Y),
+        inv_P π x' (RT_xrt Y yr) ∗ ty_own_val ty π x' m v) ∗
+      q.[κ]);
+
   inv_P_shr_pers : ∀ π κ x y, Persistent (inv_P_shr π κ x y);
   inv_P_shr_mono : ∀ π κ κ' x y, κ' ⊑ κ -∗ inv_P_shr π κ x y -∗ inv_P_shr π κ' x y;
   inv_P_share :
@@ -2908,6 +3004,24 @@ Record ex_inv_def `{!typeGS Σ} (X : RT) (Y : RT) : Type := mk_ex_inv_def' {
     inv_P π x y -∗
     logical_step F (inv_P_ghost_drop π x y);
 }.
+
+Class Canonicalizable `{!typeGS Σ} {X Y : RT}
+    (π : thread_id) (κs : list lft) (ty : type X)
+    (x : X) (y : Y) (P : iProp Σ) (Q : X → Y → iProp Σ) := {
+  canonicalizable_proof :
+    ∀ F m v q,
+    lftE ⊆ F →
+    rrust_ctx -∗
+    let κ := lft_intersect_list (κs ++ ty_lfts ty) in
+    q.[κ] -∗
+    P ∗ ty_own_val ty π x m v -∗
+    logical_step F (
+      (∃ x' (yr : RT_xt Y),
+        Q x' (RT_xrt Y yr) ∗ ty_own_val ty π x' m v) ∗
+      q.[κ]);
+}.
+Global Hint Mode Canonicalizable + + + + + + + + + + + : typeclass_instances.
+
 (* Stop Typeclass resolution for the [inv_P_shr_pers] argument, to make it more deterministic. *)
 Definition mk_ex_inv_def `{!typeGS Σ} {X Y : RT} `{!Inhabited (RT_xt Y)}
   (inv_P : thread_id → X → Y → iProp Σ)
@@ -2917,11 +3031,17 @@ Definition mk_ex_inv_def `{!typeGS Σ} {X Y : RT} `{!Inhabited (RT_xt Y)}
   inv_P_xrfn
   inv_P_lfts
   (inv_P_wf_E : elctx)
+  (Hcanon : ∀ ty π x y,
+    TCNoResolve (Canonicalizable π inv_P_lfts ty x y
+      (inv_P π x y) (inv_P π)))
   (inv_P_shr_pers : TCNoResolve (∀ (π : thread_id) (κ : lft) (x : X) (y : Y), Persistent (inv_P_shr π κ x y)))
   inv_P_shr_mono
   inv_P_share
   inv_P_drop
-  := mk_ex_inv_def' _ _ _ _ _ inv_trivial_drop true inv_P inv_P_shr inv_P_ghost_drop inv_P_xrfn inv_P_lfts inv_P_wf_E inv_P_shr_pers inv_P_shr_mono inv_P_share inv_P_drop.
+  := mk_ex_inv_def' _ _ _ _ _ inv_trivial_drop true inv_P inv_P_shr inv_P_ghost_drop inv_P_xrfn inv_P_lfts inv_P_wf_E
+    (λ ty F π x y m v q HF,
+      (Hcanon ty π x y).(canonicalizable_proof) F m v q HF)
+    inv_P_shr_pers inv_P_shr_mono inv_P_share inv_P_drop.
 Global Arguments inv_P {_ _ _ _}.
 Global Arguments inv_trivial_drop {_ _ _ _}.
 Global Arguments inv_manual_ghost_drop {_ _ _ _}.
@@ -2932,6 +3052,7 @@ Global Arguments inv_P : simpl never.
 Global Arguments inv_P_shr : simpl never.
 Global Arguments inv_P_lfts {_ _ _ _}.
 Global Arguments inv_P_wf_E {_ _ _ _}.
+Global Arguments inv_P_own_val_to_xrfn {_ _ _ _ _}.
 Global Arguments inv_P_share {_ _ _ _ _}.
 Global Arguments inv_P_drop {_ _ _ _ _}.
 Global Arguments inv_P_shr_mono {_ _ _ _ _}.
@@ -2961,8 +3082,15 @@ Proof. intros. by apply inv_P_drop. Qed.
 Program Definition mk_pers_ex_inv_def `{!typeGS Σ} {X : RT} {Y : RT} `{!Inhabited (RT_xt Y)} (P : X → Y → iProp Σ)
   (inv_trivial_drop : bool)
   (inv_P_xrfn : ∀ x y, P x y -∗ P x y ∗ ⌜is_xrfn y → is_xrfn x⌝)
+  (Hcanon : ∀ ty π x y, TCNoResolve (Canonicalizable π [] ty x y (P x y) P))
   (_: TCNoResolve (∀ x y, Persistent (P x y))) (_: TCNoResolve (∀ x y, Timeless (P x y))) : ex_inv_def X Y :=
-  mk_ex_inv_def' _ _ _ _ _ inv_trivial_drop false (λ _, P) (λ _ _, P) (λ _, P) (λ _, inv_P_xrfn) [] [] _ _ _ _.
+  mk_ex_inv_def' _ _ _ _ _ inv_trivial_drop false (λ _, P) (λ _ _, P) (λ _, P) (λ _, inv_P_xrfn) [] [] _ _ _ _ _.
+Next Obligation.
+  intros Σ tyGS X Y HY P trivial Hxr Hcanon Hpers Htime.
+  rewrite /TCNoResolve in Hcanon.
+  intros ty F π x y m v q HF.
+  exact ((Hcanon ty π x y).(canonicalizable_proof) F m v q HF).
+Qed.
 Next Obligation.
   rewrite /TCNoResolve.
   eauto with iFrame.
@@ -2972,16 +3100,16 @@ Next Obligation.
 Qed.
 Next Obligation.
   rewrite /TCNoResolve.
-  intros ????? P ??? F ? κ x y q ?.
-  iIntros (??) "#CTX Hna Htok Hb".
+  intros Σ tyGS X Y HY P trivial Hxr Hcanon Hpers Htime F π κ x y q HF Hyr.
+  iIntros "#CTX Hna Htok Hb".
   iDestruct "CTX" as "(LFT & LLCTX)".
   iApply fupd_logical_step.
   rewrite right_id. iMod (bor_persistent with "LFT Hb Htok") as "(>HP & Htok)"; first done.
   iApply logical_step_intro. by iFrame.
 Qed.
 Next Obligation.
-  intros ????? P ??? F π x y ? ?.
-  iIntros (?) "HP".
+  intros Σ tyGS X Y HY P trivial Hxr Hcanon Hpers Htime F π x y HF Hdrop.
+  iIntros "HP".
   iApply logical_step_intro. done.
 Qed.
 Global Arguments mk_pers_ex_inv_def : simpl never.
@@ -3029,15 +3157,22 @@ Program Definition mk_ex_inv_def_auto_ghost_drop `{!typeGS Σ} {X Y : RT} `{!Inh
   inv_P_xrfn
   inv_P_lfts
   (inv_P_wf_E : elctx)
+  (Hcanon : ∀ ty π x y, TCNoResolve (Canonicalizable π inv_P_lfts ty x y (inv_P π x y) (inv_P π)))
   (inv_P_shr_pers : TCNoResolve (∀ (π : thread_id) (κ : lft) (x : X) (y : Y), Persistent (inv_P_shr π κ x y)))
   inv_P_shr_mono
   inv_P_share
-  := mk_ex_inv_def' _ _ _ _ _ inv_trivial_drop false inv_P inv_P_shr (λ π x y, (Hdrop π x y).(ghost_droppable_prop)) inv_P_xrfn inv_P_lfts inv_P_wf_E inv_P_shr_pers inv_P_shr_mono inv_P_share _.
+  := mk_ex_inv_def' _ _ _ _ _ inv_trivial_drop false inv_P inv_P_shr (λ π x y, (Hdrop π x y).(ghost_droppable_prop)) inv_P_xrfn inv_P_lfts inv_P_wf_E _ inv_P_shr_pers inv_P_shr_mono inv_P_share _.
+Next Obligation.
+  intros Σ tyGS X Y HY invP invShr Hdrop trivial Hxr lfts wf Hcanon Hpers Hmono Hshare.
+  rewrite /TCNoResolve in Hcanon.
+  intros ty F π x y m v q HF.
+  exact ((Hcanon ty π x y).(canonicalizable_proof) F m v q HF).
+Qed.
 Next Obligation.
   simpl.
-  intros ??????? Hdrop ?????????? Hsub ?.
-  iIntros (?) "HP".
-  iApply ((Hdrop π x Hsub).(ghost_droppable_proof) with "HP"); first done.
+  intros Σ tyGS X Y HY invP invShr Hdrop trivial Hxr lfts wf Hcanon Hpers Hmono Hshare F π x y HF Htrivial.
+  iIntros "HP".
+  iApply ((Hdrop π x y).(ghost_droppable_proof) with "HP"); first done.
 Qed.
 
 (** Smart constructor to auto derive the sharing predicate and the ghost drop predicate *)
@@ -3046,27 +3181,34 @@ Program Definition mk_auto_ex_inv_def `{!typeGS Σ} {X : RT} {Y : RT} `{!Inhabit
   inv_P_xrfn
   (inv_P_lfts : list lft)
   (inv_P_wf_E : elctx)
+  (Hcanon : ∀ ty π x y, TCNoResolve (Canonicalizable π inv_P_lfts ty x y (P π x y) (P π)))
   (Hshr : ∀ π κ x y, TCNoResolve (Shareable π κ inv_P_lfts y True (P π x y)))
   (Hdrop : ∀ π x y, TCNoResolve (GhostDroppable (P π x y)))
   inv_P_shr_pers
   inv_P_shr_mono
   : ex_inv_def X Y :=
-  mk_ex_inv_def' _ _ _ _ _ inv_trivial_drop false P (λ π κ x y, (Hshr π κ x y).(shareable_prop)) (λ π x y, (Hdrop π x y).(ghost_droppable_prop)) inv_P_xrfn inv_P_lfts inv_P_wf_E inv_P_shr_pers inv_P_shr_mono _ _.
+  mk_ex_inv_def' _ _ _ _ _ inv_trivial_drop false P (λ π κ x y, (Hshr π κ x y).(shareable_prop)) (λ π x y, (Hdrop π x y).(ghost_droppable_prop)) inv_P_xrfn inv_P_lfts inv_P_wf_E _ inv_P_shr_pers inv_P_shr_mono _ _.
+Next Obligation.
+  intros Σ tyGS X Y HY P trivial Hxr lfts wf Hcanon Hshr Hdrop Hpers Hmono.
+  rewrite /TCNoResolve in Hcanon.
+  intros ty F π x y m v q HF.
+  exact ((Hcanon ty π x y).(canonicalizable_proof) F m v q HF).
+Qed.
 Next Obligation.
   simpl.
-  intros ???????? Hshr ? ? ? ? π κ x y q y'.
-  iIntros (q0 ? Hyr) "CTX Hna Htok Hb".
+  intros Σ tyGS X Y HY P trivial Hxr lfts wf Hcanon Hshr Hdrop Hpers Hmono F π κ x y q HF Hyr.
+  iIntros "CTX Hna Htok Hb".
   rewrite -lft_tok_sep.
   iDestruct "Htok" as "(Htok & Htok1)".
-  iApply ((Hshr0 x y q y').(shareable_proof) I Hyr with "CTX Hna Htok Htok1 Hb"); first done.
+  iApply ((Hshr π κ x y).(shareable_proof) I Hyr with "CTX Hna Htok Htok1 Hb"); first done.
   iApply logical_step_intro.
   iIntros "(Hshr' & Htok & Htok1)". iFrame.
 Qed.
 Next Obligation.
   simpl.
-  intros ???????? ? Hdrop ? ? ? π x y ? ? ?.
-  iIntros (?) "HP".
-  iApply ((Hdrop0 y x0 y0).(ghost_droppable_proof) with "HP"); first done.
+  intros Σ tyGS X Y HY P trivial Hxr lfts wf Hcanon Hshr Hdrop Hpers Hmono F π x y HF Htrivial.
+  iIntros "HP".
+  iApply ((Hdrop π x y).(ghost_droppable_proof) with "HP"); first done.
 Qed.
 
 (** Smart constructor to auto derive the sharing predicate *)
@@ -3077,19 +3219,26 @@ Program Definition mk_ex_inv_def_auto_shr `{!typeGS Σ} {X : RT} {Y : RT} `{!Inh
   inv_P_xrfn
   (inv_P_lfts : list lft)
   (inv_P_wf_E : elctx)
+  (Hcanon : ∀ ty π x y, TCNoResolve (Canonicalizable π inv_P_lfts ty x y (P π x y) (P π)))
   (Hshr : ∀ π κ x y, TCNoResolve (Shareable π κ inv_P_lfts y True (P π x y)))
   inv_P_shr_pers
   inv_P_shr_mono
   inv_P_ghost_droppable
   : ex_inv_def X Y :=
-  mk_ex_inv_def' _ _ _ _ _ inv_trivial_drop true P (λ π κ x y, (Hshr π κ x y).(shareable_prop)) Hdrop inv_P_xrfn inv_P_lfts inv_P_wf_E inv_P_shr_pers inv_P_shr_mono _ inv_P_ghost_droppable.
+  mk_ex_inv_def' _ _ _ _ _ inv_trivial_drop true P (λ π κ x y, (Hshr π κ x y).(shareable_prop)) Hdrop inv_P_xrfn inv_P_lfts inv_P_wf_E _ inv_P_shr_pers inv_P_shr_mono _ inv_P_ghost_droppable.
+Next Obligation.
+  intros Σ tyGS X Y HY P Hdrop trivial Hxr lfts wf Hcanon Hshr Hpers Hmono Hghost.
+  rewrite /TCNoResolve in Hcanon.
+  intros ty F π x y m v q HF.
+  exact ((Hcanon ty π x y).(canonicalizable_proof) F m v q HF).
+Qed.
 Next Obligation.
   simpl.
-  intros ????????? Hshr ? ? ? ? π κ x y q y'.
-  iIntros (q0 ? Hyr) "CTX Hna Htok Hb".
+  intros Σ tyGS X Y HY P Hdrop trivial Hxr lfts wf Hcanon Hshr Hpers Hmono Hghost F π κ x y q HF Hyr.
+  iIntros "CTX Hna Htok Hb".
   rewrite -lft_tok_sep.
   iDestruct "Htok" as "(Htok & Htok1)".
-  iApply ((Hshr0 x y q y').(shareable_proof) I Hyr with "CTX Hna Htok Htok1 Hb"); first done.
+  iApply ((Hshr π κ x y).(shareable_proof) I Hyr with "CTX Hna Htok Htok1 Hb"); first done.
   iApply logical_step_intro.
   iIntros "(Hshr' & Htok & Htok1)". iFrame.
 Qed.
@@ -3200,13 +3349,12 @@ Definition prodRT (rt1 rt2 : RT) : RT :=
   mk_RT (RT_rt rt1 * RT_rt rt2)%type (RT_xt rt1 * RT_xt rt2)%type (λ p, (RT_xrt rt1 p.1, RT_xrt rt2 p.2)).
 Canonical Structure prodRT.
 
-Global Instance is_xrfn_prod {rt1 rt2 : RT} (a : rt1) (b : rt2) :
-  IsXrfn a → IsXrfn b → IsXrfn (a, b).
+Global Instance is_xrfn_prod {rt1 rt2 : RT} (p : prodRT rt1 rt2) :
+  IsXrfn p.1 → IsXrfn p.2 → IsXrfn p.
 Proof.
-  intros [[a' Ha]] [[b' Hb]].
-  subst.
+  destruct p as [a b]. intros [[a' Ha]] [[b' Hb]].
   econstructor.
-  by exists (a', b').
+  exists (a', b'). simpl. by f_equal.
 Qed.
 
 Definition place_rfnRT (rt : RT) : RT :=
@@ -3261,6 +3409,12 @@ Proof.
   econstructor; first done.
   by apply is_xrfn_list_iff.
 Qed.
+Global Instance is_xrfn_list_all {rt : RT} (rs : list rt)
+    `{!∀ r : rt, IsXrfn r} : IsXrfn rs.
+Proof.
+  constructor. apply is_xrfn_list_iff, Forall_forall.
+  intros r _. apply is_xrfn_proof.
+Qed.
 Global Instance is_xrfn_list_fmap_xt {rt : RT} (rs : list (RT_xt rt)) :
   IsXrfn (fmap (M:=list) (PlaceIn ∘ RT_xrt rt) rs).
 Proof.
@@ -3269,13 +3423,6 @@ Proof.
   apply Forall_forall.
   intros x Hel. apply list_elem_of_fmap in Hel as (? & -> & ?).
   apply is_xrfn_proof.
-Qed.
-
-Global Instance is_xrfn_list_all {rt : RT} (rs : list rt)
-    `{!∀ r : rt, IsXrfn r} : IsXrfn rs.
-Proof.
-  constructor. apply is_xrfn_list_iff, Forall_forall.
-  intros r _. apply is_xrfn_proof.
 Qed.
 
 Canonical Structure propRT : RT := directRT Prop.
@@ -3309,16 +3456,18 @@ Proof.
   econstructor. exists None. done.
 Qed.
 
+Global Instance is_xrfn_option_all {rt : RT} (rs : option rt)
+    `{!∀ r : rt, IsXrfn r} : IsXrfn rs.
+Proof.
+  destruct rs; apply _.
+Qed.
+
 Global Instance is_xrfn_option_fmap_xt {rt : RT} (rs : option (RT_xt rt)) :
   IsXrfn (fmap (M:=option) (PlaceIn ∘ RT_xrt rt) rs).
 Proof.
   econstructor.
   destruct rs; apply is_xrfn_proof.
 Qed.
-
-Global Instance is_xrfn_option_all {rt : RT} (rs : option rt)
-    `{!∀ r : rt, IsXrfn r} : IsXrfn rs.
-Proof. destruct rs; apply _. Qed.
 
 Definition plistRT (l : list RT) : RT :=
   mk_RT (plist (RT_rt ∘ place_rfnRT) l) (plist (RT_xt ∘ place_rfnRT) l)

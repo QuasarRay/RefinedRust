@@ -716,6 +716,54 @@ Section enum.
       iExists el. iPureIntro. split; first done.
       by eapply use_enum_layout_alg_Some_inv.
     - iIntros (κ π r m l). rewrite enum_shr_unfold /enum_shr_def. iIntros "($ & _)".
+    - rewrite enum_own_val_unfold.
+      iIntros (F π r m v q HF) "#[LFT TIME] Htok
+        (%el & %variant & %variant_ly & -> & %Halg & %Htag & %Hvariant & %Hst & Htag & Htag_pad & Hpayload & Htail)".
+      iApply fupd_logical_step.
+      iMod (lft_incl_acc _ _
+        (lft_intersect_list (ty_lfts (enum_ty en r))) with "[] Htok") as
+        "(%q' & Htok' & Hclose_tok)"; first done.
+      { iApply list_incl_lft_incl_list.
+        by eapply enum_ty_lfts_incl_tag_ty_lfts. }
+      iPoseProof (ty_own_val_to_xrfn (enum_ty en r) F π (enum_r en r)
+        MetaNone (take (ly_size variant_ly) (drop (el_data_offset el) v)) q'
+        with "[$LFT $TIME] Htok' Hpayload") as "Hstep"; first done.
+      iModIntro. iApply logical_step_fupd.
+      iApply (logical_step_wand with "Hstep").
+      iIntros "((%xr & Hpayload) & Htok')".
+      iMod ("Hclose_tok" with "Htok'") as "Htok".
+      destruct (enum_tag_compat _ en r variant Htag) as [vinj Hfind].
+      pose proof (enum_tag_ty_find_elem _ _ _ Hfind) as Hmem.
+      set (sem := mk_enum_tag_sem (enum_rt en r) (enum_ty en r) vinj).
+      destruct (enum_tag_inj_roundtrip en variant sem Hmem ($# xr)) as
+        [Htag' HeqRT Hr'].
+      unfold sem in Htag', HeqRT, Hr'. simpl in Htag', HeqRT, Hr'.
+      assert (is_xrfn (enum_r en (vinj ($# xr)))) as Hpayload_xrfn.
+      { rewrite Hr'.
+        assert (eq_rect _ RT_rt ($# xr) _ HeqRT =
+          eq_rect _ id ($# xr) _ (f_equal RT_rt HeqRT)) as Htransport.
+        { clear Hr'. destruct HeqRT. done. }
+        rewrite Htransport.
+        apply (proj1 (is_xrfn_transport_iff HeqRT (f_equal RT_rt HeqRT) ($# xr))).
+        unfold is_xrfn. eauto. }
+      pose proof (proj2 (enum_r_is_xrfn en (vinj ($# xr))) Hpayload_xrfn) as [er Her].
+      pose proof (enum_tag_type_eq' en (vinj ($# xr)) variant sem Htag' Hfind) as Hty.
+      unfold sem in Hty. simpl in Hty.
+      replace (enum_tag_rt_eq en (vinj ($# xr)) variant sem Htag' Hfind) with HeqRT in Hty
+        by apply proof_irrelevance.
+      iModIntro. iFrame "Htok". iExists er. rewrite -Her.
+      iExists el, variant, variant_ly.
+      do 4 (iSplitR; first done).
+      iSplitR.
+      { iPureIntro.
+        enough (st_of (enum_ty en (vinj ($# xr))) = st_of (enum_ty en r)) as -> by done.
+        rewrite -Hty.
+        clear Hr' Hpayload_xrfn Hty.
+        destruct HeqRT. done. }
+      iFrame "Htag Htag_pad Htail".
+      rewrite Hr' -Hty.
+      clear Hr' Hpayload_xrfn Hty.
+      destruct HeqRT. simpl. iExact "Hpayload".
     - iIntros (E κ l ly π r m q ? Hxr) "#CTX #Hna Htok %Halg %Hly Hlb Hb".
     set (bor_contents :=
       (∃ el variant variant_ly,

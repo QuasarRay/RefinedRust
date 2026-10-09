@@ -221,6 +221,10 @@ Section value.
   Qed.
   Next Obligation. unfold TCNoResolve. apply _. Qed.
   Next Obligation.
+    iIntros (typed st F π r v ?) "Hown".
+    iApply logical_step_intro. iExists r. done.
+  Qed.
+  Next Obligation.
     intros typed st ot' hst π vs v (ot & Halg & Hot & Hst).
     iIntros "(%ot'' & %Halg' & %Hvs & %Hly & %Hst')".
     eapply use_op_alg_typed_inv in Halg' as (ot1 & Halg' & ->).
@@ -1382,6 +1386,10 @@ Section typed_value.
     rewrite ty_has_op_type_unfold//.
   Qed.
   Next Obligation. unfold TCNoResolve. apply _. Qed.
+  Next Obligation.
+    iIntros (st F π r v ?) "Hown".
+    iApply logical_step_intro. iExists r. done.
+  Qed.
   Next Obligation.
     iIntros (st ot hst π [] v Hot) "(%vs & Hv)".
     iApply (ty_decodable valRT (value_t true st) ot hst π vs v with "Hv").

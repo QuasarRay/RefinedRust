@@ -53,6 +53,13 @@ Section ex.
     - unfold TCNoResolve. apply _.
     - iIntros (κ π l r m) "(_ & %x & HP & Hv)". by iApply ty_shr_aligned.
     - iIntros (κ π r m l) "($ & _)".
+    - rewrite ex_plain_own_val_unfold /ex_plain_own_val_def.
+      iIntros (F π r m v q HF) "#CTX Htok (%x & HP & Hown)".
+      iPoseProof (P.(inv_P_own_val_to_xrfn) ty F π x r m v q HF
+        with "CTX Htok [$HP $Hown]") as "Hstep".
+      iApply (logical_step_wand with "Hstep").
+      iIntros "((%x' & %yr & HP & Hown) & Htok)".
+      iFrame "Htok". iExists yr, x'. iFrame.
     - iIntros (E κ l ly π r m q ? Hyr) "#(LFT & LLCTX) #Hna Htok %Halg %Hly Hlb Hb".
       iApply fupd_logical_step.
       rewrite ex_plain_own_val_unfold /ex_plain_own_val_def.

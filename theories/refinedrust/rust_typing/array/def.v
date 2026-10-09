@@ -55,6 +55,55 @@ Section array.
   Definition array_own_el_val (π : thread_id) (ty : type rt) (r : place_rfn rt) (v : val) : iProp Σ :=
     ∃ r', place_rfn_interp_owned r r' ∗ ty.(ty_own_val) π r' MetaNone v.
 
+  Lemma array_own_el_vals_to_xrfn (ty : type rt) F π rs vs q :
+    lftE ⊆ F →
+    rrust_ctx -∗
+    q.[lft_intersect_list (ty_lfts ty)] -∗
+    ([∗ list] r; v ∈ rs; vs, array_own_el_val π ty r v) -∗
+    logical_step F (
+      (∃ xrs : RT_xt (listRT (place_rfnRT rt)),
+        [∗ list] r; v ∈ RT_xrt (listRT (place_rfnRT rt)) xrs; vs,
+          array_own_el_val π ty r v) ∗
+      q.[lft_intersect_list (ty_lfts ty)]).
+  Proof.
+    iIntros (HF) "#[LFT TIME] Htok Hown".
+    rewrite big_sepL2_alt. iDestruct "Hown" as "(%Hlen & Hown)".
+    iPoseProof (Fractional_split_big_sepL
+      (λ q, q.[lft_intersect_list (ty_lfts ty)])%I (length rs) with "Htok") as
+      "(%qs & %Hlen_qs & Htoks & Hclose_toks)".
+    iAssert ([∗ list] i ↦ rv; q' ∈ zip rs vs; qs,
+      logical_step F
+        ((∃ xr : RT_xt rt,
+          array_own_el_val π ty (PlaceIn (RT_xrt rt xr)) rv.2) ∗
+          q'.[lft_intersect_list (ty_lfts ty)]))%I
+      with "[Hown Htoks]" as "Hsteps".
+    { iApply (big_sepL2_wand with "[Hown Htoks]").
+      { iApply big_sepL2_sep_sepL_r; iFrame.
+        iApply big_sepL2_const_sepL_l. iSplitR; last done.
+        rewrite length_zip Hlen Nat.min_id Hlen_qs. done. }
+      iApply big_sepL2_intro.
+      { rewrite length_zip Hlen Nat.min_id Hlen_qs. done. }
+      iModIntro. iIntros (i [r v] q' Hlook Hlookq) "(Hown & Htok)".
+      rewrite /array_own_el_val.
+      iDestruct "Hown" as "(%r' & Hrfn & Hown)".
+      iPoseProof (ty_own_val_to_xrfn ty F π r' MetaNone v q'
+        with "[$LFT $TIME] Htok Hown") as "Hstep"; first done.
+      iApply (logical_step_wand with "Hstep").
+      iIntros "((%xr & Hown) & Htok)".
+      iFrame "Htok". iExists xr, ($# xr). simpl. iFrame. done. }
+    iPoseProof (logical_step_big_sepL2 with "Hsteps") as "Hsteps".
+    iApply (logical_step_wand with "Hsteps").
+    iIntros "Hresults".
+    iPoseProof (big_sepL2_sep_sepL_r with "Hresults") as "(Hown & Htoks)".
+    iPoseProof ("Hclose_toks" with "Htoks") as "Htok".
+    iPoseProof (big_sepL2_const_sepL_l with "Hown") as "(_ & Hown)".
+    iPoseProof (big_sepL2_from_zip' rs vs _ Hlen with "Hown") as "Hown".
+    iEval (simpl) in "Hown".
+    iPoseProof (big_sepL2_elim_l with "Hown") as "Hown".
+    iDestruct (big_sepL_exists_l with "Hown") as "(%xrs & Hown)".
+    iFrame "Htok". iExists xrs. simpl. rewrite big_sepL2_fmap_l. done.
+  Qed.
+
   Lemma array_own_el_val_decode_compat_list π (ty : type rt) ot st rs vs vs' :
     ty_has_op_type ty ot →
     length rs = length vs →
@@ -259,6 +308,17 @@ Section array.
       iExists (mk_array_layout ly len). iSplitR; first done.
       iPureIntro. by eapply syn_type_has_layout_array.
     - rewrite array_t_shr_unfold. iIntros (κ π r m l) "($ & _)".
+    - rewrite array_t_own_val_unfold.
+      iIntros (F π r m v q HF) "#CTX Htok (%ly & -> & %Hst & %Hsz & %Hlen & %Hly & Hown)".
+      iPoseProof (array_own_el_vals_to_xrfn ty F π r
+        (reshape (replicate len (ly_size ly)) v) q with "CTX Htok Hown") as "Hstep";
+        first done.
+      iApply (logical_step_wand with "Hstep").
+      iIntros "((%xrs & Hown) & Htok)".
+      iPoseProof (big_sepL2_length with "Hown") as "%Hlen_xrs".
+      iFrame "Htok". iExists xrs, ly. iFrame "Hown".
+      iPureIntro. repeat split; try done.
+      rewrite Hlen_xrs length_reshape length_replicate //.
     -
       iIntros (E κ l ly π r m q ? Hxr).
     destruct Hxr as [xr Hxr].

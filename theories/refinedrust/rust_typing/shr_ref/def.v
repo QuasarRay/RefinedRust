@@ -83,6 +83,16 @@ Section shr_ref.
     - rewrite shr_ref_shr_unfold.
       iIntros (κ' π r m l) "(%vi & %li & %ly & %ri & %Hxr & _)".
       done.
+    - rewrite shr_ref_own_val_unfold.
+      iIntros (F π r m v q ?) "_ Htok Hown".
+      iDestruct "Hown" as (l ly ri)
+        "(%Hm & %Hdec & %Halg & %Hly & #Hbounds & #Hsc & #Hrfn & #Hcanon)".
+      iApply fupd_logical_step.
+      iMod (fupd_mask_mono with "Hcanon") as "(%Hxr & _)"; first done.
+      destruct Hxr as [xr ->].
+      iModIntro.
+      iApply logical_step_intro. iSplitR "Htok"; last done.
+      iExists xr. iExists l, ly, ri. iFrame "#%".
     - iIntros (E κ' l ly π r m q ? Hxr) "#[LFT TIME] #Hna Htok %Halg %Hly _ Hb".
       rewrite shr_ref_own_val_unfold shr_ref_shr_unfold.
       simpl. rewrite -{1}lft_tok_sep -{1}lft_tok_sep.

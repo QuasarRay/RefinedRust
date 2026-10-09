@@ -550,6 +550,32 @@ Section fixpoint.
         remember (tys n) as tyn.
         dependent destruction tyn.
         simpl. eapply ty_shr_is_xrfn.
+    - intros E π r m v q HE. unfold own_shr.
+      eapply @limit_preserving_compl.
+      + eapply bi.limit_preserving_entails; first apply _.
+        intros n [] [] [Hown Hshr]. simpl in *.
+        repeat f_equiv; apply Hown.
+      + intros n. simpl.
+        rewrite Hchain. simpl.
+        pose proof (Hsyn n) as Hsynn.
+        dependent destruction Hsynn.
+        pose proof (Hlfts n) as Hlftsn.
+        pose proof (proj1 Hlfts_incl n) as Hlfts_incln.
+        rewrite -x in Hlfts_incln.
+        rewrite -x. simpl.
+        iIntros "#CTX Htok Hown".
+        iApply fupd_logical_step.
+        iPoseProof Hlftsn as "[_ Hagg_incl]".
+        iMod (lft_incl_acc _ _ (lft_intersect_list (ty_lfts x0))
+          with "[] Htok") as "(%q' & Htok' & Hclose_tok)"; first done.
+        { iApply lft_incl_trans; first iApply "Hagg_incl". iApply Hlfts_incln. }
+        iPoseProof (ty_own_val_to_xrfn x0 E π r m v q' with
+          "CTX Htok' Hown") as "Hstep"; first done.
+        iModIntro. iApply logical_step_fupd.
+        iApply (logical_step_wand with "Hstep").
+        iIntros "((%xr & Hown) & Htok')".
+        iMod ("Hclose_tok" with "Htok'") as "Htok".
+        iModIntro. iFrame.
     - intros E κ l ly π r m q HE Hxr. unfold own_shr.
       eapply @limit_preserving_compl.
       + eapply bi.limit_preserving_entails; first apply _.

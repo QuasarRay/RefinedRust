@@ -36,6 +36,10 @@ Section uninit.
   Qed.
   Next Obligation. unfold TCNoResolve. apply _. Qed.
   Next Obligation.
+    iIntros (st F π r v ?) "Hown".
+    iApply logical_step_intro. iExists r. done.
+  Qed.
+  Next Obligation.
     simpl. iIntros (st ot st' π [] v (ly & Hst & Hot)) "(%ly' & %Hst' & %Hly')".
     subst ot.
     iExists (OVUntyped ly v). iPureIntro.

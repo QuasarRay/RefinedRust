@@ -24,6 +24,9 @@ Section never.
   Qed.
   Next Obligation. unfold TCNoResolve. apply _. Qed.
   Next Obligation.
+    simpl. iIntros (F π r v ?) "[]".
+  Qed.
+  Next Obligation.
     simpl. iIntros (ot st π [] v Hot []).
   Qed.
   Next Obligation.
