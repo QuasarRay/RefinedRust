@@ -1614,6 +1614,16 @@ Section lft_contexts.
   Global Arguments Inherit : simpl never.
   Global Typeclasses Opaque Inherit.
 
+  Lemma Inherit_sep κs P Q :
+    Inherit κs P -∗ Inherit κs Q -∗ Inherit κs (P ∗ Q).
+  Proof.
+    rewrite /Inherit.
+    iIntros "HP HQ" (F HF) "#Hdead".
+    iMod ("HP" with "[//] Hdead") as "HP".
+    iMod ("HQ" with "[//] Hdead") as "HQ".
+    iModIntro. iFrame.
+  Qed.
+
   Lemma Inherit_update Q P κ :
     (∀ F, P ={F}=∗ Q) -∗
     Inherit κ P -∗

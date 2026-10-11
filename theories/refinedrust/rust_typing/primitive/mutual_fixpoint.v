@@ -2149,6 +2149,34 @@ Section rules.
     - apply mut_type_project_fixpoint_subtype_2.
   Qed.
 
+  (** Value-level rules avoid introducing empty lifetime contexts merely to
+      unfold or fold a recursive ADT during manual ownership transport. *)
+  Lemma mut_type_project_fixpoint_own_val_unfold π r m v :
+    v ◁ᵥ{π, m} r @ mut_fixpoint_project -∗
+    v ◁ᵥ{π, m} r @ mut_fixpoint_project_unfolded.
+  Proof.
+    iIntros "Hv".
+    iPoseProof (mut_type_project_fixpoint_subtype_1 [] [] r 1%Qp with "[] []") as "Hsub".
+    { rewrite /llctx_interp_noend /=. done. }
+    { rewrite /elctx_interp /=. done. }
+    iEval (rewrite /type_incl) in "Hsub".
+    iDestruct "Hsub" as "(_ & _ & #Hown & _)".
+    by iApply ("Hown" with "Hv").
+  Qed.
+
+  Lemma mut_type_project_fixpoint_own_val_fold π r m v :
+    v ◁ᵥ{π, m} r @ mut_fixpoint_project_unfolded -∗
+    v ◁ᵥ{π, m} r @ mut_fixpoint_project.
+  Proof.
+    iIntros "Hv".
+    iPoseProof (mut_type_project_fixpoint_subtype_2 [] [] r 1%Qp with "[] []") as "Hsub".
+    { rewrite /llctx_interp_noend /=. done. }
+    { rewrite /elctx_interp /=. done. }
+    iEval (rewrite /type_incl) in "Hsub".
+    iDestruct "Hsub" as "(_ & _ & #Hown & _)".
+    by iApply ("Hown" with "Hv").
+  Qed.
+
   Lemma mut_type_project_fixpoint_unfold_eqltype E L :
     full_eqltype E L (◁ mut_fixpoint_project)%I (◁ mut_fixpoint_project_unfolded)%I.
   Proof.

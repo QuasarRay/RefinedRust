@@ -1813,16 +1813,18 @@ End copy.
 Section acc.
   Context `{!typeGS Σ}.
 
-  Lemma struct_own_val_acc {rts} (tys : hlist type rts) rs i rt ty r v π sls  :
+  (** Reassemble a field with any place refinement, including [PlaceGhost]. *)
+  Lemma struct_own_val_acc_place {rts} (tys : hlist type rts) rs i rt ty r v π sls :
     (hpzipl rts tys rs) !! i = Some (existT rt (ty, r)) →
     v ◁ᵥ{π, MetaNone} rs @ struct_t sls tys -∗
     ∃ v' r',
       place_rfn_interp_owned r r' ∗
       v' ◁ᵥ{π, MetaNone} r' @ ty ∗
-      (∀ (rt' : RT) (ty' : type rt') r',
+      (∀ (rt' : RT) (ty' : type rt') (rnew : place_rfn rt') r',
         ⌜ty_syn_type ty' MetaNone = ty_syn_type ty MetaNone⌝ -∗
+        place_rfn_interp_owned rnew r' -∗
         v' ◁ᵥ{π, MetaNone} r' @ ty' -∗
-        v ◁ᵥ{π, MetaNone} (plist_insert _ rs i _ (#r')) @ struct_t sls (hlist_insert _ tys i _ ty')).
+        v ◁ᵥ{π, MetaNone} (plist_insert _ rs i _ rnew) @ struct_t sls (hlist_insert _ tys i _ ty')).
   Proof.
     iIntros (Hlook) "Hv".
     rewrite /ty_own_val /= struct_t_own_val_unfold.
@@ -1846,16 +1848,50 @@ Section acc.
     rewrite /struct_own_el_val.
     iDestruct "Hel" as (r' ly') "(#Hrfn & %Hlook_ly & %Hst & Hv')".
     iExists v', r'. iFrame "#∗".
-    iIntros (rt' ty' r'0) "%Hst_eq Hv'".
+    iIntros (rt' ty' rnew r'0) "%Hst_eq Hrnew Hv'".
     have Hst' : syn_type_has_layout (ty_syn_type ty' MetaNone) ly'.
     { rewrite Hst_eq. exact Hst. }
     iExists sl. iFrame "%". iR. rewrite length_insert. iR.
-    set (ra := existT (P := λ rt, (type rt * place_rfn rt)%type) rt' (ty', #r'0)).
-    iSpecialize ("Hcl" $! v' ra with "[Hv']").
+    set (ra := existT (P := λ rt, (type rt * place_rfn rt)%type) rt' (ty', rnew)).
+    iSpecialize ("Hcl" $! v' ra with "[Hrnew Hv']").
     { rewrite /struct_own_el_val. iExists r'0, ly'. eauto with iFrame. }
     rewrite (list_insert_id (reshape (ly_size <$> (sl_members sl).*2) v) j v' Hlook_v).
     erewrite pad_struct_insert_field; [ | done | done | ].
     2: { eapply lookup_lt_Some. done. }
     rewrite insert_hpzipl. done.
+  Qed.
+
+  Lemma struct_own_val_acc {rts} (tys : hlist type rts) rs i rt ty r v π sls :
+    hpzipl rts tys rs !! i = Some (existT rt (ty, r)) →
+    v ◁ᵥ{π, MetaNone} rs @ struct_t sls tys -∗
+    ∃ v' r', place_rfn_interp_owned r r' ∗
+      v' ◁ᵥ{π, MetaNone} r' @ ty ∗
+      (∀ (rt' : RT) (ty' : type rt') r',
+        ⌜ty_syn_type ty' MetaNone = ty_syn_type ty MetaNone⌝ -∗
+        v' ◁ᵥ{π, MetaNone} r' @ ty' -∗
+        v ◁ᵥ{π, MetaNone} (plist_insert _ rs i _ (#r')) @
+          struct_t sls (hlist_insert _ tys i _ ty')).
+  Proof.
+    iIntros (Hlook) "Hv".
+    iDestruct (struct_own_val_acc_place with "Hv")
+      as (v' r') "(Hr & Hv & Hrestore)"; first done.
+    iExists v', r'. iFrame "Hr Hv".
+    iIntros (rt' ty' rnew) "Hst Hv".
+    by iApply ("Hrestore" with "Hst [] Hv").
+  Qed.
+
+  Lemma struct_own_val_transport {rts} (tys : hlist type rts) rs i
+      (rt : RT) (ty : type rt) (r rnew : place_rfn rt) v π sls :
+    hpzipl rts tys rs !! i = Some (existT rt (ty, r)) →
+    (∀ r', place_rfn_interp_owned r r' -∗ place_rfn_interp_owned rnew r') -∗
+    v ◁ᵥ{π, MetaNone} rs @ struct_t sls tys -∗
+    v ◁ᵥ{π, MetaNone} (plist_insert _ rs i _ rnew) @
+      struct_t sls (hlist_insert _ tys i _ ty).
+  Proof.
+    iIntros (Hlook) "Htransport Hv".
+    iDestruct (struct_own_val_acc_place with "Hv")
+      as (v' r') "(Hr & Hv & Hrestore)"; first done.
+    iPoseProof ("Htransport" with "Hr") as "Hrnew".
+    by iApply ("Hrestore" with "[] Hrnew Hv").
   Qed.
 End acc.

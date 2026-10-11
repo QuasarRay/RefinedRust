@@ -116,6 +116,18 @@ Section ghost_variables.
     eauto with iFrame.
   Qed.
 
+  (** Transport an observation in the reverse direction of [RelEq_use_pobs].
+      Retain the relation so it can transport further occurrences. *)
+  Lemma RelEq_transport_pobs γnew γold v :
+    RelEq γnew γold -∗
+    gvar_pobs γold v -∗
+    gvar_pobs γnew v ∗ RelEq γnew γold.
+  Proof.
+    iIntros "(%vnew & %vold & #Hnew & Hold & ->) #Hobs".
+    iPoseProof (gvar_pobs_agree with "Hold Hobs") as "->".
+    iSplit; first done. rewrite /RelEq. iExists v, v. iFrame "Hnew Hold". done.
+  Qed.
+
   Lemma RelEq_trans_l γ1 γ2 γ3 :
     RelEq γ1 γ2 -∗
     RelEq γ1 γ3 ==∗

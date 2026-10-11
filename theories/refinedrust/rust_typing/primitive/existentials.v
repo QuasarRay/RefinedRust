@@ -114,6 +114,24 @@ Section ex.
   Qed.
 End ex.
 
+Section transport.
+  Context `{!typeGS Σ}.
+
+  (** Transport the inner ownership together with its ADT invariant.  The
+      invariant need not be persistent or insensitive to ghost refinements. *)
+  Lemma ex_plain_t_own_val_transport {X Y : RT} (P : ex_inv_def X Y)
+      (ty : type X) π r1 r2 m v :
+    (∀ x, P.(inv_P) π x r1 -∗ v ◁ᵥ{π, m} x @ ty -∗
+      ∃ x', P.(inv_P) π x' r2 ∗ v ◁ᵥ{π, m} x' @ ty) -∗
+    v ◁ᵥ{π, m} r1 @ ex_plain_t X Y P ty -∗
+    v ◁ᵥ{π, m} r2 @ ex_plain_t X Y P ty.
+  Proof.
+    rewrite /ty_own_val /= ex_plain_own_val_unfold /ex_plain_own_val_def.
+    iIntros "Htransport (%x & HP & Hv)".
+    by iApply ("Htransport" with "HP Hv").
+  Qed.
+End transport.
+
 (* Use a smarter solver for persistence here *)
 Class ExInvPersistent {Σ} (P : iProp Σ) := ex_inv_pers_proof : Persistent P.
 Global Hint Mode ExInvPersistent + + : typeclass_instances.

@@ -2328,6 +2328,32 @@ Section subsume.
   Definition resolve_ghost_ofty_default_inst := [instance @resolve_ghost_ofty_default].
   Global Existing Instance resolve_ghost_ofty_default_inst | 1000.
 
+  (** Transport owned blocked refinements when the inherited resource and
+      the restored bytes become available.  Keep the semantic type fixed,
+      so layout, bounds, and side conditions are unchanged. *)
+  Lemma blocked_ltype_owned_transport {rt} (ty : type rt) π l κ r1 r2 P :
+    (∀ r v, P -∗ place_rfn_interp_owned r1 r -∗
+      v ◁ᵥ{π, MetaNone} r @ ty ={lftE}=∗
+      ∃ r', place_rfn_interp_owned r2 r' ∗ v ◁ᵥ{π, MetaNone} r' @ ty) -∗
+    Inherit [κ] P -∗
+    l ◁ₗ[π, Owned] r1 @ BlockedLtype ty κ -∗
+    l ◁ₗ[π, Owned] r2 @ BlockedLtype ty κ.
+  Proof.
+    iIntros "Htransport Hinh Hnode".
+    iEval (rewrite ltype_own_blocked_unfold /blocked_lty_own) in "Hnode".
+    rewrite ltype_own_blocked_unfold /blocked_lty_own.
+    iDestruct "Hnode" as (ly) "(%Hly & %Hloc & Hsc & Hlb & Hrestore)".
+    iExists ly. iFrame "Hsc Hlb". iSplit; first done. iSplit; first done.
+    iIntros "#Hdead".
+    iEval (rewrite /Inherit /lft_intersect_list /= right_id) in "Hinh".
+    iMod ("Hinh" $! lftE with "[//] Hdead") as "HP".
+    iMod ("Hrestore" with "Hdead") as (r) "(Hr & Hbytes)".
+    iMod "Hbytes" as (v) "(Hbytes & Hv)".
+    iMod ("Htransport" with "HP Hr Hv") as (r') "(Hr & Hv)".
+    iModIntro. iExists r'. iFrame "Hr".
+    iModIntro. iExists v. iFrame.
+  Qed.
+
   (** Nice lemma: we can also partially resolve on [BlockedLtype] *)
   Lemma blocked_ltype_resolve_partially {rt} (ty : type rt) π bk l κ γ r :
     Inherit [κ] (find_observation_result γ r) -∗

@@ -2466,6 +2466,26 @@ Section place_rfn.
       + iIntros "(%r' & ? & ?)". iExists _, _. iFrame. done.
   Qed.
 
+  Lemma place_rfn_interp_owned_RelEq {rt} γnew γold (r : rt) :
+    RelEq (T := rt) γnew γold -∗
+    place_rfn_interp_owned (PlaceGhost γold) r -∗
+    place_rfn_interp_owned (PlaceGhost γnew) r ∗ RelEq (T := rt) γnew γold.
+  Proof.
+    apply RelEq_transport_pobs.
+  Qed.
+
+  Lemma Inherit_RelEq_trans {rt : Type} κs γ1 γ2 γ3 :
+    Inherit κs (RelEq (T := rt) γ1 γ2) -∗
+    Inherit κs (RelEq (T := rt) γ2 γ3) -∗
+    Inherit κs (RelEq (T := rt) γ1 γ3).
+  Proof.
+    iIntros "H12 H23".
+    iPoseProof (Inherit_sep with "H12 H23") as "Hrels".
+    iApply (Inherit_update with "[] Hrels").
+    iIntros (F) "[H12 H23]". iModIntro.
+    by iApply (RelEq_trans with "H12 H23").
+  Qed.
+
   Lemma place_rfn_interp_mut_owned {rt} (r : place_rfn rt) (r' : rt) γ :
     place_rfn_interp_mut r γ -∗
     gvar_auth γ r' ==∗
