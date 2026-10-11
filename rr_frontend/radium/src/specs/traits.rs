@@ -2250,6 +2250,26 @@ impl fmt::Display for ImplSpec<'_> {
                 ));
             }
 
+            // Default methods can also depend on associated types inherited from
+            // supertraits. Their direct requirement binders still use the names
+            // from the trait declaration, just like the trait's own associated
+            // types above.
+            for method in self.methods.methods.values() {
+                if let InstanceMethodSpec::DefaultSpec(spec, scope, _) = method {
+                    let names = scope.get_surrounding_assoc_ty_params();
+                    let insts = spec.trait_ref.trait_inst.get_direct_assoc_ty_params();
+                    for (param, inst) in names.params.iter().zip(&insts) {
+                        let name = param.refinement_type();
+                        if !extra_let_binders.iter().any(|(bound, _)| bound == &name) {
+                            extra_let_binders.push((
+                                name,
+                                coq::term::Term::Type(Box::new(inst.get_rfn_type())),
+                            ));
+                        }
+                    }
+                }
+            }
+
             // This relies on all the impl's functions already having been printed
             let mut instance = make_trait_instance(
                 &self.trait_ref.generics,

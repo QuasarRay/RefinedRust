@@ -28,7 +28,7 @@ use crate::spec_parsers::parse_utils::{ParamLookup, RustPath};
 use crate::spec_parsers::struct_spec_parser::{
     self, FIELD_SPEC_ATTRS, INVARIANT_SPEC_ATTRS, InvariantSpecParser as _, StructFieldSpecParser as _,
 };
-use crate::traits::{registry, requirements};
+use crate::traits::{registry, requirements, resolution};
 use crate::types::scope;
 use crate::{attrs, environment, error, search, spec_parsers};
 
@@ -395,16 +395,6 @@ impl<'def, 'tcx> STInner<'_, 'def, 'tcx> {
             Self::SyntypeInFunction { typing_env, .. } => *typing_env,
             Self::TraitReqs(state) => state.typing_env,
         }
-    }
-
-    /// Normalize a type in the given translation state.
-    fn normalize_type_erasing_regions(
-        &self,
-        tcx: ty::TyCtxt<'tcx>,
-        ty: ty::Ty<'tcx>,
-    ) -> Result<ty::Ty<'tcx>, ty::normalize_erasing_regions::NormalizationError<'tcx>> {
-        let typing_env = self.get_typing_env(tcx);
-        tcx.try_normalize_erasing_regions(typing_env, ty::Unnormalized::dummy(ty))
     }
 
     /// Lookup a trait parameter in the current state.
@@ -1840,8 +1830,8 @@ impl<'def, 'tcx: 'def> TX<'def, 'tcx> {
             },
 
             ty::TyKind::Alias(_, alias_ty) => {
-                // TODO do we get a problem because we are erasing regions?
-                if let Ok(normalized_ty) = state.normalize_type_erasing_regions(self.tcx, ty)
+                // Preserve the external regions when resolving associated types to references.
+                if let Ok(normalized_ty) = resolution::normalize_type(self.tcx, state.get_typing_env(self.tcx), ty)
                     && !matches!(normalized_ty.kind(), ty::TyKind::Alias(..))
                 {
                     // if we managed to normalize it, translate the normalized type
