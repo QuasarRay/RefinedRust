@@ -4400,7 +4400,7 @@ Section subsume.
       (* place *)
       typed_place E L1 f l lt1 r1 UpdStrong b K (λ L2 κs (l2 : loc) (b2 : bor_kind) (bmin : place_update_kind) rti (lt2 : ltype rti) (ri2 : place_rfn rti) updcx,
         (* We need to be able to do a strong update *)
-        ∃ (Heqmin : place_update_kind_allows_strong_updates bmin),
+        find_tc_inst (TCDone (place_update_kind_allows_strong_updates bmin)) (λ Heqmin,
         (* Do not refold here: in particular, an existing AliasLtype must stay moved out. *)
         stratify_ltype_unblock f.1 E L2 StratNoRefold l2 lt2 ri2 b2 (λ L3 R rt3 lt3 ri3,
         prove_place_cond E L3 bmin lt2 lt3 (λ upd,
@@ -4408,7 +4408,7 @@ Section subsume.
           typed_place_finish f.1 E L4 updcx (place_update_kind_res_trans upd (mkPUKRes UpdStrong I (opt_place_update_eq_strong bmin Heqmin))) (R ∗ llft_elt_toks κs) l b lt' r' (λ L5,
             (* An AliasLtype is simplified instead of being reintroduced into the context. *)
             l2 ◁ₗ[π, Owned] r_moved @ lt_moved -∗
-            T L5 l2 rtb tyb rb)))))))
+            T L5 l2 rtb tyb rb))))))))
     ⊢ typed_addr_of_mut pk E L f e T.
   Proof.
     iIntros (HT') "HT'". iIntros (Φ F ???) "#CTX #HE HL Hf HΦ".

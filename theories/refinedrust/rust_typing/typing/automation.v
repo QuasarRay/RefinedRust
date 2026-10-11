@@ -1092,6 +1092,15 @@ Tactic Notation "liRStepUntil" open_constr(id) :=
          | _ => liRStep
   end; liShow.
 
+(** [stop] is a delayed Ltac function, called with [()] at each step:
+      liRStepUntilTac (fun _ => lazymatch goal with ... end).
+    It should recognize the desired goal without changing the proof state.
+    Patterns inside the function do not elaborate hole evars. Like
+    [liRStepUntil], this also stops if [liRStep] cannot advance. *)
+Tactic Notation "liRStepUntilTac" tactic3(stop) :=
+  repeat (tryif stop () then fail 0 else liRStep);
+  liShow.
+
 (** * Tactics for starting a function *)
 (* Compared to the version in [automation/existentials.v], adds the [fn_A _] case. *)
 Ltac prepare_initial_coq_context ::=
