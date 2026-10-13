@@ -75,7 +75,7 @@ Section Result_ty.
         (λ rfn, Some (match rfn with | (Ok (x)) => "Ok" | (Err (x)) => "Err" end))
         (Result_enum_rt)
         (Result_enum_ty -[] -[T_ty; E_ty])
-        (λ rfn, match rfn with | (Ok (x)) => *[x]| (Err (x)) => *[x] end)
+        (λ rfn, match rfn as x return RT_rt (Result_enum_rt x) with | (Ok (x)) => *[x]| (Err (x)) => *[x] end)
         ([("Ok", mk_enum_tag_sem _ (Result_Ok_ty -[] -[T_ty; E_ty]) (λ '( *[x]), (Ok (x)))); ("Err", mk_enum_tag_sem _ (Result_Err_ty -[] -[T_ty; E_ty]) (λ '( *[x]), (Err (x))))])
         _
         _
