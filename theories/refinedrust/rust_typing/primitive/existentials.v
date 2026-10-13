@@ -569,11 +569,11 @@ Section resolve.
   Context `{!typeGS Σ}.
 
   (* Generic lemmas *)
-  Lemma resolve_ghost_ofty_adt_owned {rt} (ty : type rt) π E L l r rm T :
+  Lemma resolve_ghost_ofty_adt_owned {rt} (ty : type rt) π E L r rm T :
     resolve_ghost_adt π E L rm r ty (λ L2 r' R changed, T L2 (# r') R changed)
-    ⊢ resolve_ghost π E L rm true l (◁ ty) (Owned ) (# r) T.
+    ⊢ resolve_ghost π E L rm true (◁ ty) (Owned ) (# r) T.
   Proof.
-    iIntros "Ha" (???) "#CTX #HE HL Hl".
+    iIntros "Ha" (????) "#CTX #HE HL Hl".
 
     rewrite ltype_own_ofty_unfold.
     iDestruct "Hl" as "(%ly & %Hst & % & ? & ? & %r'' & <- & Hb)".
@@ -587,12 +587,12 @@ Section resolve.
     iFrame. iR. iR. iR. done.
   Qed.
 
-  Lemma resolve_ghost_ofty_adt_uniq {rt} (ty : type rt) π E L l r rm κ γ T :
+  Lemma resolve_ghost_ofty_adt_uniq {rt} (ty : type rt) π E L r rm κ γ T :
     (li_tactic (lctx_lft_alive_count_goal E L κ) (λ '(κs, L2),
       resolve_ghost_adt π E L2 rm r ty (λ L3 r' R changed, T L3 (# r') (llft_elt_toks κs ∗ R) changed)))
-    ⊢ resolve_ghost π E L rm true l (◁ ty) (Uniq κ γ) (# r) T.
+    ⊢ resolve_ghost π E L rm true (◁ ty) (Uniq κ γ) (# r) T.
   Proof.
-    iIntros "Ha" (???) "#CTX #HE HL Hl".
+    iIntros "Ha" (????) "#CTX #HE HL Hl".
     rewrite /lctx_lft_alive_count_goal.
     iDestruct "Ha" as "(%κs & %L2 & %Hal & Ha)".
     iMod (Hal with "HE HL") as "(Htoks & Hcl & HL)"; first done.
@@ -631,17 +631,17 @@ Section resolve.
   Context `{!typeGS Σ}.
   Context {rt X : RT} (P : ex_inv_def rt X).
 
-  Lemma resolve_ghost_ofty_adt_ex_owned ty π E L l r rm T :
+  Lemma resolve_ghost_ofty_adt_ex_owned ty π E L r rm T :
     resolve_ghost_adt π E L rm r (∃; P, ty) (λ L2 r' R changed, T L2 (# r') R changed)
-    ⊢ resolve_ghost π E L rm true l (◁ ∃; P, ty) (Owned) (# r) T.
+    ⊢ resolve_ghost π E L rm true (◁ ∃; P, ty) (Owned) (# r) T.
   Proof. apply resolve_ghost_ofty_adt_owned. Qed.
   Definition resolve_ghost_ofty_adt_ex_owned_inst := [instance @resolve_ghost_ofty_adt_ex_owned].
   Global Existing Instance resolve_ghost_ofty_adt_ex_owned_inst | 8.
 
-  Lemma resolve_ghost_ofty_adt_ex_uniq ty π E L l r rm κ γ T :
+  Lemma resolve_ghost_ofty_adt_ex_uniq ty π E L r rm κ γ T :
     (li_tactic (lctx_lft_alive_count_goal E L κ) (λ '(κs, L2),
       resolve_ghost_adt π E L2 rm r (∃; P, ty) (λ L3 r' R changed, T L3 (# r') (llft_elt_toks κs ∗ R) changed)))
-    ⊢ resolve_ghost π E L rm true l (◁ ∃; P, ty) (Uniq κ γ) (# r) T.
+    ⊢ resolve_ghost π E L rm true (◁ ∃; P, ty) (Uniq κ γ) (# r) T.
   Proof. apply resolve_ghost_ofty_adt_uniq. Qed.
   Definition resolve_ghost_ofty_adt_ex_uniq_inst := [instance @resolve_ghost_ofty_adt_ex_uniq].
   Global Existing Instance resolve_ghost_ofty_adt_ex_uniq_inst.

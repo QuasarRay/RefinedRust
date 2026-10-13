@@ -1891,7 +1891,7 @@ Section subsume.
   Global Existing Instance owned_subltype_step_strong_subltype_inst | 1000.
 
   Lemma owned_subltype_step_resolve_ghost π E L step l {rt1 rt2 : RT} γ1 r2 (lt1 : ltype rt1) (lt2 : ltype rt2) T :
-    resolve_ghost π E L ResolveAll false l lt1 Owned (👻 γ1) (λ L2 r1' R progress,
+    resolve_ghost π E L ResolveAll false lt1 Owned (👻 γ1) (λ L2 r1' R progress,
       R -∗
       (* TODO better behavior if progress = false *)
       owned_subltype_step π E L2 step l r1' r2 lt1 lt2 T) ⊢
@@ -2250,7 +2250,7 @@ Section subsume.
 
   (* a trivial low-priority instance, in case no other instance triggers.
     In particular, we should also make sure that custom instances for user-defined types get priority. *)
-  Lemma resolve_ghost_id {rt} π E L l (lt : ltype rt) rm lb k r (T : llctx → place_rfn rt → iProp Σ → bool → iProp Σ) :
+  Lemma resolve_ghost_id {rt} π E L (lt : ltype rt) rm lb k r (T : llctx → place_rfn rt → iProp Σ → bool → iProp Σ) :
     match rm with
     | ResolveAll =>
         match r with
@@ -2260,9 +2260,9 @@ Section subsume.
     | ResolveTry =>
         T L r True false
     end
-    ⊢ resolve_ghost π E L rm lb l lt k r T.
+    ⊢ resolve_ghost π E L rm lb lt k r T.
   Proof.
-    iIntros "HT" (F ??) "#CTX #HE HL Hl".
+    iIntros "HT" (F l ??) "#CTX #HE HL Hl".
     destruct rm.
     - destruct r; last done.
       iExists L, _, True%I, _. iFrame.
@@ -2271,10 +2271,10 @@ Section subsume.
       + iExists L, _, True%I, _. iFrame. iApply maybe_logical_step_intro. by iFrame.
       + iExists L, _, True%I, _. iFrame. iApply maybe_logical_step_intro. by iFrame.
   Qed.
-  Global Instance resolve_ghost_id_inst {rt} π E L l (lt : ltype rt) rm lb k r :
-    ResolveGhost π E L rm lb l lt k r | 200 := λ T, i2p (resolve_ghost_id π E L l lt rm lb k r T).
+  Global Instance resolve_ghost_id_inst {rt} π E L (lt : ltype rt) rm lb k r :
+    ResolveGhost π E L rm lb lt k r | 200 := λ T, i2p (resolve_ghost_id π E L lt rm lb k r T).
 
-  Lemma resolve_ghost_ofty {rt} π E L l (ty : type rt) γ rm lb b T :
+  Lemma resolve_ghost_ofty {rt} π E L (ty : type rt) γ rm lb b T :
     find_observation rt γ FindObsModeDirect (λ or,
       match or with
       | None =>
@@ -2294,11 +2294,11 @@ Section subsume.
           end
       | Some r =>
           (* try again in case we should descend into the type or we have still got a PlaceGhost *)
-          resolve_ghost π E L rm lb l (◁ ty)%I b r T
+          resolve_ghost π E L rm lb (◁ ty)%I b r T
       end)
-    ⊢ resolve_ghost π E L rm lb l (◁ ty)%I b (PlaceGhost γ) T.
+    ⊢ resolve_ghost π E L rm lb (◁ ty)%I b (PlaceGhost γ) T.
   Proof.
-    iIntros "HT". iIntros (F ??) "#CTX #HE HL Hl".
+    iIntros "HT". iIntros (F l ??) "#CTX #HE HL Hl".
     iMod ("HT" with "[//]") as "HT". iDestruct "HT" as "[(%r & Hobs & HT) | HT]".
     - iPoseProof (ltype_own_ofty_use_obs with "Hl Hobs") as "Hl".
       iMod ("HT" with "[] [] CTX HE HL [$]") as "Ha"; [done.. | ].
@@ -2317,12 +2317,12 @@ Section subsume.
   Global Existing Instance resolve_ghost_ofty_inst | 7.
 
   (* Low-priority default instance. Can be overridden in case we want to descend into the type for deeper resolution, for instance for ADTs. See the instances in [existentials.v]. *)
-  Lemma resolve_ghost_ofty_default {rt} (ty : type rt) π E L l r rm lb bk T :
+  Lemma resolve_ghost_ofty_default {rt} (ty : type rt) π E L r rm lb bk T :
     T L (# r) True false
-    ⊢ resolve_ghost π E L rm lb l (◁ ty)%I bk (# r) T.
+    ⊢ resolve_ghost π E L rm lb (◁ ty)%I bk (# r) T.
   Proof.
     iIntros "HT".
-    iIntros (???) "CTX HE HL Hl". iFrame.
+    iIntros (????) "CTX HE HL Hl". iFrame.
     iModIntro. iApply maybe_logical_step_intro. by iFrame.
   Qed.
   Definition resolve_ghost_ofty_default_inst := [instance @resolve_ghost_ofty_default].
@@ -2382,23 +2382,23 @@ Section subsume.
       iPoseProof (place_rfn_interp_mut_find_observation with "Hrfn HP") as "Hrfn".
       by iFrame.
   Qed.
-  Lemma resolve_ghost_blocked {rt} π E L rm lb l (ty : type rt) κ bk γ T :
+  Lemma resolve_ghost_blocked {rt} π E L rm lb (ty : type rt) κ bk γ T :
     find_observation rt γ FindObsModeDirect (λ o,
     match o with
     | Some r =>
-        resolve_ghost π E L rm lb l (BlockedLtype ty κ) bk r T
+        resolve_ghost π E L rm lb (BlockedLtype ty κ) bk r T
     | None =>
       find_delayed_observation E L rt γ FindObsModeDirect κ (λ o,
         match o with
         | Some r =>
-            resolve_ghost π E L rm lb l (BlockedLtype ty κ) bk r T
+            resolve_ghost π E L rm lb (BlockedLtype ty κ) bk r T
         | None =>
             T L (PlaceGhost γ) True false
         end)
     end)
-    ⊢ resolve_ghost π E L rm lb l (BlockedLtype ty κ) bk (PlaceGhost γ) T.
+    ⊢ resolve_ghost π E L rm lb (BlockedLtype ty κ) bk (PlaceGhost γ) T.
   Proof.
-    iIntros "HT". iIntros (???) "#CTX #HE HL Hl".
+    iIntros "HT". iIntros (????) "#CTX #HE HL Hl".
     iMod ("HT" with "[]") as "Ha"; first done.
     iDestruct "Ha" as "[(% & Hres & HT) | HT]".
     - iPoseProof (blocked_ltype_resolve_partially with "[Hres] Hl") as "Hl".
@@ -2418,7 +2418,7 @@ Section subsume.
 
   (* when we recursively want to descend, we cannot let the resolution use the logical step *)
   Lemma stratify_ltype_resolve_ghost_rec {rt} π E L mdu ma {M} (ml : M) l (lt : ltype rt) b r T :
-    resolve_ghost π E L ResolveTry false l lt b r (λ L1 r R progress,
+    resolve_ghost π E L ResolveTry false lt b r (λ L1 r R progress,
       if progress then
       stratify_ltype π E L1 mdu ma ml l lt r b
         (λ L2 R' rt' lt' r', T L2 (R ∗ R') rt' lt' r')
@@ -2438,7 +2438,7 @@ Section subsume.
   Qed.
   (* at a leaf, we can use the logical step to do the resolution -- this allows to descend deeper into the type, which is useful for custom user-defined types *)
   Lemma stratify_ltype_resolve_ghost_leaf {rt} π E L mdu ma {M} (ml : M) rm l (lt : ltype rt) b r T :
-    resolve_ghost π E L rm true l lt b r (λ L1 r R progress, T L1 R _ lt r)
+    resolve_ghost π E L rm true lt b r (λ L1 r R progress, T L1 R _ lt r)
     ⊢ stratify_ltype π E L mdu ma ml l lt r b T.
   Proof.
     iIntros "Hres". iIntros (????) "#CTX #HE HL Hl".
@@ -2452,7 +2452,7 @@ Section subsume.
     StratifyLtype π E L mdu ma ml l lt (PlaceGhost γ) b | 100 := λ T, i2p (stratify_ltype_resolve_ghost_rec π E L mdu ma ml l lt b (PlaceGhost γ) T).
 
   Lemma stratify_ltype_blocked {rt} π E L mdu ma {M} (ml : M) l (ty : type rt) κ r b `{!StratifyLtypeShouldUnblock ml} T :
-    resolve_ghost π E L ResolveTry false l (BlockedLtype ty κ) b r (λ L1 r R progress,
+    resolve_ghost π E L ResolveTry false (BlockedLtype ty κ) b r (λ L1 r R progress,
       if progress then
         stratify_ltype π E L1 mdu ma ml l (BlockedLtype ty κ) r b
           (λ L2 R' rt' lt' r', T L2 (R ∗ R') rt' lt' r')
@@ -2483,7 +2483,7 @@ Section subsume.
   Global Existing Instance stratify_ltype_blocked_inst | 5.
 
   Lemma stratify_ltype_coreable {rt} π E L mdu ma {M} (ml : M) l (lt_full lt_full' : ltype rt) κs r b `{Hsimp: !SimpLtype (ltype_core lt_full) lt_full'} `{!StratifyLtypeShouldUnblock ml} T :
-    resolve_ghost π E L ResolveTry false l (CoreableLtype κs lt_full) b r (λ L1 r R progress,
+    resolve_ghost π E L ResolveTry false (CoreableLtype κs lt_full) b r (λ L1 r R progress,
       if progress then
         stratify_ltype π E L1 mdu ma ml l (CoreableLtype κs lt_full) r b
           (λ L2 R' rt' lt' r', T L2 (R ∗ R') rt' lt' r')
@@ -2512,7 +2512,7 @@ Section subsume.
   Global Existing Instance stratify_ltype_coreable_inst | 5.
 
   Lemma stratify_ltype_shrblocked {rt} π E L mdu ma {M} (ml : M) l (ty : type rt) κ r b `{!StratifyLtypeShouldUnblock ml} T :
-    resolve_ghost π E L ResolveTry false l (ShrBlockedLtype ty κ) b r (λ L1 r R progress,
+    resolve_ghost π E L ResolveTry false (ShrBlockedLtype ty κ) b r (λ L1 r R progress,
       if progress then
         stratify_ltype π E L1 mdu ma ml l (ShrBlockedLtype ty κ) r b
           (λ L2 R' rt' lt' r', T L2 (R ∗ R') rt' lt' r')
@@ -3028,7 +3028,7 @@ Section subsume.
 
   Lemma typed_place_resolve_ghost {rt} f E L l (lt : ltype rt) bmin0 b γ P T :
     ⌜lctx_bor_kind_alive E L b⌝ ∗
-    resolve_ghost f.1 E L ResolveAll false l lt b (PlaceGhost γ) (λ L' r R progress,
+    resolve_ghost f.1 E L ResolveAll false lt b (PlaceGhost γ) (λ L' r R progress,
       introduce_with_hooks E L' R (λ L'', typed_place E L'' f l lt r bmin0 b P T))
     ⊢ typed_place E L f l lt (PlaceGhost γ) bmin0 b P T.
   Proof.
@@ -6256,7 +6256,7 @@ Notation "'typed_value' π x 'HIDDEN_CONT'" := (typed_value π x _) (only printi
 Notation "'typed_place' E L f l lto ro b1 b2 K 'HIDDEN_CONT'" := (typed_place E L f l lto ro b1 b2 K _) (only printing, at level 0): rr_hidden.
 
 Notation "'subsume_full' E L wl P1 P2 'HIDDEN_CONT'" := (subsume_full wl P1 P2 E L _) (only printing, at level 0): rr_hidden.
-Notation "'resolve_ghost' π E L rm f l lt k r 'HIDDEN_CONT'" := (resolve_ghost π E L rm f l lt k r _) (only printing, at level 0): rr_hidden.
+Notation "'resolve_ghost' π E L rm f lt k r 'HIDDEN_CONT'" := (resolve_ghost π E L rm f lt k r _) (only printing, at level 0): rr_hidden.
 Notation "'prove_with_subtype' E L wl pm P 'HIDDEN_ACC' 'HIDDEN_CONT'" := (prove_with_subtype E L wl pm P _ _) (only printing, at level 0): rr_hidden.
 Notation "'introduce_with_hooks' E L P 'HIDDEN_CONT'" := (introduce_with_hooks E L P _) (only printing, at level 0): rr_hidden.
 Notation "'stratify_ltype' π E L mdu ma m l lt r b 'HIDDEN_CONT'" := (stratify_ltype π E L mdu ma m l lt r b _) (only printing, at level 0): rr_hidden.

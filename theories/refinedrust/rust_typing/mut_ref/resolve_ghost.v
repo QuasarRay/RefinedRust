@@ -9,16 +9,16 @@ Section resolve_ghost.
   Context `{!typeGS Σ}.
 
   (** resolve_ghost *)
-  Lemma resolve_ghost_mut_Owned {rt} π E L l (lt : ltype rt) γ rm lb κ T :
+  Lemma resolve_ghost_mut_Owned {rt} π E L (lt : ltype rt) γ rm lb κ T :
     find_observation (place_rfn rt * gname)%type γ FindObsModeDirect (λ or,
         match or with
         | None => ⌜fast_eq_hint (rm = ResolveTry)⌝ ∗ T L (PlaceGhost γ) True false
         | Some r => T L r True true
         end)
-    ⊢ resolve_ghost π E L rm lb l (MutLtype lt κ) (Owned) (PlaceGhost γ) T.
+    ⊢ resolve_ghost π E L rm lb (MutLtype lt κ) (Owned) (PlaceGhost γ) T.
   Proof.
     rewrite /FindOptGvarPobs /=.
-    iIntros "HT". iIntros (F ??) "#CTX #HE HL Hb".
+    iIntros "HT". iIntros (F l ??) "#CTX #HE HL Hb".
     iMod ("HT" with "[//]") as "HT". iDestruct "HT" as "[(%r & Hobs & HT) | (-> & HT)]".
     - rewrite ltype_own_mut_ref_unfold /mut_ltype_own.
       iDestruct "Hb" as "(%ly & %Hst & %Hly & ? & %γ0 & %r'& Hrfn & ?)".
@@ -31,16 +31,16 @@ Section resolve_ghost.
   Definition resolve_ghost_mut_Owned_inst := [instance @resolve_ghost_mut_Owned].
   Global Existing Instance resolve_ghost_mut_Owned_inst | 7.
 
-  Lemma resolve_ghost_mut_Uniq {rt} π E L l (lt : ltype rt) γ rm lb κ κ' γ' T :
+  Lemma resolve_ghost_mut_Uniq {rt} π E L (lt : ltype rt) γ rm lb κ κ' γ' T :
     find_observation (place_rfn rt * gname)%type γ FindObsModeDirect (λ or,
         match or with
         | None => ⌜fast_eq_hint (rm = ResolveTry)⌝ ∗ T L (PlaceGhost γ) True false
         | Some r => T L r True true
         end)
-    ⊢ resolve_ghost π E L rm lb l (MutLtype lt κ) (Uniq κ' γ') (PlaceGhost γ) T.
+    ⊢ resolve_ghost π E L rm lb (MutLtype lt κ) (Uniq κ' γ') (PlaceGhost γ) T.
   Proof.
     rewrite /FindOptGvarPobs /=.
-    iIntros "HT". iIntros (F ??) "#CTX #HE HL Hb".
+    iIntros "HT". iIntros (F l ??) "#CTX #HE HL Hb".
     iMod ("HT" with "[//]") as "HT". iDestruct "HT" as "[(%r & Hobs & HT) | (-> & HT)]".
     - rewrite ltype_own_mut_ref_unfold /mut_ltype_own.
       iDestruct "Hb" as "(%ly & %Hst & %Hly & ? & ? & Hrfn & ?)".
@@ -53,16 +53,16 @@ Section resolve_ghost.
   Definition resolve_ghost_mut_Uniq_inst := [instance @resolve_ghost_mut_Uniq].
   Global Existing Instance resolve_ghost_mut_Uniq_inst | 7.
 
-  Lemma resolve_ghost_mut_shared {rt} π E L l (lt : ltype rt) γ rm lb κ κ' T :
+  Lemma resolve_ghost_mut_shared {rt} π E L (lt : ltype rt) γ rm lb κ κ' T :
     find_observation (place_rfn rt * gname)%type γ FindObsModeDirect (λ or,
         match or with
         | None => ⌜fast_eq_hint (rm = ResolveTry)⌝ ∗ T L (PlaceGhost γ) True false
         | Some r => T L r True true
         end)
-    ⊢ resolve_ghost π E L rm lb l (MutLtype lt κ) (Shared κ') (PlaceGhost γ) T.
+    ⊢ resolve_ghost π E L rm lb (MutLtype lt κ) (Shared κ') (PlaceGhost γ) T.
   Proof.
     rewrite /FindOptGvarPobs /=.
-    iIntros "HT". iIntros (F ??) "#CTX #HE HL Hb".
+    iIntros "HT". iIntros (F l ??) "#CTX #HE HL Hb".
     iMod ("HT" with "[//]") as "HT". iDestruct "HT" as "[(%r & Hobs & HT) | (-> & HT)]".
     - rewrite ltype_own_mut_ref_unfold /mut_ltype_own.
       iDestruct "Hb" as "(%ly & %Hst & %Hly & ? & %Hconc & _)".

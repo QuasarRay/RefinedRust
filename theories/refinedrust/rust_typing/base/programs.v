@@ -889,16 +889,16 @@ Section judgments.
   (** [ResolveAll] will fail if we cannot resolve some variable. [ResolveTry] will just leave a [PlaceGhost] if we cannot resolve it. *)
   Inductive ResolutionMode := ResolveAll | ResolveTry.
   Definition resolve_ghost_cont_t (rt : RT) := llctx → place_rfn rt → iProp Σ → bool → iProp Σ.
-  Definition resolve_ghost {rt} π E L (rm : ResolutionMode) (lb : bool) l (lt : ltype rt) b (r : place_rfn rt) (T : resolve_ghost_cont_t rt) : iProp Σ :=
-    ∀ F,
+  Definition resolve_ghost {rt} π E L (rm : ResolutionMode) (lb : bool) (lt : ltype rt) b (r : place_rfn rt) (T : resolve_ghost_cont_t rt) : iProp Σ :=
+    ∀ F l,
       ⌜lftE ⊆ F⌝ → ⌜lft_userE ⊆ F⌝ →
       rrust_ctx -∗ elctx_interp E -∗ llctx_interp L -∗
       l ◁ₗ[π, b] r @ lt ={F}=∗
       ∃ L' r' R progress,
       maybe_logical_step lb F (l ◁ₗ[π, b] r' @ lt ∗ R) ∗
       llctx_interp L' ∗ T L' r' R progress.
-  Class ResolveGhost {rt} π E L rm lb l (lt : ltype rt) b r : Type :=
-    resolve_ghost_proof T : iProp_to_Prop (resolve_ghost π E L rm lb l lt b r T).
+  Class ResolveGhost {rt} π E L rm lb (lt : ltype rt) b r : Type :=
+    resolve_ghost_proof T : iProp_to_Prop (resolve_ghost π E L rm lb lt b r T).
 
   (** User-defined ADTs should provide an instance of this if they provide means of borrowing below their abstraction-level. *)
   Definition resolve_ghost_adt_cont_t (rt : RT) := llctx → rt → iProp Σ → bool → iProp Σ.
@@ -916,20 +916,21 @@ Section judgments.
   (* TODO phrase this with fold_list instead. Problem: llctxupdate, existential quantifier, updating ownershp *)
   (* Iteration is controlled by refinement [rs] *)
   Definition resolve_ghost_iter_cont_t rt : Type := llctx → list (place_rfn rt) → iProp Σ → bool → iProp Σ.
-  Definition resolve_ghost_iter {rt} (π : thread_id) (E : elctx) (L : llctx) (rm : ResolutionMode) (lb : bool) (l : loc) (st : syn_type) (lts : list (ltype rt)) (b : bor_kind) (rs : list (place_rfn rt)) (ig : list nat) (i0 : nat) (T : resolve_ghost_iter_cont_t rt) : iProp Σ :=
-    (∀ F : coPset,
+  Definition resolve_ghost_iter {rt} (π : thread_id) (E : elctx) (L : llctx) (rm : ResolutionMode) (lb : bool) (lts : list (ltype rt)) (b : bor_kind) (rs : list (place_rfn rt)) (ig : list nat) (i0 : nat) (T : resolve_ghost_iter_cont_t rt) : iProp Σ :=
+    (∀ (F : coPset) (locs : list loc),
       ⌜lftE ⊆ F⌝ -∗
       ⌜lft_userE ⊆ F⌝ -∗
       rrust_ctx -∗
       elctx_interp E -∗
       llctx_interp L -∗
+      ⌜length locs = length rs⌝ -∗
       ⌜length lts = (length rs)%nat⌝ -∗
-      ([∗ list] i ↦ r; lt ∈ rs; lts, if decide ((i + i0) ∈ ig) then True else (l offsetst{st}ₗ (i + i0)) ◁ₗ[ π, b] r @ lt) ={F}=∗
+      ([∗ list] i ↦ r; lt ∈ rs; lts, if decide ((i + i0) ∈ ig) then True else (locs !!! i) ◁ₗ[ π, b] r @ lt) ={F}=∗
       ∃ (L' : llctx) (rs' : list $ place_rfn rt) (R : iPropI Σ) (progress : bool),
-      maybe_logical_step lb F (([∗ list] i ↦ r; lt ∈ rs'; lts, if decide ((i + i0) ∈ ig) then True else (l offsetst{st}ₗ (i + i0)) ◁ₗ[ π, b] r @ lt) ∗ R) ∗
+      maybe_logical_step lb F (([∗ list] i ↦ r; lt ∈ rs'; lts, if decide ((i + i0) ∈ ig) then True else (locs !!! i) ◁ₗ[ π, b] r @ lt) ∗ R) ∗
       llctx_interp L' ∗ T L' rs' R progress).
-  Class ResolveGhostIter {rt} (π : thread_id) (E : elctx) (L : llctx) (rm : ResolutionMode) (lb : bool) (l : loc) (st : syn_type) (lts : list (ltype rt)) (b : bor_kind) (rs : list (place_rfn rt)) (ig : list nat) (i0 : nat) : Type :=
-    resolve_ghost_iter_proof T : iProp_to_Prop (resolve_ghost_iter π E L rm lb l st lts b rs ig i0 T).
+  Class ResolveGhostIter {rt} (π : thread_id) (E : elctx) (L : llctx) (rm : ResolutionMode) (lb : bool) (lts : list (ltype rt)) (b : bor_kind) (rs : list (place_rfn rt)) (ig : list nat) (i0 : nat) : Type :=
+    resolve_ghost_iter_proof T : iProp_to_Prop (resolve_ghost_iter π E L rm lb lts b rs ig i0 T).
 
 
   (** Finding observations *)
@@ -2585,8 +2586,8 @@ Global Hint Mode TypedCall + + + + + + + + + + + + + + : typeclass_instances.
 Global Hint Mode TypedIf + + + + + + + : typeclass_instances.
 Global Hint Mode TypedAnnotExpr + + + + + + + + + + : typeclass_instances.
 
-Global Hint Mode ResolveGhost + + + + + + + + + + + + : typeclass_instances.
-Global Hint Mode ResolveGhostIter + + + + + + + + + + + + + + + : typeclass_instances.
+Global Hint Mode ResolveGhost + + + + + + + + + + + : typeclass_instances.
+Global Hint Mode ResolveGhostIter + + + + + + + + + + + + + : typeclass_instances.
 Global Hint Mode FindObservation + + + + + :  typeclass_instances.
 Global Hint Mode FindDelayedObservation + + + + + + + + : typeclass_instances.
 
@@ -4061,9 +4062,9 @@ Ltac generate_i2p_instance_to_tc_hook arg c ::=
   | introduce_with_hooks ?E ?L ?P => constr:(IntroduceWithHooks E L P)
   | iterate_with_hooks ?E ?L ?m => constr:(IterateWithHooks E L m)
   | subsume_full ?wl ?P1 ?P2 => constr:(SubsumeFull wl P1 P2)
-  | resolve_ghost ?π ?E ?L ?rm ?f ?l ?lt ?k ?r => constr:(ResolveGhost π E L rm f l lt k r)
+  | resolve_ghost ?π ?E ?L ?rm ?f ?lt ?k ?r => constr:(ResolveGhost π E L rm f lt k r)
   | resolve_ghost_adt ?π ?E ?L ?rm ?r ?ty => constr:(ResolveGhostADT π E L rm r ty)
-  | resolve_ghost_iter ?π ?E ?L ?rm ?b ?l ?st ?ltys ?bk ?rs ?ig ?i => constr:(ResolveGhostIter π E L rm b l st ltys bk rs ig i)
+  | resolve_ghost_iter ?π ?E ?L ?rm ?b ?ltys ?bk ?rs ?ig ?i => constr:(ResolveGhostIter π E L rm b ltys bk rs ig i)
   | prove_place_cond ?E ?L ?bk ?lt1 ?lt2 => constr:(ProvePlaceCond E L bk lt1 lt2)
   | simplify_hyp_value ?E ?L ?π ?P => constr:(SimplifyHypValue E L π P)
   | prove_with_subtype ?E ?L ?wl ?pm ?P ?Acc => constr:(ProveWithSubtype E L wl pm P Acc)

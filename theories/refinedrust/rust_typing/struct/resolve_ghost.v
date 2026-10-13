@@ -9,15 +9,15 @@ Section resolve_ghost.
   Context `{!typeGS Σ}.
 
   (** resolve_ghost instances *)
-  Lemma resolve_ghost_struct_Owned {rts} π E L l (lts : hlist ltype rts) sls γ rm lb T :
+  Lemma resolve_ghost_struct_Owned {rts} π E L (lts : hlist ltype rts) sls γ rm lb T :
     find_observation ((plist place_rfnRT rts)) γ FindObsModeDirect (λ or,
         match or with
         | None => ⌜fast_eq_hint (rm = ResolveTry)⌝ ∗ T L (PlaceGhost γ) True false
         | Some r => T L r True true
         end)
-    ⊢ resolve_ghost π E L rm lb l (StructLtype lts sls) (Owned) (PlaceGhost γ) T.
+    ⊢ resolve_ghost π E L rm lb (StructLtype lts sls) (Owned) (PlaceGhost γ) T.
   Proof.
-    iIntros "Ha" (???) "#CTX #HE HL Hl".
+    iIntros "Ha" (????) "#CTX #HE HL Hl".
     iMod ("Ha" with "[//]") as "[(%r' & HObs & Ha) | (_ & Ha)]".
     - rewrite ltype_own_struct_unfold /struct_ltype_own.
       iDestruct "Hl" as "(%sl & ? & ? & ? & ? & %rs & Hinterp & ?)".
@@ -30,15 +30,15 @@ Section resolve_ghost.
   Definition resolve_ghost_struct_Owned_inst := [instance @resolve_ghost_struct_Owned].
   Global Existing Instance resolve_ghost_struct_Owned_inst.
 
-  Lemma resolve_ghost_struct_Uniq {rts} π E L l (lts : hlist ltype rts) sls γ rm lb κ γ' T :
+  Lemma resolve_ghost_struct_Uniq {rts} π E L (lts : hlist ltype rts) sls γ rm lb κ γ' T :
     find_observation ((plist place_rfnRT rts)) γ FindObsModeDirect (λ or,
         match or with
         | None => ⌜fast_eq_hint (rm = ResolveTry)⌝ ∗ T L (PlaceGhost γ) True false
         | Some r => T L r True true
         end)
-    ⊢ resolve_ghost π E L rm lb l (StructLtype lts sls) (Uniq κ γ') (PlaceGhost γ) T.
+    ⊢ resolve_ghost π E L rm lb (StructLtype lts sls) (Uniq κ γ') (PlaceGhost γ) T.
   Proof.
-    iIntros "Ha" (???) "#CTX #HE HL Hl".
+    iIntros "Ha" (????) "#CTX #HE HL Hl".
     iMod ("Ha" with "[//]") as "[(%r' & HObs & Ha) | (_ & Ha)]".
     - rewrite ltype_own_struct_unfold /struct_ltype_own.
       iDestruct "Hl" as "(%ly & ? & ? & ? & ? & ? & Hinterp & ?)".
@@ -51,15 +51,15 @@ Section resolve_ghost.
   Definition resolve_ghost_struct_Uniq_inst := [instance @resolve_ghost_struct_Uniq].
   Global Existing Instance resolve_ghost_struct_Uniq_inst.
 
-  Lemma resolve_ghost_struct_Shared {rts} π E L l (lts : hlist ltype rts) sls γ rm lb κ T :
+  Lemma resolve_ghost_struct_Shared {rts} π E L (lts : hlist ltype rts) sls γ rm lb κ T :
     find_observation (plist place_rfnRT rts) γ FindObsModeDirect (λ or,
         match or with
         | None => ⌜fast_eq_hint (rm = ResolveTry)⌝ ∗ T L (PlaceGhost γ) True false
         | Some r => T L r True true
         end)
-    ⊢ resolve_ghost π E L rm lb l (StructLtype lts sls) (Shared κ) (PlaceGhost γ) T.
+    ⊢ resolve_ghost π E L rm lb (StructLtype lts sls) (Shared κ) (PlaceGhost γ) T.
   Proof.
-    iIntros "Ha" (???) "#CTX #HE HL Hl".
+    iIntros "Ha" (????) "#CTX #HE HL Hl".
     iMod ("Ha" with "[//]") as "[(%r' & HObs & Ha) | (_ & Ha)]".
     - rewrite ltype_own_struct_unfold /struct_ltype_own.
       iDestruct "Hl" as "(%sl & ? & ? & ? & ? & %Hconc & Hl)".

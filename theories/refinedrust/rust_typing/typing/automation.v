@@ -185,8 +185,8 @@ Ltac liExtensible_to_i2p_hook P bind cont ::=
       cont uconstr:(((_ : @StratifyLtype _ _ rt π E L _ _ _ (StratifyCloseOp κs) l lt r b) T))
   | @stratify_ltype_post_hook _ _ ?rt ?π ?E ?L ?M ?ml ?l ?lt ?r ?b ?T =>
       cont uconstr:(((_ : @StratifyLtypePostHook _ _ rt π E L M ml l lt r b) T))
-  | @resolve_ghost _ _ ?rt ?π ?E ?L ?m ?lb ?l ?lt ?b ?r ?T =>
-      cont uconstr:(((_ : @ResolveGhost _ _ rt π E L m lb l lt b r) T))
+  | @resolve_ghost _ _ ?rt ?π ?E ?L ?m ?lb ?lt ?b ?r ?T =>
+      cont uconstr:(((_ : @ResolveGhost _ _ rt π E L m lb lt b r) T))
   | @resolve_ghost_adt _ _ ?π ?E ?L ?m ?rt ?r ?ty ?T =>
       cont uconstr:(((_ : @ResolveGhostADT _ _ rt π E L m r ty) T))
   | find_observation ?rt ?γ ?mode ?T =>
@@ -203,8 +203,8 @@ Ltac liExtensible_to_i2p_hook P bind cont ::=
       cont uconstr:(((_ : @StratifyLtypeArrayIter _ _ π E L mdu ma M ml l ig rt def len iml rs bk) T))
   | @typed_array_access _ _ ?π ?E ?L ?base ?offset ?st ?rt ?lt ?r ?k ?T =>
       cont uconstr:(((_ : @TypedArrayAccess _ _ π E L base offset st rt lt r k) T))
-  | @resolve_ghost_iter _ _ ?rt ?π ?E ?L ?rm ?lb ?l ?st ?lts ?b ?rs ?ig ?i0 ?T =>
-      cont uconstr:(((_ : @ResolveGhostIter _ _ rt π E L rm lb l st lts b rs ig i0) T))
+  | @resolve_ghost_iter _ _ ?rt ?π ?E ?L ?rm ?lb ?lts ?b ?rs ?ig ?i0 ?T =>
+      cont uconstr:(((_ : @ResolveGhostIter _ _ rt π E L rm lb lts b rs ig i0) T))
   | @typed_discriminant_end _ _ ?π ?E ?L ?l ?rt ?lt ?r ?b2 ?els ?T =>
       cont uconstr:(((_ : @TypedDiscriminantEnd _ _ π E L l rt lt r b2 els) T))
   | @interpret_typing_hint _ _ ?E ?L ?f ?orty ?bmin ?rt ?ty ?r ?T =>
