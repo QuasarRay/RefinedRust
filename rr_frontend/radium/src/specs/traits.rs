@@ -2261,10 +2261,8 @@ impl fmt::Display for ImplSpec<'_> {
                     for (param, inst) in names.params.iter().zip(&insts) {
                         let name = param.refinement_type();
                         if !extra_let_binders.iter().any(|(bound, _)| bound == &name) {
-                            extra_let_binders.push((
-                                name,
-                                coq::term::Term::Type(Box::new(inst.get_rfn_type())),
-                            ));
+                            extra_let_binders
+                                .push((name, coq::term::Term::Type(Box::new(inst.get_rfn_type()))));
                         }
                     }
                 }

@@ -589,6 +589,17 @@ impl<'a, 'def: 'a, 'tcx: 'def> DropGlueTX<'a, 'def, 'tcx> {
         )))
     }
 
+    /// Semantic specifications need the preserved generic regions, unlike shim layout uses.
+    pub(super) fn spec_state(&self) -> types::STInner<'_, 'def, 'tcx> {
+        let typing_env = ty::TypingEnv::post_analysis(self.tcx, self.adt_did);
+        types::STInner::TraitReqs(Box::new(types::TraitState::new(
+            self.generic_scope.clone(),
+            typing_env,
+            None,
+            None,
+        )))
+    }
+
     fn translate_drop_glue_region(&self, region: ty::Region<'tcx>) -> Result<specs::Lft, TranslationError> {
         match region.kind() {
             ty::RegionKind::ReEarlyParam(early) => self

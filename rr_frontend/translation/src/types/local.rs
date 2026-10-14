@@ -50,12 +50,13 @@ pub(crate) struct AbstractedGenerics<'def> {
 }
 
 impl AbstractedGenerics<'_> {
-    /// Treat every abstracted generic as part of one concrete implementation realization.
+    /// Collapse the formal generic instantiation into one concrete drop-glue realization.
+    /// Additional lifetimes quantified for specialized type arguments remain only in `scope`.
     #[must_use]
     pub(crate) fn all_as_realization_context(mut self) -> Self {
         let full_inst =
             specs::GenericScopeInst::nest(&self.realization_context_inst, &self.method_scope_inst);
-        let lfts = full_inst.get_lfts().to_vec();
+        let lfts = self.procedure_scope_inst.get_lfts().to_vec();
         self.realization_context_inst = full_inst.all_as_realization_context(lfts);
         self.method_scope_inst = specs::GenericScopeInst::empty();
         self

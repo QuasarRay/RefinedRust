@@ -1831,7 +1831,8 @@ impl<'def, 'tcx: 'def> TX<'def, 'tcx> {
 
             ty::TyKind::Alias(_, alias_ty) => {
                 // Preserve the external regions when resolving associated types to references.
-                if let Ok(normalized_ty) = resolution::normalize_type(self.tcx, state.get_typing_env(self.tcx), ty)
+                if let Ok(normalized_ty) =
+                    resolution::normalize_type(self.tcx, state.get_typing_env(self.tcx), ty)
                     && !matches!(normalized_ty.kind(), ty::TyKind::Alias(..))
                 {
                     // if we managed to normalize it, translate the normalized type
