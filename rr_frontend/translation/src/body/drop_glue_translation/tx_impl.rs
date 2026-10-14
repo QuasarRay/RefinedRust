@@ -144,7 +144,16 @@ impl<'a, 'def: 'a, 'tcx: 'def> DropGlueTX<'a, 'def, 'tcx> {
         args: ty::GenericArgsRef<'tcx>,
         include_self: bool,
     ) -> Result<Vec<ResolvedTraitReq<'tcx, 'def>>, TranslationError> {
+        // Collect requirement-only layout dependencies, but discard lifetime-erased specs.
         let mut state = self.shim_state();
+        drop(self.ty_translator.trait_registry().resolve_trait_requirements_in_state(
+            &mut state,
+            did,
+            args,
+            include_self,
+            true,
+        )?);
+        let mut state = self.spec_state();
         self.ty_translator.trait_registry().resolve_trait_requirements_in_state(
             &mut state,
             did,
@@ -320,6 +329,9 @@ impl<'a, 'def: 'a, 'tcx: 'def> DropGlueTX<'a, 'def, 'tcx> {
             }
         }
 
+        // Realization arguments are the ordered explicit lifetime slots, including repetitions.
+        // Embedded lifetimes only extend the specialized assumption's scope and call hints.
+        let realization_lft_binders = callee_lft_param_inst.clone();
         let (tyvars, regions, projections) = collector.get_result();
 
         let mut scope = specs::GenericScope::empty();
@@ -344,7 +356,6 @@ impl<'a, 'def: 'a, 'tcx: 'def> DropGlueTX<'a, 'def, 'tcx> {
             }
             callee_lft_param_inst.push(lft_name);
         }
-        let realization_lft_binders = bound_lfts.clone();
 
         let mut method_lft_binders = Vec::new();
         for (late_bound_idx, late_bound) in late_bounds.iter().enumerate() {
@@ -407,9 +418,15 @@ impl<'a, 'def: 'a, 'tcx: 'def> DropGlueTX<'a, 'def, 'tcx> {
         }
 
         for req in trait_reqs {
+            let mut params = self.generic_scope.clone();
+            params.add_trait_req_scope(&req.req_inst.scope);
+            let shim_state = self.shim_state();
+            let mut layout_state = shim_state.setup_trait_state(self.tcx, params.clone());
+            let spec_state = self.spec_state();
+            let mut state = spec_state.setup_trait_state(self.tcx, params);
             let mut assoc_inst = Vec::new();
             for ty in req.req_inst.assoc_ty_inst {
-                let mut state = self.shim_state();
+                drop(self.ty_translator.translate_type_in_state(ty, &mut layout_state)?);
                 assoc_inst.push(self.ty_translator.translate_type_in_state(ty, &mut state)?);
             }
             let trait_req = specs::traits::ReqInst::new(
@@ -466,6 +483,12 @@ impl<'a, 'def: 'a, 'tcx: 'def> MirDropTranslation<'def, 'tcx> for DropGlueTX<'a,
     ) -> Result<types::AbstractedGenerics<'def>, TranslationError> {
         let trait_reqs = {
             let mut state = self.shim_state();
+            drop(
+                self.ty_translator
+                    .trait_registry()
+                    .resolve_drop_glue_requirements_for_args(&mut state, args)?,
+            );
+            let mut state = self.spec_state();
             self.ty_translator
                 .trait_registry()
                 .resolve_drop_glue_requirements_for_args(&mut state, args)?
@@ -487,10 +510,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> MirDropTranslation<'def, 'tcx> for DropGlueTX<'a,
         owner_did: DefId,
         args: ty::GenericArgsRef<'tcx>,
     ) -> Result<Vec<ResolvedTraitReq<'tcx, 'def>>, TranslationError> {
-        let mut state = self.shim_state();
-        self.ty_translator
-            .trait_registry()
-            .resolve_trait_requirements_in_state(&mut state, owner_did, args, true, true)
+        self.resolve_trait_requirements_of_call(owner_did, args, true)
     }
 
     fn make_virtual_drop_glue_method_for_param(&self, dropped_ty: ty::Ty<'tcx>) -> TraitMethodUseData<'def> {
@@ -502,8 +522,9 @@ impl<'a, 'def: 'a, 'tcx: 'def> MirDropTranslation<'def, 'tcx> for DropGlueTX<'a,
         dropped_ty: ty::Ty<'tcx>,
     ) -> Result<Option<code::UsedProcedureSpec<'def>>, TranslationError> {
         let trait_registry = self.ty_translator.trait_registry();
+        drop(trait_registry.get_drop_glue_impl_spec_term_in_state(&mut self.shim_state(), dropped_ty)?);
         let Some(impl_) =
-            trait_registry.get_drop_glue_impl_spec_term_in_state(&mut self.shim_state(), dropped_ty)?
+            trait_registry.get_drop_glue_impl_spec_term_in_state(&mut self.spec_state(), dropped_ty)?
         else {
             return Ok(None);
         };

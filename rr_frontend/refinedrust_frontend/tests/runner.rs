@@ -240,6 +240,76 @@ mod tests {
     }
 
     #[test]
+    fn drop_realizations_keep_only_formal_lifetime_arguments() {
+        let project = path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/drop_realization_lifetimes");
+        let output = GeneratedOutput::new(project.join("target/verify"));
+
+        build_refinedrust();
+        build_subproject("./tests/drop_realization_lifetimes/");
+
+        for name in ["drop_box", "drop_option", "drop_tuple", "drop_glue_Wrapper", "drop_glue_TupleWrapper"] {
+            let template = fs::read_to_string(
+                output
+                    .path()
+                    .join(format!("drop_realization_lifetimes/generated/generated_template_{name}.v")),
+            )
+            .expect("missing drop-realization proof template");
+            assert!(!template.contains("DUMMY"), "lifetime-erased semantic term in {name}: {template}");
+            let call = template
+                .lines()
+                .find(|line| line.contains("@ function_ptr"))
+                .expect("missing specialized drop call");
+            assert!(
+                call.contains("realization.(trait_ctx_spec) -[]"),
+                "embedded lifetime became a realization parameter in {name}: {call}"
+            );
+            assert!(
+                call.contains("realization.(trait_ctx_wf) -[]"),
+                "linking context has incorrect lifetime arguments in {name}: {call}"
+            );
+            let specialized_spec = call.split("realization.(trait_ctx_spec)").nth(1).unwrap();
+            assert!(
+                specialized_spec.contains("shr_ref"),
+                "specialized drop type lost its embedded reference in {name}: {call}"
+            );
+            assert!(call.contains("spec! ( *["), "missing quantified assumption in {name}");
+            if name.starts_with("drop_glue_") {
+                assert!(
+                    call.contains("shr_ref ulft_a (int I32)"),
+                    "synthesized drop lost its declared lifetime in {name}: {call}"
+                );
+            }
+        }
+
+        for name in ["drop_wrapper", "drop_glue_Outer"] {
+            let template = fs::read_to_string(
+                output
+                    .path()
+                    .join(format!("drop_realization_lifetimes/generated/generated_template_{name}.v")),
+            )
+            .expect("missing lifetime-parameterized drop template");
+            assert!(!template.contains("DUMMY"), "lifetime-erased semantic term in {name}: {template}");
+            let call = template
+                .lines()
+                .find(|line| line.contains("@ function_ptr"))
+                .expect("missing Wrapper drop call");
+            assert!(call.contains("drop_glue_Wrapper_realization"));
+            for projection in ["trait_ctx_spec", "trait_ctx_wf"] {
+                let prefix = format!("realization.({projection}) -[");
+                let arguments =
+                    call.split(prefix.as_str()).nth(1).expect("missing realization projection arguments");
+                let lifetimes = arguments.split(']').next().unwrap();
+                assert!(
+                    !lifetimes.is_empty() && !lifetimes.contains(';'),
+                    "Wrapper must retain exactly one formal lifetime in {name}: {call}"
+                );
+            }
+        }
+
+        output.cleanup();
+    }
+
+    #[test]
     fn concrete_projection_preserves_type_dependencies() {
         let project = path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/projection_deps");
         let output = GeneratedOutput::new(project.join("target/verify"));
