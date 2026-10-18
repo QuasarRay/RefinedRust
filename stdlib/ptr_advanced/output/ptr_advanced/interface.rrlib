@@ -185,6 +185,18 @@
     },
     {
       "kind": "method",
+      "name": "unique_Unique_T_as_non_null_ptr",
+      "path": [
+        "core",
+        "ptr",
+        "Unique",
+        "as_non_null_ptr"
+      ],
+      "spec": "type_of_unique_Unique_T_as_non_null_ptr",
+      "trait_req_incl": "trait_incl_of_unique_Unique_T_as_non_null_ptr"
+    },
+    {
+      "kind": "method",
       "name": "unique_Unique_T_as_ptr",
       "path": [
         "core",
@@ -197,6 +209,18 @@
     },
     {
       "kind": "method",
+      "name": "unique_Unique_T_cast",
+      "path": [
+        "core",
+        "ptr",
+        "Unique",
+        "cast"
+      ],
+      "spec": "type_of_unique_Unique_T_cast",
+      "trait_req_incl": "trait_incl_of_unique_Unique_T_cast"
+    },
+    {
+      "kind": "method",
       "name": "unique_Unique_T_dangling",
       "path": [
         "core",
@@ -206,6 +230,18 @@
       ],
       "spec": "type_of_unique_Unique_T_dangling",
       "trait_req_incl": "trait_incl_of_unique_Unique_T_dangling"
+    },
+    {
+      "kind": "method",
+      "name": "unique_Unique_T_from_non_null",
+      "path": [
+        "core",
+        "ptr",
+        "Unique",
+        "from_non_null"
+      ],
+      "spec": "type_of_unique_Unique_T_from_non_null",
+      "trait_req_incl": "trait_incl_of_unique_Unique_T_from_non_null"
     },
     {
       "kind": "method",
@@ -252,6 +288,57 @@
           "std",
           "clone",
           "Clone"
+        ]
+      }
+    },
+    {
+      "for_type": {
+        "Adt": {
+          "args": [
+            {
+              "Param": 0
+            }
+          ],
+          "path": [
+            "core",
+            "ptr",
+            "NonNull"
+          ]
+        }
+      },
+      "has_semantic_interp": false,
+      "impl_kind": "rust",
+      "kind": "trait_impl",
+      "method_specs": {
+        "from": {
+          "name": "nonnull_NonNullTasstd_convert_Fromunique_UniqueT_from",
+          "spec": "type_of_nonnull_NonNullTasstd_convert_Fromunique_UniqueT_from",
+          "trait_req_incl": "trait_incl_of_nonnull_NonNullTasstd_convert_Fromunique_UniqueT_from"
+        }
+      },
+      "name": "nonnull_NonNullTasstd_convert_Fromunique_UniqueT",
+      "realization": "nonnull_NonNullTasstd_convert_Fromunique_UniqueT_realization",
+      "trait_path": {
+        "args": [
+          {
+            "Adt": {
+              "args": [
+                {
+                  "Param": 0
+                }
+              ],
+              "path": [
+                "core",
+                "ptr",
+                "Unique"
+              ]
+            }
+          }
+        ],
+        "path": [
+          "std",
+          "convert",
+          "From"
         ]
       }
     },
@@ -356,6 +443,7 @@
     "rrstd.clone.clone.generated",
     "rrstd.closures.closures.generated",
     "rrstd.closures.theories",
+    "rrstd.controlflow.controlflow.generated",
     "rrstd.mem.mem.generated",
     "rrstd.mem.theories",
     "rrstd.num.num.generated",

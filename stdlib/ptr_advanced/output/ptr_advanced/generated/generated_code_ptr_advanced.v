@@ -1,6 +1,7 @@
 From radium Require Import lang notation.
 From refinedrust Require Import typing shims.
 From rrstd.clone.clone.generated Require Export generated_specs_clone.
+From rrstd.controlflow.controlflow.generated Require Export generated_specs_controlflow.
 From rrstd.mem.mem.generated Require Export generated_specs_mem.
 From rrstd.option.option.generated Require Export generated_specs_option.
 From rrstd.ptr.ptr.generated Require Export generated_specs_ptr.
@@ -40,6 +41,36 @@ Program Definition nonnull_NonNullTasstd_clone_Clone_clone_def (T_st: syn_type) 
       local_live{ (nonnull_NonNull_st (T_st)) } "__0";
       annot{ 1 }: CopyLftNameAnnot "plft3" "ulft_1"; (* initialization *)
       "__0" <-{ (use_op_alg' (nonnull_NonNull_st (T_st))) } copy{ (use_op_alg' (nonnull_NonNull_st (T_st))) } (!{ RefOp } ( "self" ));
+      return (move{ (use_op_alg' (nonnull_NonNull_st (T_st))) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition nonnull_NonNullTasstd_convert_Fromunique_UniqueT_from_def (unique_Unique_T_as_non_null_ptr_T_loc: loc) (T_st: syn_type) : function :=
+  {|
+     f_args := [
+      ("unique", (use_layout_alg' (unique_Unique_st (T_st))) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (nonnull_NonNull_st (T_st)) } "__0";
+      local_live{ (unique_Unique_st (T_st)) } "__2";
+      "__2" <-{ (use_op_alg' (unique_Unique_st (T_st))) } copy{ (use_op_alg' (unique_Unique_st (T_st))) } ("unique");
+      CallS unique_Unique_T_as_non_null_ptr_T_loc [] [RSTTyVar "T"] [@{expr} move{ (use_op_alg' (unique_Unique_st (T_st))) } ("__2")] (Some (Na1Ord, (use_op_alg' (nonnull_NonNull_st (T_st))), "__0"))
+      ( Goto "_bb1")
+      ( Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__2";
       return (move{ (use_op_alg' (nonnull_NonNull_st (T_st))) } ("__0"))
      ]>%E $
       ∅;
@@ -648,7 +679,7 @@ Qed.
 
 
 
-Program Definition unique_Unique_T_as_ptr_def (T_st: syn_type) : function :=
+Program Definition unique_Unique_T_as_non_null_ptr_def (T_st: syn_type) : function :=
   {|
      f_args := [
       ("self", (use_layout_alg' (unique_Unique_st (T_st))) : layout)
@@ -659,6 +690,74 @@ Program Definition unique_Unique_T_as_ptr_def (T_st: syn_type) : function :=
       local_live{ (nonnull_NonNull_st (T_st)) } "__0";
       "__0" <-{ (use_op_alg' (nonnull_NonNull_st (T_st))) } copy{ (use_op_alg' (nonnull_NonNull_st (T_st))) } (("self") at{ (unique_Unique_sls (T_st)) } "pointer");
       return (move{ (use_op_alg' (nonnull_NonNull_st (T_st))) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition unique_Unique_T_as_ptr_def (nonnull_NonNull_T_as_ptr_T_loc: loc) (T_st: syn_type) : function :=
+  {|
+     f_args := [
+      ("self", (use_layout_alg' (unique_Unique_st (T_st))) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ PtrSynType } "__0";
+      local_live{ (nonnull_NonNull_st (T_st)) } "__2";
+      "__2" <-{ (use_op_alg' (nonnull_NonNull_st (T_st))) } copy{ (use_op_alg' (nonnull_NonNull_st (T_st))) } (("self") at{ (unique_Unique_sls (T_st)) } "pointer");
+      CallS nonnull_NonNull_T_as_ptr_T_loc [] [RSTTyVar "T"] [@{expr} move{ (use_op_alg' (nonnull_NonNull_st (T_st))) } ("__2")] (Some (Na1Ord, PtrOp, "__0"))
+      ( Goto "_bb1")
+      ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__2";
+      return (move{ PtrOp } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition unique_Unique_T_cast_def (nonnull_NonNull_T_cast_T_U_loc: loc) (T_st: syn_type) (U_st: syn_type) : function :=
+  {|
+     f_args := [
+      ("self", (use_layout_alg' (unique_Unique_st (T_st))) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (unique_Unique_st (U_st)) } "__0";
+      local_live{ (nonnull_NonNull_st (U_st)) } "__2";
+      local_live{ (nonnull_NonNull_st (T_st)) } "__3";
+      "__3" <-{ (use_op_alg' (nonnull_NonNull_st (T_st))) } copy{ (use_op_alg' (nonnull_NonNull_st (T_st))) } (("self") at{ (unique_Unique_sls (T_st)) } "pointer");
+      CallS nonnull_NonNull_T_cast_T_U_loc [] [RSTTyVar "T"; RSTTyVar "U"] [@{expr} move{ (use_op_alg' (nonnull_NonNull_st (T_st))) } ("__3")] (Some (Na1Ord, (use_op_alg' (nonnull_NonNull_st (U_st))), "__2"))
+      ( Goto "_bb1")
+      ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__3";
+      local_live{ ((core_marker_PhantomData_sls (U_st)) : syn_type) } "__4";
+      "__4" <-{ (use_op_alg' ((core_marker_PhantomData_sls (U_st)) : syn_type)) } StructInit (core_marker_PhantomData_sls (U_st)) [];
+      "__0" <-{ (use_op_alg' (unique_Unique_st (U_st))) } StructInit (unique_Unique_sls (U_st)) [("pointer", move{ (use_op_alg' (nonnull_NonNull_st (U_st))) } ("__2") : expr); ("_marker", move{ (use_op_alg' ((core_marker_PhantomData_sls (U_st)) : syn_type)) } ("__4") : expr)];
+      local_dead "__4";
+      local_dead "__2";
+      return (move{ (use_op_alg' (unique_Unique_st (U_st))) } ("__0"))
      ]>%E $
       ∅;
      f_init := "_bb0";
@@ -695,6 +794,34 @@ Program Definition unique_Unique_T_dangling_def (dangling_mut_T_loc: loc) (uniqu
      <[
      "_bb2" :=
       local_dead "__1";
+      return (move{ (use_op_alg' (unique_Unique_st (T_st))) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition unique_Unique_T_from_non_null_def (T_st: syn_type) : function :=
+  {|
+     f_args := [
+      ("pointer", (use_layout_alg' (nonnull_NonNull_st (T_st))) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (unique_Unique_st (T_st)) } "__0";
+      local_live{ (nonnull_NonNull_st (T_st)) } "__2";
+      "__2" <-{ (use_op_alg' (nonnull_NonNull_st (T_st))) } copy{ (use_op_alg' (nonnull_NonNull_st (T_st))) } ("pointer");
+      local_live{ ((core_marker_PhantomData_sls (T_st)) : syn_type) } "__3";
+      "__3" <-{ (use_op_alg' ((core_marker_PhantomData_sls (T_st)) : syn_type)) } StructInit (core_marker_PhantomData_sls (T_st)) [];
+      "__0" <-{ (use_op_alg' (unique_Unique_st (T_st))) } StructInit (unique_Unique_sls (T_st)) [("pointer", move{ (use_op_alg' (nonnull_NonNull_st (T_st))) } ("__2") : expr); ("_marker", move{ (use_op_alg' ((core_marker_PhantomData_sls (T_st)) : syn_type)) } ("__3") : expr)];
+      local_dead "__3";
+      local_dead "__2";
       return (move{ (use_op_alg' (unique_Unique_st (T_st))) } ("__0"))
      ]>%E $
       ∅;

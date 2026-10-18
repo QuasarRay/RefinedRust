@@ -12,7 +12,7 @@ Lemma unique_Unique_T_as_ptr_proof (π : thread_id) :
 Proof.
   unique_Unique_T_as_ptr_prelude.
 
-  rep <-! liRStep; liShow.
+  1: rep <-! <3000 liRStep.
 
   all: print_remaining_goal.
   Unshelve. all: sidecond_solver.
