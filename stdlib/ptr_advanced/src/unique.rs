@@ -42,7 +42,7 @@ impl<T: Sized> Unique<T> {
 
 #[rr::export_as(core::ptr::Unique)]
 impl<T: ?Sized> Unique<T> {
-    #[rr::requires("ptr.(loc_a) ≠ 0")]
+    #[rr::requires("Hptr_nonnull": "ptr.(loc_a) ≠ 0")]
     #[rr::returns("ptr")]
     pub const unsafe fn new_unchecked(ptr: *mut T) -> Self {
         unsafe {
@@ -50,12 +50,23 @@ impl<T: ?Sized> Unique<T> {
         }
     }
 
+    #[rr::returns("pointer")]
+    pub const fn from_non_null(pointer: NonNull<T>) -> Self {
+        Unique { pointer, _marker: PhantomData }
+    }
+
     #[rr::returns("self")]
-    pub const fn as_ptr(self) -> NonNull<T> { self.pointer }
+    pub const fn as_ptr(self) -> *mut T {
+        // TODO(verification): Correct the previous model's NonNull return type
+        // to match upstream; the NonNull accessor is as_non_null_ptr instead.
+        self.pointer.as_ptr()
+    }
+
+    #[rr::returns("self")]
+    pub const fn as_non_null_ptr(self) -> NonNull<T> { self.pointer }
+
+    #[rr::returns("self")]
+    pub const fn cast<U>(self) -> Unique<U> {
+        Unique { pointer: self.pointer.cast(), _marker: PhantomData }
+    }
 }
-
-//#[rr::verify]
-//impl<T: ?Sized> From<NonNull<T>> for Unique<T> {
-    //fn from(ptr: NonNull<T>) -> Self { Self { ptr, _marker: PhantomData } }
-//}
-

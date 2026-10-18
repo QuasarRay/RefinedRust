@@ -13,6 +13,7 @@
 #![rr::include("ptr")]
 #![rr::include("option")]
 #![rr::include("clone")]
+#![rr::include("controlflow")]
 
 //! Advanced pointer functionality so that we can depend on `option`.
 
