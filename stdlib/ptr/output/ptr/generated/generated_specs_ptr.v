@@ -7,6 +7,35 @@ From rrstd.option.option.generated Require Export generated_specs_option.
 From rrstd.ptr.theories Require Export alignment shims specs.
 From rrstd.ptr.ptr Require Export generated_code_ptr.
 
+Definition Default_DefaultValue_sig `{RRGS : !(refinedrustGS Σ)} (Self_rt: RT) :=
+  ((RT_xt (Self_rt))).
+Definition Default_DefaultUnwind_sig `{RRGS : !(refinedrustGS Σ)} (Self_rt: RT) (Default_DefaultValue: (Default_DefaultValue_sig (Self_rt))) :=
+  (Prop).
+Record Default_spec_attrs `{RRGS : !(refinedrustGS Σ)} `{Self_rt : !RT} : Type := mk_Default_spec_attrs {
+  Default_DefaultValue  : (Default_DefaultValue_sig (Self_rt));
+  Default_DefaultUnwind  : (Default_DefaultUnwind_sig (Self_rt) (Default_DefaultValue));
+}.
+#[global] Arguments Default_spec_attrs : clear implicits.
+
+#[global] Arguments Default_spec_attrs {_ _}.
+
+#[global] Arguments mk_Default_spec_attrs  {_} {_} {_}.
+
+
+Section attrs.
+Context `{RRGS : !refinedrustGS Σ}.
+Program Definition usizeasDefault_spec_attrs `{RRGS : !(refinedrustGS Σ)} : ((Default_spec_attrs (Z))) :=
+  {|
+    Default_DefaultValue  :=
+      (0) : ((Default_DefaultValue_sig (Z)));
+    Default_DefaultUnwind  :=
+      (False) : ((Default_DefaultUnwind_sig (Z) (_)));
+  |}
+.
+
+
+End attrs.
+
 Section alignment_AlignmentEnum_ty.
   Context `{RRGS : !(refinedrustGS Σ)}.
   Section components.
@@ -989,6 +1018,72 @@ Ltac2 Set start_function_hook as old_start_function_hook :=
     end) (fun _ => ());
     old_start_function_hook ()
   .
+Record Default_spec `{RRGS : !(refinedrustGS Σ)} `{Self_rt : !RT} : Type := mk_Default_spec {
+  Default_default_spec  : (spec_with 0 [] fn_spec);
+}.
+#[global] Arguments Default_spec : clear implicits.
+
+#[global] Arguments Default_spec {_ _}.
+
+
+Section Default.
+Context `{RRGS : !refinedrustGS Σ}.
+Definition Default_spec_incl `{Self_rt : !RT} (spec1: ((Default_spec (Self_rt)))) (spec2: ((Default_spec (Self_rt)))) : Prop :=
+  ((function_subtype (spec1.(Default_default_spec)) (spec2.(Default_default_spec)))).
+Instance Default_spec_incl_preorder `{Self_rt : !RT} : (PreOrder (Default_spec_incl (Self_rt := Self_rt))).
+Proof.
+  split.
+  all: apply _.
+Qed.
+
+Definition scope_bindable_Default_spec `{Self_rt : !RT} : (ScopeBindable ((Default_spec (Self_rt)))) :=
+  {|
+    scope_add_typarams (rts: (list RT)) (tys: (plist type rts)) (s: ((Default_spec (Self_rt)))) :=
+      {|
+        Default_default_spec  :=
+          (scope_add_typarams (rts) (tys) (s.(Default_default_spec)));
+      |}
+      ;
+    scope_add_elctx (E: (lft → elctx)) (s: ((Default_spec (Self_rt)))) :=
+      {|
+        Default_default_spec  :=
+          (scope_add_elctx (E) (s.(Default_default_spec)));
+      |}
+      ;
+  |}
+.
+#[global] Existing Instance scope_bindable_Default_spec.
+
+Definition Default_default_base_spec (Self_rt: RT) (Self_st: syn_type) (DropGlue_Self_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )) (Default_Self_spec_attrs: (Default_spec_attrs (RRGS:=RRGS) (Self_rt) )) :=
+  fn(∀ ( *[]) : 0 | ( *[Self_ty]) : ([(Self_rt, Self_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) _ : unit,
+      (* elctx........ *) (λ ϝ, []);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, Default_Self_spec_attrs.(Default_DefaultValue) @ Self_ty;
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) Default_Self_spec_attrs.(Default_DefaultUnwind) |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition Default_base_spec (Self_rt: RT) (Self_st: syn_type) (DropGlue_Self_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )) (_ATTRS: ((Default_spec_attrs ((Self_rt))))) : (spec_with _ _ (Default_spec ((Self_rt)))) :=
+  spec! ( *[]) : 0 | ( *[Self_ty]) : ([Self_rt] : list RT), {|
+      Default_default_spec  :=
+        (Default_default_base_spec ((Self_rt)) (Self_st)) DropGlue_Self_spec_attrs _ATTRS 
+           <TY> Self_ty : (spec_with 0 [] fn_spec);
+    |}
+.
+Arguments Default_base_spec : simpl never.
+
+
+End Default.
+
+Section Default_trait_req_incls.
+  Context `{RRGS : !(refinedrustGS Σ)}.
+  Definition trait_incl_of_Default_default (Self_rt: RT) (Self_st: syn_type) (DropGlue_Self_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )) (DropGlue_Self_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (Self_rt))))) (Default_Self_spec_attrs: (Default_spec_attrs (RRGS:=RRGS) (Self_rt) )) (Default_Self_realization: (trait_spec_realization (spec_with 0 [] (Default_spec (RRGS:=RRGS) (Self_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+    spec! ( *[]) : 0 | ( *[Self_ty]) : ([Self_rt] : list RT), (λ π, ((∃ (DropGlue_Self_lfts_inst : prod_vec lft DropGlue_Self_realization.(trait_ctx_lfts)) (DropGlue_Self_tys_inst : plist type DropGlue_Self_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_Self_realization.(trait_ctx_spec) DropGlue_Self_lfts_inst DropGlue_Self_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (Self_rt) Self_st DropGlue_Self_spec_attrs-[] -[Self_ty]))⌝ ∗ DropGlue_Self_realization.(trait_ctx_wf) DropGlue_Self_lfts_inst DropGlue_Self_tys_inst π)
+      ∗ (∃ (Default_Self_lfts_inst : prod_vec lft Default_Self_realization.(trait_ctx_lfts)) (Default_Self_tys_inst : plist type Default_Self_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Default_spec_incl (Default_Self_realization.(trait_ctx_spec) Default_Self_lfts_inst Default_Self_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Default_base_spec (Self_rt) Self_st DropGlue_Self_spec_attrs Default_Self_spec_attrs-[] -[Self_ty]))⌝ ∗ Default_Self_realization.(trait_ctx_wf) Default_Self_lfts_inst Default_Self_tys_inst π))%I).
+End Default_trait_req_incls.
+
 Section specs.
 Context `{RRGS : !refinedrustGS Σ}.
 
@@ -1005,6 +1100,13 @@ Definition trait_incl_of_alignment_AlignmentEnumasstd_clone_Clone_clone  : (spec
 Definition type_of_alignment_AlignmentEnumasstd_clone_Clone_clone  :=
   spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Clone_base_spec ((alignment_AlignmentEnum_rt)) (alignment_AlignmentEnum_st) ((drop_glue_trivial_spec_attrs ((alignment_AlignmentEnum_rt)))) (alignment_AlignmentEnumasstd_clone_Clone_spec_attrs))
     -[] -[(alignment_AlignmentEnum_ty  -[] -[])]).(Clone_clone_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_usizeasDefault_default  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_usizeasDefault_default  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Default_base_spec (Z) ((IntSynType USize)) ((drop_glue_trivial_spec_attrs (Z))) (usizeasDefault_spec_attrs))
+    -[] -[(int USize)]).(Default_default_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_alignment_Alignment_as_usize  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
@@ -1789,6 +1891,22 @@ Definition type_of_mem_swap (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: 
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
 
+Definition trait_incl_of_mem_take (T_rt: RT) (T_st: syn_type) (Default_T_spec_attrs: (Default_spec_attrs (RRGS:=RRGS) (T_rt) )) (Default_T_realization: (trait_spec_realization (spec_with 0 [] (Default_spec (RRGS:=RRGS) (T_rt))))) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[T_ty]) : ([T_rt] : list RT), (λ π, ((∃ (Default_T_lfts_inst : prod_vec lft Default_T_realization.(trait_ctx_lfts)) (Default_T_tys_inst : plist type Default_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Default_spec_incl (Default_T_realization.(trait_ctx_spec) Default_T_lfts_inst Default_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Default_base_spec (T_rt) T_st DropGlue_T_spec_attrs Default_T_spec_attrs-[] -[T_ty]))⌝ ∗ Default_T_realization.(trait_ctx_wf) Default_T_lfts_inst Default_T_tys_inst π)
+    ∗ (∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π))%I).
+
+Definition type_of_mem_take (T_rt: RT) (T_st: syn_type) (Default_T_spec_attrs: (Default_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (dest) : ((_)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) dest :@: (mut_ref ulft_1 T_ty);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, dest.cur @ T_ty;
+      (* postcondition *) (λ π : thread_id, (gvar_pobs dest.ghost ($# Default_T_spec_attrs.(Default_DefaultValue)))) |
+      (* unwind cond... *) Default_T_spec_attrs.(Default_DefaultUnwind) |
+      (* unwind post... *) (λ π : thread_id, True).
+
 Definition trait_incl_of_const_ptr_is_aligned (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), (λ π, ((∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π))%I).
 
@@ -1900,6 +2018,31 @@ Definition type_of_ptr_null_mut (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_att
 
 
 End specs.
+Section usizeasDefault_spec.
+  Context `{RRGS : !(refinedrustGS Σ)}.
+  Definition usizeasDefault_spec  : (spec_with _ _ (Default_spec (Z))) :=
+    spec! ( *[]) : 0 | ( *[]) : ([] : list RT), {|
+        Default_default_spec  :=
+          type_of_usizeasDefault_default 
+             : (spec_with 0 [] fn_spec);
+      |}
+  .
+  Arguments usizeasDefault_spec : simpl never.
+
+  Program Definition usizeasDefault_realization  : trait_spec_realization (spec_with 0 [] (Default_spec (RRGS:=RRGS) Z)) :=
+  {|
+    trait_ctx_lfts := 0;
+    trait_ctx_tys := [];
+    trait_ctx_wf := λ '( *[]) '( *[]) π, ((True))%I;
+    trait_ctx_spec := λ '( *[]) '( *[]) _ _, usizeasDefault_spec-[] -[];
+  |}.
+  Next Obligation.
+    solve_trait_realization_pers.
+  Qed.
+  Definition usizeasDefault_spec_subsumption  :=
+    trait_incl_marker (lift_trait_incl Default_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), usizeasDefault_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Default_base_spec Z (IntSynType USize) (drop_glue_trivial_spec_attrs (Z)) usizeasDefault_spec_attrs-[] -[(int USize)])))).
+End usizeasDefault_spec.
+
 Section alignment_Alignmentasstd_clone_Clone_spec.
   Context `{RRGS : !(refinedrustGS Σ)}.
   Definition alignment_Alignmentasstd_clone_Clone_spec  : (spec_with _ _ (Clone_spec ((alignment_Alignment_inv_t_rt)))) :=

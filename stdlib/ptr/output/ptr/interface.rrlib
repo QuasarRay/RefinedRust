@@ -91,6 +91,17 @@
       "trait_req_incl": "trait_incl_of_mem_swap"
     },
     {
+      "kind": "function",
+      "name": "mem_take",
+      "path": [
+        "core",
+        "mem",
+        "take"
+      ],
+      "spec": "type_of_mem_take",
+      "trait_req_incl": "trait_incl_of_mem_take"
+    },
+    {
       "kind": "method",
       "name": "const_ptr_add",
       "path": [
@@ -677,6 +688,50 @@
       ],
       "spec": "type_of_write_volatile",
       "trait_req_incl": "trait_incl_of_write_volatile"
+    },
+    {
+      "allowed_attrs": [
+        "DefaultValue",
+        "DefaultUnwind"
+      ],
+      "assoc_tys": [],
+      "attrs_dependent": true,
+      "has_semantic_interp": false,
+      "kind": "trait",
+      "method_trait_incl_decls": {
+        "default": "trait_incl_of_Default_default"
+      },
+      "name": "Default",
+      "path": [
+        "core",
+        "default",
+        "Default"
+      ]
+    },
+    {
+      "for_type": {
+        "Uint": "Usize"
+      },
+      "has_semantic_interp": false,
+      "impl_kind": "rust",
+      "kind": "trait_impl",
+      "method_specs": {
+        "default": {
+          "name": "usizeasDefault_default",
+          "spec": "type_of_usizeasDefault_default",
+          "trait_req_incl": "trait_incl_of_usizeasDefault_default"
+        }
+      },
+      "name": "usizeasDefault",
+      "realization": "usizeasDefault_realization",
+      "trait_path": {
+        "args": [],
+        "path": [
+          "core",
+          "default",
+          "Default"
+        ]
+      }
     },
     {
       "for_type": {

@@ -1603,6 +1603,28 @@ Qed.
 
 
 
+Program Definition usizeasDefault_default_def  : function :=
+  {|
+     f_args := [
+      
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType USize) } "__0";
+      "__0" <-{ (IntOp USize) } i2v (0) USize;
+      return (move{ (IntOp USize) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
 Program Definition write_volatile_def (write_T_loc: loc) (T_st: syn_type) : function :=
   {|
      f_args := [

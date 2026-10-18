@@ -1,5 +1,6 @@
 From radium Require Import lang notation.
 From refinedrust Require Import typing shims.
+From rrstd.option.option.generated Require Export generated_specs_option.
 From rrstd.num.num Require Export generated_code_num generated_specs_num.
 
 Set Default Proof Using "Type".

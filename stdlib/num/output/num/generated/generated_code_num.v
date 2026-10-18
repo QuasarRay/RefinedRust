@@ -1,5 +1,6 @@
 From radium Require Import lang notation.
 From refinedrust Require Import typing shims.
+From rrstd.option.option.generated Require Export generated_specs_option.
 Section code.
 Context `{!LayoutAlg}.
 Open Scope printing_sugar.
@@ -390,6 +391,71 @@ Qed.
 
 
 
+Program Definition u128_checked_sub_def (u128_unchecked_sub_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U128) : layout);
+     ("rhs", (it_layout U128) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ ((Option_els ((IntSynType U128))) : syn_type) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U128) } "__4";
+      "__4" <-{ (IntOp U128) } copy{ (IntOp U128) } ("x");
+      local_live{ (IntSynType U128) } "__5";
+      "__5" <-{ (IntOp U128) } copy{ (IntOp U128) } ("rhs");
+      "__3" <-{ BoolOp } (move{ (IntOp U128) } ("__4")) <{ (IntOp U128) , (IntOp U128) , U8 } (move{ (IntOp U128) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U128))) : syn_type)) } EnumInit (Option_els ((IntSynType U128))) "None" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U128] [])) (StructInit (Option_None_sls ((IntSynType U128))) []);
+      Goto "_bb4"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_live{ (IntSynType U128) } "__6";
+      local_live{ (IntSynType U128) } "__7";
+      "__7" <-{ (IntOp U128) } copy{ (IntOp U128) } ("x");
+      local_live{ (IntSynType U128) } "__8";
+      "__8" <-{ (IntOp U128) } copy{ (IntOp U128) } ("rhs");
+      CallS u128_unchecked_sub_loc [] [] [@{expr} move{ (IntOp U128) } ("__7"); move{ (IntOp U128) } ("__8")] (Some (Na1Ord, (IntOp U128), "__6"))
+      ( Goto "_bb3")
+      ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__8";
+      local_dead "__7";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U128))) : syn_type)) } EnumInit (Option_els ((IntSynType U128))) "Some" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U128] [])) (StructInit (Option_Some_sls ((IntSynType U128))) [("0", move{ (IntOp U128) } ("__6") : expr)]);
+      local_dead "__6";
+      Goto "_bb4"
+     ]>%E $
+     <[
+     "_bb4" :=
+      local_dead "__3";
+      return (move{ (use_op_alg' ((Option_els ((IntSynType U128))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
 Program Definition u16_abs_diff_def (panic_shim_loc: loc) : function :=
   {|
      f_args := [
@@ -465,6 +531,71 @@ Program Definition u16_abs_diff_def (panic_shim_loc: loc) : function :=
      "_bb5" :=
       local_dead "__3";
       return (move{ (IntOp U16) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u16_checked_sub_def (u16_unchecked_sub_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U16) : layout);
+     ("rhs", (it_layout U16) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ ((Option_els ((IntSynType U16))) : syn_type) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U16) } "__4";
+      "__4" <-{ (IntOp U16) } copy{ (IntOp U16) } ("x");
+      local_live{ (IntSynType U16) } "__5";
+      "__5" <-{ (IntOp U16) } copy{ (IntOp U16) } ("rhs");
+      "__3" <-{ BoolOp } (move{ (IntOp U16) } ("__4")) <{ (IntOp U16) , (IntOp U16) , U8 } (move{ (IntOp U16) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U16))) : syn_type)) } EnumInit (Option_els ((IntSynType U16))) "None" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U16] [])) (StructInit (Option_None_sls ((IntSynType U16))) []);
+      Goto "_bb4"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_live{ (IntSynType U16) } "__6";
+      local_live{ (IntSynType U16) } "__7";
+      "__7" <-{ (IntOp U16) } copy{ (IntOp U16) } ("x");
+      local_live{ (IntSynType U16) } "__8";
+      "__8" <-{ (IntOp U16) } copy{ (IntOp U16) } ("rhs");
+      CallS u16_unchecked_sub_loc [] [] [@{expr} move{ (IntOp U16) } ("__7"); move{ (IntOp U16) } ("__8")] (Some (Na1Ord, (IntOp U16), "__6"))
+      ( Goto "_bb3")
+      ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__8";
+      local_dead "__7";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U16))) : syn_type)) } EnumInit (Option_els ((IntSynType U16))) "Some" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U16] [])) (StructInit (Option_Some_sls ((IntSynType U16))) [("0", move{ (IntOp U16) } ("__6") : expr)]);
+      local_dead "__6";
+      Goto "_bb4"
+     ]>%E $
+     <[
+     "_bb4" :=
+      local_dead "__3";
+      return (move{ (use_op_alg' ((Option_els ((IntSynType U16))) : syn_type)) } ("__0"))
      ]>%E $
       ∅;
      f_init := "_bb0";
@@ -562,6 +693,71 @@ Qed.
 
 
 
+Program Definition u32_checked_sub_def (u32_unchecked_sub_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U32) : layout);
+     ("rhs", (it_layout U32) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ ((Option_els ((IntSynType U32))) : syn_type) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U32) } "__4";
+      "__4" <-{ (IntOp U32) } copy{ (IntOp U32) } ("x");
+      local_live{ (IntSynType U32) } "__5";
+      "__5" <-{ (IntOp U32) } copy{ (IntOp U32) } ("rhs");
+      "__3" <-{ BoolOp } (move{ (IntOp U32) } ("__4")) <{ (IntOp U32) , (IntOp U32) , U8 } (move{ (IntOp U32) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U32))) : syn_type)) } EnumInit (Option_els ((IntSynType U32))) "None" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U32] [])) (StructInit (Option_None_sls ((IntSynType U32))) []);
+      Goto "_bb4"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_live{ (IntSynType U32) } "__6";
+      local_live{ (IntSynType U32) } "__7";
+      "__7" <-{ (IntOp U32) } copy{ (IntOp U32) } ("x");
+      local_live{ (IntSynType U32) } "__8";
+      "__8" <-{ (IntOp U32) } copy{ (IntOp U32) } ("rhs");
+      CallS u32_unchecked_sub_loc [] [] [@{expr} move{ (IntOp U32) } ("__7"); move{ (IntOp U32) } ("__8")] (Some (Na1Ord, (IntOp U32), "__6"))
+      ( Goto "_bb3")
+      ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__8";
+      local_dead "__7";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U32))) : syn_type)) } EnumInit (Option_els ((IntSynType U32))) "Some" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U32] [])) (StructInit (Option_Some_sls ((IntSynType U32))) [("0", move{ (IntOp U32) } ("__6") : expr)]);
+      local_dead "__6";
+      Goto "_bb4"
+     ]>%E $
+     <[
+     "_bb4" :=
+      local_dead "__3";
+      return (move{ (use_op_alg' ((Option_els ((IntSynType U32))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
 Program Definition u64_abs_diff_def (panic_shim_loc: loc) : function :=
   {|
      f_args := [
@@ -637,6 +833,71 @@ Program Definition u64_abs_diff_def (panic_shim_loc: loc) : function :=
      "_bb5" :=
       local_dead "__3";
       return (move{ (IntOp U64) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u64_checked_sub_def (u64_unchecked_sub_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U64) : layout);
+     ("rhs", (it_layout U64) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ ((Option_els ((IntSynType U64))) : syn_type) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U64) } "__4";
+      "__4" <-{ (IntOp U64) } copy{ (IntOp U64) } ("x");
+      local_live{ (IntSynType U64) } "__5";
+      "__5" <-{ (IntOp U64) } copy{ (IntOp U64) } ("rhs");
+      "__3" <-{ BoolOp } (move{ (IntOp U64) } ("__4")) <{ (IntOp U64) , (IntOp U64) , U8 } (move{ (IntOp U64) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U64))) : syn_type)) } EnumInit (Option_els ((IntSynType U64))) "None" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U64] [])) (StructInit (Option_None_sls ((IntSynType U64))) []);
+      Goto "_bb4"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_live{ (IntSynType U64) } "__6";
+      local_live{ (IntSynType U64) } "__7";
+      "__7" <-{ (IntOp U64) } copy{ (IntOp U64) } ("x");
+      local_live{ (IntSynType U64) } "__8";
+      "__8" <-{ (IntOp U64) } copy{ (IntOp U64) } ("rhs");
+      CallS u64_unchecked_sub_loc [] [] [@{expr} move{ (IntOp U64) } ("__7"); move{ (IntOp U64) } ("__8")] (Some (Na1Ord, (IntOp U64), "__6"))
+      ( Goto "_bb3")
+      ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__8";
+      local_dead "__7";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U64))) : syn_type)) } EnumInit (Option_els ((IntSynType U64))) "Some" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U64] [])) (StructInit (Option_Some_sls ((IntSynType U64))) [("0", move{ (IntOp U64) } ("__6") : expr)]);
+      local_dead "__6";
+      Goto "_bb4"
+     ]>%E $
+     <[
+     "_bb4" :=
+      local_dead "__3";
+      return (move{ (use_op_alg' ((Option_els ((IntSynType U64))) : syn_type)) } ("__0"))
      ]>%E $
       ∅;
      f_init := "_bb0";
@@ -734,6 +995,71 @@ Qed.
 
 
 
+Program Definition u8_checked_sub_def (u8_unchecked_sub_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U8) : layout);
+     ("rhs", (it_layout U8) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ ((Option_els ((IntSynType U8))) : syn_type) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U8) } "__4";
+      "__4" <-{ (IntOp U8) } copy{ (IntOp U8) } ("x");
+      local_live{ (IntSynType U8) } "__5";
+      "__5" <-{ (IntOp U8) } copy{ (IntOp U8) } ("rhs");
+      "__3" <-{ BoolOp } (move{ (IntOp U8) } ("__4")) <{ (IntOp U8) , (IntOp U8) , U8 } (move{ (IntOp U8) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U8))) : syn_type)) } EnumInit (Option_els ((IntSynType U8))) "None" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U8] [])) (StructInit (Option_None_sls ((IntSynType U8))) []);
+      Goto "_bb4"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_live{ (IntSynType U8) } "__6";
+      local_live{ (IntSynType U8) } "__7";
+      "__7" <-{ (IntOp U8) } copy{ (IntOp U8) } ("x");
+      local_live{ (IntSynType U8) } "__8";
+      "__8" <-{ (IntOp U8) } copy{ (IntOp U8) } ("rhs");
+      CallS u8_unchecked_sub_loc [] [] [@{expr} move{ (IntOp U8) } ("__7"); move{ (IntOp U8) } ("__8")] (Some (Na1Ord, (IntOp U8), "__6"))
+      ( Goto "_bb3")
+      ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__8";
+      local_dead "__7";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U8))) : syn_type)) } EnumInit (Option_els ((IntSynType U8))) "Some" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U8] [])) (StructInit (Option_Some_sls ((IntSynType U8))) [("0", move{ (IntOp U8) } ("__6") : expr)]);
+      local_dead "__6";
+      Goto "_bb4"
+     ]>%E $
+     <[
+     "_bb4" :=
+      local_dead "__3";
+      return (move{ (use_op_alg' ((Option_els ((IntSynType U8))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
 Program Definition usize_abs_diff_def (panic_shim_loc: loc) : function :=
   {|
      f_args := [
@@ -809,6 +1135,71 @@ Program Definition usize_abs_diff_def (panic_shim_loc: loc) : function :=
      "_bb5" :=
       local_dead "__3";
       return (move{ (IntOp USize) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition usize_checked_sub_def (usize_unchecked_sub_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout USize) : layout);
+     ("rhs", (it_layout USize) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ ((Option_els ((IntSynType USize))) : syn_type) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType USize) } "__4";
+      "__4" <-{ (IntOp USize) } copy{ (IntOp USize) } ("x");
+      local_live{ (IntSynType USize) } "__5";
+      "__5" <-{ (IntOp USize) } copy{ (IntOp USize) } ("rhs");
+      "__3" <-{ BoolOp } (move{ (IntOp USize) } ("__4")) <{ (IntOp USize) , (IntOp USize) , U8 } (move{ (IntOp USize) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType USize))) : syn_type)) } EnumInit (Option_els ((IntSynType USize))) "None" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt USize] [])) (StructInit (Option_None_sls ((IntSynType USize))) []);
+      Goto "_bb4"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_live{ (IntSynType USize) } "__6";
+      local_live{ (IntSynType USize) } "__7";
+      "__7" <-{ (IntOp USize) } copy{ (IntOp USize) } ("x");
+      local_live{ (IntSynType USize) } "__8";
+      "__8" <-{ (IntOp USize) } copy{ (IntOp USize) } ("rhs");
+      CallS usize_unchecked_sub_loc [] [] [@{expr} move{ (IntOp USize) } ("__7"); move{ (IntOp USize) } ("__8")] (Some (Na1Ord, (IntOp USize), "__6"))
+      ( Goto "_bb3")
+      ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__8";
+      local_dead "__7";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType USize))) : syn_type)) } EnumInit (Option_els ((IntSynType USize))) "Some" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt USize] [])) (StructInit (Option_Some_sls ((IntSynType USize))) [("0", move{ (IntOp USize) } ("__6") : expr)]);
+      local_dead "__6";
+      Goto "_bb4"
+     ]>%E $
+     <[
+     "_bb4" :=
+      local_dead "__3";
+      return (move{ (use_op_alg' ((Option_els ((IntSynType USize))) : syn_type)) } ("__0"))
      ]>%E $
       ∅;
      f_init := "_bb0";
