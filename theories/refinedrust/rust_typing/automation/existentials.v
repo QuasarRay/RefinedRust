@@ -266,13 +266,15 @@ Ltac ex_plain_t_solve_is_xrfn :=
   simpl in *;
   prepare_initial_coq_context_weak;
   iIntros "Ha";
-  ex_t_destruct_hyp "Ha";
-  iFrame "%∗#";
-  repeat iR;
-  iPureIntro;
-  intros Hxr;
-  invert_is_xrfn_assumptions;
-  solve_is_xrfn.
+  lazymatch goal with
+  | |- ?f _ ((_ ∗ ?Q)%I) =>
+      let Hcanonical := fresh "Hcanonical" in
+      iAssert Q as %Hcanonical;
+      [ ex_t_destruct_hyp "Ha";
+        iPureIntro; intros Hxr;
+        invert_is_xrfn_assumptions; solve_is_xrfn
+      | iFrame; done ]
+  end.
 
 Ltac ex_plain_t_solve_ghost_drop_auto :=
   simpl; intro_adt_params;
