@@ -231,6 +231,30 @@
     },
     {
       "kind": "method",
+      "name": "u128_checked_add",
+      "path": [
+        "core",
+        "num",
+        "u128",
+        "checked_add"
+      ],
+      "spec": "type_of_u128_checked_add",
+      "trait_req_incl": "trait_incl_of_u128_checked_add"
+    },
+    {
+      "kind": "method",
+      "name": "u128_checked_mul",
+      "path": [
+        "core",
+        "num",
+        "u128",
+        "checked_mul"
+      ],
+      "spec": "type_of_u128_checked_mul",
+      "trait_req_incl": "trait_incl_of_u128_checked_mul"
+    },
+    {
+      "kind": "method",
       "name": "u128_checked_sub",
       "path": [
         "core",
@@ -267,6 +291,30 @@
     },
     {
       "kind": "method",
+      "name": "u128_unchecked_add",
+      "path": [
+        "core",
+        "num",
+        "u128",
+        "unchecked_add"
+      ],
+      "spec": "type_of_u128_unchecked_add",
+      "trait_req_incl": "trait_incl_of_u128_unchecked_add"
+    },
+    {
+      "kind": "method",
+      "name": "u128_unchecked_mul",
+      "path": [
+        "core",
+        "num",
+        "u128",
+        "unchecked_mul"
+      ],
+      "spec": "type_of_u128_unchecked_mul",
+      "trait_req_incl": "trait_incl_of_u128_unchecked_mul"
+    },
+    {
+      "kind": "method",
       "name": "u128_unchecked_sub",
       "path": [
         "core",
@@ -279,6 +327,18 @@
     },
     {
       "kind": "method",
+      "name": "u128_wrapping_sub",
+      "path": [
+        "core",
+        "num",
+        "u128",
+        "wrapping_sub"
+      ],
+      "spec": "type_of_u128_wrapping_sub",
+      "trait_req_incl": "trait_incl_of_u128_wrapping_sub"
+    },
+    {
+      "kind": "method",
       "name": "u16_abs_diff",
       "path": [
         "core",
@@ -288,6 +348,30 @@
       ],
       "spec": "type_of_u16_abs_diff",
       "trait_req_incl": "trait_incl_of_u16_abs_diff"
+    },
+    {
+      "kind": "method",
+      "name": "u16_checked_add",
+      "path": [
+        "core",
+        "num",
+        "u16",
+        "checked_add"
+      ],
+      "spec": "type_of_u16_checked_add",
+      "trait_req_incl": "trait_incl_of_u16_checked_add"
+    },
+    {
+      "kind": "method",
+      "name": "u16_checked_mul",
+      "path": [
+        "core",
+        "num",
+        "u16",
+        "checked_mul"
+      ],
+      "spec": "type_of_u16_checked_mul",
+      "trait_req_incl": "trait_incl_of_u16_checked_mul"
     },
     {
       "kind": "method",
@@ -327,6 +411,30 @@
     },
     {
       "kind": "method",
+      "name": "u16_unchecked_add",
+      "path": [
+        "core",
+        "num",
+        "u16",
+        "unchecked_add"
+      ],
+      "spec": "type_of_u16_unchecked_add",
+      "trait_req_incl": "trait_incl_of_u16_unchecked_add"
+    },
+    {
+      "kind": "method",
+      "name": "u16_unchecked_mul",
+      "path": [
+        "core",
+        "num",
+        "u16",
+        "unchecked_mul"
+      ],
+      "spec": "type_of_u16_unchecked_mul",
+      "trait_req_incl": "trait_incl_of_u16_unchecked_mul"
+    },
+    {
+      "kind": "method",
       "name": "u16_unchecked_sub",
       "path": [
         "core",
@@ -339,6 +447,18 @@
     },
     {
       "kind": "method",
+      "name": "u16_wrapping_sub",
+      "path": [
+        "core",
+        "num",
+        "u16",
+        "wrapping_sub"
+      ],
+      "spec": "type_of_u16_wrapping_sub",
+      "trait_req_incl": "trait_incl_of_u16_wrapping_sub"
+    },
+    {
+      "kind": "method",
       "name": "u32_abs_diff",
       "path": [
         "core",
@@ -348,6 +468,30 @@
       ],
       "spec": "type_of_u32_abs_diff",
       "trait_req_incl": "trait_incl_of_u32_abs_diff"
+    },
+    {
+      "kind": "method",
+      "name": "u32_checked_add",
+      "path": [
+        "core",
+        "num",
+        "u32",
+        "checked_add"
+      ],
+      "spec": "type_of_u32_checked_add",
+      "trait_req_incl": "trait_incl_of_u32_checked_add"
+    },
+    {
+      "kind": "method",
+      "name": "u32_checked_mul",
+      "path": [
+        "core",
+        "num",
+        "u32",
+        "checked_mul"
+      ],
+      "spec": "type_of_u32_checked_mul",
+      "trait_req_incl": "trait_incl_of_u32_checked_mul"
     },
     {
       "kind": "method",
@@ -387,6 +531,30 @@
     },
     {
       "kind": "method",
+      "name": "u32_unchecked_add",
+      "path": [
+        "core",
+        "num",
+        "u32",
+        "unchecked_add"
+      ],
+      "spec": "type_of_u32_unchecked_add",
+      "trait_req_incl": "trait_incl_of_u32_unchecked_add"
+    },
+    {
+      "kind": "method",
+      "name": "u32_unchecked_mul",
+      "path": [
+        "core",
+        "num",
+        "u32",
+        "unchecked_mul"
+      ],
+      "spec": "type_of_u32_unchecked_mul",
+      "trait_req_incl": "trait_incl_of_u32_unchecked_mul"
+    },
+    {
+      "kind": "method",
       "name": "u32_unchecked_sub",
       "path": [
         "core",
@@ -399,6 +567,18 @@
     },
     {
       "kind": "method",
+      "name": "u32_wrapping_sub",
+      "path": [
+        "core",
+        "num",
+        "u32",
+        "wrapping_sub"
+      ],
+      "spec": "type_of_u32_wrapping_sub",
+      "trait_req_incl": "trait_incl_of_u32_wrapping_sub"
+    },
+    {
+      "kind": "method",
       "name": "u64_abs_diff",
       "path": [
         "core",
@@ -408,6 +588,30 @@
       ],
       "spec": "type_of_u64_abs_diff",
       "trait_req_incl": "trait_incl_of_u64_abs_diff"
+    },
+    {
+      "kind": "method",
+      "name": "u64_checked_add",
+      "path": [
+        "core",
+        "num",
+        "u64",
+        "checked_add"
+      ],
+      "spec": "type_of_u64_checked_add",
+      "trait_req_incl": "trait_incl_of_u64_checked_add"
+    },
+    {
+      "kind": "method",
+      "name": "u64_checked_mul",
+      "path": [
+        "core",
+        "num",
+        "u64",
+        "checked_mul"
+      ],
+      "spec": "type_of_u64_checked_mul",
+      "trait_req_incl": "trait_incl_of_u64_checked_mul"
     },
     {
       "kind": "method",
@@ -447,6 +651,30 @@
     },
     {
       "kind": "method",
+      "name": "u64_unchecked_add",
+      "path": [
+        "core",
+        "num",
+        "u64",
+        "unchecked_add"
+      ],
+      "spec": "type_of_u64_unchecked_add",
+      "trait_req_incl": "trait_incl_of_u64_unchecked_add"
+    },
+    {
+      "kind": "method",
+      "name": "u64_unchecked_mul",
+      "path": [
+        "core",
+        "num",
+        "u64",
+        "unchecked_mul"
+      ],
+      "spec": "type_of_u64_unchecked_mul",
+      "trait_req_incl": "trait_incl_of_u64_unchecked_mul"
+    },
+    {
+      "kind": "method",
       "name": "u64_unchecked_sub",
       "path": [
         "core",
@@ -459,6 +687,18 @@
     },
     {
       "kind": "method",
+      "name": "u64_wrapping_sub",
+      "path": [
+        "core",
+        "num",
+        "u64",
+        "wrapping_sub"
+      ],
+      "spec": "type_of_u64_wrapping_sub",
+      "trait_req_incl": "trait_incl_of_u64_wrapping_sub"
+    },
+    {
+      "kind": "method",
       "name": "u8_abs_diff",
       "path": [
         "core",
@@ -468,6 +708,30 @@
       ],
       "spec": "type_of_u8_abs_diff",
       "trait_req_incl": "trait_incl_of_u8_abs_diff"
+    },
+    {
+      "kind": "method",
+      "name": "u8_checked_add",
+      "path": [
+        "core",
+        "num",
+        "u8",
+        "checked_add"
+      ],
+      "spec": "type_of_u8_checked_add",
+      "trait_req_incl": "trait_incl_of_u8_checked_add"
+    },
+    {
+      "kind": "method",
+      "name": "u8_checked_mul",
+      "path": [
+        "core",
+        "num",
+        "u8",
+        "checked_mul"
+      ],
+      "spec": "type_of_u8_checked_mul",
+      "trait_req_incl": "trait_incl_of_u8_checked_mul"
     },
     {
       "kind": "method",
@@ -507,6 +771,30 @@
     },
     {
       "kind": "method",
+      "name": "u8_unchecked_add",
+      "path": [
+        "core",
+        "num",
+        "u8",
+        "unchecked_add"
+      ],
+      "spec": "type_of_u8_unchecked_add",
+      "trait_req_incl": "trait_incl_of_u8_unchecked_add"
+    },
+    {
+      "kind": "method",
+      "name": "u8_unchecked_mul",
+      "path": [
+        "core",
+        "num",
+        "u8",
+        "unchecked_mul"
+      ],
+      "spec": "type_of_u8_unchecked_mul",
+      "trait_req_incl": "trait_incl_of_u8_unchecked_mul"
+    },
+    {
+      "kind": "method",
       "name": "u8_unchecked_sub",
       "path": [
         "core",
@@ -519,6 +807,18 @@
     },
     {
       "kind": "method",
+      "name": "u8_wrapping_sub",
+      "path": [
+        "core",
+        "num",
+        "u8",
+        "wrapping_sub"
+      ],
+      "spec": "type_of_u8_wrapping_sub",
+      "trait_req_incl": "trait_incl_of_u8_wrapping_sub"
+    },
+    {
+      "kind": "method",
       "name": "usize_abs_diff",
       "path": [
         "core",
@@ -528,6 +828,30 @@
       ],
       "spec": "type_of_usize_abs_diff",
       "trait_req_incl": "trait_incl_of_usize_abs_diff"
+    },
+    {
+      "kind": "method",
+      "name": "usize_checked_add",
+      "path": [
+        "core",
+        "num",
+        "usize",
+        "checked_add"
+      ],
+      "spec": "type_of_usize_checked_add",
+      "trait_req_incl": "trait_incl_of_usize_checked_add"
+    },
+    {
+      "kind": "method",
+      "name": "usize_checked_mul",
+      "path": [
+        "core",
+        "num",
+        "usize",
+        "checked_mul"
+      ],
+      "spec": "type_of_usize_checked_mul",
+      "trait_req_incl": "trait_incl_of_usize_checked_mul"
     },
     {
       "kind": "method",
@@ -567,6 +891,30 @@
     },
     {
       "kind": "method",
+      "name": "usize_unchecked_add",
+      "path": [
+        "core",
+        "num",
+        "usize",
+        "unchecked_add"
+      ],
+      "spec": "type_of_usize_unchecked_add",
+      "trait_req_incl": "trait_incl_of_usize_unchecked_add"
+    },
+    {
+      "kind": "method",
+      "name": "usize_unchecked_mul",
+      "path": [
+        "core",
+        "num",
+        "usize",
+        "unchecked_mul"
+      ],
+      "spec": "type_of_usize_unchecked_mul",
+      "trait_req_incl": "trait_incl_of_usize_unchecked_mul"
+    },
+    {
+      "kind": "method",
       "name": "usize_unchecked_sub",
       "path": [
         "core",
@@ -576,6 +924,18 @@
       ],
       "spec": "type_of_usize_unchecked_sub",
       "trait_req_incl": "trait_incl_of_usize_unchecked_sub"
+    },
+    {
+      "kind": "method",
+      "name": "usize_wrapping_sub",
+      "path": [
+        "core",
+        "num",
+        "usize",
+        "wrapping_sub"
+      ],
+      "spec": "type_of_usize_wrapping_sub",
+      "trait_req_incl": "trait_incl_of_usize_wrapping_sub"
     }
   ],
   "module_dependencies": [
