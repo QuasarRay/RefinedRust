@@ -71,6 +71,19 @@ unsafe impl<A: Allocator + ?Sized> AllocatorClone for &A {}
 
 /// Allocation functions using the global allocator 
 
+// TODO(verification): Trust the public runtime API rather than porting its
+// const-evaluation dispatch, compiler-generated handler, and configurable hooks.
+// The pinned API guarantees divergence but permits either panic or abort.
+#[rr::export_as(alloc::alloc::handle_alloc_error)]
+#[rr::only_spec]
+#[rr::may_unwind_if("True")]
+#[rr::ensures("False")]
+pub fn handle_alloc_error(layout: Layout) -> ! {
+    // TODO(verification): This exported model uses our local Layout type, like
+    // the other allocation API specifications below; its body is not verified.
+    unimplemented!()
+}
+
 #[rr::export_as(alloc::alloc::alloc)]
 #[rr::only_spec]
 #[rr::requires("ly.(layout_sz) > 0")]

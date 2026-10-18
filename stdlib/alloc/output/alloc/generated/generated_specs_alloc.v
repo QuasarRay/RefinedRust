@@ -928,6 +928,21 @@ Definition type_of_alloc_dealloc  :=
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
 
+Definition trait_incl_of_handle_alloc_error  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_handle_alloc_error  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (layout) : ((_)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) layout :@: (layout_Layout_inv_t   -[] -[]);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (ret) : ((_)), ret @ never_t;
+      (* postcondition *) (λ π : thread_id, (⌜(False)%Z⌝)) |
+      (* unwind cond... *) True |
+      (* unwind post... *) (λ π : thread_id, True).
+
 Definition trait_incl_of_realloc  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
