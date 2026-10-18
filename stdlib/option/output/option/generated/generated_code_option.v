@@ -684,6 +684,86 @@ Qed.
 
 
 
+Program Definition Option_T_unwrap_or_else_def (DropGlue_F_drop_glue_loc: loc) (FnOnce_F_unit_call_once_loc: loc) (T_st: syn_type) (F_st: syn_type) : function :=
+  {|
+     f_args := [
+      ("self", (use_layout_alg' (Option_st (T_st))) : layout);
+     ("f", (use_layout_alg' F_st) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ T_st } "__0";
+      local_live{ (IntSynType ISize) } "__3";
+      local_live{ BoolSynType } "__7";
+      local_live{ BoolSynType } "__8";
+      "__7" <-{ BoolOp } val_of_bool false;
+      "__8" <-{ BoolOp } val_of_bool false;
+      "__8" <-{ BoolOp } val_of_bool true;
+      "__7" <-{ BoolOp } val_of_bool true;
+      "__3" <-{ (IntOp ISize) } EnumDiscriminant ((Option_els (T_st))) ("self");
+      Switch (ISize: int_type) (move{ (IntOp ISize) } ("__3")) (<[ 0%Z := 0%nat ]> $ <[ 1%Z := 1%nat ]> $ ∅) ([Goto "_bb2"; Goto "_bb3"]) (Goto "_bb1")
+     ]>%E $
+     <[
+     "_bb1" :=
+      StuckS
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_live{ F_st } "__5";
+      "__7" <-{ BoolOp } val_of_bool false;
+      "__5" <-{ (use_op_alg' F_st) } move{ (use_op_alg' F_st) } ("f");
+      local_live{ UnitSynType } "__6";
+      "__6" <-{ (StructOp unit_sl []) } zst_val;
+      CallS FnOnce_F_unit_call_once_loc [] [RSTTyVar "T"; RSTTyVar "F"] [@{expr} move{ (use_op_alg' F_st) } ("__5"); move{ (StructOp unit_sl []) } ("__6")] (Some (Na1Ord, (use_op_alg' T_st), "__0"))
+      ( Goto "_bb4")
+      ( Goto "_bb6")
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_live{ T_st } "x";
+      "x" <-{ (use_op_alg' T_st) } move{ (use_op_alg' T_st) } ((EnumData ((Option_els (T_st))) "Some" ("self")) at{ (Option_Some_sls (T_st)) } "0");
+      "__0" <-{ (use_op_alg' T_st) } move{ (use_op_alg' T_st) } ("x");
+      local_dead "x";
+      Goto "_bb8"
+     ]>%E $
+     <[
+     "_bb4" :=
+      local_dead "__6";
+      local_dead "__5";
+      Goto "_bb8"
+     ]>%E $
+     <[
+     "_bb5" :=
+      return (move{ (use_op_alg' T_st) } ("__0"))
+     ]>%E $
+     <[
+     "_bb6" :=
+      Unwind
+     ]>%E $
+     <[
+     "_bb7" :=
+      CallS DropGlue_F_drop_glue_loc [] [] [@{expr} &raw{ PRef, Mut } ("f")] None
+      ( Goto "_bb5")
+      ( Goto "_bb6")
+     ]>%E $
+     <[
+     "_bb8" :=
+      if{ BoolOp }: copy{ BoolOp } ("__7") then
+       Goto "_bb7"
+      else
+       Goto "_bb5"
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
 Program Definition drop_glue_Option_def (DropGlue_T_drop_glue_loc: loc) (T_st: syn_type) : function :=
   {|
      f_args := [

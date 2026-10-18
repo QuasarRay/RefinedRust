@@ -747,6 +747,199 @@ Qed.
 
 
 
+Program Definition traits_double_ended_DoubleEndedIterator_try_rfold_def (DropGlue_B_drop_glue_loc: loc) (DropGlue_F_drop_glue_loc: loc) (FnMut_F_BSelfastraits_iterator_Iterator_Item_call_mut_loc: loc) (FromResidual_R_Rasstd_ops_Try_Residual_from_residual_loc: loc) (Try_R_branch_loc: loc) (Try_R_from_output_loc: loc) (traits_double_ended_DoubleEndedIterator_Self_next_back_loc: loc) (Self_st: syn_type) (traits_iterator_Iterator_Self_Item_st: syn_type) (B_st: syn_type) (F_st: syn_type) (R_st: syn_type) (Try_R_Residual_st: syn_type) (Residual_Rasstd_ops_Try_Residual_Rasstd_ops_Try_Output_TryType_st: syn_type) : function :=
+  {|
+     f_args := [
+      ("self", void* : layout);
+     ("init", (use_layout_alg' B_st) : layout);
+     ("f", (use_layout_alg' F_st) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ R_st } "__0";
+      local_live{ UnitSynType } "__6";
+      local_live{ (IntSynType ISize) } "__9";
+      local_live{ (IntSynType ISize) } "__19";
+      local_live{ NeverSynType } "__21";
+      local_live{ NeverSynType } "__24";
+      local_live{ NeverSynType } "__26";
+      local_live{ BoolSynType } "__28";
+      annot{ 1 }: CopyLftNameAnnot "plft5" "ulft_1"; (* initialization *)
+      "__28" <-{ BoolOp } val_of_bool false;
+      local_live{ B_st } "accum";
+      "__28" <-{ BoolOp } val_of_bool true;
+      "accum" <-{ (use_op_alg' B_st) } move{ (use_op_alg' B_st) } ("init");
+      local_live{ UnitSynType } "__5";
+      annot{ 1 }: StratifyContextAnnot; (* goto to loop head *)
+      Goto "_bb1"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_live{ ((Option_els (traits_iterator_Iterator_Self_Item_st)) : syn_type) } "__7";
+      local_live{ RefSynType } "__8";
+      annot{ 1 }: StartLftAnnot "llft3" ["plft5"]; (* borrow *)
+      "__8" <-{ RefOp } &ref{ Mut, Some (RSTTyVar "Self"), "llft3" } (!{ RefOp } ( "self" ));
+      annot{ 1 }: CopyLftNameAnnot "plft6" "llft3"; (* post-assignment *)
+      annot{ 1 }: CopyLftNameAnnot "vlft8" "plft6"; (* function_call *)
+      CallS traits_double_ended_DoubleEndedIterator_Self_next_back_loc ["vlft8"] [RSTTyVar "Self"; RSTTyVar "traits_iterator_Iterator_Self_Item"; RSTTyVar "traits_iterator_Iterator_Self_Item"] [@{expr} move{ RefOp } ("__8")] (Some (Na1Ord, (use_op_alg' ((Option_els (traits_iterator_Iterator_Self_Item_st)) : syn_type)), "__7"))
+      ( annot{ 2 }: EndLftAnnot "llft3"; (* endlft *)
+       Goto "_bb2")
+      ( annot{ 2 }: EndLftAnnot "llft3"; (* endlft *)
+       Goto "_bb16")
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__8";
+      "__9" <-{ (IntOp ISize) } EnumDiscriminant ((Option_els (traits_iterator_Iterator_Self_Item_st))) ("__7");
+      Switch (ISize: int_type) (move{ (IntOp ISize) } ("__9")) (<[ 1%Z := 0%nat ]> $ ∅) ([Goto "_bb3"]) (Goto "_bb10")
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_live{ traits_iterator_Iterator_Self_Item_st } "x";
+      "x" <-{ (use_op_alg' traits_iterator_Iterator_Self_Item_st) } move{ (use_op_alg' traits_iterator_Iterator_Self_Item_st) } ((EnumData ((Option_els (traits_iterator_Iterator_Self_Item_st))) "Some" ("__7")) at{ (Option_Some_sls (traits_iterator_Iterator_Self_Item_st)) } "0");
+      local_live{ B_st } "__12";
+      local_live{ ((ControlFlow_els (Try_R_Residual_st) (B_st)) : syn_type) } "__13";
+      local_live{ R_st } "__14";
+      local_live{ RefSynType } "__15";
+      annot{ 1 }: StartLftAnnot "llft4" ["_flft"]; (* borrow *)
+      "__15" <-{ RefOp } &ref{ Mut, Some (RSTTyVar "F"), "llft4" } ("f");
+      annot{ 1 }: CopyLftNameAnnot "plft7" "llft4"; (* post-assignment *)
+      local_live{ ((tuple2_sls (B_st) (traits_iterator_Iterator_Self_Item_st)) : syn_type) } "__16";
+      local_live{ B_st } "__17";
+      "__28" <-{ BoolOp } val_of_bool false;
+      "__17" <-{ (use_op_alg' B_st) } move{ (use_op_alg' B_st) } ("accum");
+      local_live{ traits_iterator_Iterator_Self_Item_st } "__18";
+      "__18" <-{ (use_op_alg' traits_iterator_Iterator_Self_Item_st) } move{ (use_op_alg' traits_iterator_Iterator_Self_Item_st) } ("x");
+      "__16" <-{ (use_op_alg' ((tuple2_sls (B_st) (traits_iterator_Iterator_Self_Item_st)) : syn_type)) } StructInit (tuple2_sls (B_st) (traits_iterator_Iterator_Self_Item_st)) [("0", move{ (use_op_alg' B_st) } ("__17") : expr); ("1", move{ (use_op_alg' traits_iterator_Iterator_Self_Item_st) } ("__18") : expr)];
+      annot{ 1 }: CopyLftNameAnnot "vlft9" "plft7"; (* function_call *)
+      CallS FnMut_F_BSelfastraits_iterator_Iterator_Item_call_mut_loc ["vlft9"] [RSTTyVar "B"; RSTTyVar "F"; RSTTyVar "R"; RSTTyVar "R"; RSTTyVar "traits_iterator_Iterator_Self_Item"] [@{expr} move{ RefOp } ("__15"); move{ (use_op_alg' ((tuple2_sls (B_st) (traits_iterator_Iterator_Self_Item_st)) : syn_type)) } ("__16")] (Some (Na1Ord, (use_op_alg' R_st), "__14"))
+      ( annot{ 2 }: EndLftAnnot "llft4"; (* endlft *)
+       Goto "_bb4")
+      ( annot{ 2 }: EndLftAnnot "llft4"; (* endlft *)
+       Goto "_bb16")
+     ]>%E $
+     <[
+     "_bb4" :=
+      local_dead "__18";
+      local_dead "__17";
+      local_dead "__16";
+      local_dead "__15";
+      CallS Try_R_branch_loc [] [RSTTyVar "B"; RSTTyVar "R"; RSTTyVar "Residual_Rasstd_ops_Try_Residual_Rasstd_ops_Try_Output_TryType"; RSTTyVar "Residual_Rasstd_ops_Try_Residual_Rasstd_ops_Try_Output_TryType"; RSTTyVar "Try_R_Residual"] [@{expr} move{ (use_op_alg' R_st) } ("__14")] (Some (Na1Ord, (use_op_alg' ((ControlFlow_els (Try_R_Residual_st) (B_st)) : syn_type)), "__13"))
+      ( Goto "_bb5")
+      ( Goto "_bb16")
+     ]>%E $
+     <[
+     "_bb5" :=
+      local_dead "__14";
+      "__19" <-{ (IntOp ISize) } EnumDiscriminant ((ControlFlow_els (Try_R_Residual_st) (B_st))) ("__13");
+      Switch (ISize: int_type) (move{ (IntOp ISize) } ("__19")) (<[ 0%Z := 0%nat ]> $ <[ 1%Z := 1%nat ]> $ ∅) ([Goto "_bb7"; Goto "_bb8"]) (Goto "_bb6")
+     ]>%E $
+     <[
+     "_bb6" :=
+      StuckS
+     ]>%E $
+     <[
+     "_bb7" :=
+      local_live{ B_st } "val";
+      "val" <-{ (use_op_alg' B_st) } move{ (use_op_alg' B_st) } ((EnumData ((ControlFlow_els (Try_R_Residual_st) (B_st))) "Continue" ("__13")) at{ (ControlFlow_Continue_sls (Try_R_Residual_st) (B_st)) } "0");
+      "__12" <-{ (use_op_alg' B_st) } move{ (use_op_alg' B_st) } ("val");
+      local_dead "val";
+      "__28" <-{ BoolOp } val_of_bool true;
+      "accum" <-{ (use_op_alg' B_st) } move{ (use_op_alg' B_st) } ("__12");
+      local_dead "__12";
+      local_dead "__13";
+      "__6" <-{ (StructOp unit_sl []) } zst_val;
+      local_dead "x";
+      local_dead "__7";
+      annot{ 1 }: StratifyContextAnnot; (* goto to loop head *)
+      Goto "_bb1"
+     ]>%E $
+     <[
+     "_bb8" :=
+      local_live{ Try_R_Residual_st } "residual";
+      "residual" <-{ (use_op_alg' Try_R_Residual_st) } move{ (use_op_alg' Try_R_Residual_st) } ((EnumData ((ControlFlow_els (Try_R_Residual_st) (B_st))) "Break" ("__13")) at{ (ControlFlow_Break_sls (Try_R_Residual_st) (B_st)) } "0");
+      local_live{ Try_R_Residual_st } "__22";
+      "__22" <-{ (use_op_alg' Try_R_Residual_st) } move{ (use_op_alg' Try_R_Residual_st) } ("residual");
+      CallS FromResidual_R_Rasstd_ops_Try_Residual_from_residual_loc [] [RSTTyVar "R"; RSTTyVar "Try_R_Residual"] [@{expr} move{ (use_op_alg' Try_R_Residual_st) } ("__22")] (Some (Na1Ord, (use_op_alg' R_st), "__0"))
+      ( Goto "_bb9")
+      ( Goto "_bb16")
+     ]>%E $
+     <[
+     "_bb9" :=
+      local_dead "__22";
+      local_dead "residual";
+      local_dead "__12";
+      local_dead "__13";
+      local_dead "x";
+      local_dead "__7";
+      local_dead "__5";
+      "__28" <-{ BoolOp } val_of_bool false;
+      local_dead "accum";
+      CallS DropGlue_F_drop_glue_loc [] [] [@{expr} &raw{ PRef, Mut } ("f")] None
+      ( Goto "_bb12")
+      ( Goto "_bb14")
+     ]>%E $
+     <[
+     "_bb10" :=
+      local_dead "__7";
+      local_live{ UnitSynType } "__25";
+      "__5" <-{ (StructOp unit_sl []) } zst_val;
+      local_dead "__25";
+      local_dead "__5";
+      local_live{ B_st } "__27";
+      "__28" <-{ BoolOp } val_of_bool false;
+      "__27" <-{ (use_op_alg' B_st) } move{ (use_op_alg' B_st) } ("accum");
+      CallS Try_R_from_output_loc [] [RSTTyVar "B"; RSTTyVar "R"; RSTTyVar "Residual_Rasstd_ops_Try_Residual_Rasstd_ops_Try_Output_TryType"; RSTTyVar "Residual_Rasstd_ops_Try_Residual_Rasstd_ops_Try_Output_TryType"; RSTTyVar "Try_R_Residual"] [@{expr} move{ (use_op_alg' B_st) } ("__27")] (Some (Na1Ord, (use_op_alg' R_st), "__0"))
+      ( Goto "_bb11")
+      ( Goto "_bb16")
+     ]>%E $
+     <[
+     "_bb11" :=
+      local_dead "__27";
+      "__28" <-{ BoolOp } val_of_bool false;
+      local_dead "accum";
+      CallS DropGlue_F_drop_glue_loc [] [] [@{expr} &raw{ PRef, Mut } ("f")] None
+      ( Goto "_bb12")
+      ( Goto "_bb14")
+     ]>%E $
+     <[
+     "_bb12" :=
+      return (move{ (use_op_alg' R_st) } ("__0"))
+     ]>%E $
+     <[
+     "_bb13" :=
+      CallS DropGlue_F_drop_glue_loc [] [] [@{expr} &raw{ PRef, Mut } ("f")] None
+      ( Goto "_bb14")
+      ( UnwindTerminate)
+     ]>%E $
+     <[
+     "_bb14" :=
+      Unwind
+     ]>%E $
+     <[
+     "_bb15" :=
+      CallS DropGlue_B_drop_glue_loc [] [] [@{expr} &raw{ PRef, Mut } ("accum")] None
+      ( Goto "_bb13")
+      ( UnwindTerminate)
+     ]>%E $
+     <[
+     "_bb16" :=
+      if{ BoolOp }: copy{ BoolOp } ("__28") then
+       Goto "_bb15"
+      else
+       Goto "_bb13"
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
 Program Definition traits_iterator_Iterator_all_def (DropGlue_F_drop_glue_loc: loc) (traits_iterator_Iterator_Self_try_fold_unit_closuresrctraitsiteratorrs1431314319_std_ops_ControlFlowunit_loc: loc) (Self_st: syn_type) (Item_st: syn_type) (F_st: syn_type) : function :=
   {|
      f_args := [

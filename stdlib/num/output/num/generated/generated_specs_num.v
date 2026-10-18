@@ -1,5 +1,6 @@
 From radium Require Import lang notation.
 From refinedrust Require Import typing shims.
+From rrstd.option.option.generated Require Export generated_specs_option.
 From rrstd.num.num Require Export generated_code_num.
 
 Section drop_glue_attrs.
@@ -208,6 +209,21 @@ Definition type_of_u128_abs_diff  :=
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
 
+Definition trait_incl_of_u128_checked_sub  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_u128_checked_sub  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (x, rhs) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) x :@: (int U128), rhs :@: (int U128);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, if bool_decide (x >= rhs) then Some (x - rhs)%Z else None @ (Option_ty (Z) -[] -[(int U128)]);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
 Definition trait_incl_of_u16_abs_diff  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
@@ -219,6 +235,21 @@ Definition type_of_u16_abs_diff  :=
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ _ : unit, Z.abs (x - other) @ (int U16);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_u16_checked_sub  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_u16_checked_sub  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (x, rhs) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) x :@: (int U16), rhs :@: (int U16);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, if bool_decide (x >= rhs) then Some (x - rhs)%Z else None @ (Option_ty (Z) -[] -[(int U16)]);
       (* postcondition *) (λ π : thread_id, True) |
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
@@ -238,6 +269,21 @@ Definition type_of_u32_abs_diff  :=
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
 
+Definition trait_incl_of_u32_checked_sub  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_u32_checked_sub  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (x, rhs) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) x :@: (int U32), rhs :@: (int U32);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, if bool_decide (x >= rhs) then Some (x - rhs)%Z else None @ (Option_ty (Z) -[] -[(int U32)]);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
 Definition trait_incl_of_u64_abs_diff  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
@@ -249,6 +295,21 @@ Definition type_of_u64_abs_diff  :=
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ _ : unit, Z.abs (x - other) @ (int U64);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_u64_checked_sub  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_u64_checked_sub  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (x, rhs) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) x :@: (int U64), rhs :@: (int U64);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, if bool_decide (x >= rhs) then Some (x - rhs)%Z else None @ (Option_ty (Z) -[] -[(int U64)]);
       (* postcondition *) (λ π : thread_id, True) |
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
@@ -268,6 +329,21 @@ Definition type_of_u8_abs_diff  :=
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
 
+Definition trait_incl_of_u8_checked_sub  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_u8_checked_sub  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (x, rhs) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) x :@: (int U8), rhs :@: (int U8);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, if bool_decide (x >= rhs) then Some (x - rhs)%Z else None @ (Option_ty (Z) -[] -[(int U8)]);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
 Definition trait_incl_of_usize_abs_diff  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
@@ -279,6 +355,21 @@ Definition type_of_usize_abs_diff  :=
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ _ : unit, Z.abs (x - other) @ (int USize);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_usize_checked_sub  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_usize_checked_sub  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (x, rhs) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) x :@: (int USize), rhs :@: (int USize);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, if bool_decide (x >= rhs) then Some (x - rhs)%Z else None @ (Option_ty (Z) -[] -[(int USize)]);
       (* postcondition *) (λ π : thread_id, True) |
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
@@ -389,6 +480,36 @@ Definition type_of_u128_is_power_of_two  :=
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
 
+Definition trait_incl_of_u128_saturating_sub  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_u128_saturating_sub  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (x, rhs) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) x :@: (int U128), rhs :@: (int U128);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, Z.max 0%Z (x - rhs)%Z @ (int U128);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_u128_unchecked_sub  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_u128_unchecked_sub  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (x, rhs) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) x :@: (int U128), rhs :@: (int U128);
+      (* precondition. *) (λ π : thread_id, (⌜((rhs ≤ x)%Z)%Z⌝)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, (x - rhs)%Z @ (int U128);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
 Definition trait_incl_of_u16_is_power_of_two  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
@@ -400,6 +521,36 @@ Definition type_of_u16_is_power_of_two  :=
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ _ : unit, bool_decide (is_power_of_two (Z.to_nat x)) @ bool_t;
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_u16_saturating_sub  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_u16_saturating_sub  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (x, rhs) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) x :@: (int U16), rhs :@: (int U16);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, Z.max 0%Z (x - rhs)%Z @ (int U16);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_u16_unchecked_sub  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_u16_unchecked_sub  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (x, rhs) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) x :@: (int U16), rhs :@: (int U16);
+      (* precondition. *) (λ π : thread_id, (⌜((rhs ≤ x)%Z)%Z⌝)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, (x - rhs)%Z @ (int U16);
       (* postcondition *) (λ π : thread_id, True) |
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
@@ -419,6 +570,36 @@ Definition type_of_u32_is_power_of_two  :=
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
 
+Definition trait_incl_of_u32_saturating_sub  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_u32_saturating_sub  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (x, rhs) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) x :@: (int U32), rhs :@: (int U32);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, Z.max 0%Z (x - rhs)%Z @ (int U32);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_u32_unchecked_sub  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_u32_unchecked_sub  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (x, rhs) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) x :@: (int U32), rhs :@: (int U32);
+      (* precondition. *) (λ π : thread_id, (⌜((rhs ≤ x)%Z)%Z⌝)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, (x - rhs)%Z @ (int U32);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
 Definition trait_incl_of_u64_is_power_of_two  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
@@ -430,6 +611,36 @@ Definition type_of_u64_is_power_of_two  :=
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ _ : unit, bool_decide (is_power_of_two (Z.to_nat x)) @ bool_t;
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_u64_saturating_sub  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_u64_saturating_sub  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (x, rhs) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) x :@: (int U64), rhs :@: (int U64);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, Z.max 0%Z (x - rhs)%Z @ (int U64);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_u64_unchecked_sub  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_u64_unchecked_sub  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (x, rhs) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) x :@: (int U64), rhs :@: (int U64);
+      (* precondition. *) (λ π : thread_id, (⌜((rhs ≤ x)%Z)%Z⌝)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, (x - rhs)%Z @ (int U64);
       (* postcondition *) (λ π : thread_id, True) |
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
@@ -449,6 +660,36 @@ Definition type_of_u8_is_power_of_two  :=
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
 
+Definition trait_incl_of_u8_saturating_sub  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_u8_saturating_sub  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (x, rhs) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) x :@: (int U8), rhs :@: (int U8);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, Z.max 0%Z (x - rhs)%Z @ (int U8);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_u8_unchecked_sub  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_u8_unchecked_sub  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (x, rhs) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) x :@: (int U8), rhs :@: (int U8);
+      (* precondition. *) (λ π : thread_id, (⌜((rhs ≤ x)%Z)%Z⌝)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, (x - rhs)%Z @ (int U8);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
 Definition trait_incl_of_usize_is_power_of_two  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
@@ -460,6 +701,36 @@ Definition type_of_usize_is_power_of_two  :=
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ _ : unit, bool_decide (is_power_of_two (Z.to_nat x)) @ bool_t;
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_usize_saturating_sub  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_usize_saturating_sub  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (x, rhs) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) x :@: (int USize), rhs :@: (int USize);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, Z.max 0%Z (x - rhs)%Z @ (int USize);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_usize_unchecked_sub  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_usize_unchecked_sub  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (x, rhs) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) x :@: (int USize), rhs :@: (int USize);
+      (* precondition. *) (λ π : thread_id, (⌜((rhs ≤ x)%Z)%Z⌝)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, (x - rhs)%Z @ (int USize);
       (* postcondition *) (λ π : thread_id, True) |
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).

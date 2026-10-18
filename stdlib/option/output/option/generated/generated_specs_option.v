@@ -402,6 +402,26 @@ Definition type_of_Option_T_unwrap_or (T_rt: RT) (T_st: syn_type) (DropGlue_T_sp
       (* unwind cond... *) is_Some self ∧ DropGlue_T_spec_attrs.(DropGlue_DropGlueUnwind) |
       (* unwind post... *) (λ π : thread_id, True).
 
+Definition trait_incl_of_Option_T_unwrap_or_else (T_rt: RT) (F_rt: RT) (T_st: syn_type) (F_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) (FnOnce_F_unit_spec_attrs: (FnOnce_spec_attrs (RRGS:=RRGS) (F_rt) unit (T_rt) )) (FnOnce_F_unit_realization: (trait_spec_realization (spec_with 0 [] (FnOnce_spec (RRGS:=RRGS) (F_rt) unit (T_rt))))) (DropGlue_F_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (F_rt) )) (DropGlue_F_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (F_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[T_ty; F_ty]) : ([T_rt; F_rt] : list RT), (λ π, ((∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π)
+    ∗ (∃ (FnOnce_F_unit_lfts_inst : prod_vec lft FnOnce_F_unit_realization.(trait_ctx_lfts)) (FnOnce_F_unit_tys_inst : plist type FnOnce_F_unit_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl FnOnce_spec_incl (FnOnce_F_unit_realization.(trait_ctx_spec) FnOnce_F_unit_lfts_inst FnOnce_F_unit_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), FnOnce_base_spec (F_rt) unit (T_rt) F_st UnitSynType T_st DropGlue_F_spec_attrs (drop_glue_trivial_spec_attrs (unit)) DropGlue_T_spec_attrs FnOnce_F_unit_spec_attrs-[] -[F_ty; unit_t; T_ty]))⌝ ∗ FnOnce_F_unit_realization.(trait_ctx_wf) FnOnce_F_unit_lfts_inst FnOnce_F_unit_tys_inst π)
+    ∗ (∃ (DropGlue_F_lfts_inst : prod_vec lft DropGlue_F_realization.(trait_ctx_lfts)) (DropGlue_F_tys_inst : plist type DropGlue_F_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_F_realization.(trait_ctx_spec) DropGlue_F_lfts_inst DropGlue_F_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (F_rt) F_st DropGlue_F_spec_attrs-[] -[F_ty]))⌝ ∗ DropGlue_F_realization.(trait_ctx_wf) DropGlue_F_lfts_inst DropGlue_F_tys_inst π))%I).
+
+Definition type_of_Option_T_unwrap_or_else (T_rt: RT) (F_rt: RT) (T_st: syn_type) (F_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (FnOnce_F_unit_spec_attrs: (FnOnce_spec_attrs (RRGS:=RRGS) (F_rt) unit (T_rt) )) (DropGlue_F_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (F_rt) )) :=
+  fn(∀ ( *[]) : 0 | ( *[T_ty; F_ty]) : ([(T_rt, T_st); (F_rt, F_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (op, self, f) : ((_ * _ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) self :@: (Option_ty ((T_rt)) -[] -[T_ty]), f :@: F_ty;
+      (* precondition. *) (λ π : thread_id, (if_iSome self (λ _, ⌜op = None⌝))
+        ∗ (if_iNone self (∃ p, ⌜op = Some p⌝ ∗ FnOnce_F_unit_spec_attrs.(FnOnce_Pre) π p f ()))) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (ret) : ((_)), ret @ T_ty;
+      (* postcondition *) (λ π : thread_id, (if_iSome self (λ x, ⌜ret = x⌝ ∗ ty_ghost_drop F_ty π ($# f)))
+      ∗ (if_iNone self (∃ p, ⌜op = Some p⌝ ∗ FnOnce_F_unit_spec_attrs.(FnOnce_Post) π p f () ret))) |
+      (* unwind cond... *) if_Some self (λ _, DropGlue_F_spec_attrs.(DropGlue_DropGlueUnwind)) ∧
+                                if_None self (∃ p, op = Some p ∧ FnOnce_F_unit_spec_attrs.(FnOnce_UnwindCondition) f p ()) |
+      (* unwind post... *) (λ π : thread_id, True).
+
 Definition trait_incl_of_drop_glue_Option (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), (λ π, ((∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π))%I).
 

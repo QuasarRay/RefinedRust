@@ -194,6 +194,18 @@
     },
     {
       "kind": "method",
+      "name": "Option_T_unwrap_or_else",
+      "path": [
+        "core",
+        "option",
+        "Option",
+        "unwrap_or_else"
+      ],
+      "spec": "type_of_Option_T_unwrap_or_else",
+      "trait_req_incl": "trait_incl_of_Option_T_unwrap_or_else"
+    },
+    {
+      "kind": "method",
       "name": "Option_T_unwrap_unchecked",
       "path": [
         "core",

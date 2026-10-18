@@ -103,6 +103,18 @@
     },
     {
       "kind": "function",
+      "name": "traits_double_ended_DoubleEndedIterator_try_rfold",
+      "path": [
+        "core",
+        "iter",
+        "DoubleEndedIterator",
+        "try_rfold"
+      ],
+      "spec": "traits_double_ended_DoubleEndedIterator_try_rfold_base_spec",
+      "trait_req_incl": "trait_incl_of_traits_double_ended_DoubleEndedIterator_try_rfold"
+    },
+    {
+      "kind": "function",
       "name": "traits_iterator_Iterator_all",
       "path": [
         "core",
@@ -354,6 +366,25 @@
       ],
       "spec": "type_of_adapters_take_Take_I_new",
       "trait_req_incl": "trait_incl_of_adapters_take_Take_I_new"
+    },
+    {
+      "allowed_attrs": [
+        "NextBack"
+      ],
+      "assoc_tys": [],
+      "attrs_dependent": true,
+      "has_semantic_interp": false,
+      "kind": "trait",
+      "method_trait_incl_decls": {
+        "next_back": "trait_incl_of_traits_double_ended_DoubleEndedIterator_next_back",
+        "try_rfold": "trait_incl_of_traits_double_ended_DoubleEndedIterator_try_rfold"
+      },
+      "name": "traits_double_ended_DoubleEndedIterator",
+      "path": [
+        "core",
+        "iter",
+        "DoubleEndedIterator"
+      ]
     },
     {
       "allowed_attrs": [
