@@ -86,9 +86,9 @@ struct Node<T> {
     element: T,
 }
 
-#[rr::refined_by("xs" : "listRT (place_rfnRT {rt_of T})")]
+#[rr::refined_by("xs" : "listRT (directRT {xt_of T})")]
 #[rr::depends_on(Node)]
-#[rr::exists("all_elems" : "list (place_rfn {rt_of T})")]
+#[rr::exists("all_elems" : "list {xt_of T}")]
 #[rr::exists("locs" : "list loc")]
 #[rr::exists("idx" : "nat")]
 #[rr::exists("back_idx" : "nat")]
@@ -99,7 +99,7 @@ struct Node<T> {
 #[rr::inv("Hnonnull" : "Forall (λ l, l.(loc_a) ≠ 0) locs")]
 #[rr::inv("Hbound" : "length all_elems ≤ MaxInt usize")]
 #[rr::inv(#iris "LL
-    (λ l next prev elem, guarded false (l ◁ₗ[π, Shared {'a}] #((next, prev, elem)) @ ◁(Node_inv_t {rt_of T} <TY> {T} <INST!>)))
+    (λ l next prev elem, guarded false (l ◁ₗ[π, Shared {'a}] #((next, prev, #($# elem))) @ ◁(Node_inv_t {rt_of T} <TY> {T} <INST!>)))
     (λ _ _, True) all_elems locs tt")]
 #[rr::ty_lfts("ty_lfts {T}")]
 #[rr::ty_wf_E("ty_wf_E {T}")]

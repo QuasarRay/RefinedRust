@@ -16,15 +16,18 @@ Proof.
   rep <-! liRStep; liShow.
   1: rep liRStep.
   1: liInst Hevar_all_elems all_elems.
+  1: rep liRStep.
+  1: liInst Hevar_rf (drop idx (take back_idx all_elems)).
   1: rep <-! liRStep; liShow.
 
-  destruct x0 as [ | x_head xs]; first done.
+  remember (drop idx (take back_idx all_elems)) as x0 eqn:Hsuffix in *.
+  destruct x0 as [ | x_head xs].
+  { have Hempty := f_equal (@length _) Hsuffix.
+    rewrite length_drop length_take Nat.min_l in Hempty; last lia.
+    simpl in Hempty. lia. }
   simpl in Hsuffix.
   have Hdrop_len := f_equal (@length _) Hsuffix.
    rewrite length_drop length_take Nat.min_l in Hdrop_len; last lia. simpl in Hdrop_len.
-   have Hmap_len : length ((PlaceIn ∘ RT_xrt T_rt) <$> xs) = length xs :=
-     length_fmap _ _.
-   rewrite Hmap_len in Hdrop_len.
   assert (idx < length all_elems) as Hidxlt.
   { lia. }
   assert (S (length xs) <= length all_elems)%nat as Hremainle.
@@ -34,8 +37,8 @@ Proof.
   { solve_goal. }
   assert ((Z.of_nat (S (length xs)) - 1)%Z ≤ MaxInt usize)%Z as Hdecr_upper by lia.
   destruct (lookup_lt_is_Some_2 locs idx) as (l & Hloc); first lia.
-  have Helem : all_elems !! idx = Some (# $#@{T_rt} x_head).
-     { have Hlookup : take back_idx all_elems !! idx = Some (# $#@{T_rt} x_head).
+  have Helem : all_elems !! idx = Some x_head.
+     { have Hlookup : take back_idx all_elems !! idx = Some x_head.
      { rewrite -(Nat.add_0_r idx) -lookup_drop -Hsuffix. done. }
      rewrite lookup_take decide_True in Hlookup; last lia. done. }
 
@@ -52,7 +55,7 @@ Proof.
   rep <-! liRStep; liShow.
 
   { rep liRStep. liShow.
-    1: liInst Hevar_rf (PlaceIn ∘ RT_xrt T_rt <$> xs).
+    1: liInst Hevar_rf xs.
     1: liInst Hevar_all_elems all_elems.
     1: liInst Hevar_locs locs.
      1: liInst Hevar_idx (S idx).
@@ -64,6 +67,8 @@ Proof.
   Unshelve. all: sidecond_solver.
   Unshelve. all: sidecond_hammer.
 
+   - apply length_zero_iff_nil.
+     rewrite length_drop length_take Nat.min_l; lia.
    - move: Hsuffix.
      erewrite drop_S. 2: { rewrite lookup_take decide_True; [done | lia]. }
     intros [= <-]. done.

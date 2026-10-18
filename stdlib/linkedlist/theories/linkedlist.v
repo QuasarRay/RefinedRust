@@ -18,6 +18,32 @@ Definition LinkedListRT (T A : RT) : RT :=
       p.(linked_list_locs) p.(linked_list_alloc)).
 Canonical Structure LinkedListRT.
 
+Global Instance is_xrfn_linked_list (T A : RT) elems locs alloc
+    `{!IsXrfn (rt := listRT (place_rfnRT T)) elems} :
+  IsXrfn (rt := LinkedListRT T A) (mk_linked_list_x elems locs alloc).
+Proof.
+  constructor. destruct (is_xrfn_proof (r := elems)) as [xs ->].
+  exists (mk_linked_list_x xs locs alloc). done.
+Qed.
+
+Lemma is_xrfn_linked_list_elem (T A : RT) (x : LinkedListRT T A) elem :
+  is_xrfn x → elem ∈ linked_list_elems x →
+  is_xrfn (rt := place_rfnRT T) elem.
+Proof.
+  intros Hcanonical Hmember.
+  assert (Hlist : is_xrfn (rt := listRT (place_rfnRT T)) (linked_list_elems x)).
+  { destruct Hcanonical as [xr ->]. exists (linked_list_elems xr). done. }
+  apply is_xrfn_list_iff in Hlist.
+  eapply Forall_forall; eauto.
+Qed.
+
+Global Hint Extern 10 (IsXrfn ?elem) =>
+  match goal with
+  | Houter : is_xrfn (rt := LinkedListRT _ _) ?x,
+    Hmember : ?elem ∈ linked_list_elems ?x |- _ =>
+      constructor; exact (is_xrfn_linked_list_elem _ _ x elem Houter Hmember)
+  end : typeclass_instances.
+
 (** A shared cursor records its list snapshot and position. *)
 Record CursorX (L : Type) : Type := mk_cursor_x {
   shared_cursor_list : L;
@@ -303,6 +329,13 @@ Section list_ownership.
 
 End list_ownership.
 
+Lemma LL_fmap `{!typeGS Σ} {E E' A : Type}
+    (node : loc → option loc → option loc → E' → iProp Σ)
+    (freeable : A → loc → iProp Σ) (f : E → E') elems locs alloc :
+  LL node freeable (f <$> elems) locs alloc ⊣⊢
+  LL (λ l next prev elem, node l next prev (f elem)) freeable elems locs alloc.
+Proof. by rewrite /LL big_sepL_fmap. Qed.
+
 Section list_ownership_freeable.
   Context `{!typeGS Σ}.
   Context {E A : Type}.
@@ -401,25 +434,41 @@ Section list_ownership_sharing.
     iSplitL "Hnode"; by iApply as_shared_to_pred.
   Qed.
 
-  Local Definition LL_item_shr π κ κs locs alloc
-      (Hnode : ∀ l next prev elem, Shareable π κ κs (node l next prev elem))
-      (Hfree : ∀ l, Shareable π κ κs (freeable alloc l)) i elem :
-    Shareable π κ κs (LL_item node freeable locs alloc i elem).
+  Local Definition LL_item_shr {rt : RT} π κ κs (outer : rt) assumptions locs alloc i elem
+      (Hnode : ∀ l next prev, Shareable π κ κs outer assumptions (node l next prev elem))
+      (Hfree : ∀ l, Shareable π κ κs outer assumptions (freeable alloc l)) :
+    Shareable π κ κs outer assumptions (LL_item node freeable locs alloc i elem).
   Proof. unfold LL_item. typeclasses eauto. Defined.
 
-  Global Program Instance LL_shareable π κ κs elems locs alloc
-      `{Hnode : ∀ l next prev elem, Shareable π κ κs (node l next prev elem)}
-      `{Hfree : ∀ l, Shareable π κ κs (freeable alloc l)} :
-    Shareable π κ κs (LL node freeable elems locs alloc) | 1 := {|
+  Local Definition LL_shareable_weaken {rt : RT} π κ κs (outer : rt)
+      (assumptions assumptions' : Prop) (P : iProp Σ)
+      (Himpl : assumptions' → assumptions)
+      (Shr : Shareable π κ κs outer assumptions P) :
+    Shareable π κ κs outer assumptions' P := {|
+      shareable_prop := Shr.(shareable_prop);
+      shareable_proof Ha := Shr.(shareable_proof) (Himpl Ha);
+    |}.
+
+  Global Program Instance LL_shareable {rt : RT} π κ κs (outer : rt) assumptions elems locs alloc
+      `{Hnode : ∀ l next prev elem, Shareable π κ κs outer
+          (assumptions ∧ elem ∈ elems) (node l next prev elem)}
+      `{Hfree : ∀ l, Shareable π κ κs outer assumptions (freeable alloc l)} :
+    Shareable π κ κs outer assumptions (LL node freeable elems locs alloc) | 1 := {|
       shareable_prop :=
         LL (λ l next prev elem, (Hnode l next prev elem).(shareable_prop))
            (λ _ l, (Hfree l).(shareable_prop)) elems locs alloc;
     |}.
   Next Obligation.
-    intros π κ κs elems locs alloc Hnode Hfree.
-    set (Hitem := LL_item_shr π κ κs locs alloc Hnode Hfree).
-    exact (@shareable_proof _ _ π κ κs _ (big_sepL_shareable π κ κs elems
-      (LL_item node freeable locs alloc) Hitem)).
+    intros rt π κ κs outer assumptions elems locs alloc Hnode Hfree.
+    set (Hitem := λ i elem,
+      LL_item_shr π κ κs outer (assumptions ∧ elems !! i = Some elem) locs alloc i elem
+        (λ l next prev, LL_shareable_weaken π κ κs outer _ _ _
+          (λ Ha, conj (proj1 Ha) (list_elem_of_lookup_2 _ _ _ (proj2 Ha)))
+          (Hnode l next prev elem))
+        (λ l, LL_shareable_weaken π κ κs outer _ _ _ (@proj1 _ _) (Hfree l))).
+    exact (@shareable_proof _ _ rt π κ κs outer assumptions _
+      (big_sepL_shareable π κ κs outer assumptions elems
+        (LL_item node freeable locs alloc) Hitem)).
   Qed.
 
   Local Definition LL_item_drop locs alloc

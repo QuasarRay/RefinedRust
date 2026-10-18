@@ -38,7 +38,7 @@ Proof.
       rewrite list_fmap_id list_fmap_compose.
       rep <-! <3000 liRStep; liShow.
     }
-    { liRStepUntil typed_call.
+    { rep <-! <3000 liRStep.
       3: { (* impossible subtraction overflow *)
         exfalso. solve [sidecond_solver].
       }
@@ -52,6 +52,7 @@ Proof.
         exfalso. solve [sidecond_solver].
       }
       2: { (* backward traversal *)
+        rep <-! <3000 liRStep.
         liShow.
         iApply updateable_add_fupd.
         iRename select (_ ◁ₗ[π, Owned] _ @ ◁ LinkedList_inv_t _ _ _ _ _)%I into "Hlist".

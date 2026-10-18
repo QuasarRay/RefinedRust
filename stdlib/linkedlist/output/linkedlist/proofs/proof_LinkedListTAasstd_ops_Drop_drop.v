@@ -15,7 +15,13 @@ Proof.
   liRStepUntil (typed_val_expr _ _ _ (&ref{Mut,_,_} _)%E). 
   change ((&ref{Mut,_,_} (!{RefOp} "self"))%E) with ((&raw{PRef,Mut} (!{RefOp} "self"))%E).
   liRStepUntil (typed_stmt _ _ _ (Goto _)).
-  rep <-! liRStep. 
+  rep liRStep.
+  match goal with
+  | |- @is_xrfn ?rt ?r ∧ _ =>
+      assert (IsXrfn (rt := rt) r) as Hcanonical by
+        (constructor; exists x'; destruct x'; done)
+  end.
+  rep <-! liRStep.
   { rename select (head remaining = Some _) into Hrem.
     destruct remaining as [|xhead remaining]; simpl in *; first done.
     injection Hrem as <-.

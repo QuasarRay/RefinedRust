@@ -14,6 +14,12 @@ Proof.
 
   1: rep <-! <500 liRStep.
   1: rep <-! <500 liRStep.
+  rep liRStep.
+  match goal with
+  | |- @is_xrfn ?rt ?r ∧ _ =>
+      assert (IsXrfn (rt := rt) r) as Hcanonical by
+        (constructor; exists x'; destruct x'; done)
+  end.
   rep <-! liRStep.
   { rep liRStep.
     liInst Hevar_self (tail remaining').
