@@ -275,6 +275,17 @@
     },
     {
       "kind": "function",
+      "name": "handle_alloc_error",
+      "path": [
+        "alloc",
+        "alloc",
+        "handle_alloc_error"
+      ],
+      "spec": "type_of_handle_alloc_error",
+      "trait_req_incl": "trait_incl_of_handle_alloc_error"
+    },
+    {
+      "kind": "function",
       "name": "realloc",
       "path": [
         "alloc",
