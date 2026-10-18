@@ -175,6 +175,81 @@ Proof.
   rewrite /has_layout_val ly_size_mk_array_layout in Hvsize. nia.
 Qed.
 
+(* Shrinking keeps the semantic ownership of the retained element prefix. *)
+Lemma raw_vec_array_bytes_shrink `{!refinedrustGS Σ} {rt} (ty : type rt) π l ly (n : nat) rs :
+  syn_type_has_layout (st_of ty MetaNone) ly →
+  l ◁ₗ[π, Owned] #rs @ ◁ array_t n (maybe_uninit ty) ={lftE}=∗
+  ∃ v : val,
+    ⌜length v = (ly_size ly * n)%nat⌝ ∗
+    l ◁ₗ[π, Owned] #v @ ◁ value_t false (LiteralSynType (mk_array_layout ly n)) ∗
+    (∀ l' (m : nat), ⌜m ≤ n⌝%nat -∗
+      ⌜(ly_size ly * m ≤ MaxInt ISize)%Z⌝ -∗
+      l' ◁ₗ[π, Owned] #(take (ly_size ly * m) v) @ ◁ value_t false (LiteralSynType (mk_array_layout ly m)) ={lftE}=∗
+      l' ◁ₗ[π, Owned] #(take m rs) @ ◁ array_t m (maybe_uninit ty)).
+Proof.
+  intros Hlayout.
+  have Hmaybe : syn_type_has_layout (st_of (maybe_uninit ty) MetaNone) ly
+    by apply syn_type_has_layout_untyped.
+  have Hmaybe_alg : use_layout_alg (st_of (maybe_uninit ty) MetaNone) = Some ly
+    by apply syn_type_has_layout_op_alg in Hmaybe as (? & ? & ?); solve_layout_alg.
+  rewrite ltype_own_ofty_unfold /lty_of_ty_own.
+  iIntros "(%array_ly & %Hlayout' & %Halign & _ & #Hbounds & %rs' & -> & Hv)".
+  apply syn_type_has_layout_array_inv in Hlayout' as (ly' & Hlayout' & -> & Hsize).
+  have Hly : ly' = ly by eapply syn_type_has_layout_inj. subst ly'.
+  rewrite ly_size_mk_array_layout Nat2Z.inj_mul in Hsize.
+  iMod "Hv" as (v) "[Hl Hsaved]".
+  have Harray : syn_type_has_layout (st_of (array_t n (maybe_uninit ty)) MetaNone) (mk_array_layout ly n).
+  { eapply syn_type_has_layout_array; [reflexivity | exact Hmaybe | exact Hsize]. }
+  iPoseProof (ty_own_val_has_layout _ _ _ _ _ _ Harray with "Hsaved") as "%Hvsize".
+  iPoseProof (array_t_rfn_length_eq with "Hsaved") as "%Hrs".
+  iModIntro. iExists v. iSplitR; first done. iSplitL "Hl".
+  { rewrite ltype_own_ofty_unfold /lty_of_ty_own.
+    iExists (mk_array_layout ly n). iSplitR.
+    { iPureIntro. apply syn_type_has_layout_untyped.
+      eapply syn_type_has_layout_make_literal; [reflexivity | exact Harray]. }
+    iR. iSplitR; first by rewrite /value_t /ty_sidecond /=. iFrame "Hbounds".
+    iExists v. iR. iModIntro. iExists v. iFrame "Hl".
+    iApply value_t_untyped_equiv. iExists (mk_array_layout ly n). iR.
+    iSplitR; last done. iPureIntro.
+    eapply syn_type_has_layout_make_literal; [reflexivity | exact Harray]. }
+  iIntros (l' m Hmn Hsize').
+  iIntros "Hbytes".
+  iPoseProof (array_t_own_val_split (maybe_uninit ty) π m (n - m)
+    (take (ly_size ly * m) v) (drop (ly_size ly * m) v)
+    (take m rs') (drop m rs') MetaNone with "[Hsaved]") as "[Hprefix _]".
+  { rewrite length_take Hrs. lia. }
+  { rewrite length_drop Hrs. done. }
+  { rewrite length_take /size_of_st /use_layout_alg' Hmaybe_alg /=.
+    rewrite /has_layout_val ly_size_mk_array_layout in Hvsize. nia. }
+  { rewrite length_drop /size_of_st /use_layout_alg' Hmaybe_alg /=.
+    rewrite /has_layout_val ly_size_mk_array_layout in Hvsize. nia. }
+  { rewrite !take_drop. replace (m + (n - m))%nat with n by lia. done. }
+  rewrite ltype_own_ofty_unfold /lty_of_ty_own.
+  iDestruct "Hbytes" as "(%ly' & %Hnewlayout & %Halign' & _ & #Hbounds' & %v' & <- & Hv)".
+  apply syn_type_has_layout_untyped_inv in Hnewlayout.
+  apply syn_type_has_layout_literal_inv in Hnewlayout as (-> & _).
+  iMod "Hv" as (bytes) "[Hl Hv]".
+  iDestruct (value_t_untyped_equiv with "Hv") as "(%ly' & -> & %Halg & %Hbytes)".
+  iModIntro. rewrite ltype_own_ofty_unfold /lty_of_ty_own.
+  iExists (mk_array_layout ly m). iSplitR.
+  { iPureIntro. eapply syn_type_has_layout_array; [reflexivity | exact Hmaybe | exact Hsize']. }
+  iR. iSplitR; first done. iFrame "Hbounds'".
+  iExists (take m rs'). iR. iModIntro. iExists (take (ly_size ly * m) v).
+  iFrame "Hl Hprefix".
+Qed.
+
+Lemma raw_vec_shrink_capacity (size stored requested : nat) :
+  (requested ≤ raw_vec_effective_capacity size stored)%nat →
+  let stored' := if decide (size * stored = 0)%nat then stored else requested in
+  (stored' ≤ stored)%nat ∧
+  raw_vec_effective_capacity size stored' = raw_vec_effective_capacity size requested ∧
+  (size * stored' = size * requested)%nat.
+Proof.
+  intros Hrequested. cbn zeta.
+  unfold raw_vec_effective_capacity in *.
+  repeat case_decide; repeat split; nia.
+Qed.
+
 (* With a valid logical length, wrapping subtraction is ordinary subtraction. *)
 Lemma raw_vec_capacity_sub_no_wrap (cap : nat) (len : Z) :
   (cap ≤ MaxInt USize)%Z →

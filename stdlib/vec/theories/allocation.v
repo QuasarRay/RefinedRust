@@ -18,6 +18,13 @@ Proof.
   unfold rust_layout_to_layout. simpl. f_equal. exact Halign.
 Qed.
 
+Lemma raw_vec_alignment_roundtrip ly :
+  alignment_of_align (layout_alignment_nat ly) = layout_alignment ly.
+Proof.
+  rewrite /layout_alignment_nat /alignment_to_align_nat Nat2Z.inj_pow /=.
+  rewrite -/alignment_to_align alignment_from_to. reflexivity.
+Qed.
+
 Section allocation.
   Context `{!refinedrustGS Σ}.
 
@@ -145,6 +152,42 @@ Section allocation.
     { iPureIntro. unfold raw_vec_effective_capacity.
       destruct (decide (ly_size ly = 0%nat)) as [Hzero | Hnonzero]; last done.
       rewrite Hzero. pose proof (MaxInt_ge_127 ISize). lia. }
+    iModIntro. iFrame. done.
+  Qed.
+
+  Lemma raw_vec_array_storage_shrink {rt} (ty : type rt) π freeable l (stored : nat) ly rs :
+    syn_type_has_layout (st_of ty MetaNone) ly →
+    (ly_size ly * stored ≤ MaxInt ISize)%Z →
+    l.(loc_a) ≠ 0 → l `has_layout_loc` ly →
+    let cap := raw_vec_effective_capacity (ly_size ly) stored in
+    (if decide (ly_size ly * cap = 0)%nat then True else freeable l (ly_size ly * cap)%nat) -∗
+    l ◁ₗ[π, Owned] #rs @ ◁ array_t cap (maybe_uninit ty) ={lftE}=∗
+    ∃ v : val, ⌜length v = (ly_size ly * stored)%nat⌝ ∗ raw_vec_storage π freeable l stored ly v ∗
+    (∀ l' (stored' : nat),
+      ⌜raw_vec_effective_capacity (ly_size ly) stored' ≤ cap⌝%nat -∗
+      ⌜(ly_size ly * stored' ≤ MaxInt ISize)%Z⌝ -∗
+      raw_vec_storage π freeable l' stored' ly (take (ly_size ly * stored') v) ={lftE}=∗
+      ⌜l'.(loc_a) ≠ 0 ∧ l' `has_layout_loc` ly⌝ ∗
+      (if decide (ly_size ly * raw_vec_effective_capacity (ly_size ly) stored' = 0)%nat
+       then True else freeable l' (ly_size ly * raw_vec_effective_capacity (ly_size ly) stored')%nat) ∗
+      l' ◁ₗ[π, Owned] #(take (raw_vec_effective_capacity (ly_size ly) stored') rs)
+        @ ◁ array_t (raw_vec_effective_capacity (ly_size ly) stored') (maybe_uninit ty)).
+  Proof.
+    intros Hlayout Hsize Hnonnull Halign. cbn zeta. iIntros "Hfree Harray".
+    iMod (raw_vec_array_bytes_shrink with "Harray") as (v) "(%Hlength & Hbytes & Hrestore)"; first done.
+    iMod (raw_vec_bytes_storage with "Hfree Hbytes") as "Hstorage"; [done.. |].
+    iModIntro. iExists v. iSplitR.
+    { iPureIntro. rewrite Hlength. unfold raw_vec_effective_capacity. case_decide; nia. }
+    iFrame "Hstorage".
+    iIntros (l' stored' Hcap Hsize') "Hstorage".
+    iPoseProof (raw_vec_storage_bytes ty with "Hstorage") as "(%Hptr & Hfree & Hbytes)"; [done.. |].
+    have Hbytesize : (ly_size ly * raw_vec_effective_capacity (ly_size ly) stored' = ly_size ly * stored')%nat.
+    { unfold raw_vec_effective_capacity. case_decide; nia. }
+    iMod ("Hrestore" with "[] [] [Hbytes]") as "Harray"; [done | | |].
+    { iPureIntro. unfold raw_vec_effective_capacity.
+      destruct (decide (ly_size ly = 0%nat)) as [Hzero | Hnonzero]; last done.
+      rewrite Hzero. pose proof (MaxInt_ge_127 ISize). lia. }
+    { by rewrite Hbytesize. }
     iModIntro. iFrame. done.
   Qed.
 

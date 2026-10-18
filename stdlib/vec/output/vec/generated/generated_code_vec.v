@@ -113,6 +113,51 @@ Section code.
 Context `{!LayoutAlg}.
 Open Scope printing_sugar.
 
+Program Definition RawVecTAasstd_ops_Drop_drop_def (layout_Layout_new_T_loc: loc) (raw_vec_implRawVecInnerA_deallocate_A_loc: loc) (T_st: syn_type) (A_st: syn_type) : function :=
+  {|
+     f_args := [
+      ("self", void* : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ UnitSynType } "__0";
+      annot{ 1 }: CopyLftNameAnnot "plft4" "ulft_1"; (* initialization *)
+      local_live{ RefSynType } "__2";
+      annot{ 1 }: StartLftAnnot "llft3" ["plft4"]; (* borrow *)
+      "__2" <-{ RefOp } &ref{ Mut, Some (RSTLitType ["RawVecInner_inv_t"] (RSTScopeInst [] [RSTTyVar "A"] [AppDef ["Allocator_A_spec_attrs"] []])), "llft3" } ((!{ RefOp } ( "self" )) at{ (RawVec_sls (T_st) (A_st)) } "inner");
+      annot{ 1 }: CopyLftNameAnnot "plft5" "llft3"; (* post-assignment *)
+      local_live{ (layout_Layout_sls : syn_type) } "__3";
+      CallS layout_Layout_new_T_loc [] [RSTTyVar "T"] [@{expr} ] (Some (Na1Ord, (use_op_alg' (layout_Layout_sls : syn_type)), "__3"))
+      ( Goto "_bb1")
+      ( annot{ 2 }: EndLftAnnot "llft3"; (* endlft *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      annot{ 1 }: CopyLftNameAnnot "vlft6" "plft5"; (* function_call *)
+      CallS raw_vec_implRawVecInnerA_deallocate_A_loc ["vlft6"] [RSTTyVar "A"] [@{expr} move{ RefOp } ("__2"); move{ (use_op_alg' (layout_Layout_sls : syn_type)) } ("__3")] (Some (Na1Ord, (StructOp unit_sl []), "__0"))
+      ( annot{ 2 }: EndLftAnnot "llft3"; (* endlft *)
+       Goto "_bb2")
+      ( annot{ 2 }: EndLftAnnot "llft3"; (* endlft *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__3";
+      local_dead "__2";
+      return (move{ (StructOp unit_sl []) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
 Program Definition Vec_TA_is_empty_def (Vec_TA_len_T_A_loc: loc) (T_st: syn_type) (A_st: syn_type) : function :=
   {|
      f_args := [
@@ -178,6 +223,52 @@ Qed.
 
 
 
+Program Definition drop_glue_RawVec_def (RawVecTAasstd_ops_Drop_drop_T_A_loc: loc) (drop_glue_RawVecInner_A_loc: loc) (T_st: syn_type) (A_st: syn_type) : function :=
+  {|
+     f_args := [
+      ("ptr", void* : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ UnitSynType } "ret";
+      local_live{ RefSynType } "__2";
+      local_live{ UnitSynType } "__3";
+      "__2" <-{ RefOp } copy{ RefOp } ("ptr");
+      CallS RawVecTAasstd_ops_Drop_drop_T_A_loc ["_flft"] [RSTTyVar "T"; RSTTyVar "A"] [@{expr} move{ RefOp } ("__2")] (Some (Na1Ord, (StructOp unit_sl []), "__3"))
+      ( Goto "_bb4")
+      ( Goto "_bb3")
+     ]>%E $
+     <[
+     "_bb1" :=
+      return (zst_val)
+     ]>%E $
+     <[
+     "_bb2" :=
+      Unwind
+     ]>%E $
+     <[
+     "_bb3" :=
+      CallS drop_glue_RawVecInner_A_loc [] [RSTTyVar "A"] [@{expr} &raw{ PRef, Mut } ((!{ RefOp } ( "ptr" )) at{ (RawVec_sls (T_st) (A_st)) } "inner")] None
+      ( Goto "_bb2")
+      ( UnwindTerminate)
+     ]>%E $
+     <[
+     "_bb4" :=
+      CallS drop_glue_RawVecInner_A_loc [] [RSTTyVar "A"] [@{expr} &raw{ PRef, Mut } ((!{ RefOp } ( "ptr" )) at{ (RawVec_sls (T_st) (A_st)) } "inner")] None
+      ( Goto "_bb1")
+      ( Unwind)
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
 Program Definition drop_glue_RawVecInner_def (DropGlue_A_drop_glue_loc: loc) (A_st: syn_type) : function :=
   {|
      f_args := [
@@ -194,6 +285,88 @@ Program Definition drop_glue_RawVecInner_def (DropGlue_A_drop_glue_loc: loc) (A_
      <[
      "_bb1" :=
       return (zst_val)
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition raw_vec_capacity_overflow_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ NeverSynType } "__0";
+      local_live{ NeverSynType } "__1";
+      CallS panic_shim_loc [] [] [@{expr} ] None
+      ( StuckS)
+      ( Unwind)
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition raw_vec_handle_error_def (errors_TryReserveError_kind_loc: loc) (handle_alloc_error_loc: loc) (raw_vec_capacity_overflow_loc: loc) : function :=
+  {|
+     f_args := [
+      ("e", (use_layout_alg' (errors_TryReserveError_sls : syn_type)) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ NeverSynType } "__0";
+      local_live{ (IntSynType ISize) } "__4";
+      local_live{ (errors_TryReserveErrorKind_els : syn_type) } "__2";
+      local_live{ RefSynType } "__3";
+      annot{ 1 }: StartLftAnnot "llft2" ["_flft"]; (* borrow *)
+      "__3" <-{ RefOp } &ref{ Shr, Some (RSTLitType ["errors_TryReserveError_inv_t"] (RSTScopeInst [] [] [])), "llft2" } ("e");
+      annot{ 1 }: CopyLftNameAnnot "plft3" "llft2"; (* post-assignment *)
+      annot{ 1 }: CopyLftNameAnnot "vlft4" "plft3"; (* function_call *)
+      CallS errors_TryReserveError_kind_loc ["vlft4"] [] [@{expr} move{ RefOp } ("__3")] (Some (Na1Ord, (use_op_alg' (errors_TryReserveErrorKind_els : syn_type)), "__2"))
+      ( annot{ 2 }: EndLftAnnot "llft2"; (* endlft *)
+       Goto "_bb1")
+      ( annot{ 2 }: EndLftAnnot "llft2"; (* endlft *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__3";
+      "__4" <-{ (IntOp ISize) } EnumDiscriminant (errors_TryReserveErrorKind_els) ("__2");
+      Switch (ISize: int_type) (move{ (IntOp ISize) } ("__4")) (<[ 0%Z := 0%nat ]> $ <[ 1%Z := 1%nat ]> $ ∅) ([Goto "_bb4"; Goto "_bb3"]) (Goto "_bb2")
+     ]>%E $
+     <[
+     "_bb2" :=
+      StuckS
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_live{ (layout_Layout_sls : syn_type) } "layout";
+      "layout" <-{ (use_op_alg' (layout_Layout_sls : syn_type)) } copy{ (use_op_alg' (layout_Layout_sls : syn_type)) } ((EnumData (errors_TryReserveErrorKind_els) "AllocError" ("__2")) at{ errors_TryReserveErrorKind_AllocError_sls } "layout");
+      local_live{ (layout_Layout_sls : syn_type) } "__6";
+      "__6" <-{ (use_op_alg' (layout_Layout_sls : syn_type)) } copy{ (use_op_alg' (layout_Layout_sls : syn_type)) } ("layout");
+      CallS handle_alloc_error_loc [] [] [@{expr} move{ (use_op_alg' (layout_Layout_sls : syn_type)) } ("__6")] (Some (Na1Ord, NeverOp, "__0"))
+      ( StuckS)
+      ( Unwind)
+     ]>%E $
+     <[
+     "_bb4" :=
+      CallS raw_vec_capacity_overflow_loc [] [] [@{expr} ] (Some (Na1Ord, NeverOp, "__0"))
+      ( StuckS)
+      ( Unwind)
      ]>%E $
       ∅;
      f_init := "_bb0";
@@ -431,6 +604,98 @@ Program Definition raw_vec_implRawVecInnerA_current_memory_def (Tasconvert_IntoU
       local_dead "__6";
       local_dead "__3";
       return (move{ (use_op_alg' ((Option_els (((tuple2_sls (((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) ((layout_Layout_sls : syn_type))) : syn_type))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition raw_vec_implRawVecInnerA_deallocate_def (allocation_deallocate_raw_A_loc: loc) (raw_vec_implRawVecInnerA_current_memory_A_loc: loc) (A_st: syn_type) : function :=
+  {|
+     f_args := [
+      ("self", void* : layout);
+     ("elem_layout", (use_layout_alg' (layout_Layout_sls : syn_type)) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ UnitSynType } "__0";
+      local_live{ (IntSynType ISize) } "__6";
+      annot{ 1 }: CopyLftNameAnnot "plft6" "ulft_1"; (* initialization *)
+      local_live{ ((Option_els (((tuple2_sls (((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) ((layout_Layout_sls : syn_type))) : syn_type))) : syn_type) } "__3";
+      local_live{ RefSynType } "__4";
+      annot{ 1 }: StartLftAnnot "llft3" ["plft6"]; (* borrow *)
+      "__4" <-{ RefOp } &ref{ Shr, Some (RSTLitType ["RawVecInner_inv_t"] (RSTScopeInst [] [RSTTyVar "A"] [AppDef ["Allocator_A_spec_attrs"] []])), "llft3" } (!{ RefOp } ( "self" ));
+      annot{ 1 }: CopyLftNameAnnot "plft7" "llft3"; (* post-assignment *)
+      local_live{ (layout_Layout_sls : syn_type) } "__5";
+      "__5" <-{ (use_op_alg' (layout_Layout_sls : syn_type)) } copy{ (use_op_alg' (layout_Layout_sls : syn_type)) } ("elem_layout");
+      annot{ 1 }: CopyLftNameAnnot "vlft10" "plft7"; (* function_call *)
+      CallS raw_vec_implRawVecInnerA_current_memory_A_loc ["vlft10"] [RSTTyVar "A"] [@{expr} move{ RefOp } ("__4"); move{ (use_op_alg' (layout_Layout_sls : syn_type)) } ("__5")] (Some (Na1Ord, (use_op_alg' ((Option_els (((tuple2_sls (((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) ((layout_Layout_sls : syn_type))) : syn_type))) : syn_type)), "__3"))
+      ( annot{ 2 }: EndLftAnnot "llft3"; (* endlft *)
+       Goto "_bb1")
+      ( annot{ 2 }: EndLftAnnot "llft3"; (* endlft *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__6" <-{ (IntOp ISize) } EnumDiscriminant ((Option_els (((tuple2_sls (((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) ((layout_Layout_sls : syn_type))) : syn_type)))) ("__3");
+      Switch (ISize: int_type) (move{ (IntOp ISize) } ("__6")) (<[ 1%Z := 0%nat ]> $ ∅) ([Goto "_bb2"]) (Goto "_bb4")
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_live{ ((nonnull_NonNull_sls ((IntSynType U8))) : syn_type) } "ptr";
+      "ptr" <-{ (use_op_alg' ((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) } copy{ (use_op_alg' ((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) } (((EnumData ((Option_els (((tuple2_sls (((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) ((layout_Layout_sls : syn_type))) : syn_type)))) "Some" ("__3")) at{ (Option_Some_sls (((tuple2_sls (((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) ((layout_Layout_sls : syn_type))) : syn_type))) } "0") at{ (tuple2_sls (((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) ((layout_Layout_sls : syn_type))) } "0");
+      local_live{ (layout_Layout_sls : syn_type) } "layout";
+      "layout" <-{ (use_op_alg' (layout_Layout_sls : syn_type)) } copy{ (use_op_alg' (layout_Layout_sls : syn_type)) } (((EnumData ((Option_els (((tuple2_sls (((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) ((layout_Layout_sls : syn_type))) : syn_type)))) "Some" ("__3")) at{ (Option_Some_sls (((tuple2_sls (((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) ((layout_Layout_sls : syn_type))) : syn_type))) } "0") at{ (tuple2_sls (((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) ((layout_Layout_sls : syn_type))) } "1");
+      local_live{ UnitSynType } "__9";
+      local_live{ RefSynType } "__10";
+      local_live{ RefSynType } "__11";
+      annot{ 1 }: StartLftAnnot "llft4" ["plft6"]; (* borrow *)
+      "__11" <-{ RefOp } &ref{ Shr, Some (RSTTyVar "A"), "llft4" } ((!{ RefOp } ( "self" )) at{ (RawVecInner_sls (A_st)) } "alloc");
+      annot{ 1 }: CopyLftNameAnnot "plft9" "llft4"; (* post-assignment *)
+      annot{ 1 }: CopyLftNameAnnot "vlft5" "plft9"; (* borrow *)
+      "__10" <-{ RefOp } &ref{ Shr, Some (RSTTyVar "A"), "vlft5" } (!{ RefOp } ( "__11" ));
+      annot{ 1 }: CopyLftNameAnnot "plft8" "vlft5"; (* post-assignment *)
+      local_live{ ((nonnull_NonNull_sls ((IntSynType U8))) : syn_type) } "__12";
+      "__12" <-{ (use_op_alg' ((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) } copy{ (use_op_alg' ((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) } ("ptr");
+      local_live{ (layout_Layout_sls : syn_type) } "__13";
+      "__13" <-{ (use_op_alg' (layout_Layout_sls : syn_type)) } copy{ (use_op_alg' (layout_Layout_sls : syn_type)) } ("layout");
+      annot{ 1 }: CopyLftNameAnnot "vlft11" "plft8"; (* function_call *)
+      CallS allocation_deallocate_raw_A_loc ["vlft11"] [RSTTyVar "A"] [@{expr} move{ RefOp } ("__10"); move{ (use_op_alg' ((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) } ("__12"); move{ (use_op_alg' (layout_Layout_sls : syn_type)) } ("__13")] (Some (Na1Ord, (StructOp unit_sl []), "__9"))
+      ( annot{ 2 }: EndLftAnnot "llft4"; (* endlft *)
+       Goto "_bb3")
+      ( annot{ 2 }: EndLftAnnot "llft4"; (* endlft *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__13";
+      local_dead "__12";
+      local_dead "__11";
+      local_dead "__10";
+      local_dead "__9";
+      "__0" <-{ (StructOp unit_sl []) } zst_val;
+      local_dead "layout";
+      local_dead "ptr";
+      local_dead "__3";
+      Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb4" :=
+      local_dead "__3";
+      "__0" <-{ (StructOp unit_sl []) } zst_val;
+      Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb5" :=
+      return (move{ (StructOp unit_sl []) } ("__0"))
      ]>%E $
       ∅;
      f_init := "_bb0";
@@ -1961,6 +2226,540 @@ Qed.
 
 
 
+Program Definition raw_vec_implRawVecInnerA_shrink_def (layout_Layout_size_loc: loc) (panic_shim_loc: loc) (raw_vec_implRawVecInnerA_capacity_A_loc: loc) (raw_vec_implRawVecInnerA_shrink_unchecked_A_loc: loc) (A_st: syn_type) : function :=
+  {|
+     f_args := [
+      ("self", void* : layout);
+     ("cap", (it_layout USize) : layout);
+     ("elem_layout", (use_layout_alg' (layout_Layout_sls : syn_type)) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ ((Result_els (UnitSynType) ((errors_TryReserveError_sls : syn_type))) : syn_type) } "__0";
+      annot{ 1 }: CopyLftNameAnnot "plft7" "ulft_1"; (* initialization *)
+      local_live{ UnitSynType } "__4";
+      local_live{ BoolSynType } "__5";
+      local_live{ (IntSynType USize) } "__6";
+      "__6" <-{ (IntOp USize) } copy{ (IntOp USize) } ("cap");
+      local_live{ (IntSynType USize) } "__7";
+      local_live{ RefSynType } "__8";
+      annot{ 1 }: StartLftAnnot "llft3" ["plft7"]; (* borrow *)
+      "__8" <-{ RefOp } &ref{ Shr, Some (RSTLitType ["RawVecInner_inv_t"] (RSTScopeInst [] [RSTTyVar "A"] [AppDef ["Allocator_A_spec_attrs"] []])), "llft3" } (!{ RefOp } ( "self" ));
+      annot{ 1 }: CopyLftNameAnnot "plft8" "llft3"; (* post-assignment *)
+      local_live{ (IntSynType USize) } "__9";
+      local_live{ RefSynType } "__10";
+      annot{ 1 }: StartLftAnnot "llft4" ["_flft"]; (* borrow *)
+      "__10" <-{ RefOp } &ref{ Shr, Some (RSTLitType ["layout_Layout_inv_t"] (RSTScopeInst [] [] [])), "llft4" } ("elem_layout");
+      annot{ 1 }: CopyLftNameAnnot "plft9" "llft4"; (* post-assignment *)
+      annot{ 1 }: CopyLftNameAnnot "vlft11" "plft9"; (* function_call *)
+      CallS layout_Layout_size_loc ["vlft11"] [] [@{expr} move{ RefOp } ("__10")] (Some (Na1Ord, (IntOp USize), "__9"))
+      ( annot{ 2 }: EndLftAnnot "llft4"; (* endlft *)
+       Goto "_bb1")
+      ( annot{ 2 }: EndLftAnnot "llft4"; (* endlft *)
+       annot{ 2 }: EndLftAnnot "llft3"; (* endlft *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__10";
+      annot{ 1 }: CopyLftNameAnnot "vlft12" "plft8"; (* function_call *)
+      CallS raw_vec_implRawVecInnerA_capacity_A_loc ["vlft12"] [RSTTyVar "A"] [@{expr} move{ RefOp } ("__8"); move{ (IntOp USize) } ("__9")] (Some (Na1Ord, (IntOp USize), "__7"))
+      ( annot{ 2 }: EndLftAnnot "llft3"; (* endlft *)
+       Goto "_bb2")
+      ( annot{ 2 }: EndLftAnnot "llft3"; (* endlft *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__9";
+      local_dead "__8";
+      "__5" <-{ BoolOp } (move{ (IntOp USize) } ("__6")) ≤{ (IntOp USize) , (IntOp USize) , U8 } (move{ (IntOp USize) } ("__7"));
+      if{ BoolOp }: move{ BoolOp } ("__5") then
+       Goto "_bb3"
+      else
+       Goto "_bb4"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__7";
+      local_dead "__6";
+      "__4" <-{ (StructOp unit_sl []) } zst_val;
+      local_dead "__5";
+      local_dead "__4";
+      local_live{ RefSynType } "__12";
+      annot{ 1 }: StartLftAnnot "llft5" ["plft7"]; (* borrow *)
+      "__12" <-{ RefOp } &ref{ Mut, Some (RSTLitType ["RawVecInner_inv_t"] (RSTScopeInst [] [RSTTyVar "A"] [AppDef ["Allocator_A_spec_attrs"] []])), "llft5" } (!{ RefOp } ( "self" ));
+      annot{ 1 }: CopyLftNameAnnot "plft10" "llft5"; (* post-assignment *)
+      local_live{ (IntSynType USize) } "__13";
+      "__13" <-{ (IntOp USize) } copy{ (IntOp USize) } ("cap");
+      local_live{ (layout_Layout_sls : syn_type) } "__14";
+      "__14" <-{ (use_op_alg' (layout_Layout_sls : syn_type)) } copy{ (use_op_alg' (layout_Layout_sls : syn_type)) } ("elem_layout");
+      annot{ 1 }: CopyLftNameAnnot "vlft13" "plft10"; (* function_call *)
+      CallS raw_vec_implRawVecInnerA_shrink_unchecked_A_loc ["vlft13"] [RSTTyVar "A"] [@{expr} move{ RefOp } ("__12"); move{ (IntOp USize) } ("__13"); move{ (use_op_alg' (layout_Layout_sls : syn_type)) } ("__14")] (Some (Na1Ord, (use_op_alg' ((Result_els (UnitSynType) ((errors_TryReserveError_sls : syn_type))) : syn_type)), "__0"))
+      ( annot{ 2 }: EndLftAnnot "llft5"; (* endlft *)
+       Goto "_bb5")
+      ( annot{ 2 }: EndLftAnnot "llft5"; (* endlft *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb4" :=
+      local_dead "__7";
+      local_dead "__6";
+      local_live{ NeverSynType } "__11";
+      CallS panic_shim_loc [] [] [@{expr} ] None
+      ( StuckS)
+      ( Unwind)
+     ]>%E $
+     <[
+     "_bb5" :=
+      local_dead "__14";
+      local_dead "__13";
+      local_dead "__12";
+      return (move{ (use_op_alg' ((Result_els (UnitSynType) ((errors_TryReserveError_sls : syn_type))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition raw_vec_implRawVecInnerA_shrink_to_fit_def (raw_vec_handle_error_loc: loc) (raw_vec_implRawVecInnerA_shrink_A_loc: loc) (A_st: syn_type) : function :=
+  {|
+     f_args := [
+      ("self", void* : layout);
+     ("cap", (it_layout USize) : layout);
+     ("elem_layout", (use_layout_alg' (layout_Layout_sls : syn_type)) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ UnitSynType } "__0";
+      local_live{ (IntSynType ISize) } "__8";
+      local_live{ NeverSynType } "__10";
+      annot{ 1 }: CopyLftNameAnnot "plft4" "ulft_1"; (* initialization *)
+      local_live{ ((Result_els (UnitSynType) ((errors_TryReserveError_sls : syn_type))) : syn_type) } "__4";
+      local_live{ RefSynType } "__5";
+      annot{ 1 }: StartLftAnnot "llft3" ["plft4"]; (* borrow *)
+      "__5" <-{ RefOp } &ref{ Mut, Some (RSTLitType ["RawVecInner_inv_t"] (RSTScopeInst [] [RSTTyVar "A"] [AppDef ["Allocator_A_spec_attrs"] []])), "llft3" } (!{ RefOp } ( "self" ));
+      annot{ 1 }: CopyLftNameAnnot "plft5" "llft3"; (* post-assignment *)
+      local_live{ (IntSynType USize) } "__6";
+      "__6" <-{ (IntOp USize) } copy{ (IntOp USize) } ("cap");
+      local_live{ (layout_Layout_sls : syn_type) } "__7";
+      "__7" <-{ (use_op_alg' (layout_Layout_sls : syn_type)) } copy{ (use_op_alg' (layout_Layout_sls : syn_type)) } ("elem_layout");
+      annot{ 1 }: CopyLftNameAnnot "vlft6" "plft5"; (* function_call *)
+      CallS raw_vec_implRawVecInnerA_shrink_A_loc ["vlft6"] [RSTTyVar "A"] [@{expr} move{ RefOp } ("__5"); move{ (IntOp USize) } ("__6"); move{ (use_op_alg' (layout_Layout_sls : syn_type)) } ("__7")] (Some (Na1Ord, (use_op_alg' ((Result_els (UnitSynType) ((errors_TryReserveError_sls : syn_type))) : syn_type)), "__4"))
+      ( annot{ 2 }: EndLftAnnot "llft3"; (* endlft *)
+       Goto "_bb1")
+      ( annot{ 2 }: EndLftAnnot "llft3"; (* endlft *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__7";
+      local_dead "__6";
+      local_dead "__5";
+      "__8" <-{ (IntOp ISize) } EnumDiscriminant ((Result_els (UnitSynType) ((errors_TryReserveError_sls : syn_type)))) ("__4");
+      Switch (ISize: int_type) (move{ (IntOp ISize) } ("__8")) (<[ 1%Z := 0%nat ]> $ ∅) ([Goto "_bb2"]) (Goto "_bb3")
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_live{ (errors_TryReserveError_sls : syn_type) } "err";
+      "err" <-{ (use_op_alg' (errors_TryReserveError_sls : syn_type)) } move{ (use_op_alg' (errors_TryReserveError_sls : syn_type)) } ((EnumData ((Result_els (UnitSynType) ((errors_TryReserveError_sls : syn_type)))) "Err" ("__4")) at{ (Result_Err_sls (UnitSynType) ((errors_TryReserveError_sls : syn_type))) } "0");
+      local_live{ NeverSynType } "__11";
+      local_live{ (errors_TryReserveError_sls : syn_type) } "__12";
+      "__12" <-{ (use_op_alg' (errors_TryReserveError_sls : syn_type)) } move{ (use_op_alg' (errors_TryReserveError_sls : syn_type)) } ("err");
+      CallS raw_vec_handle_error_loc [] [] [@{expr} move{ (use_op_alg' (errors_TryReserveError_sls : syn_type)) } ("__12")] (Some (Na1Ord, NeverOp, "__11"))
+      ( StuckS)
+      ( Unwind)
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__4";
+      "__0" <-{ (StructOp unit_sl []) } zst_val;
+      return (move{ (StructOp unit_sl []) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition raw_vec_implRawVecInnerA_shrink_unchecked_def (Result_TE_map_err_mutu8_std_alloc_AllocError_std_collections_TryReserveErrorKind_closuresrcraw_vecrs7222572228_loc: loc) (allocation_deallocate_raw_A_loc: loc) (allocation_shrink_raw_A_loc: loc) (layout_Layout_align_loc: loc) (layout_Layout_from_size_align_unchecked_loc: loc) (layout_Layout_size_loc: loc) (raw_vec_implRawVecInnerA_current_memory_A_loc: loc) (raw_vec_implRawVecInnerA_set_ptr_and_cap_A_loc: loc) (std_result_ResultTEasTry_branch_mutu8_std_collections_TryReserveErrorKind_loc: loc) (std_result_ResultTFasFromResidualstd_result_ResultE_from_residual_unit_std_collections_TryReserveErrorKind_std_collections_TryReserveError_loc: loc) (unique_Unique_T_new_unchecked_u8_loc: loc) (usize_unchecked_mul_loc: loc) (without_provenance_mut_u8_loc: loc) (A_st: syn_type) : function :=
+  {|
+     f_args := [
+      ("self", void* : layout);
+     ("cap", (it_layout USize) : layout);
+     ("elem_layout", (use_layout_alg' (layout_Layout_sls : syn_type)) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ ((Result_els (UnitSynType) ((errors_TryReserveError_sls : syn_type))) : syn_type) } "__0";
+      local_live{ NeverSynType } "__4";
+      local_live{ (IntSynType ISize) } "__11";
+      local_live{ (IntSynType ISize) } "__43";
+      local_live{ NeverSynType } "__45";
+      annot{ 1 }: CopyLftNameAnnot "plft15" "ulft_1"; (* initialization *)
+      local_live{ ((Option_els (((tuple2_sls (((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) ((layout_Layout_sls : syn_type))) : syn_type))) : syn_type) } "__8";
+      local_live{ RefSynType } "__9";
+      annot{ 1 }: StartLftAnnot "llft3" ["plft15"]; (* borrow *)
+      "__9" <-{ RefOp } &ref{ Shr, Some (RSTLitType ["RawVecInner_inv_t"] (RSTScopeInst [] [RSTTyVar "A"] [AppDef ["Allocator_A_spec_attrs"] []])), "llft3" } (!{ RefOp } ( "self" ));
+      annot{ 1 }: CopyLftNameAnnot "plft16" "llft3"; (* post-assignment *)
+      local_live{ (layout_Layout_sls : syn_type) } "__10";
+      "__10" <-{ (use_op_alg' (layout_Layout_sls : syn_type)) } copy{ (use_op_alg' (layout_Layout_sls : syn_type)) } ("elem_layout");
+      annot{ 1 }: CopyLftNameAnnot "vlft27" "plft16"; (* function_call *)
+      CallS raw_vec_implRawVecInnerA_current_memory_A_loc ["vlft27"] [RSTTyVar "A"] [@{expr} move{ RefOp } ("__9"); move{ (use_op_alg' (layout_Layout_sls : syn_type)) } ("__10")] (Some (Na1Ord, (use_op_alg' ((Option_els (((tuple2_sls (((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) ((layout_Layout_sls : syn_type))) : syn_type))) : syn_type)), "__8"))
+      ( annot{ 2 }: EndLftAnnot "llft3"; (* endlft *)
+       Goto "_bb1")
+      ( annot{ 2 }: EndLftAnnot "llft3"; (* endlft *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__10";
+      local_dead "__9";
+      "__11" <-{ (IntOp ISize) } EnumDiscriminant ((Option_els (((tuple2_sls (((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) ((layout_Layout_sls : syn_type))) : syn_type)))) ("__8");
+      Switch (ISize: int_type) (move{ (IntOp ISize) } ("__11")) (<[ 1%Z := 0%nat ]> $ ∅) ([Goto "_bb2"]) (Goto "_bb3")
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_live{ ((nonnull_NonNull_sls ((IntSynType U8))) : syn_type) } "ptr";
+      "ptr" <-{ (use_op_alg' ((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) } copy{ (use_op_alg' ((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) } (((EnumData ((Option_els (((tuple2_sls (((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) ((layout_Layout_sls : syn_type))) : syn_type)))) "Some" ("__8")) at{ (Option_Some_sls (((tuple2_sls (((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) ((layout_Layout_sls : syn_type))) : syn_type))) } "0") at{ (tuple2_sls (((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) ((layout_Layout_sls : syn_type))) } "0");
+      local_live{ (layout_Layout_sls : syn_type) } "layout";
+      "layout" <-{ (use_op_alg' (layout_Layout_sls : syn_type)) } copy{ (use_op_alg' (layout_Layout_sls : syn_type)) } (((EnumData ((Option_els (((tuple2_sls (((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) ((layout_Layout_sls : syn_type))) : syn_type)))) "Some" ("__8")) at{ (Option_Some_sls (((tuple2_sls (((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) ((layout_Layout_sls : syn_type))) : syn_type))) } "0") at{ (tuple2_sls (((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) ((layout_Layout_sls : syn_type))) } "1");
+      local_dead "__8";
+      local_live{ UnitSynType } "__12";
+      local_live{ BoolSynType } "__13";
+      local_live{ (IntSynType USize) } "__14";
+      "__14" <-{ (IntOp USize) } copy{ (IntOp USize) } ("cap");
+      "__13" <-{ BoolOp } (move{ (IntOp USize) } ("__14")) = { (IntOp USize) , (IntOp USize) , U8 } (i2v (0) USize);
+      if{ BoolOp }: move{ BoolOp } ("__13") then
+       Goto "_bb4"
+      else
+       Goto "_bb9"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__8";
+      local_live{ UnitSynType } "__5";
+      "__5" <-{ (StructOp unit_sl []) } zst_val;
+      "__0" <-{ (use_op_alg' ((Result_els (UnitSynType) ((errors_TryReserveError_sls : syn_type))) : syn_type)) } EnumInit (Result_els (UnitSynType) ((errors_TryReserveError_sls : syn_type))) "Ok" (RSTEnumDef ["Result_enum"] (RSTScopeInst [] [RSTUnit; RSTLitType ["errors_TryReserveError_inv_t"] (RSTScopeInst [] [] [])] [])) (StructInit (Result_Ok_sls (UnitSynType) ((errors_TryReserveError_sls : syn_type))) [("0", move{ (StructOp unit_sl []) } ("__5") : expr)]);
+      local_dead "__5";
+      Goto "_bb23"
+     ]>%E $
+     <[
+     "_bb4" :=
+      local_dead "__14";
+      local_live{ UnitSynType } "__15";
+      local_live{ RefSynType } "__16";
+      local_live{ RefSynType } "__17";
+      annot{ 1 }: StartLftAnnot "llft4" ["plft15"]; (* borrow *)
+      "__17" <-{ RefOp } &ref{ Shr, Some (RSTTyVar "A"), "llft4" } ((!{ RefOp } ( "self" )) at{ (RawVecInner_sls (A_st)) } "alloc");
+      annot{ 1 }: CopyLftNameAnnot "plft18" "llft4"; (* post-assignment *)
+      annot{ 1 }: CopyLftNameAnnot "vlft5" "plft18"; (* borrow *)
+      "__16" <-{ RefOp } &ref{ Shr, Some (RSTTyVar "A"), "vlft5" } (!{ RefOp } ( "__17" ));
+      annot{ 1 }: CopyLftNameAnnot "plft17" "vlft5"; (* post-assignment *)
+      local_live{ ((nonnull_NonNull_sls ((IntSynType U8))) : syn_type) } "__18";
+      "__18" <-{ (use_op_alg' ((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) } copy{ (use_op_alg' ((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) } ("ptr");
+      local_live{ (layout_Layout_sls : syn_type) } "__19";
+      "__19" <-{ (use_op_alg' (layout_Layout_sls : syn_type)) } copy{ (use_op_alg' (layout_Layout_sls : syn_type)) } ("layout");
+      annot{ 1 }: CopyLftNameAnnot "vlft28" "plft17"; (* function_call *)
+      CallS allocation_deallocate_raw_A_loc ["vlft28"] [RSTTyVar "A"] [@{expr} move{ RefOp } ("__16"); move{ (use_op_alg' ((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) } ("__18"); move{ (use_op_alg' (layout_Layout_sls : syn_type)) } ("__19")] (Some (Na1Ord, (StructOp unit_sl []), "__15"))
+      ( annot{ 2 }: EndLftAnnot "llft4"; (* endlft *)
+       Goto "_bb5")
+      ( annot{ 2 }: EndLftAnnot "llft4"; (* endlft *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb5" :=
+      local_dead "__19";
+      local_dead "__18";
+      local_dead "__17";
+      local_dead "__16";
+      local_dead "__15";
+      local_live{ ((unique_Unique_sls ((IntSynType U8))) : syn_type) } "__20";
+      local_live{ PtrSynType } "__21";
+      local_live{ (IntSynType USize) } "__22";
+      local_live{ RefSynType } "__23";
+      annot{ 1 }: StartLftAnnot "llft6" ["_flft"]; (* borrow *)
+      "__23" <-{ RefOp } &ref{ Shr, Some (RSTLitType ["layout_Layout_inv_t"] (RSTScopeInst [] [] [])), "llft6" } ("elem_layout");
+      annot{ 1 }: CopyLftNameAnnot "plft19" "llft6"; (* post-assignment *)
+      annot{ 1 }: CopyLftNameAnnot "vlft29" "plft19"; (* function_call *)
+      CallS layout_Layout_align_loc ["vlft29"] [] [@{expr} move{ RefOp } ("__23")] (Some (Na1Ord, (IntOp USize), "__22"))
+      ( annot{ 2 }: EndLftAnnot "llft6"; (* endlft *)
+       Goto "_bb6")
+      ( annot{ 2 }: EndLftAnnot "llft6"; (* endlft *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb6" :=
+      local_dead "__23";
+      CallS without_provenance_mut_u8_loc [] [] [@{expr} move{ (IntOp USize) } ("__22")] (Some (Na1Ord, PtrOp, "__21"))
+      ( Goto "_bb7")
+      ( Unwind)
+     ]>%E $
+     <[
+     "_bb7" :=
+      local_dead "__22";
+      CallS unique_Unique_T_new_unchecked_u8_loc [] [] [@{expr} move{ PtrOp } ("__21")] (Some (Na1Ord, (use_op_alg' ((unique_Unique_sls ((IntSynType U8))) : syn_type)), "__20"))
+      ( Goto "_bb8")
+      ( Unwind)
+     ]>%E $
+     <[
+     "_bb8" :=
+      local_dead "__21";
+      (!{ RefOp } ( "self" )) at{ (RawVecInner_sls (A_st)) } "ptr" <-{ (use_op_alg' ((unique_Unique_sls ((IntSynType U8))) : syn_type)) } move{ (use_op_alg' ((unique_Unique_sls ((IntSynType U8))) : syn_type)) } ("__20");
+      local_dead "__20";
+      (!{ RefOp } ( "self" )) at{ (RawVecInner_sls (A_st)) } "cap" <-{ (IntOp USize) } i2v (0) USize;
+      "__12" <-{ (StructOp unit_sl []) } zst_val;
+      Goto "_bb22"
+     ]>%E $
+     <[
+     "_bb9" :=
+      local_dead "__14";
+      local_live{ PtrSynType } "__24";
+      local_live{ (IntSynType USize) } "new_size";
+      local_live{ (IntSynType USize) } "__26";
+      local_live{ RefSynType } "__27";
+      annot{ 1 }: StartLftAnnot "llft7" ["_flft"]; (* borrow *)
+      "__27" <-{ RefOp } &ref{ Shr, Some (RSTLitType ["layout_Layout_inv_t"] (RSTScopeInst [] [] [])), "llft7" } ("elem_layout");
+      annot{ 1 }: CopyLftNameAnnot "plft20" "llft7"; (* post-assignment *)
+      annot{ 1 }: CopyLftNameAnnot "vlft30" "plft20"; (* function_call *)
+      CallS layout_Layout_size_loc ["vlft30"] [] [@{expr} move{ RefOp } ("__27")] (Some (Na1Ord, (IntOp USize), "__26"))
+      ( annot{ 2 }: EndLftAnnot "llft7"; (* endlft *)
+       Goto "_bb10")
+      ( annot{ 2 }: EndLftAnnot "llft7"; (* endlft *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb10" :=
+      local_dead "__27";
+      local_live{ (IntSynType USize) } "__28";
+      "__28" <-{ (IntOp USize) } copy{ (IntOp USize) } ("cap");
+      CallS usize_unchecked_mul_loc [] [] [@{expr} move{ (IntOp USize) } ("__26"); move{ (IntOp USize) } ("__28")] (Some (Na1Ord, (IntOp USize), "new_size"))
+      ( Goto "_bb11")
+      ( Unwind)
+     ]>%E $
+     <[
+     "_bb11" :=
+      local_dead "__28";
+      local_dead "__26";
+      local_live{ (layout_Layout_sls : syn_type) } "new_layout";
+      local_live{ (IntSynType USize) } "__30";
+      "__30" <-{ (IntOp USize) } copy{ (IntOp USize) } ("new_size");
+      local_live{ (IntSynType USize) } "__31";
+      local_live{ RefSynType } "__32";
+      annot{ 1 }: StartLftAnnot "llft8" ["_flft"]; (* borrow *)
+      "__32" <-{ RefOp } &ref{ Shr, Some (RSTLitType ["layout_Layout_inv_t"] (RSTScopeInst [] [] [])), "llft8" } ("layout");
+      annot{ 1 }: CopyLftNameAnnot "plft21" "llft8"; (* post-assignment *)
+      annot{ 1 }: CopyLftNameAnnot "vlft31" "plft21"; (* function_call *)
+      CallS layout_Layout_align_loc ["vlft31"] [] [@{expr} move{ RefOp } ("__32")] (Some (Na1Ord, (IntOp USize), "__31"))
+      ( annot{ 2 }: EndLftAnnot "llft8"; (* endlft *)
+       Goto "_bb12")
+      ( annot{ 2 }: EndLftAnnot "llft8"; (* endlft *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb12" :=
+      local_dead "__32";
+      CallS layout_Layout_from_size_align_unchecked_loc [] [] [@{expr} move{ (IntOp USize) } ("__30"); move{ (IntOp USize) } ("__31")] (Some (Na1Ord, (use_op_alg' (layout_Layout_sls : syn_type)), "new_layout"))
+      ( Goto "_bb13")
+      ( Unwind)
+     ]>%E $
+     <[
+     "_bb13" :=
+      local_dead "__31";
+      local_dead "__30";
+      local_live{ ((ControlFlow_els (((Result_els (NeverSynType) ((errors_TryReserveErrorKind_els : syn_type))) : syn_type)) (PtrSynType)) : syn_type) } "__33";
+      local_live{ ((Result_els (PtrSynType) ((errors_TryReserveErrorKind_els : syn_type))) : syn_type) } "__34";
+      local_live{ ((Result_els (PtrSynType) ((errors_AllocError_sls : syn_type))) : syn_type) } "__35";
+      local_live{ RefSynType } "__36";
+      local_live{ RefSynType } "__37";
+      annot{ 1 }: StartLftAnnot "llft9" ["plft15"]; (* borrow *)
+      "__37" <-{ RefOp } &ref{ Shr, Some (RSTTyVar "A"), "llft9" } ((!{ RefOp } ( "self" )) at{ (RawVecInner_sls (A_st)) } "alloc");
+      annot{ 1 }: CopyLftNameAnnot "plft23" "llft9"; (* post-assignment *)
+      annot{ 1 }: CopyLftNameAnnot "vlft10" "plft23"; (* borrow *)
+      "__36" <-{ RefOp } &ref{ Shr, Some (RSTTyVar "A"), "vlft10" } (!{ RefOp } ( "__37" ));
+      annot{ 1 }: CopyLftNameAnnot "plft22" "vlft10"; (* post-assignment *)
+      local_live{ ((nonnull_NonNull_sls ((IntSynType U8))) : syn_type) } "__38";
+      "__38" <-{ (use_op_alg' ((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) } copy{ (use_op_alg' ((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) } ("ptr");
+      local_live{ (layout_Layout_sls : syn_type) } "__39";
+      "__39" <-{ (use_op_alg' (layout_Layout_sls : syn_type)) } copy{ (use_op_alg' (layout_Layout_sls : syn_type)) } ("layout");
+      local_live{ (layout_Layout_sls : syn_type) } "__40";
+      "__40" <-{ (use_op_alg' (layout_Layout_sls : syn_type)) } copy{ (use_op_alg' (layout_Layout_sls : syn_type)) } ("new_layout");
+      annot{ 1 }: CopyLftNameAnnot "vlft32" "plft22"; (* function_call *)
+      CallS allocation_shrink_raw_A_loc ["vlft32"] [RSTTyVar "A"] [@{expr} move{ RefOp } ("__36"); move{ (use_op_alg' ((nonnull_NonNull_sls ((IntSynType U8))) : syn_type)) } ("__38"); move{ (use_op_alg' (layout_Layout_sls : syn_type)) } ("__39"); move{ (use_op_alg' (layout_Layout_sls : syn_type)) } ("__40")] (Some (Na1Ord, (use_op_alg' ((Result_els (PtrSynType) ((errors_AllocError_sls : syn_type))) : syn_type)), "__35"))
+      ( annot{ 2 }: EndLftAnnot "llft9"; (* endlft *)
+       Goto "_bb14")
+      ( annot{ 2 }: EndLftAnnot "llft9"; (* endlft *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb14" :=
+      local_dead "__40";
+      local_dead "__39";
+      local_dead "__38";
+      local_dead "__36";
+      local_live{ ((tuple1_sls (RefSynType)) : syn_type) } "__41";
+      local_live{ RefSynType } "__42";
+      annot{ 1 }: StartLftAnnot "llft11" ["_flft"]; (* borrow *)
+      "__42" <-{ RefOp } &ref{ Shr, Some (RSTLitType ["layout_Layout_inv_t"] (RSTScopeInst [] [] [])), "llft11" } ("new_layout");
+      annot{ 1 }: CopyLftNameAnnot "plft25" "llft11"; (* post-assignment *)
+      annot{ 1 }: CopyLftNameAnnot "vlft12" "plft25"; (* rvalue *)
+      "__41" <-{ (use_op_alg' ((tuple1_sls (RefSynType)) : syn_type)) } StructInit (tuple1_sls (RefSynType)) [("0", move{ RefOp } ("__42") : expr)];
+      annot{ 1 }: CopyLftNameAnnot "plft24" "vlft12"; (* post-assignment *)
+      local_dead "__42";
+      annot{ 1 }: CopyLftNameAnnot "vlft13" "plft24"; (* function_call *)
+      CallS Result_TE_map_err_mutu8_std_alloc_AllocError_std_collections_TryReserveErrorKind_closuresrcraw_vecrs7222572228_loc ["vlft13"] [RSTTyVar "A"] [@{expr} move{ (use_op_alg' ((Result_els (PtrSynType) ((errors_AllocError_sls : syn_type))) : syn_type)) } ("__35"); move{ (use_op_alg' ((tuple1_sls (RefSynType)) : syn_type)) } ("__41")] (Some (Na1Ord, (use_op_alg' ((Result_els (PtrSynType) ((errors_TryReserveErrorKind_els : syn_type))) : syn_type)), "__34"))
+      ( annot{ 2 }: EndLftAnnot "llft11"; (* endlft *)
+       Goto "_bb15")
+      ( annot{ 2 }: EndLftAnnot "llft11"; (* endlft *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb15" :=
+      local_dead "__41";
+      local_dead "__35";
+      CallS std_result_ResultTEasTry_branch_mutu8_std_collections_TryReserveErrorKind_loc [] [] [@{expr} move{ (use_op_alg' ((Result_els (PtrSynType) ((errors_TryReserveErrorKind_els : syn_type))) : syn_type)) } ("__34")] (Some (Na1Ord, (use_op_alg' ((ControlFlow_els (((Result_els (NeverSynType) ((errors_TryReserveErrorKind_els : syn_type))) : syn_type)) (PtrSynType)) : syn_type)), "__33"))
+      ( Goto "_bb16")
+      ( Unwind)
+     ]>%E $
+     <[
+     "_bb16" :=
+      local_dead "__34";
+      "__43" <-{ (IntOp ISize) } EnumDiscriminant ((ControlFlow_els (((Result_els (NeverSynType) ((errors_TryReserveErrorKind_els : syn_type))) : syn_type)) (PtrSynType))) ("__33");
+      Switch (ISize: int_type) (move{ (IntOp ISize) } ("__43")) (<[ 0%Z := 0%nat ]> $ <[ 1%Z := 1%nat ]> $ ∅) ([Goto "_bb18"; Goto "_bb19"]) (Goto "_bb17")
+     ]>%E $
+     <[
+     "_bb17" :=
+      StuckS
+     ]>%E $
+     <[
+     "_bb18" :=
+      local_live{ PtrSynType } "val";
+      "val" <-{ PtrOp } copy{ PtrOp } ((EnumData ((ControlFlow_els (((Result_els (NeverSynType) ((errors_TryReserveErrorKind_els : syn_type))) : syn_type)) (PtrSynType))) "Continue" ("__33")) at{ (ControlFlow_Continue_sls (((Result_els (NeverSynType) ((errors_TryReserveErrorKind_els : syn_type))) : syn_type)) (PtrSynType)) } "0");
+      "__24" <-{ PtrOp } copy{ PtrOp } ("val");
+      local_dead "val";
+      local_dead "__37";
+      local_dead "__33";
+      local_dead "new_layout";
+      local_dead "new_size";
+      local_live{ UnitSynType } "__48";
+      local_live{ RefSynType } "__49";
+      annot{ 1 }: StartLftAnnot "llft14" ["plft15"]; (* borrow *)
+      "__49" <-{ RefOp } &ref{ Mut, Some (RSTLitType ["RawVecInner_inv_t"] (RSTScopeInst [] [RSTTyVar "A"] [AppDef ["Allocator_A_spec_attrs"] []])), "llft14" } (!{ RefOp } ( "self" ));
+      annot{ 1 }: CopyLftNameAnnot "plft26" "llft14"; (* post-assignment *)
+      local_live{ PtrSynType } "__50";
+      "__50" <-{ PtrOp } copy{ PtrOp } ("__24");
+      local_live{ (IntSynType USize) } "__51";
+      "__51" <-{ (IntOp USize) } copy{ (IntOp USize) } ("cap");
+      annot{ 1 }: CopyLftNameAnnot "vlft33" "plft26"; (* function_call *)
+      CallS raw_vec_implRawVecInnerA_set_ptr_and_cap_A_loc ["vlft33"] [RSTTyVar "A"] [@{expr} move{ RefOp } ("__49"); move{ PtrOp } ("__50"); move{ (IntOp USize) } ("__51")] (Some (Na1Ord, (StructOp unit_sl []), "__48"))
+      ( annot{ 2 }: EndLftAnnot "llft14"; (* endlft *)
+       Goto "_bb21")
+      ( annot{ 2 }: EndLftAnnot "llft14"; (* endlft *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb19" :=
+      local_live{ ((Result_els (NeverSynType) ((errors_TryReserveErrorKind_els : syn_type))) : syn_type) } "residual";
+      "residual" <-{ (use_op_alg' ((Result_els (NeverSynType) ((errors_TryReserveErrorKind_els : syn_type))) : syn_type)) } move{ (use_op_alg' ((Result_els (NeverSynType) ((errors_TryReserveErrorKind_els : syn_type))) : syn_type)) } ((EnumData ((ControlFlow_els (((Result_els (NeverSynType) ((errors_TryReserveErrorKind_els : syn_type))) : syn_type)) (PtrSynType))) "Break" ("__33")) at{ (ControlFlow_Break_sls (((Result_els (NeverSynType) ((errors_TryReserveErrorKind_els : syn_type))) : syn_type)) (PtrSynType)) } "0");
+      local_live{ ((Result_els (NeverSynType) ((errors_TryReserveErrorKind_els : syn_type))) : syn_type) } "__46";
+      "__46" <-{ (use_op_alg' ((Result_els (NeverSynType) ((errors_TryReserveErrorKind_els : syn_type))) : syn_type)) } move{ (use_op_alg' ((Result_els (NeverSynType) ((errors_TryReserveErrorKind_els : syn_type))) : syn_type)) } ("residual");
+      CallS std_result_ResultTFasFromResidualstd_result_ResultE_from_residual_unit_std_collections_TryReserveErrorKind_std_collections_TryReserveError_loc [] [] [@{expr} move{ (use_op_alg' ((Result_els (NeverSynType) ((errors_TryReserveErrorKind_els : syn_type))) : syn_type)) } ("__46")] (Some (Na1Ord, (use_op_alg' ((Result_els (UnitSynType) ((errors_TryReserveError_sls : syn_type))) : syn_type)), "__0"))
+      ( Goto "_bb20")
+      ( Unwind)
+     ]>%E $
+     <[
+     "_bb20" :=
+      local_dead "__46";
+      local_dead "residual";
+      local_dead "__37";
+      local_dead "__33";
+      local_dead "new_layout";
+      local_dead "new_size";
+      local_dead "__24";
+      local_dead "__13";
+      local_dead "__12";
+      local_dead "layout";
+      local_dead "ptr";
+      Goto "_bb23"
+     ]>%E $
+     <[
+     "_bb21" :=
+      local_dead "__51";
+      local_dead "__50";
+      local_dead "__49";
+      local_dead "__48";
+      "__12" <-{ (StructOp unit_sl []) } zst_val;
+      local_dead "__24";
+      Goto "_bb22"
+     ]>%E $
+     <[
+     "_bb22" :=
+      local_dead "__13";
+      local_dead "__12";
+      local_live{ UnitSynType } "__52";
+      "__52" <-{ (StructOp unit_sl []) } zst_val;
+      "__0" <-{ (use_op_alg' ((Result_els (UnitSynType) ((errors_TryReserveError_sls : syn_type))) : syn_type)) } EnumInit (Result_els (UnitSynType) ((errors_TryReserveError_sls : syn_type))) "Ok" (RSTEnumDef ["Result_enum"] (RSTScopeInst [] [RSTUnit; RSTLitType ["errors_TryReserveError_inv_t"] (RSTScopeInst [] [] [])] [])) (StructInit (Result_Ok_sls (UnitSynType) ((errors_TryReserveError_sls : syn_type))) [("0", move{ (StructOp unit_sl []) } ("__52") : expr)]);
+      local_dead "__52";
+      local_dead "layout";
+      local_dead "ptr";
+      Goto "_bb23"
+     ]>%E $
+     <[
+     "_bb23" :=
+      return (move{ (use_op_alg' ((Result_els (UnitSynType) ((errors_TryReserveError_sls : syn_type))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition raw_vec_implRawVecInnerA_shrink_unchecked_closure0_def (A_st: syn_type) : function :=
+  {|
+     f_args := [
+      ("__1", (use_layout_alg' ((tuple1_sls (RefSynType)) : syn_type)) : layout);
+     ("__2", (use_layout_alg' (errors_AllocError_sls : syn_type)) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (errors_TryReserveErrorKind_els : syn_type) } "__0";
+      annot{ 1 }: CopyLftNameAnnot "plft7" "ulft1"; (* initialization *)
+      local_live{ (layout_Layout_sls : syn_type) } "__3";
+      "__3" <-{ (use_op_alg' (layout_Layout_sls : syn_type)) } copy{ (use_op_alg' (layout_Layout_sls : syn_type)) } (!{ RefOp } ( ("__1") at{ (tuple1_sls (RefSynType)) } "0" ));
+      local_live{ UnitSynType } "__4";
+      "__4" <-{ (StructOp unit_sl []) } zst_val;
+      "__0" <-{ (use_op_alg' (errors_TryReserveErrorKind_els : syn_type)) } EnumInit errors_TryReserveErrorKind_els "AllocError" (RSTEnumDef ["errors_TryReserveErrorKind_enum"] (RSTScopeInst [] [] [])) (StructInit errors_TryReserveErrorKind_AllocError_sls [("layout", move{ (use_op_alg' (layout_Layout_sls : syn_type)) } ("__3") : expr); ("non_exhaustive", move{ (StructOp unit_sl []) } ("__4") : expr)]);
+      local_dead "__4";
+      local_dead "__3";
+      return (move{ (use_op_alg' (errors_TryReserveErrorKind_els : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
 Program Definition raw_vec_implRawVecInnerA_try_allocate_in_def (DropGlue_A_drop_glue_loc: loc) (Tasconvert_IntoU_into_std_collections_TryReserveErrorKind_std_collections_TryReserveError_loc: loc) (allocation_allocate_raw_A_loc: loc) (allocation_allocate_zeroed_raw_A_loc: loc) (layout_Layout_alignment_loc: loc) (layout_Layout_size_loc: loc) (raw_vec_implRawVecInnerA_new_in_A_loc: loc) (raw_vec_layout_array_loc: loc) (unique_Unique_T_new_unchecked_u8_loc: loc) (A_st: syn_type) : function :=
   {|
      f_args := [
@@ -2636,6 +3435,50 @@ Program Definition raw_vec_implRawVecInnerA_try_reserve_exact_def (raw_vec_asser
      ]>%E $
      <[
      "_bb13" :=
+      return (move{ (use_op_alg' ((Result_els (UnitSynType) ((errors_TryReserveError_sls : syn_type))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition raw_vec_implRawVecInnerA_try_shrink_to_fit_def (raw_vec_implRawVecInnerA_shrink_A_loc: loc) (A_st: syn_type) : function :=
+  {|
+     f_args := [
+      ("self", void* : layout);
+     ("cap", (it_layout USize) : layout);
+     ("elem_layout", (use_layout_alg' (layout_Layout_sls : syn_type)) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ ((Result_els (UnitSynType) ((errors_TryReserveError_sls : syn_type))) : syn_type) } "__0";
+      annot{ 1 }: CopyLftNameAnnot "plft4" "ulft_1"; (* initialization *)
+      local_live{ RefSynType } "__4";
+      annot{ 1 }: StartLftAnnot "llft3" ["plft4"]; (* borrow *)
+      "__4" <-{ RefOp } &ref{ Mut, Some (RSTLitType ["RawVecInner_inv_t"] (RSTScopeInst [] [RSTTyVar "A"] [AppDef ["Allocator_A_spec_attrs"] []])), "llft3" } (!{ RefOp } ( "self" ));
+      annot{ 1 }: CopyLftNameAnnot "plft5" "llft3"; (* post-assignment *)
+      local_live{ (IntSynType USize) } "__5";
+      "__5" <-{ (IntOp USize) } copy{ (IntOp USize) } ("cap");
+      local_live{ (layout_Layout_sls : syn_type) } "__6";
+      "__6" <-{ (use_op_alg' (layout_Layout_sls : syn_type)) } copy{ (use_op_alg' (layout_Layout_sls : syn_type)) } ("elem_layout");
+      annot{ 1 }: CopyLftNameAnnot "vlft6" "plft5"; (* function_call *)
+      CallS raw_vec_implRawVecInnerA_shrink_A_loc ["vlft6"] [RSTTyVar "A"] [@{expr} move{ RefOp } ("__4"); move{ (IntOp USize) } ("__5"); move{ (use_op_alg' (layout_Layout_sls : syn_type)) } ("__6")] (Some (Na1Ord, (use_op_alg' ((Result_els (UnitSynType) ((errors_TryReserveError_sls : syn_type))) : syn_type)), "__0"))
+      ( annot{ 2 }: EndLftAnnot "llft3"; (* endlft *)
+       Goto "_bb1")
+      ( annot{ 2 }: EndLftAnnot "llft3"; (* endlft *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__6";
+      local_dead "__5";
+      local_dead "__4";
       return (move{ (use_op_alg' ((Result_els (UnitSynType) ((errors_TryReserveError_sls : syn_type))) : syn_type)) } ("__0"))
      ]>%E $
       ∅;
@@ -3506,6 +4349,55 @@ Qed.
 
 
 
+Program Definition raw_vec_implRawVecTA_shrink_to_fit_def (layout_Layout_new_T_loc: loc) (raw_vec_implRawVecInnerA_shrink_to_fit_A_loc: loc) (T_st: syn_type) (A_st: syn_type) : function :=
+  {|
+     f_args := [
+      ("self", void* : layout);
+     ("cap", (it_layout USize) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ UnitSynType } "__0";
+      annot{ 1 }: CopyLftNameAnnot "plft4" "ulft_1"; (* initialization *)
+      local_live{ RefSynType } "__3";
+      annot{ 1 }: StartLftAnnot "llft3" ["plft4"]; (* borrow *)
+      "__3" <-{ RefOp } &ref{ Mut, Some (RSTLitType ["RawVecInner_inv_t"] (RSTScopeInst [] [RSTTyVar "A"] [AppDef ["Allocator_A_spec_attrs"] []])), "llft3" } ((!{ RefOp } ( "self" )) at{ (RawVec_sls (T_st) (A_st)) } "inner");
+      annot{ 1 }: CopyLftNameAnnot "plft5" "llft3"; (* post-assignment *)
+      local_live{ (IntSynType USize) } "__4";
+      "__4" <-{ (IntOp USize) } copy{ (IntOp USize) } ("cap");
+      local_live{ (layout_Layout_sls : syn_type) } "__5";
+      CallS layout_Layout_new_T_loc [] [RSTTyVar "T"] [@{expr} ] (Some (Na1Ord, (use_op_alg' (layout_Layout_sls : syn_type)), "__5"))
+      ( Goto "_bb1")
+      ( annot{ 2 }: EndLftAnnot "llft3"; (* endlft *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      annot{ 1 }: CopyLftNameAnnot "vlft6" "plft5"; (* function_call *)
+      CallS raw_vec_implRawVecInnerA_shrink_to_fit_A_loc ["vlft6"] [RSTTyVar "A"] [@{expr} move{ RefOp } ("__3"); move{ (IntOp USize) } ("__4"); move{ (use_op_alg' (layout_Layout_sls : syn_type)) } ("__5")] (Some (Na1Ord, (StructOp unit_sl []), "__0"))
+      ( annot{ 2 }: EndLftAnnot "llft3"; (* endlft *)
+       Goto "_bb2")
+      ( annot{ 2 }: EndLftAnnot "llft3"; (* endlft *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_dead "__3";
+      return (move{ (StructOp unit_sl []) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
 Program Definition raw_vec_implRawVecTA_try_reserve_def (layout_Layout_new_T_loc: loc) (raw_vec_implRawVecInnerA_try_reserve_A_loc: loc) (T_st: syn_type) (A_st: syn_type) : function :=
   {|
      f_args := [
@@ -3600,6 +4492,55 @@ Program Definition raw_vec_implRawVecTA_try_reserve_exact_def (layout_Layout_new
       local_dead "__6";
       local_dead "__5";
       local_dead "__4";
+      return (move{ (use_op_alg' ((Result_els (UnitSynType) ((errors_TryReserveError_sls : syn_type))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition raw_vec_implRawVecTA_try_shrink_to_fit_def (layout_Layout_new_T_loc: loc) (raw_vec_implRawVecInnerA_try_shrink_to_fit_A_loc: loc) (T_st: syn_type) (A_st: syn_type) : function :=
+  {|
+     f_args := [
+      ("self", void* : layout);
+     ("cap", (it_layout USize) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ ((Result_els (UnitSynType) ((errors_TryReserveError_sls : syn_type))) : syn_type) } "__0";
+      annot{ 1 }: CopyLftNameAnnot "plft4" "ulft_1"; (* initialization *)
+      local_live{ RefSynType } "__3";
+      annot{ 1 }: StartLftAnnot "llft3" ["plft4"]; (* borrow *)
+      "__3" <-{ RefOp } &ref{ Mut, Some (RSTLitType ["RawVecInner_inv_t"] (RSTScopeInst [] [RSTTyVar "A"] [AppDef ["Allocator_A_spec_attrs"] []])), "llft3" } ((!{ RefOp } ( "self" )) at{ (RawVec_sls (T_st) (A_st)) } "inner");
+      annot{ 1 }: CopyLftNameAnnot "plft5" "llft3"; (* post-assignment *)
+      local_live{ (IntSynType USize) } "__4";
+      "__4" <-{ (IntOp USize) } copy{ (IntOp USize) } ("cap");
+      local_live{ (layout_Layout_sls : syn_type) } "__5";
+      CallS layout_Layout_new_T_loc [] [RSTTyVar "T"] [@{expr} ] (Some (Na1Ord, (use_op_alg' (layout_Layout_sls : syn_type)), "__5"))
+      ( Goto "_bb1")
+      ( annot{ 2 }: EndLftAnnot "llft3"; (* endlft *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      annot{ 1 }: CopyLftNameAnnot "vlft6" "plft5"; (* function_call *)
+      CallS raw_vec_implRawVecInnerA_try_shrink_to_fit_A_loc ["vlft6"] [RSTTyVar "A"] [@{expr} move{ RefOp } ("__3"); move{ (IntOp USize) } ("__4"); move{ (use_op_alg' (layout_Layout_sls : syn_type)) } ("__5")] (Some (Na1Ord, (use_op_alg' ((Result_els (UnitSynType) ((errors_TryReserveError_sls : syn_type))) : syn_type)), "__0"))
+      ( annot{ 2 }: EndLftAnnot "llft3"; (* endlft *)
+       Goto "_bb2")
+      ( annot{ 2 }: EndLftAnnot "llft3"; (* endlft *)
+       Unwind)
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_dead "__3";
       return (move{ (use_op_alg' ((Result_els (UnitSynType) ((errors_TryReserveError_sls : syn_type))) : syn_type)) } ("__0"))
      ]>%E $
       ∅;
@@ -4283,4 +5224,30 @@ Qed.
 
 
 (* closure shims *)
+Program Definition raw_vec_implRawVecInnerA_shrink_unchecked_closure0_call_once_code (raw_vec_implRawVecInnerA_shrink_unchecked_closure0_loc: loc) (A_st: syn_type) : function :=
+  {|
+     f_args := [
+      ("self", (use_layout_alg' ((tuple1_sls (RefSynType)) : syn_type)) : layout);
+     ("args", (use_layout_alg' ((tuple1_sls ((errors_AllocError_sls : syn_type))) : syn_type)) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (errors_TryReserveErrorKind_els : syn_type) } "__0";
+      local_live{ ((tuple1_sls (RefSynType)) : syn_type) } "__1";
+      "__1" <-{ (use_op_alg' ((tuple1_sls (RefSynType)) : syn_type)) } move{ (use_op_alg' ((tuple1_sls (RefSynType)) : syn_type)) } ("self");
+      CallS raw_vec_implRawVecInnerA_shrink_unchecked_closure0_loc ["ulft1"] [RSTTyVar "A"] [@{expr} move{ (use_op_alg' ((tuple1_sls (RefSynType)) : syn_type)) } ("__1"); move{ (use_op_alg' (errors_AllocError_sls : syn_type)) } (("args") at{ (tuple1_sls ((errors_AllocError_sls : syn_type))) } "0")] (Some (Na1Ord, (use_op_alg' (errors_TryReserveErrorKind_els : syn_type)), "__0"))
+      ( return (move{ (use_op_alg' (errors_TryReserveErrorKind_els : syn_type)) } ("__0")))
+      ( Unwind)
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
 End code.

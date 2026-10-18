@@ -24,8 +24,12 @@ unsafe fn assert_unchecked(condition: bool) {
 }
 
 
+#[rr::may_unwind_if("True")]
+#[rr::ensures("False")]
 const fn capacity_overflow() -> ! {
-    panic!("capacity overflow");
+    // TODO(verification): Omit the upstream panic message: its formatting uses
+    // unsupported function pointers. Keep the same diverging panic behavior.
+    panic!();
 }
 
 #[rr::refined_by("bool")]
@@ -257,12 +261,27 @@ impl<T, A: Allocator> RawVec<T, A> {
         unsafe { self.inner.try_reserve_exact(len, additional, Layout::new::<T>()) }
     }
 
+    #[rr::may_unwind_if("True")]
+    #[rr::requires("Hshrink_cap": "cap ≤ self.cur.1.2")]
+    #[rr::exists("l" : "loc")]
+    #[rr::observe("self.ghost": "(l, raw_vec_effective_capacity (size_of_st {st_of T}) (Z.to_nat cap), RT_xrt (listRT (place_rfnRT (optionRT (place_rfnRT {rt_of T})))) (take (raw_vec_effective_capacity (size_of_st {st_of T}) (Z.to_nat cap)) self.cur.2))")]
+    #[rr::ensures_on_unwind(#iris "Obs self.ghost (self.cur.1.1, self.cur.1.2, RT_xrt (listRT (place_rfnRT (optionRT (place_rfnRT {rt_of T})))) self.cur.2)")]
     pub(crate) fn shrink_to_fit(&mut self, cap: usize) {
-        unsafe { self.inner.shrink_to_fit(cap, T::LAYOUT) }
+        // TODO(verification): Use the modeled layout constructor instead of the
+        // generic associated layout constant unsupported by the frontend.
+        unsafe { self.inner.shrink_to_fit(cap, Layout::new::<T>()) }
     }
 
+    #[rr::may_unwind_if("False")]
+    #[rr::requires("Hshrink_cap": "cap ≤ self.cur.1.2")]
+    #[rr::exists("res" : "result unit reserve_error", "l" : "loc")]
+    #[rr::returns("res")]
+    #[rr::observe("self.ghost": "match res with | Ok _ => (l, raw_vec_effective_capacity (size_of_st {st_of T}) (Z.to_nat cap), RT_xrt (listRT (place_rfnRT (optionRT (place_rfnRT {rt_of T})))) (take (raw_vec_effective_capacity (size_of_st {st_of T}) (Z.to_nat cap)) self.cur.2)) | Err _ => (self.cur.1.1, self.cur.1.2, RT_xrt (listRT (place_rfnRT (optionRT (place_rfnRT {rt_of T})))) self.cur.2) end")]
+    #[rr::ensures("if_Err res (λ err, err = ReserveAllocError (#(mk_rust_layout (size_of_st {st_of T} * Z.to_nat cap) (alignment_of_align (ly_align {ly_of T})))) (#tt) ∧ 0 < cap ∧ size_of_st {st_of T} ≠ 0%nat)")]
     pub(crate) fn try_shrink_to_fit(&mut self, cap: usize) -> Result<(), TryReserveError> {
-        unsafe { self.inner.try_shrink_to_fit(cap, T::LAYOUT) }
+        // TODO(verification): Use the modeled layout constructor instead of the
+        // generic associated layout constant unsupported by the frontend.
+        unsafe { self.inner.try_shrink_to_fit(cap, Layout::new::<T>()) }
     }
 }
 
@@ -622,25 +641,66 @@ impl<A: Allocator> RawVecInner<A> {
         }
     }
 
-    #[rr::skip]
+    #[rr::may_unwind_if("True")]
+    #[rr::params("v" : "val")]
+    #[rr::requires("Hshrink_cap": "cap ≤ raw_vec_effective_capacity elem_layout.(layout_sz) self.cur.1.2")]
+    #[rr::requires("Hallocation_size": "(elem_layout.(layout_sz) * self.cur.1.2 ≤ MaxInt ISize)%Z")]
+    #[rr::requires(#iris "raw_vec_storage π ({A::FreeablePerm} self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v")]
+    #[rr::exists("l" : "loc")]
+    #[rr::observe("self.ghost": "(l, (if decide (elem_layout.(layout_sz) * self.cur.1.2 = 0)%nat then self.cur.1.2 else Z.to_nat cap), $# self.cur.2)")]
+    #[rr::ensures(#iris "raw_vec_storage π ({A::FreeablePerm} self.cur.2) l (if decide (elem_layout.(layout_sz) * self.cur.1.2 = 0)%nat then self.cur.1.2 else Z.to_nat cap) elem_layout (take (elem_layout.(layout_sz) * Z.to_nat cap) v)")]
+    #[rr::ensures_on_unwind(#iris "Obs self.ghost (self.cur.1.1, self.cur.1.2, $# self.cur.2)")]
+    #[rr::ensures_on_unwind(#iris "raw_vec_storage π ({A::FreeablePerm} self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v")]
     unsafe fn shrink_to_fit(&mut self, cap: usize, elem_layout: Layout) {
         if let Err(err) = unsafe { self.shrink(cap, elem_layout) } {
             handle_error(err);
         }
     }
 
-    #[rr::skip]
+    #[rr::may_unwind_if("False")]
+    #[rr::params("v" : "val")]
+    #[rr::requires("Hshrink_cap": "cap ≤ raw_vec_effective_capacity elem_layout.(layout_sz) self.cur.1.2")]
+    #[rr::requires("Hallocation_size": "(elem_layout.(layout_sz) * self.cur.1.2 ≤ MaxInt ISize)%Z")]
+    #[rr::requires(#iris "raw_vec_storage π ({A::FreeablePerm} self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v")]
+    #[rr::exists("res" : "result unit reserve_error", "l" : "loc")]
+    #[rr::returns("res")]
+    #[rr::observe("self.ghost": "match res with | Ok _ => (l, (if decide (elem_layout.(layout_sz) * self.cur.1.2 = 0)%nat then self.cur.1.2 else Z.to_nat cap), $# self.cur.2) | Err _ => (self.cur.1.1, self.cur.1.2, $# self.cur.2) end")]
+    #[rr::ensures(#iris "if_iOk res (λ _, raw_vec_storage π ({A::FreeablePerm} self.cur.2) l (if decide (elem_layout.(layout_sz) * self.cur.1.2 = 0)%nat then self.cur.1.2 else Z.to_nat cap) elem_layout (take (elem_layout.(layout_sz) * Z.to_nat cap) v))")]
+    #[rr::ensures(#iris "if_iErr res (λ _, raw_vec_storage π ({A::FreeablePerm} self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v)")]
+    #[rr::ensures("if_Err res (λ err, ∃ layout extra, err = ReserveAllocError layout extra ∧ layout = #(mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat cap) elem_layout.(layout_alignment)) ∧ extra = #tt ∧ (0 < cap ∧ elem_layout.(layout_sz) ≠ 0%nat))")]
     unsafe fn try_shrink_to_fit(&mut self, cap: usize, elem_layout: Layout) -> Result<(), TryReserveError> {
         unsafe { self.shrink(cap, elem_layout) }
     }
 
-    #[rr::skip]
+    #[rr::may_unwind_if("False")]
+    #[rr::params("v" : "val")]
+    #[rr::requires("Hshrink_cap": "cap ≤ raw_vec_effective_capacity elem_layout.(layout_sz) self.cur.1.2")]
+    #[rr::requires("Hallocation_size": "(elem_layout.(layout_sz) * self.cur.1.2 ≤ MaxInt ISize)%Z")]
+    #[rr::requires(#iris "raw_vec_storage π ({A::FreeablePerm} self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v")]
+    #[rr::exists("res" : "result unit reserve_error", "l" : "loc")]
+    #[rr::returns("res")]
+    #[rr::observe("self.ghost": "match res with | Ok _ => (l, (if decide (elem_layout.(layout_sz) * self.cur.1.2 = 0)%nat then self.cur.1.2 else Z.to_nat cap), $# self.cur.2) | Err _ => (self.cur.1.1, self.cur.1.2, $# self.cur.2) end")]
+    #[rr::ensures(#iris "if_iOk res (λ _, raw_vec_storage π ({A::FreeablePerm} self.cur.2) l (if decide (elem_layout.(layout_sz) * self.cur.1.2 = 0)%nat then self.cur.1.2 else Z.to_nat cap) elem_layout (take (elem_layout.(layout_sz) * Z.to_nat cap) v))")]
+    #[rr::ensures(#iris "if_iErr res (λ _, raw_vec_storage π ({A::FreeablePerm} self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v)")]
+    #[rr::ensures("if_Err res (λ err, ∃ layout extra, err = ReserveAllocError layout extra ∧ layout = #(mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat cap) elem_layout.(layout_alignment)) ∧ extra = #tt ∧ (0 < cap ∧ elem_layout.(layout_sz) ≠ 0%nat))")]
     unsafe fn shrink(&mut self, cap: usize, elem_layout: Layout) -> Result<(), TryReserveError> {
-        assert!(cap <= self.capacity(elem_layout.size()), "Tried to shrink to a larger capacity");
+        // TODO(verification): Omit the custom panic message: its formatting
+        // machinery contains function pointers unsupported by the frontend.
+        assert!(cap <= self.capacity(elem_layout.size()));
         unsafe { self.shrink_unchecked(cap, elem_layout) }
     }
 
-    #[rr::skip]
+    #[rr::may_unwind_if("False")]
+    #[rr::params("v" : "val")]
+    #[rr::requires("Hshrink_cap": "cap ≤ raw_vec_effective_capacity elem_layout.(layout_sz) self.cur.1.2")]
+    #[rr::requires("Hallocation_size": "(elem_layout.(layout_sz) * self.cur.1.2 ≤ MaxInt ISize)%Z")]
+    #[rr::requires(#iris "raw_vec_storage π ({A::FreeablePerm} self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v")]
+    #[rr::exists("res" : "result unit reserve_error", "l" : "loc")]
+    #[rr::returns("res")]
+    #[rr::observe("self.ghost": "match res with | Ok _ => (l, (if decide (elem_layout.(layout_sz) * self.cur.1.2 = 0)%nat then self.cur.1.2 else Z.to_nat cap), $# self.cur.2) | Err _ => (self.cur.1.1, self.cur.1.2, $# self.cur.2) end")]
+    #[rr::ensures(#iris "if_iOk res (λ _, raw_vec_storage π ({A::FreeablePerm} self.cur.2) l (if decide (elem_layout.(layout_sz) * self.cur.1.2 = 0)%nat then self.cur.1.2 else Z.to_nat cap) elem_layout (take (elem_layout.(layout_sz) * Z.to_nat cap) v))")]
+    #[rr::ensures(#iris "if_iErr res (λ _, raw_vec_storage π ({A::FreeablePerm} self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v)")]
+    #[rr::ensures("if_Err res (λ err, ∃ layout extra, err = ReserveAllocError layout extra ∧ layout = #(mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat cap) elem_layout.(layout_alignment)) ∧ extra = #tt ∧ (0 < cap ∧ elem_layout.(layout_sz) ≠ 0%nat))")]
     unsafe fn shrink_unchecked(&mut self, cap: usize, elem_layout: Layout) -> Result<(), TryReserveError> {
         let Some((ptr, layout)) = (unsafe { self.current_memory(elem_layout) }) else {
             return Ok(());
@@ -657,7 +717,10 @@ impl<A: Allocator> RawVecInner<A> {
                 // TODO(verification): Replace the slice-valued shrink result
                 // with the raw-pointer wrapper result.
                 shrink_raw(&self.alloc, ptr, layout, new_layout)
-                    .map_err(|_| AllocError { layout: new_layout, non_exhaustive: () })?
+                    .map_err(
+                        #[rr::returns("ReserveAllocError (#{new_layout}) (#tt)")]
+                        |_| AllocError { layout: new_layout, non_exhaustive: () },
+                    )?
             };
             unsafe { self.set_ptr_and_cap(ptr, cap) };
         }
@@ -667,7 +730,11 @@ impl<A: Allocator> RawVecInner<A> {
     /// # Safety
     /// The original element layout must be supplied and self must not be used
     /// again: deallocation leaves ptr and cap unchanged.
-    #[rr::skip]
+    #[rr::may_unwind_if("False")]
+    #[rr::params("v" : "val")]
+    #[rr::requires("Hallocation_size": "(elem_layout.(layout_sz) * self.cur.1.2 ≤ MaxInt ISize)%Z")]
+    #[rr::requires(#iris "raw_vec_storage π ({A::FreeablePerm} self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v")]
+    #[rr::observe("self.ghost": "(self.cur.1.1, self.cur.1.2, $# self.cur.2)")]
     pub(super) unsafe fn deallocate(&mut self, elem_layout: Layout) {
         if let Some((ptr, layout)) = unsafe { self.current_memory(elem_layout) } {
             // TODO(verification): Use the local trusted deallocation boundary.
@@ -676,9 +743,6 @@ impl<A: Allocator> RawVecInner<A> {
     }
 }
 
-// TODO(verification): Temporarily trust the diverging error dispatcher until
-// handle_alloc_error has a model; neither branch can return normally.
-#[rr::only_spec]
 #[rr::may_unwind_if("True")]
 #[rr::ensures("False")]
 fn handle_error(e: TryReserveError) -> ! {

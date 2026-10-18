@@ -1,6 +1,7 @@
 #![feature(register_tool)]
 #![register_tool(rr)]
 #![feature(custom_inner_attributes)]
+#![feature(stmt_expr_attributes)]
 #![allow(unused)]
 
 #![feature(allocator_api)]
@@ -55,7 +56,7 @@ type Cap = usize;
 // TODO(verification): Model the bound supplied by upstream's UsizeNoHighBit
 // niche explicitly because the port stores a plain usize.
 #[rr::invariant("Hstored_cap" : "cap ≤ Z.to_nat (MaxInt ISize)")]
-#[rr::trust_me(drop_glue)]
+#[rr::ghost_drop(#iris "ty_ghost_drop {A} π alloc")]
 #[rr::derive_instantiate("DropGlueUnwind" := "{A::DropGlueUnwind}")]
 struct RawVecInner<A: Allocator = Global> {
     #[rr::field("#(l)")]
@@ -68,7 +69,9 @@ struct RawVecInner<A: Allocator = Global> {
 
 
 // TODO: maybe expose a value interface instead
-#[rr::only_spec(drop_glue)]
+// RawVec frees storage without dropping elements. Its allocator is hidden by
+// the invariant, and buffer ownership cannot survive deallocation.
+#[rr::ghost_drop("True")]
 #[rr::derive_instantiate("DropGlueUnwind" := "{A::DropGlueUnwind}")]
 #[rr::export_as(alloc::raw_vec::RawVec)]
 #[rr::refined_by("(l, cap, els)" : "(loc * nat * list (place_rfn (option (place_rfn {rt_of T}))))")]
@@ -93,22 +96,26 @@ pub(crate) struct RawVec<T, A: Allocator = Global> {
 }
 
 
-// TODO(verification): Use a non-const Drop impl without may_dangle while retaining
-// the existing drop contract; const-trait bounds and may_dangle are deferred.
-#[rr::only_spec]
+// TODO(verification): Use a non-const Drop impl without may_dangle;
+// const-trait bounds and may_dangle are deferred.
 impl<T, A: Allocator> Drop for RawVec<T, A> {
     /// Frees the memory owned by the `RawVec` *without* trying to drop its contents.
-    #[rr::params("l", "lmem", "cap", "els")] 
+    #[rr::unsafe_elctx("ty_outlives_E {T} ulft_1")]
+    #[rr::unsafe_elctx("ty_outlives_E {A} ulft_1")]
+    #[rr::params("l", "x")]
     #[rr::args("l" @ "alias_ref_t")]
-    #[rr::requires(#type "l" : "(lmem, cap, els)" @ "RawVec_inv_t T_rt A_rt Allocator_A_spec_attrs -[] -[T_ty; A_ty]")]
-    #[rr::exists("a")]
+    #[rr::requires(#type "l" : "$# x" @ "RawVec_inv_t T_rt A_rt Allocator_A_spec_attrs -[] -[T_ty; A_ty]")]
+    #[rr::may_unwind_if("False")]
+    #[rr::exists("a" : "{xt_of A}")]
     #[rr::exists("stored_cap" : "nat")]
-    // Drop exposes the physical stored capacity, not the
-    // ZST effective capacity, and retains the allocation pointer lmem.
-    #[rr::ensures(#type "l" : "-[ #(lmem, stored_cap, a); #tt]" @ "RawVec_ty T_rt A_rt Allocator_A_spec_attrs -[] -[T_ty; A_ty]")]
+    // The allocation is gone, so expose the fields rather than restore RawVec's
+    // buffer invariant. Drop glue can then drop the allocator in these fields.
+    #[rr::ensures(#type "l" : "-[ #(x.1.1, stored_cap, $# a); #tt]" @ "RawVec_ty T_rt A_rt Allocator_A_spec_attrs -[] -[T_ty; A_ty]")]
     fn drop(&mut self) {
         // SAFETY: We are in a Drop impl, self.inner will not be used again.
-        unsafe { self.inner.deallocate(T::LAYOUT) }
+        // TODO(verification): Use the modeled constructor instead of the generic
+        // associated layout constant unsupported by the frontend.
+        unsafe { self.inner.deallocate(Layout::new::<T>()) }
     }
 }
 

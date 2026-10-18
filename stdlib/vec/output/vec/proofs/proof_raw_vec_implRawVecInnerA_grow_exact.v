@@ -49,10 +49,6 @@ Proof.
   Unshelve.
   all: try exact ([] : val).
   all: try exact (self : loc).
-  all: try (timeout 2 sidecond_solver).
-  all: try (timeout 2 sidecond_hammer).
-  all: try (timeout 10 sidecond_solver).
-  all: try (timeout 10 sidecond_hammer).
   all: sidecond_solver.
   all: sidecond_hammer.
   Unshelve.
@@ -64,6 +60,6 @@ Proof.
     rename select (0 ≤ len + additional)%Z into Hsum_nonneg.
     clear -Hnew_size Helem_nonzero Hsum_nonneg.
     nia.
-   - destruct x'2; simpl in *; intuition nia.
+  - destruct x'2; simpl in *; intuition nia.
 Qed.
 End proof.
