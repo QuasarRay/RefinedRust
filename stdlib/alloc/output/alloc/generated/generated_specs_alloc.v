@@ -1,8 +1,11 @@
 From radium Require Import lang notation.
 From refinedrust Require Import typing shims.
-From rrstd.alloc.theories Require Export layout shims.
+From rrstd.alloc.theories Require Export errors layout shims.
 From rrstd.clone.clone.generated Require Export generated_specs_clone.
+From rrstd.controlflow.controlflow.generated Require Export generated_specs_controlflow.
 From rrstd.mem.mem.generated Require Export generated_specs_mem.
+From rrstd.num.num.generated Require Export generated_specs_num.
+From rrstd.option.option.generated Require Export generated_specs_option.
 From rrstd.ptr.ptr.generated Require Export generated_specs_ptr.
 From rrstd.result.result.generated Require Export generated_specs_result.
 From rrstd.alloc.alloc Require Export generated_code_alloc.
@@ -39,6 +42,79 @@ Program Definition REFAasAllocator_spec_attrs `{RRGS : !(refinedrustGS Σ)} (A_r
 
 
 End attrs.
+
+Section errors_AllocError_ty.
+  Context `{RRGS : !(refinedrustGS Σ)}.
+  Definition errors_AllocError_ty  : (spec_with 0 [] ((type (plist place_rfnRT [])))).
+  Proof.
+    exact (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (struct_t errors_AllocError_sls +[])).
+  Defined.
+
+  Definition errors_AllocError_rt  : RT.
+  Proof using  .
+    let __a := (normalized_rt_of_spec_ty (errors_AllocError_ty)) in exact __a.
+  Defined.
+
+  #[global] Typeclasses Transparent errors_AllocError_rt.
+  #[global] Typeclasses Transparent errors_AllocError_ty.
+End errors_AllocError_ty.
+#[global] Arguments errors_AllocError_rt : clear implicits.
+
+#[global] Arguments errors_AllocError_ty : clear implicits.
+
+#[global] Arguments errors_AllocError_ty {_ _}  .
+
+Section errors_AllocError_inv_t.
+  Context `{RRGS : !(refinedrustGS Σ)}.
+  Program Definition errors_AllocError_inv_t_inv_spec  : (spec_with 0 [] ((ex_inv_def (errors_AllocError_rt)%type ((unit))%type))) :=
+    spec! ( *[]) : 0 | ( *[]) : ([] : list RT), mk_auto_ex_inv_def
+          (λ π (inner_rfn : errors_AllocError_rt) (_ty_rfn : RT_rt ((unit)%type : RT)),
+                  let '() := _ty_rfn in ⌜inner_rfn = -[]⌝ ∗ True)%I
+          (true)
+          ([])
+          ([])
+          _ _ _ _
+        .
+  Next Obligation.
+    ex_plain_t_solve_shr_auto.
+  Defined.
+
+  Next Obligation.
+    ex_plain_t_solve_ghost_drop_auto.
+  Defined.
+
+  Next Obligation.
+    ex_t_solve_persistent.
+  Qed.
+
+  Final Obligation.
+    ex_plain_t_solve_shr_mono.
+  Qed.
+
+  Definition errors_AllocError_inv_t  : (spec_with 0 [] ((type (((unit))%type)))) :=
+    spec! ( *[]) : 0 | ( *[]) : ([] : list RT), ex_plain_t _ _ (errors_AllocError_inv_t_inv_spec  -[] -[]) (errors_AllocError_ty -[] -[]).
+  #[global] Arguments errors_AllocError_inv_t_inv_spec : simpl never.
+
+  #[global] Arguments errors_AllocError_inv_t : simpl never.
+
+  #[global] Typeclasses Transparent errors_AllocError_inv_t.
+  Definition errors_AllocError_inv_t_rt  : RT.
+  Proof using  .
+    let __a := (normalized_rt_of_spec_ty (errors_AllocError_inv_t)) in exact __a.
+  Defined.
+
+  #[global] Typeclasses Transparent errors_AllocError_inv_t_rt.
+End errors_AllocError_inv_t.
+#[global] Arguments errors_AllocError_inv_t_rt : clear implicits.
+
+#[global] Arguments errors_AllocError_inv_t : clear implicits.
+
+#[global] Arguments errors_AllocError_inv_t {_ _}  .
+
+#[global] Arguments errors_AllocError_inv_t_inv_spec : clear implicits.
+
+#[global] Arguments errors_AllocError_inv_t_inv_spec {_ _}  .
+
 
 Section Global_ty.
   Context `{RRGS : !(refinedrustGS Σ)}.
@@ -160,6 +236,14 @@ Program Definition GlobalasAllocator_spec_attrs `{RRGS : !(refinedrustGS Σ)} : 
 
 End attrs.
 
+Section attrs.
+Context `{RRGS : !refinedrustGS Σ}.
+Program Definition errors_AllocErrorasstd_clone_Clone_spec_attrs `{RRGS : !(refinedrustGS Σ)} : ((Clone_spec_attrs ((errors_AllocError_inv_t_rt)))) :=
+  mk_Clone_spec_attrs.
+
+
+End attrs.
+
 Section layout_Layout_ty.
   Context `{RRGS : !(refinedrustGS Σ)}.
   Definition layout_Layout_ty  : (spec_with 0 [] ((type (plist place_rfnRT [Z : RT; (((alignment_Alignment_inv_t_rt))) : RT])))).
@@ -237,6 +321,236 @@ End layout_Layout_inv_t.
 
 #[global] Arguments layout_Layout_inv_t_inv_spec {_ _}  .
 
+
+Section attrs.
+Context `{RRGS : !refinedrustGS Σ}.
+Program Definition errors_AllocErrorasstd_marker_Copy_spec_attrs `{RRGS : !(refinedrustGS Σ)} : ((Copy_spec_attrs ((errors_AllocError_inv_t_rt)) (errors_AllocErrorasstd_clone_Clone_spec_attrs))) :=
+  mk_Copy_spec_attrs.
+
+
+End attrs.
+
+Section attrs.
+Context `{RRGS : !refinedrustGS Σ}.
+Program Definition layout_Layoutasstd_clone_Clone_spec_attrs `{RRGS : !(refinedrustGS Σ)} : ((Clone_spec_attrs ((layout_Layout_inv_t_rt)))) :=
+  mk_Clone_spec_attrs.
+
+
+End attrs.
+
+Section errors_TryReserveErrorKind_ty.
+  Context `{RRGS : !(refinedrustGS Σ)}.
+  Section components.
+    Definition errors_TryReserveErrorKind_CapacityOverflow_ty  : (spec_with 0 [] ((type (plist place_rfnRT [])))).
+    Proof.
+      exact (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (struct_t errors_TryReserveErrorKind_CapacityOverflow_sls +[])).
+    Defined.
+
+    Definition errors_TryReserveErrorKind_CapacityOverflow_rt  : RT.
+    Proof using  .
+      let __a := (normalized_rt_of_spec_ty (errors_TryReserveErrorKind_CapacityOverflow_ty)) in exact __a.
+    Defined.
+
+    #[global] Typeclasses Transparent errors_TryReserveErrorKind_CapacityOverflow_rt.
+    #[global] Typeclasses Transparent errors_TryReserveErrorKind_CapacityOverflow_ty.
+    Definition errors_TryReserveErrorKind_AllocError_ty  : (spec_with 0 [] ((type (plist place_rfnRT [(layout_Layout_inv_t_rt) : RT; unit : RT])))).
+    Proof.
+      exact (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (struct_t errors_TryReserveErrorKind_AllocError_sls +[((layout_Layout_inv_t   -[] -[])); (unit_t)])).
+    Defined.
+
+    Definition errors_TryReserveErrorKind_AllocError_rt  : RT.
+    Proof using  .
+      let __a := (normalized_rt_of_spec_ty (errors_TryReserveErrorKind_AllocError_ty)) in exact __a.
+    Defined.
+
+    #[global] Typeclasses Transparent errors_TryReserveErrorKind_AllocError_rt.
+    #[global] Typeclasses Transparent errors_TryReserveErrorKind_AllocError_ty.
+    Definition errors_TryReserveErrorKind_enum_rt  :=
+      λ rfn : (reserve_error), match rfn with | ReserveCapacityOverflow => errors_TryReserveErrorKind_CapacityOverflow_rt| (ReserveAllocError (layout) (extra)) => errors_TryReserveErrorKind_AllocError_rt end.
+    Definition errors_TryReserveErrorKind_enum_ty  : (spec_with 0 [] (∀ (x: _), (type (errors_TryReserveErrorKind_enum_rt (x))))) :=
+      spec! ( *[]) : 0 | ( *[]) : ([] : list RT), λ rfn, match rfn as x return type (errors_TryReserveErrorKind_enum_rt x) with | ReserveCapacityOverflow => errors_TryReserveErrorKind_CapacityOverflow_ty -[] -[]| (ReserveAllocError (layout) (extra)) => errors_TryReserveErrorKind_AllocError_ty -[] -[] end.
+    Program Definition errors_TryReserveErrorKind_enum  : (spec_with 0 [] ((enum ((reserve_error))))) :=
+      spec! ( *[]) : 0 | ( *[]) : ([] : list RT), mk_enum
+        _
+        (errors_TryReserveErrorKind_els)
+        (λ rfn, Some (match rfn with | ReserveCapacityOverflow => "CapacityOverflow" | (ReserveAllocError (layout) (extra)) => "AllocError" end))
+        (errors_TryReserveErrorKind_enum_rt)
+        (errors_TryReserveErrorKind_enum_ty -[] -[])
+        (λ rfn, match rfn with | ReserveCapacityOverflow => *[]| (ReserveAllocError (layout) (extra)) => *[layout; extra] end)
+        ([("CapacityOverflow", mk_enum_tag_sem _ (errors_TryReserveErrorKind_CapacityOverflow_ty -[] -[]) (λ '( *[]), ReserveCapacityOverflow)); ("AllocError", mk_enum_tag_sem _ (errors_TryReserveErrorKind_AllocError_ty -[] -[]) (λ '( *[layout; extra]), (ReserveAllocError (layout) (extra))))])
+        _
+        _
+        _.
+    Next Obligation.
+      solve_inhabited.
+    Defined.
+
+    Next Obligation.
+      done.
+    Qed.
+
+    Next Obligation.
+      solve_mk_enum_tag_consistent.
+    Defined.
+
+    Final Obligation.
+      solve_mk_enum_tag_inj_roundtrip.
+    Defined.
+
+    #[global] Arguments errors_TryReserveErrorKind_enum : simpl never.
+
+    Definition errors_TryReserveErrorKind_ty_pre  : (spec_with 0 [] ((type _))) :=
+      spec! ( *[]) : 0 | ( *[]) : ([] : list RT), enum_t (errors_TryReserveErrorKind_enum -[] -[]).
+    Definition errors_TryReserveErrorKind_rt_pre  : RT.
+    Proof using  .
+      let __a := (normalized_rt_of_spec_ty (errors_TryReserveErrorKind_ty_pre)) in exact __a.
+    Defined.
+
+    #[global] Typeclasses Transparent errors_TryReserveErrorKind_rt_pre.
+  End components.
+  Arguments enum_ty : simpl never.
+
+  Definition errors_TryReserveErrorKind_ty  : (spec_with 0 [] ((type _))) :=
+    spec! ( *[]) : 0 | ( *[]) : ([] : list RT), enum_t (errors_TryReserveErrorKind_enum -[] -[]).
+  Definition errors_TryReserveErrorKind_rt  : RT.
+  Proof using  .
+    let __a := (normalized_rt_of_spec_ty (errors_TryReserveErrorKind_ty)) in exact __a.
+  Defined.
+
+  #[global] Typeclasses Transparent errors_TryReserveErrorKind_rt.
+End errors_TryReserveErrorKind_ty.
+#[global] Typeclasses Transparent errors_TryReserveErrorKind_ty.
+#[global] Typeclasses Transparent errors_TryReserveErrorKind_rt.
+#[global] Arguments errors_TryReserveErrorKind_enum : simpl never.
+
+#[global] Arguments errors_TryReserveErrorKind_rt : clear implicits.
+
+#[global] Arguments errors_TryReserveErrorKind_ty : clear implicits.
+
+#[global] Arguments errors_TryReserveErrorKind_ty {_ _}  .
+
+Global Hint Unfold errors_TryReserveErrorKind_ty : solve_protected_eq_db.
+
+Section attrs.
+Context `{RRGS : !refinedrustGS Σ}.
+Program Definition errors_TryReserveErrorKindasstd_clone_Clone_spec_attrs `{RRGS : !(refinedrustGS Σ)} : ((Clone_spec_attrs ((errors_TryReserveErrorKind_rt)))) :=
+  mk_Clone_spec_attrs.
+
+
+End attrs.
+
+Section attrs.
+Context `{RRGS : !refinedrustGS Σ}.
+Program Definition errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_spec_attrs `{RRGS : !(refinedrustGS Σ)} : ((convert_From_spec_attrs ((errors_TryReserveErrorKind_rt)) ((layout_LayoutError_rt)))) :=
+  {|
+    convert_From_FromFn  :=
+      (λ _, ReserveCapacityOverflow) : ((convert_From_FromFn_sig ((errors_TryReserveErrorKind_rt)) ((layout_LayoutError_rt))));
+  |}
+.
+
+
+End attrs.
+
+Section attrs.
+Context `{RRGS : !refinedrustGS Σ}.
+Program Definition layout_Layoutasstd_marker_Copy_spec_attrs `{RRGS : !(refinedrustGS Σ)} : ((Copy_spec_attrs ((layout_Layout_inv_t_rt)) (layout_Layoutasstd_clone_Clone_spec_attrs))) :=
+  mk_Copy_spec_attrs.
+
+
+End attrs.
+
+Section errors_TryReserveError_ty.
+  Context `{RRGS : !(refinedrustGS Σ)}.
+  Definition errors_TryReserveError_ty  : (spec_with 0 [] ((type (plist place_rfnRT [(errors_TryReserveErrorKind_rt) : RT])))).
+  Proof.
+    exact (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (struct_t errors_TryReserveError_sls +[((errors_TryReserveErrorKind_ty  -[] -[]))])).
+  Defined.
+
+  Definition errors_TryReserveError_rt  : RT.
+  Proof using  .
+    let __a := (normalized_rt_of_spec_ty (errors_TryReserveError_ty)) in exact __a.
+  Defined.
+
+  #[global] Typeclasses Transparent errors_TryReserveError_rt.
+  #[global] Typeclasses Transparent errors_TryReserveError_ty.
+End errors_TryReserveError_ty.
+#[global] Arguments errors_TryReserveError_rt : clear implicits.
+
+#[global] Arguments errors_TryReserveError_ty : clear implicits.
+
+#[global] Arguments errors_TryReserveError_ty {_ _}  .
+
+Section errors_TryReserveError_inv_t.
+  Context `{RRGS : !(refinedrustGS Σ)}.
+  Program Definition errors_TryReserveError_inv_t_inv_spec  : (spec_with 0 [] ((ex_inv_def (errors_TryReserveError_rt)%type ((reserve_error))%type))) :=
+    spec! ( *[]) : 0 | ( *[]) : ([] : list RT), mk_auto_ex_inv_def
+          (λ π (inner_rfn : errors_TryReserveError_rt) (_ty_rfn : RT_rt ((reserve_error)%type : RT)),
+                  let 'kind := _ty_rfn in ⌜inner_rfn = -[#kind]⌝ ∗ True)%I
+          (true)
+          ([])
+          ([])
+          _ _ _ _
+        .
+  Next Obligation.
+    ex_plain_t_solve_shr_auto.
+  Defined.
+
+  Next Obligation.
+    ex_plain_t_solve_ghost_drop_auto.
+  Defined.
+
+  Next Obligation.
+    ex_t_solve_persistent.
+  Qed.
+
+  Final Obligation.
+    ex_plain_t_solve_shr_mono.
+  Qed.
+
+  Definition errors_TryReserveError_inv_t  : (spec_with 0 [] ((type (((reserve_error))%type)))) :=
+    spec! ( *[]) : 0 | ( *[]) : ([] : list RT), ex_plain_t _ _ (errors_TryReserveError_inv_t_inv_spec  -[] -[]) (errors_TryReserveError_ty -[] -[]).
+  #[global] Arguments errors_TryReserveError_inv_t_inv_spec : simpl never.
+
+  #[global] Arguments errors_TryReserveError_inv_t : simpl never.
+
+  #[global] Typeclasses Transparent errors_TryReserveError_inv_t.
+  Definition errors_TryReserveError_inv_t_rt  : RT.
+  Proof using  .
+    let __a := (normalized_rt_of_spec_ty (errors_TryReserveError_inv_t)) in exact __a.
+  Defined.
+
+  #[global] Typeclasses Transparent errors_TryReserveError_inv_t_rt.
+End errors_TryReserveError_inv_t.
+#[global] Arguments errors_TryReserveError_inv_t_rt : clear implicits.
+
+#[global] Arguments errors_TryReserveError_inv_t : clear implicits.
+
+#[global] Arguments errors_TryReserveError_inv_t {_ _}  .
+
+#[global] Arguments errors_TryReserveError_inv_t_inv_spec : clear implicits.
+
+#[global] Arguments errors_TryReserveError_inv_t_inv_spec {_ _}  .
+
+
+Section attrs.
+Context `{RRGS : !refinedrustGS Σ}.
+Program Definition errors_TryReserveErrorasstd_clone_Clone_spec_attrs `{RRGS : !(refinedrustGS Σ)} : ((Clone_spec_attrs ((errors_TryReserveError_inv_t_rt)))) :=
+  mk_Clone_spec_attrs.
+
+
+End attrs.
+
+Section attrs.
+Context `{RRGS : !refinedrustGS Σ}.
+Program Definition errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_spec_attrs `{RRGS : !(refinedrustGS Σ)} : ((convert_From_spec_attrs ((errors_TryReserveError_inv_t_rt)) ((errors_TryReserveErrorKind_rt)))) :=
+  {|
+    convert_From_FromFn  :=
+      (id) : ((convert_From_FromFn_sig ((errors_TryReserveError_inv_t_rt)) ((errors_TryReserveErrorKind_rt))));
+  |}
+.
+
+
+End attrs.
 
 Section drop_glue_attrs.
 Context `{RRGS : !refinedrustGS Σ}.
@@ -362,6 +676,48 @@ End AllocatorClone_trait_req_incls.
 Section specs.
 Context `{RRGS : !refinedrustGS Σ}.
 
+Definition trait_incl_of_errors_AllocErrorasstd_clone_Clone_clone  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_errors_AllocErrorasstd_clone_Clone_clone  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Clone_base_spec ((errors_AllocError_inv_t_rt)) (errors_AllocError_st) ((drop_glue_trivial_spec_attrs ((errors_AllocError_inv_t_rt)))) (errors_AllocErrorasstd_clone_Clone_spec_attrs))
+    -[] -[(errors_AllocError_inv_t   -[] -[])]).(Clone_clone_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_errors_TryReserveErrorasstd_clone_Clone_clone  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_errors_TryReserveErrorasstd_clone_Clone_clone  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Clone_base_spec ((errors_TryReserveError_inv_t_rt)) (errors_TryReserveError_st) ((drop_glue_trivial_spec_attrs ((errors_TryReserveError_inv_t_rt)))) (errors_TryReserveErrorasstd_clone_Clone_spec_attrs))
+    -[] -[(errors_TryReserveError_inv_t   -[] -[])]).(Clone_clone_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_from  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_from  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((convert_From_base_spec ((errors_TryReserveError_inv_t_rt)) ((errors_TryReserveErrorKind_rt)) (errors_TryReserveError_st) (errors_TryReserveErrorKind_st) ((drop_glue_trivial_spec_attrs ((errors_TryReserveError_inv_t_rt)))) ((drop_glue_trivial_spec_attrs ((errors_TryReserveErrorKind_rt)))) (errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_spec_attrs))
+    -[] -[(errors_TryReserveError_inv_t   -[] -[]); (errors_TryReserveErrorKind_ty  -[] -[])]).(convert_From_from_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_errors_TryReserveErrorKindasstd_clone_Clone_clone  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_errors_TryReserveErrorKindasstd_clone_Clone_clone  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Clone_base_spec ((errors_TryReserveErrorKind_rt)) (errors_TryReserveErrorKind_st) ((drop_glue_trivial_spec_attrs ((errors_TryReserveErrorKind_rt)))) (errors_TryReserveErrorKindasstd_clone_Clone_spec_attrs))
+    -[] -[(errors_TryReserveErrorKind_ty  -[] -[])]).(Clone_clone_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_from  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_from  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((convert_From_base_spec ((errors_TryReserveErrorKind_rt)) ((layout_LayoutError_rt)) (errors_TryReserveErrorKind_st) (layout_LayoutError_st) ((drop_glue_trivial_spec_attrs ((errors_TryReserveErrorKind_rt)))) ((drop_glue_trivial_spec_attrs ((layout_LayoutError_rt)))) (errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_spec_attrs))
+    -[] -[(errors_TryReserveErrorKind_ty  -[] -[]); (layout_LayoutError_ty   -[] -[])]).(convert_From_from_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_layout_Layoutasstd_clone_Clone_clone  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_layout_Layoutasstd_clone_Clone_clone  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Clone_base_spec ((layout_Layout_inv_t_rt)) (layout_Layout_st) ((drop_glue_trivial_spec_attrs ((layout_Layout_inv_t_rt)))) (layout_Layoutasstd_clone_Clone_spec_attrs))
+    -[] -[(layout_Layout_inv_t   -[] -[])]).(Clone_clone_spec)   a b))) <MERGE!>.
+
 Definition trait_incl_of_layout_Layout_align  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1]) : 1 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
@@ -373,6 +729,21 @@ Definition type_of_layout_Layout_align  :=
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ _ : unit, Z.of_nat (layout_alignment_nat self) @ (int USize);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_layout_Layout_alignment  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_layout_Layout_alignment  :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (self) : ((_)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (shr_ref ulft_1 (layout_Layout_inv_t   -[] -[]));
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, self.(layout_alignment) @ (alignment_Alignment_inv_t  -[] -[]);
       (* postcondition *) (λ π : thread_id, True) |
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
@@ -425,6 +796,36 @@ Definition type_of_layout_Layout_new (T_rt: RT) (T_st: syn_type) (DropGlue_T_spe
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
 
+Definition trait_incl_of_layout_Layout_pad_to_align  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_layout_Layout_pad_to_align  :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (self) : ((_)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (shr_ref ulft_1 (layout_Layout_inv_t   -[] -[]));
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, self @ (layout_Layout_inv_t   -[] -[]);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_layout_Layout_repeat_packed  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_layout_Layout_repeat_packed  :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (self, n) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (shr_ref ulft_1 (layout_Layout_inv_t   -[] -[])), n :@: (int USize);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, if bool_decide (Z.of_nat self.(layout_sz) * n ≤ MaxInt ISize) then Ok (mk_rust_layout (self.(layout_sz) * Z.to_nat n) self.(layout_alignment)) else Err ( *[]) @ (Result_ty ((layout_Layout_inv_t_rt)) ((layout_LayoutError_rt)) -[] -[(layout_Layout_inv_t   -[] -[]); (layout_LayoutError_ty   -[] -[])]);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
 Definition trait_incl_of_layout_Layout_size  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1]) : 1 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
@@ -473,6 +874,21 @@ Definition type_of_alloc_dealloc_internal  :=
         ∗ (ptr ◁ₗ[π, Owned] #(()) @ (◁ uninit (LiteralSynType (Layout (Z.to_nat size) (Z.to_nat align_log2)))))) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ (ret) : ((_)), ret @ unit_t;
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_errors_TryReserveError_kind  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_errors_TryReserveError_kind  :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (self) : ((_)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (shr_ref ulft_1 (errors_TryReserveError_inv_t   -[] -[]));
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, self @ (errors_TryReserveErrorKind_ty  -[] -[]);
       (* postcondition *) (λ π : thread_id, True) |
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
@@ -624,4 +1040,216 @@ Section GlobalasAllocator_spec.
   Definition GlobalasAllocator_spec_subsumption  :=
     trait_incl_marker (lift_trait_incl Allocator_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), GlobalasAllocator_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Allocator_base_spec (Global_inv_t_rt) Global_st (drop_glue_trivial_spec_attrs ((Global_inv_t_rt))) GlobalasAllocator_spec_attrs-[] -[(Global_inv_t   -[] -[])])))).
 End GlobalasAllocator_spec.
+
+Section errors_AllocErrorasstd_clone_Clone_spec.
+  Context `{RRGS : !(refinedrustGS Σ)}.
+  Definition errors_AllocErrorasstd_clone_Clone_spec  : (spec_with _ _ (Clone_spec ((errors_AllocError_inv_t_rt)))) :=
+    spec! ( *[]) : 0 | ( *[]) : ([] : list RT), {|
+        Clone_clone_spec  :=
+          type_of_errors_AllocErrorasstd_clone_Clone_clone 
+             : (spec_with 1 [] fn_spec);
+        Clone_clone_from_spec  :=
+          (Clone_clone_from_base_spec ((errors_AllocError_inv_t_rt)) (errors_AllocError_st)) (drop_glue_trivial_spec_attrs ((errors_AllocError_inv_t_rt))) errors_AllocErrorasstd_clone_Clone_spec_attrs 
+             <TY> (errors_AllocError_inv_t   -[] -[]) : (spec_with 2 [] fn_spec);
+      |}
+  .
+  Arguments errors_AllocErrorasstd_clone_Clone_spec : simpl never.
+
+  Program Definition errors_AllocErrorasstd_clone_Clone_realization  : trait_spec_realization (spec_with 0 [] (Clone_spec (RRGS:=RRGS) (errors_AllocError_inv_t_rt))) :=
+  {|
+    trait_ctx_lfts := 0;
+    trait_ctx_tys := [];
+    trait_ctx_wf := λ '( *[]) '( *[]) π, ((True))%I;
+    trait_ctx_spec := λ '( *[]) '( *[]) _ _, errors_AllocErrorasstd_clone_Clone_spec-[] -[];
+  |}.
+  Next Obligation.
+    solve_trait_realization_pers.
+  Qed.
+  Definition errors_AllocErrorasstd_clone_Clone_spec_subsumption  :=
+    trait_incl_marker (lift_trait_incl Clone_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), errors_AllocErrorasstd_clone_Clone_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Clone_base_spec (errors_AllocError_inv_t_rt) errors_AllocError_st (drop_glue_trivial_spec_attrs ((errors_AllocError_inv_t_rt))) errors_AllocErrorasstd_clone_Clone_spec_attrs-[] -[(errors_AllocError_inv_t   -[] -[])])))).
+End errors_AllocErrorasstd_clone_Clone_spec.
+
+Section errors_AllocErrorasstd_marker_Copy_spec.
+  Context `{RRGS : !(refinedrustGS Σ)}.
+  Definition errors_AllocErrorasstd_marker_Copy_spec  : (spec_with _ _ (Copy_spec ((errors_AllocError_inv_t_rt)))) :=
+    spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (@mk_Copy_spec _ _ ((errors_AllocError_inv_t_rt))).
+  Arguments errors_AllocErrorasstd_marker_Copy_spec : simpl never.
+
+  Program Definition errors_AllocErrorasstd_marker_Copy_realization  : trait_spec_realization (spec_with 0 [] (Copy_spec (RRGS:=RRGS) (errors_AllocError_inv_t_rt))) :=
+  {|
+    trait_ctx_lfts := 0;
+    trait_ctx_tys := [];
+    trait_ctx_wf := λ '( *[]) '( *[]) π, ((True))%I;
+    trait_ctx_spec := λ '( *[]) '( *[]) _ _, errors_AllocErrorasstd_marker_Copy_spec-[] -[];
+  |}.
+  Next Obligation.
+    solve_trait_realization_pers.
+  Qed.
+  Definition errors_AllocErrorasstd_marker_Copy_spec_subsumption  :=
+    trait_incl_marker (lift_trait_incl Copy_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), errors_AllocErrorasstd_marker_Copy_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Copy_base_spec (errors_AllocError_inv_t_rt) errors_AllocError_st errors_AllocErrorasstd_clone_Clone_spec_attrs (drop_glue_trivial_spec_attrs ((errors_AllocError_inv_t_rt))) errors_AllocErrorasstd_marker_Copy_spec_attrs-[] -[(errors_AllocError_inv_t   -[] -[])])))).
+  Lemma errors_AllocErrorasstd_marker_Copy_semantic_interp  : (Copy_semantic_interp (errors_AllocError_inv_t_rt) (errors_AllocError_inv_t   -[] -[])).
+  Proof.
+    unfold Copy_semantic_interp in *; apply _.
+  Qed.
+
+End errors_AllocErrorasstd_marker_Copy_spec.
+
+Section errors_TryReserveErrorasstd_clone_Clone_spec.
+  Context `{RRGS : !(refinedrustGS Σ)}.
+  Definition errors_TryReserveErrorasstd_clone_Clone_spec  : (spec_with _ _ (Clone_spec ((errors_TryReserveError_inv_t_rt)))) :=
+    spec! ( *[]) : 0 | ( *[]) : ([] : list RT), {|
+        Clone_clone_spec  :=
+          type_of_errors_TryReserveErrorasstd_clone_Clone_clone 
+             : (spec_with 1 [] fn_spec);
+        Clone_clone_from_spec  :=
+          (Clone_clone_from_base_spec ((errors_TryReserveError_inv_t_rt)) (errors_TryReserveError_st)) (drop_glue_trivial_spec_attrs ((errors_TryReserveError_inv_t_rt))) errors_TryReserveErrorasstd_clone_Clone_spec_attrs 
+             <TY> (errors_TryReserveError_inv_t   -[] -[]) : (spec_with 2 [] fn_spec);
+      |}
+  .
+  Arguments errors_TryReserveErrorasstd_clone_Clone_spec : simpl never.
+
+  Program Definition errors_TryReserveErrorasstd_clone_Clone_realization  : trait_spec_realization (spec_with 0 [] (Clone_spec (RRGS:=RRGS) (errors_TryReserveError_inv_t_rt))) :=
+  {|
+    trait_ctx_lfts := 0;
+    trait_ctx_tys := [];
+    trait_ctx_wf := λ '( *[]) '( *[]) π, ((True))%I;
+    trait_ctx_spec := λ '( *[]) '( *[]) _ _, errors_TryReserveErrorasstd_clone_Clone_spec-[] -[];
+  |}.
+  Next Obligation.
+    solve_trait_realization_pers.
+  Qed.
+  Definition errors_TryReserveErrorasstd_clone_Clone_spec_subsumption  :=
+    trait_incl_marker (lift_trait_incl Clone_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), errors_TryReserveErrorasstd_clone_Clone_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Clone_base_spec (errors_TryReserveError_inv_t_rt) errors_TryReserveError_st (drop_glue_trivial_spec_attrs ((errors_TryReserveError_inv_t_rt))) errors_TryReserveErrorasstd_clone_Clone_spec_attrs-[] -[(errors_TryReserveError_inv_t   -[] -[])])))).
+End errors_TryReserveErrorasstd_clone_Clone_spec.
+
+Section errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_spec.
+  Context `{RRGS : !(refinedrustGS Σ)}.
+  Definition errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_spec  : (spec_with _ _ (convert_From_spec ((errors_TryReserveError_inv_t_rt)) ((errors_TryReserveErrorKind_rt)))) :=
+    spec! ( *[]) : 0 | ( *[]) : ([] : list RT), {|
+        convert_From_from_spec  :=
+          type_of_errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_from 
+             : (spec_with 0 [] fn_spec);
+      |}
+  .
+  Arguments errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_spec : simpl never.
+
+  Program Definition errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_realization  : trait_spec_realization (spec_with 0 [] (convert_From_spec (RRGS:=RRGS) (errors_TryReserveError_inv_t_rt) (errors_TryReserveErrorKind_rt))) :=
+  {|
+    trait_ctx_lfts := 0;
+    trait_ctx_tys := [];
+    trait_ctx_wf := λ '( *[]) '( *[]) π, ((True))%I;
+    trait_ctx_spec := λ '( *[]) '( *[]) _ _, errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_spec-[] -[];
+  |}.
+  Next Obligation.
+    solve_trait_realization_pers.
+  Qed.
+  Definition errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_spec_subsumption  :=
+    trait_incl_marker (lift_trait_incl convert_From_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((convert_From_base_spec (errors_TryReserveError_inv_t_rt) (errors_TryReserveErrorKind_rt) errors_TryReserveError_st errors_TryReserveErrorKind_st (drop_glue_trivial_spec_attrs ((errors_TryReserveError_inv_t_rt))) (drop_glue_trivial_spec_attrs ((errors_TryReserveErrorKind_rt))) errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_spec_attrs-[] -[(errors_TryReserveError_inv_t   -[] -[]); (errors_TryReserveErrorKind_ty  -[] -[])])))).
+End errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_spec.
+
+Section errors_TryReserveErrorKindasstd_clone_Clone_spec.
+  Context `{RRGS : !(refinedrustGS Σ)}.
+  Definition errors_TryReserveErrorKindasstd_clone_Clone_spec  : (spec_with _ _ (Clone_spec ((errors_TryReserveErrorKind_rt)))) :=
+    spec! ( *[]) : 0 | ( *[]) : ([] : list RT), {|
+        Clone_clone_spec  :=
+          type_of_errors_TryReserveErrorKindasstd_clone_Clone_clone 
+             : (spec_with 1 [] fn_spec);
+        Clone_clone_from_spec  :=
+          (Clone_clone_from_base_spec ((errors_TryReserveErrorKind_rt)) (errors_TryReserveErrorKind_st)) (drop_glue_trivial_spec_attrs ((errors_TryReserveErrorKind_rt))) errors_TryReserveErrorKindasstd_clone_Clone_spec_attrs 
+             <TY> (errors_TryReserveErrorKind_ty  -[] -[]) : (spec_with 2 [] fn_spec);
+      |}
+  .
+  Arguments errors_TryReserveErrorKindasstd_clone_Clone_spec : simpl never.
+
+  Program Definition errors_TryReserveErrorKindasstd_clone_Clone_realization  : trait_spec_realization (spec_with 0 [] (Clone_spec (RRGS:=RRGS) (errors_TryReserveErrorKind_rt))) :=
+  {|
+    trait_ctx_lfts := 0;
+    trait_ctx_tys := [];
+    trait_ctx_wf := λ '( *[]) '( *[]) π, ((True))%I;
+    trait_ctx_spec := λ '( *[]) '( *[]) _ _, errors_TryReserveErrorKindasstd_clone_Clone_spec-[] -[];
+  |}.
+  Next Obligation.
+    solve_trait_realization_pers.
+  Qed.
+  Definition errors_TryReserveErrorKindasstd_clone_Clone_spec_subsumption  :=
+    trait_incl_marker (lift_trait_incl Clone_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), errors_TryReserveErrorKindasstd_clone_Clone_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Clone_base_spec (errors_TryReserveErrorKind_rt) errors_TryReserveErrorKind_st (drop_glue_trivial_spec_attrs ((errors_TryReserveErrorKind_rt))) errors_TryReserveErrorKindasstd_clone_Clone_spec_attrs-[] -[(errors_TryReserveErrorKind_ty  -[] -[])])))).
+End errors_TryReserveErrorKindasstd_clone_Clone_spec.
+
+Section errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_spec.
+  Context `{RRGS : !(refinedrustGS Σ)}.
+  Definition errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_spec  : (spec_with _ _ (convert_From_spec ((errors_TryReserveErrorKind_rt)) ((layout_LayoutError_rt)))) :=
+    spec! ( *[]) : 0 | ( *[]) : ([] : list RT), {|
+        convert_From_from_spec  :=
+          type_of_errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_from 
+             : (spec_with 0 [] fn_spec);
+      |}
+  .
+  Arguments errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_spec : simpl never.
+
+  Program Definition errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_realization  : trait_spec_realization (spec_with 0 [] (convert_From_spec (RRGS:=RRGS) (errors_TryReserveErrorKind_rt) (layout_LayoutError_rt))) :=
+  {|
+    trait_ctx_lfts := 0;
+    trait_ctx_tys := [];
+    trait_ctx_wf := λ '( *[]) '( *[]) π, ((True))%I;
+    trait_ctx_spec := λ '( *[]) '( *[]) _ _, errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_spec-[] -[];
+  |}.
+  Next Obligation.
+    solve_trait_realization_pers.
+  Qed.
+  Definition errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_spec_subsumption  :=
+    trait_incl_marker (lift_trait_incl convert_From_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((convert_From_base_spec (errors_TryReserveErrorKind_rt) (layout_LayoutError_rt) errors_TryReserveErrorKind_st layout_LayoutError_st (drop_glue_trivial_spec_attrs ((errors_TryReserveErrorKind_rt))) (drop_glue_trivial_spec_attrs ((layout_LayoutError_rt))) errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_spec_attrs-[] -[(errors_TryReserveErrorKind_ty  -[] -[]); (layout_LayoutError_ty   -[] -[])])))).
+End errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_spec.
+
+Section layout_Layoutasstd_clone_Clone_spec.
+  Context `{RRGS : !(refinedrustGS Σ)}.
+  Definition layout_Layoutasstd_clone_Clone_spec  : (spec_with _ _ (Clone_spec ((layout_Layout_inv_t_rt)))) :=
+    spec! ( *[]) : 0 | ( *[]) : ([] : list RT), {|
+        Clone_clone_spec  :=
+          type_of_layout_Layoutasstd_clone_Clone_clone 
+             : (spec_with 1 [] fn_spec);
+        Clone_clone_from_spec  :=
+          (Clone_clone_from_base_spec ((layout_Layout_inv_t_rt)) (layout_Layout_st)) (drop_glue_trivial_spec_attrs ((layout_Layout_inv_t_rt))) layout_Layoutasstd_clone_Clone_spec_attrs 
+             <TY> (layout_Layout_inv_t   -[] -[]) : (spec_with 2 [] fn_spec);
+      |}
+  .
+  Arguments layout_Layoutasstd_clone_Clone_spec : simpl never.
+
+  Program Definition layout_Layoutasstd_clone_Clone_realization  : trait_spec_realization (spec_with 0 [] (Clone_spec (RRGS:=RRGS) (layout_Layout_inv_t_rt))) :=
+  {|
+    trait_ctx_lfts := 0;
+    trait_ctx_tys := [];
+    trait_ctx_wf := λ '( *[]) '( *[]) π, ((True))%I;
+    trait_ctx_spec := λ '( *[]) '( *[]) _ _, layout_Layoutasstd_clone_Clone_spec-[] -[];
+  |}.
+  Next Obligation.
+    solve_trait_realization_pers.
+  Qed.
+  Definition layout_Layoutasstd_clone_Clone_spec_subsumption  :=
+    trait_incl_marker (lift_trait_incl Clone_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), layout_Layoutasstd_clone_Clone_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Clone_base_spec (layout_Layout_inv_t_rt) layout_Layout_st (drop_glue_trivial_spec_attrs ((layout_Layout_inv_t_rt))) layout_Layoutasstd_clone_Clone_spec_attrs-[] -[(layout_Layout_inv_t   -[] -[])])))).
+End layout_Layoutasstd_clone_Clone_spec.
+
+Section layout_Layoutasstd_marker_Copy_spec.
+  Context `{RRGS : !(refinedrustGS Σ)}.
+  Definition layout_Layoutasstd_marker_Copy_spec  : (spec_with _ _ (Copy_spec ((layout_Layout_inv_t_rt)))) :=
+    spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (@mk_Copy_spec _ _ ((layout_Layout_inv_t_rt))).
+  Arguments layout_Layoutasstd_marker_Copy_spec : simpl never.
+
+  Program Definition layout_Layoutasstd_marker_Copy_realization  : trait_spec_realization (spec_with 0 [] (Copy_spec (RRGS:=RRGS) (layout_Layout_inv_t_rt))) :=
+  {|
+    trait_ctx_lfts := 0;
+    trait_ctx_tys := [];
+    trait_ctx_wf := λ '( *[]) '( *[]) π, ((True))%I;
+    trait_ctx_spec := λ '( *[]) '( *[]) _ _, layout_Layoutasstd_marker_Copy_spec-[] -[];
+  |}.
+  Next Obligation.
+    solve_trait_realization_pers.
+  Qed.
+  Definition layout_Layoutasstd_marker_Copy_spec_subsumption  :=
+    trait_incl_marker (lift_trait_incl Copy_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), layout_Layoutasstd_marker_Copy_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Copy_base_spec (layout_Layout_inv_t_rt) layout_Layout_st layout_Layoutasstd_clone_Clone_spec_attrs (drop_glue_trivial_spec_attrs ((layout_Layout_inv_t_rt))) layout_Layoutasstd_marker_Copy_spec_attrs-[] -[(layout_Layout_inv_t   -[] -[])])))).
+  Lemma layout_Layoutasstd_marker_Copy_semantic_interp  : (Copy_semantic_interp (layout_Layout_inv_t_rt) (layout_Layout_inv_t   -[] -[])).
+  Proof.
+    unfold Copy_semantic_interp in *; apply _.
+  Qed.
+
+End layout_Layoutasstd_marker_Copy_spec.
 

@@ -10,13 +10,15 @@
 #![rr::coq_prefix("rrstd.alloc")]
 #![rr::import("rrstd.alloc.theories", "shims")]
 #![rr::include("clone")]
+#![rr::include("controlflow")]
 
 
 mod layout;
 use layout::*;
+mod errors;
+pub use errors::{AllocError, TryReserveError, TryReserveErrorKind};
 
 use std::ptr::{NonNull, copy_nonoverlapping};
-use std::alloc::{AllocError};
 
 #[rr::export_as(alloc::alloc::Global)]
 #[rr::refined_by("()" : "unit")]

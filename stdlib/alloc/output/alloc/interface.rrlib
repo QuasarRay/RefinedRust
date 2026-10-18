@@ -8,6 +8,25 @@
       },
       "kind": "adt",
       "path": [
+        "core",
+        "alloc",
+        "AllocError"
+      ],
+      "raw_type": {
+        "rtype": "(errors_AllocError_rt)",
+        "semtype": "errors_AllocError_ty"
+      },
+      "rtype": "(errors_AllocError_inv_t_rt)",
+      "semtype": "errors_AllocError_inv_t",
+      "syntype": "errors_AllocError_sls"
+    },
+    {
+      "info": {
+        "enum_name": null,
+        "needs_trait_attrs": true
+      },
+      "kind": "adt",
+      "path": [
         "alloc",
         "alloc",
         "Global"
@@ -59,6 +78,84 @@
       "syntype": "layout_LayoutError_sls"
     },
     {
+      "info": {
+        "enum_name": null,
+        "needs_trait_attrs": true
+      },
+      "kind": "adt",
+      "path": [
+        "alloc",
+        "collections",
+        "TryReserveError"
+      ],
+      "raw_type": {
+        "rtype": "(errors_TryReserveError_rt)",
+        "semtype": "errors_TryReserveError_ty"
+      },
+      "rtype": "(errors_TryReserveError_inv_t_rt)",
+      "semtype": "errors_TryReserveError_inv_t",
+      "syntype": "errors_TryReserveError_sls"
+    },
+    {
+      "info": {
+        "enum_name": null,
+        "needs_trait_attrs": false
+      },
+      "kind": "adt",
+      "path": [
+        "alloc",
+        "collections",
+        "TryReserveErrorKind",
+        "AllocError"
+      ],
+      "raw_type": {
+        "rtype": "(errors_TryReserveErrorKind_AllocError_rt)",
+        "semtype": "errors_TryReserveErrorKind_AllocError_ty"
+      },
+      "rtype": "(errors_TryReserveErrorKind_AllocError_rt)",
+      "semtype": "errors_TryReserveErrorKind_AllocError_ty",
+      "syntype": "errors_TryReserveErrorKind_AllocError_sls"
+    },
+    {
+      "info": {
+        "enum_name": null,
+        "needs_trait_attrs": false
+      },
+      "kind": "adt",
+      "path": [
+        "alloc",
+        "collections",
+        "TryReserveErrorKind",
+        "CapacityOverflow"
+      ],
+      "raw_type": {
+        "rtype": "(errors_TryReserveErrorKind_CapacityOverflow_rt)",
+        "semtype": "errors_TryReserveErrorKind_CapacityOverflow_ty"
+      },
+      "rtype": "(errors_TryReserveErrorKind_CapacityOverflow_rt)",
+      "semtype": "errors_TryReserveErrorKind_CapacityOverflow_ty",
+      "syntype": "errors_TryReserveErrorKind_CapacityOverflow_sls"
+    },
+    {
+      "info": {
+        "enum_name": "errors_TryReserveErrorKind_enum",
+        "needs_trait_attrs": false
+      },
+      "kind": "adt",
+      "path": [
+        "alloc",
+        "collections",
+        "TryReserveErrorKind"
+      ],
+      "raw_type": {
+        "rtype": "(errors_TryReserveErrorKind_rt)",
+        "semtype": "errors_TryReserveErrorKind_ty"
+      },
+      "rtype": "(errors_TryReserveErrorKind_rt)",
+      "semtype": "errors_TryReserveErrorKind_ty",
+      "syntype": "errors_TryReserveErrorKind_els"
+    },
+    {
       "kind": "method",
       "name": "layout_Layout_align",
       "path": [
@@ -69,6 +166,18 @@
       ],
       "spec": "type_of_layout_Layout_align",
       "trait_req_incl": "trait_incl_of_layout_Layout_align"
+    },
+    {
+      "kind": "method",
+      "name": "layout_Layout_alignment",
+      "path": [
+        "alloc",
+        "alloc",
+        "Layout",
+        "alignment"
+      ],
+      "spec": "type_of_layout_Layout_alignment",
+      "trait_req_incl": "trait_incl_of_layout_Layout_alignment"
     },
     {
       "kind": "method",
@@ -105,6 +214,30 @@
       ],
       "spec": "type_of_layout_Layout_new",
       "trait_req_incl": "trait_incl_of_layout_Layout_new"
+    },
+    {
+      "kind": "method",
+      "name": "layout_Layout_pad_to_align",
+      "path": [
+        "alloc",
+        "alloc",
+        "Layout",
+        "pad_to_align"
+      ],
+      "spec": "type_of_layout_Layout_pad_to_align",
+      "trait_req_incl": "trait_incl_of_layout_Layout_pad_to_align"
+    },
+    {
+      "kind": "method",
+      "name": "layout_Layout_repeat_packed",
+      "path": [
+        "alloc",
+        "alloc",
+        "Layout",
+        "repeat_packed"
+      ],
+      "spec": "type_of_layout_Layout_repeat_packed",
+      "trait_req_incl": "trait_incl_of_layout_Layout_repeat_packed"
     },
     {
       "kind": "method",
@@ -150,6 +283,18 @@
       ],
       "spec": "type_of_realloc",
       "trait_req_incl": "trait_incl_of_realloc"
+    },
+    {
+      "kind": "method",
+      "name": "errors_TryReserveError_kind",
+      "path": [
+        "alloc",
+        "collections",
+        "TryReserveError",
+        "kind"
+      ],
+      "spec": "type_of_errors_TryReserveError_kind",
+      "trait_req_incl": "trait_incl_of_errors_TryReserveError_kind"
     },
     {
       "allowed_attrs": [
@@ -256,6 +401,272 @@
           "Allocator"
         ]
       }
+    },
+    {
+      "for_type": {
+        "Adt": {
+          "args": [],
+          "path": [
+            "core",
+            "alloc",
+            "AllocError"
+          ]
+        }
+      },
+      "has_semantic_interp": false,
+      "impl_kind": "rust",
+      "kind": "trait_impl",
+      "method_specs": {
+        "clone": {
+          "name": "errors_AllocErrorasstd_clone_Clone_clone",
+          "spec": "type_of_errors_AllocErrorasstd_clone_Clone_clone",
+          "trait_req_incl": "trait_incl_of_errors_AllocErrorasstd_clone_Clone_clone"
+        }
+      },
+      "name": "errors_AllocErrorasstd_clone_Clone",
+      "realization": "errors_AllocErrorasstd_clone_Clone_realization",
+      "trait_path": {
+        "args": [],
+        "path": [
+          "std",
+          "clone",
+          "Clone"
+        ]
+      }
+    },
+    {
+      "for_type": {
+        "Adt": {
+          "args": [],
+          "path": [
+            "core",
+            "alloc",
+            "AllocError"
+          ]
+        }
+      },
+      "has_semantic_interp": true,
+      "impl_kind": "rust",
+      "kind": "trait_impl",
+      "method_specs": {},
+      "name": "errors_AllocErrorasstd_marker_Copy",
+      "realization": "errors_AllocErrorasstd_marker_Copy_realization",
+      "trait_path": {
+        "args": [],
+        "path": [
+          "std",
+          "marker",
+          "Copy"
+        ]
+      }
+    },
+    {
+      "for_type": {
+        "Adt": {
+          "args": [],
+          "path": [
+            "alloc",
+            "collections",
+            "TryReserveError"
+          ]
+        }
+      },
+      "has_semantic_interp": false,
+      "impl_kind": "rust",
+      "kind": "trait_impl",
+      "method_specs": {
+        "clone": {
+          "name": "errors_TryReserveErrorasstd_clone_Clone_clone",
+          "spec": "type_of_errors_TryReserveErrorasstd_clone_Clone_clone",
+          "trait_req_incl": "trait_incl_of_errors_TryReserveErrorasstd_clone_Clone_clone"
+        }
+      },
+      "name": "errors_TryReserveErrorasstd_clone_Clone",
+      "realization": "errors_TryReserveErrorasstd_clone_Clone_realization",
+      "trait_path": {
+        "args": [],
+        "path": [
+          "std",
+          "clone",
+          "Clone"
+        ]
+      }
+    },
+    {
+      "for_type": {
+        "Adt": {
+          "args": [],
+          "path": [
+            "alloc",
+            "collections",
+            "TryReserveError"
+          ]
+        }
+      },
+      "has_semantic_interp": false,
+      "impl_kind": "rust",
+      "kind": "trait_impl",
+      "method_specs": {
+        "from": {
+          "name": "errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_from",
+          "spec": "type_of_errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_from",
+          "trait_req_incl": "trait_incl_of_errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_from"
+        }
+      },
+      "name": "errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind",
+      "realization": "errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_realization",
+      "trait_path": {
+        "args": [
+          {
+            "Adt": {
+              "args": [],
+              "path": [
+                "alloc",
+                "collections",
+                "TryReserveErrorKind"
+              ]
+            }
+          }
+        ],
+        "path": [
+          "std",
+          "convert",
+          "From"
+        ]
+      }
+    },
+    {
+      "for_type": {
+        "Adt": {
+          "args": [],
+          "path": [
+            "alloc",
+            "collections",
+            "TryReserveErrorKind"
+          ]
+        }
+      },
+      "has_semantic_interp": false,
+      "impl_kind": "rust",
+      "kind": "trait_impl",
+      "method_specs": {
+        "clone": {
+          "name": "errors_TryReserveErrorKindasstd_clone_Clone_clone",
+          "spec": "type_of_errors_TryReserveErrorKindasstd_clone_Clone_clone",
+          "trait_req_incl": "trait_incl_of_errors_TryReserveErrorKindasstd_clone_Clone_clone"
+        }
+      },
+      "name": "errors_TryReserveErrorKindasstd_clone_Clone",
+      "realization": "errors_TryReserveErrorKindasstd_clone_Clone_realization",
+      "trait_path": {
+        "args": [],
+        "path": [
+          "std",
+          "clone",
+          "Clone"
+        ]
+      }
+    },
+    {
+      "for_type": {
+        "Adt": {
+          "args": [],
+          "path": [
+            "alloc",
+            "collections",
+            "TryReserveErrorKind"
+          ]
+        }
+      },
+      "has_semantic_interp": false,
+      "impl_kind": "rust",
+      "kind": "trait_impl",
+      "method_specs": {
+        "from": {
+          "name": "errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_from",
+          "spec": "type_of_errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_from",
+          "trait_req_incl": "trait_incl_of_errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_from"
+        }
+      },
+      "name": "errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError",
+      "realization": "errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_realization",
+      "trait_path": {
+        "args": [
+          {
+            "Adt": {
+              "args": [],
+              "path": [
+                "alloc",
+                "alloc",
+                "LayoutError"
+              ]
+            }
+          }
+        ],
+        "path": [
+          "std",
+          "convert",
+          "From"
+        ]
+      }
+    },
+    {
+      "for_type": {
+        "Adt": {
+          "args": [],
+          "path": [
+            "alloc",
+            "alloc",
+            "Layout"
+          ]
+        }
+      },
+      "has_semantic_interp": false,
+      "impl_kind": "rust",
+      "kind": "trait_impl",
+      "method_specs": {
+        "clone": {
+          "name": "layout_Layoutasstd_clone_Clone_clone",
+          "spec": "type_of_layout_Layoutasstd_clone_Clone_clone",
+          "trait_req_incl": "trait_incl_of_layout_Layoutasstd_clone_Clone_clone"
+        }
+      },
+      "name": "layout_Layoutasstd_clone_Clone",
+      "realization": "layout_Layoutasstd_clone_Clone_realization",
+      "trait_path": {
+        "args": [],
+        "path": [
+          "std",
+          "clone",
+          "Clone"
+        ]
+      }
+    },
+    {
+      "for_type": {
+        "Adt": {
+          "args": [],
+          "path": [
+            "alloc",
+            "alloc",
+            "Layout"
+          ]
+        }
+      },
+      "has_semantic_interp": true,
+      "impl_kind": "rust",
+      "kind": "trait_impl",
+      "method_specs": {},
+      "name": "layout_Layoutasstd_marker_Copy",
+      "realization": "layout_Layoutasstd_marker_Copy_realization",
+      "trait_path": {
+        "args": [],
+        "path": [
+          "std",
+          "marker",
+          "Copy"
+        ]
+      }
     }
   ],
   "module_dependencies": [
@@ -263,6 +674,7 @@
     "rrstd.clone.clone.generated",
     "rrstd.closures.closures.generated",
     "rrstd.closures.theories",
+    "rrstd.controlflow.controlflow.generated",
     "rrstd.mem.mem.generated",
     "rrstd.mem.theories",
     "rrstd.num.num.generated",
