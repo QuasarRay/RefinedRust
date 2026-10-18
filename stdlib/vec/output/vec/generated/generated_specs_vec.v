@@ -7,11 +7,15 @@ From rrstd.cmp.cmp.generated Require Export generated_specs_cmp.
 From rrstd.controlflow.controlflow.generated Require Export generated_specs_controlflow.
 From rrstd.index.index.generated Require Export generated_specs_index.
 From rrstd.iterator.iterator.generated Require Export generated_specs_iterator.
+From rrstd.mem.mem.generated Require Export generated_specs_mem.
+From rrstd.num.num.generated Require Export generated_specs_num.
 From rrstd.option.option.generated Require Export generated_specs_option.
+From rrstd.ptr.ptr.generated Require Export generated_specs_ptr.
 From rrstd.ptr_advanced.ptr_advanced.generated Require Export generated_specs_ptr_advanced.
+From rrstd.result.result.generated Require Export generated_specs_result.
 From rrstd.rr_internal.rr_internal.generated Require Export generated_specs_rr_internal.
 From rrstd.sized.sized.generated Require Export generated_specs_sized.
-From rrstd.vec.theories Require Export vec.
+From rrstd.vec.theories Require Export allocation vec.
 From rrstd.vec.vec Require Export generated_code_vec.
 
 Record private_slice_index_Sealed_spec_attrs `{RRGS : !(refinedrustGS Σ)} `{Self_rt : !RT} : Type := mk_private_slice_index_Sealed_spec_attrs {
@@ -45,6 +49,99 @@ Program Definition usizeasprivate_slice_index_Sealed_spec_attrs `{RRGS : !(refin
 
 
 End attrs.
+
+Section raw_vec_AllocInit_ty.
+  Context `{RRGS : !(refinedrustGS Σ)}.
+  Section components.
+    Definition raw_vec_AllocInit_Uninitialized_ty  : (spec_with 0 [] ((type (plist place_rfnRT [])))).
+    Proof.
+      exact (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (struct_t raw_vec_AllocInit_Uninitialized_sls +[])).
+    Defined.
+
+    Definition raw_vec_AllocInit_Uninitialized_rt  : RT.
+    Proof using  .
+      let __a := (normalized_rt_of_spec_ty (raw_vec_AllocInit_Uninitialized_ty)) in exact __a.
+    Defined.
+
+    #[global] Typeclasses Transparent raw_vec_AllocInit_Uninitialized_rt.
+    #[global] Typeclasses Transparent raw_vec_AllocInit_Uninitialized_ty.
+    Definition raw_vec_AllocInit_Zeroed_ty  : (spec_with 0 [] ((type (plist place_rfnRT [])))).
+    Proof.
+      exact (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (struct_t raw_vec_AllocInit_Zeroed_sls +[])).
+    Defined.
+
+    Definition raw_vec_AllocInit_Zeroed_rt  : RT.
+    Proof using  .
+      let __a := (normalized_rt_of_spec_ty (raw_vec_AllocInit_Zeroed_ty)) in exact __a.
+    Defined.
+
+    #[global] Typeclasses Transparent raw_vec_AllocInit_Zeroed_rt.
+    #[global] Typeclasses Transparent raw_vec_AllocInit_Zeroed_ty.
+    Definition raw_vec_AllocInit_enum_rt  :=
+      λ rfn : (bool), match rfn with | false => raw_vec_AllocInit_Uninitialized_rt| true => raw_vec_AllocInit_Zeroed_rt end.
+    Definition raw_vec_AllocInit_enum_ty  : (spec_with 0 [] (∀ (x: _), (type (raw_vec_AllocInit_enum_rt (x))))) :=
+      spec! ( *[]) : 0 | ( *[]) : ([] : list RT), λ rfn, match rfn as x return type (raw_vec_AllocInit_enum_rt x) with | false => raw_vec_AllocInit_Uninitialized_ty -[] -[]| true => raw_vec_AllocInit_Zeroed_ty -[] -[] end.
+    Program Definition raw_vec_AllocInit_enum  : (spec_with 0 [] ((enum ((bool))))) :=
+      spec! ( *[]) : 0 | ( *[]) : ([] : list RT), mk_enum
+        _
+        (raw_vec_AllocInit_els)
+        (λ rfn, Some (match rfn with | false => "Uninitialized" | true => "Zeroed" end))
+        (raw_vec_AllocInit_enum_rt)
+        (raw_vec_AllocInit_enum_ty -[] -[])
+        (λ rfn, match rfn with | false => *[]| true => *[] end)
+        ([("Uninitialized", mk_enum_tag_sem _ (raw_vec_AllocInit_Uninitialized_ty -[] -[]) (λ '( *[]), false)); ("Zeroed", mk_enum_tag_sem _ (raw_vec_AllocInit_Zeroed_ty -[] -[]) (λ '( *[]), true))])
+        _
+        _
+        _.
+    Next Obligation.
+      solve_inhabited.
+    Defined.
+
+    Next Obligation.
+      done.
+    Qed.
+
+    Next Obligation.
+      solve_mk_enum_tag_consistent.
+    Defined.
+
+    Final Obligation.
+      solve_mk_enum_tag_inj_roundtrip.
+    Defined.
+
+    #[global] Arguments raw_vec_AllocInit_enum : simpl never.
+
+    Definition raw_vec_AllocInit_ty_pre  : (spec_with 0 [] ((type _))) :=
+      spec! ( *[]) : 0 | ( *[]) : ([] : list RT), enum_t (raw_vec_AllocInit_enum -[] -[]).
+    Definition raw_vec_AllocInit_rt_pre  : RT.
+    Proof using  .
+      let __a := (normalized_rt_of_spec_ty (raw_vec_AllocInit_ty_pre)) in exact __a.
+    Defined.
+
+    #[global] Typeclasses Transparent raw_vec_AllocInit_rt_pre.
+  End components.
+  Arguments enum_ty : simpl never.
+
+  Definition raw_vec_AllocInit_ty  : (spec_with 0 [] ((type _))) :=
+    spec! ( *[]) : 0 | ( *[]) : ([] : list RT), enum_t (raw_vec_AllocInit_enum -[] -[]).
+  Definition raw_vec_AllocInit_rt  : RT.
+  Proof using  .
+    let __a := (normalized_rt_of_spec_ty (raw_vec_AllocInit_ty)) in exact __a.
+  Defined.
+
+  #[global] Typeclasses Transparent raw_vec_AllocInit_rt.
+End raw_vec_AllocInit_ty.
+#[global] Typeclasses Transparent raw_vec_AllocInit_ty.
+#[global] Typeclasses Transparent raw_vec_AllocInit_rt.
+#[global] Arguments raw_vec_AllocInit_enum : simpl never.
+
+#[global] Arguments raw_vec_AllocInit_rt : clear implicits.
+
+#[global] Arguments raw_vec_AllocInit_ty : clear implicits.
+
+#[global] Arguments raw_vec_AllocInit_ty {_ _}  .
+
+Global Hint Unfold raw_vec_AllocInit_ty : solve_protected_eq_db.
 
 Section Iter_ty.
   Context `{RRGS : !(refinedrustGS Σ)}.
@@ -314,7 +411,7 @@ Section RawVecInner_inv_t.
   Program Definition RawVecInner_inv_t_inv_spec (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) : (spec_with 0 [(A_rt)] ((ex_inv_def ((RawVecInner_rt (A_rt)))%type (((loc * nat * (A_rt) : RT)%type))%type))) :=
     spec! ( *[]) : 0 | ( *[A_ty]) : ([A_rt] : list RT), mk_auto_ex_inv_def
           (λ π (inner_rfn : (RawVecInner_rt (A_rt))) (_ty_rfn : RT_rt (((loc * nat * (A_rt) : RT)%type)%type : RT)),
-                  let '(l, cap, alloc) := _ty_rfn in ⌜inner_rfn = -[#(l); #(Z.of_nat cap); #(alloc)]⌝ ∗ True)%I
+                  let '(l, cap, alloc) := _ty_rfn in ⌜inner_rfn = -[#(l); #(Z.of_nat cap); #(alloc)]⌝ ∗ ⌜(name_hint "Hstored_cap" (cap ≤ Z.to_nat (MaxInt ISize))%Z)%Z⌝ ∗ True)%I
           (false)
           _
           ([])
@@ -394,7 +491,7 @@ Section RawVec_inv_t.
   Program Definition RawVec_inv_t_inv_spec (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) : (spec_with 0 [(T_rt); (A_rt)] ((ex_inv_def ((RawVec_rt (T_rt) (A_rt)))%type (((loc * nat * list (place_rfn (option (place_rfn (T_rt)))))))%type))) :=
     spec! ( *[]) : 0 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), mk_auto_ex_inv_def
           (λ π (inner_rfn : (RawVec_rt (T_rt) (A_rt))) (_ty_rfn : RT_rt (((loc * nat * list (place_rfn (option (place_rfn (T_rt))))))%type : RT)),
-                  let '(l, cap, els) := _ty_rfn in ∃ (a: name_hint_ty "a" (_)%Z), ⌜inner_rfn = -[#((l, cap, $# a)); #(tt)]⌝ ∗ guarded true (l ◁ₗ[π, Owned] #(els) @ (◁ array_t cap (maybe_uninit T_ty))) ∗ Allocator_A_spec_attrs.(Allocator_FreeablePerm) a l (size_of_array_in_bytes (ty_syn_type T_ty MetaNone) cap) ∗ True)%I
+                  let '(l, cap, els) := _ty_rfn in ∃ (a: name_hint_ty "a" (_)%Z) (stored_cap: name_hint_ty "stored_cap" ((nat))%Z), ⌜inner_rfn = -[#((l, stored_cap, $# a)); #(tt)]⌝ ∗ guarded true (l ◁ₗ[π, Owned] #(els) @ (◁ array_t cap (maybe_uninit T_ty))) ∗ ⌜(name_hint "Hcapacity" (raw_vec_capacity_valid (ty_syn_type T_ty MetaNone) stored_cap cap)%Z)%Z⌝ ∗ ⌜(name_hint "Hptr_nonnull" (l.(loc_a) ≠ 0)%Z)%Z⌝ ∗ ⌜(name_hint "Hptr_aligned" (l `has_layout_loc` (use_layout_alg' (ty_syn_type T_ty MetaNone)))%Z)%Z⌝ ∗ (if decide (size_of_array_in_bytes (ty_syn_type T_ty MetaNone) cap = 0%nat) then True else Allocator_A_spec_attrs.(Allocator_FreeablePerm) a l (size_of_array_in_bytes (ty_syn_type T_ty MetaNone) cap)) ∗ True)%I
           (false)
           _
           ([] ++ (ty_lfts (T_ty)))
@@ -678,7 +775,10 @@ Section Vec_inv_t_ne.
     intros X.
     apply ex_plain_t_contr.
     - constructor.
-      + solve_type_proper.
+      + solve_type_proper_prepare; solve_proper_prepare.
+        repeat solve_proper_step.
+        rewrite type_dist2_st.
+        done.
       + solve_type_proper.
     - cbn; apply _.
   Qed.
@@ -816,7 +916,7 @@ Proof.
   { done. }
   simpl. iDestruct "Hrfn" as "<-".
   rewrite {1}ex_plain_t_unfold_val/=.
-  iDestruct "Hv" as "(%fields' & (%a & -> & Hls & Hfreeable & _) & Hv)".
+  iDestruct "Hv" as "(%fields' & (%a & %stored_cap & -> & Hls & %Hcapacity & %Hptr_nonnull & %Hptr_aligned & Hfreeable & _) & Hv)".
 
   rewrite /guarded.
   iDestruct "Hls" as "(Hcred & Hls)".
@@ -939,12 +1039,15 @@ Proof.
   iExists _. iFrame.
 
   iPoseProof ("Hcl_raw" $! _ (RawVec_inv_t T_rt' A_rt A_attrs -[] -[T_ty'; A_ty]) (l', cap, (<#> (Some <$> <#> rs') ++ <#> replicate (cap - length rs) None))  with "[//] [Hcred Hls Hv Hfreeable]") as "Hv".
-  { rewrite ex_plain_t_unfold_val/=. iFrame.
+  { rewrite ex_plain_t_unfold_val/=.
     rewrite /inv_P/=/name_hint_ty/name_hint/=.
     rewrite Hst''.
     rewrite /guarded.
-    iFrame. iExists _. iSplitR "Hv".
-    { iR. iNext. replace (length rs + (cap - length rs))%nat with cap by lia. done. }
+    iExists -[#((l', stored_cap, $# a)); #tt]. iSplitR "Hv".
+    { iExists a, stored_cap. iR.
+      iSplitL "Hls Hcred".
+      { iFrame "Hcred". iNext. replace (length rs + (cap - length rs))%nat with cap by lia. done. }
+      iR. iR. iR. iFrame. }
     iApply (struct_t_own_val_mono _ false); last iApply "Hv".
     unfold struct_t_incl_precond. simpl.
     iSplitR; first last.
@@ -1292,6 +1395,802 @@ Definition type_of_Vec_TA_is_empty (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st:
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
 
+Definition trait_incl_of_raw_vec_implRawVecTA_allocator (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), (λ π, ((∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π)
+    ∗ (∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecTA_allocator (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[T_ty; A_ty]) : ([(T_rt, T_st); (A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (self) : ((_)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (shr_ref ulft_1 (RawVec_inv_t ((T_rt)) ((A_rt)) Allocator_A_spec_attrs -[] -[T_ty; A_ty]));
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (a) : ((((RT_xt (A_rt))))), a @ (shr_ref ulft_1 A_ty);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecInnerA_allocator (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecInnerA_allocator (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (self) : ((_)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (shr_ref ulft_1 (RawVecInner_inv_t ((A_rt)) Allocator_A_spec_attrs -[] -[A_ty]));
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, self.2 @ (shr_ref ulft_1 A_ty);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecTA_capacity (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), (λ π, ((∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π)
+    ∗ (∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecTA_capacity (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[T_ty; A_ty]) : ([(T_rt, T_st); (A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (self) : ((_)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (shr_ref ulft_1 (RawVec_inv_t ((T_rt)) ((A_rt)) Allocator_A_spec_attrs -[] -[T_ty; A_ty]));
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, Z.of_nat self.1.2 @ (int USize);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecInnerA_capacity (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecInnerA_capacity (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (self, elem_size) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (shr_ref ulft_1 (RawVecInner_inv_t ((A_rt)) Allocator_A_spec_attrs -[] -[A_ty])), elem_size :@: (int USize);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, Z.of_nat (raw_vec_effective_capacity (Z.to_nat elem_size) self.1.2) @ (int USize);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecInnerA_current_memory (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecInnerA_current_memory (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (self, elem_layout) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (shr_ref ulft_1 (RawVecInner_inv_t ((A_rt)) Allocator_A_spec_attrs -[] -[A_ty])), elem_layout :@: (layout_Layout_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, (⌜(name_hint "Hallocation_size" ((elem_layout.(layout_sz) * self.1.2 ≤ MaxInt ISize)%Z)%Z)%Z⌝)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, if decide (elem_layout.(layout_sz) = 0%nat ∨ self.1.2 = 0%nat) then None else Some ( *[self.1.1; mk_rust_layout (elem_layout.(layout_sz) * self.1.2) elem_layout.(layout_alignment)]) @ (Option_ty ((((tuple2_rt) (((((nonnull_NonNull_inv_t_rt)) (Z)))) ((((layout_Layout_inv_t_rt))))))) -[] -[(tuple2_ty (((((nonnull_NonNull_inv_t_rt)) (Z)))) ((((layout_Layout_inv_t_rt)))) -[] -[(nonnull_NonNull_inv_t (Z) -[] -[(int U8)]); (layout_Layout_inv_t  -[] -[])])]);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecInnerA_finish_grow (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecInnerA_finish_grow (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (v, self, cap, elem_layout) : (((val) * _ * _ * _)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (shr_ref ulft_1 (RawVecInner_inv_t ((A_rt)) Allocator_A_spec_attrs -[] -[A_ty])), cap :@: (int USize), elem_layout :@: (layout_Layout_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, (⌜(name_hint "Helem_nonzero" (elem_layout.(layout_sz) ≠ 0%nat)%Z)%Z⌝)
+        ∗ (⌜(name_hint "Hgrow_cap" (Z.of_nat self.1.2 < cap)%Z)%Z⌝)
+        ∗ (⌜(name_hint "Hallocation_size" ((elem_layout.(layout_sz) * self.1.2 ≤ MaxInt ISize)%Z)%Z)%Z⌝)
+        ∗ (raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) self.2) self.1.1 self.1.2 elem_layout v)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (res, suffix) : (((result loc reserve_error) * (val))), res @ (Result_ty (loc) ((((errors_TryReserveError_inv_t_rt)))) -[] -[alias_ptr_t; (errors_TryReserveError_inv_t  -[] -[])]);
+      (* postcondition *) (λ π : thread_id, (if_iOk res (λ l, raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) self.2) l (Z.to_nat cap) elem_layout (v ++ suffix)))
+      ∗ (if_iErr res (λ _, raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) self.2) self.1.1 self.1.2 elem_layout v))
+      ∗ (⌜(if_Ok res (λ _, (elem_layout.(layout_sz) * Z.to_nat cap ≤ MaxInt ISize)%Z))%Z⌝)
+      ∗ (⌜(if_Err res (λ err, match err with | ReserveCapacityOverflow => (MaxInt ISize < Z.of_nat elem_layout.(layout_sz) * cap)%Z | ReserveAllocError layout extra => layout = #(mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat cap) elem_layout.(layout_alignment)) ∧ extra = #tt ∧ (Z.of_nat elem_layout.(layout_sz) * cap ≤ MaxInt ISize)%Z end))%Z⌝)) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecTA_from_nonnull_in (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), (λ π, ((∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π)
+    ∗ (∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecTA_from_nonnull_in (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[]) : 0 | ( *[T_ty; A_ty]) : ([(T_rt, T_st); (A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (els, ptr, capacity, alloc) : (((list (option (RT_xt (T_rt)))) * _ * _ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) ptr :@: (nonnull_NonNull_inv_t ((T_rt)) -[] -[T_ty]), capacity :@: (int USize), alloc :@: A_ty;
+      (* precondition. *) (λ π : thread_id, (⌜(name_hint "Hptr_aligned" (ptr `has_layout_loc` (use_layout_alg' (ty_syn_type T_ty MetaNone)))%Z)%Z⌝)
+        ∗ (⌜(name_hint "Hallocation_size" ((size_of_array_in_bytes (ty_syn_type T_ty MetaNone) (Z.to_nat capacity) ≤ MaxInt ISize)%Z)%Z)%Z⌝)
+        ∗ (ptr ◁ₗ[π, Owned] #(RT_xrt (listRT (place_rfnRT (optionRT (place_rfnRT (T_rt))))) els) @ (◁ array_t (raw_vec_effective_capacity (size_of_st (ty_syn_type T_ty MetaNone)) (Z.to_nat capacity)) (maybe_uninit T_ty)))
+        ∗ ((if decide (size_of_array_in_bytes (ty_syn_type T_ty MetaNone) (Z.to_nat capacity) = 0%nat) then True else Allocator_A_spec_attrs.(Allocator_FreeablePerm) alloc ptr (size_of_array_in_bytes (ty_syn_type T_ty MetaNone) (Z.to_nat capacity))))) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, (ptr, raw_vec_effective_capacity (size_of_st (ty_syn_type T_ty MetaNone)) (Z.to_nat capacity), els) @ (RawVec_inv_t ((T_rt)) ((A_rt)) Allocator_A_spec_attrs -[] -[T_ty; A_ty]);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecInnerA_from_nonnull_in (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecInnerA_from_nonnull_in (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[]) : 0 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (ptr, cap, alloc) : ((_ * _ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) ptr :@: (nonnull_NonNull_inv_t (Z) -[] -[(int U8)]), cap :@: (int USize), alloc :@: A_ty;
+      (* precondition. *) (λ π : thread_id, (⌜(name_hint "Hstored_cap" (cap ≤ MaxInt ISize)%Z)%Z⌝)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, (ptr, Z.to_nat cap, alloc) @ (RawVecInner_inv_t ((A_rt)) Allocator_A_spec_attrs -[] -[A_ty]);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecTA_from_raw_parts_in (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), (λ π, ((∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π)
+    ∗ (∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecTA_from_raw_parts_in (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[]) : 0 | ( *[T_ty; A_ty]) : ([(T_rt, T_st); (A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (els, ptr, capacity, alloc) : (((list (option (RT_xt (T_rt)))) * _ * _ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) ptr :@: alias_ptr_t, capacity :@: (int USize), alloc :@: A_ty;
+      (* precondition. *) (λ π : thread_id, (⌜(name_hint "Hptr_nonnull" (ptr.(loc_a) ≠ 0)%Z)%Z⌝)
+        ∗ (⌜(name_hint "Hptr_aligned" (ptr `has_layout_loc` (use_layout_alg' (ty_syn_type T_ty MetaNone)))%Z)%Z⌝)
+        ∗ (⌜(name_hint "Hallocation_size" ((size_of_array_in_bytes (ty_syn_type T_ty MetaNone) (Z.to_nat capacity) ≤ MaxInt ISize)%Z)%Z)%Z⌝)
+        ∗ (ptr ◁ₗ[π, Owned] #(RT_xrt (listRT (place_rfnRT (optionRT (place_rfnRT (T_rt))))) els) @ (◁ array_t (raw_vec_effective_capacity (size_of_st (ty_syn_type T_ty MetaNone)) (Z.to_nat capacity)) (maybe_uninit T_ty)))
+        ∗ ((if decide (size_of_array_in_bytes (ty_syn_type T_ty MetaNone) (Z.to_nat capacity) = 0%nat) then True else Allocator_A_spec_attrs.(Allocator_FreeablePerm) alloc ptr (size_of_array_in_bytes (ty_syn_type T_ty MetaNone) (Z.to_nat capacity))))) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, (ptr, raw_vec_effective_capacity (size_of_st (ty_syn_type T_ty MetaNone)) (Z.to_nat capacity), els) @ (RawVec_inv_t ((T_rt)) ((A_rt)) Allocator_A_spec_attrs -[] -[T_ty; A_ty]);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecInnerA_from_raw_parts_in (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecInnerA_from_raw_parts_in (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[]) : 0 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (ptr, cap, alloc) : ((_ * _ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) ptr :@: alias_ptr_t, cap :@: (int USize), alloc :@: A_ty;
+      (* precondition. *) (λ π : thread_id, (⌜(name_hint "Hptr_nonnull" (ptr.(loc_a) ≠ 0)%Z)%Z⌝)
+        ∗ (⌜(name_hint "Hstored_cap" (cap ≤ MaxInt ISize)%Z)%Z⌝)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, (ptr, Z.to_nat cap, alloc) @ (RawVecInner_inv_t ((A_rt)) Allocator_A_spec_attrs -[] -[A_ty]);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecInnerA_grow_amortized (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecInnerA_grow_amortized (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (v, self, len, additional, elem_layout) : (((val) * _ * _ * _ * _)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (mut_ref ulft_1 (RawVecInner_inv_t ((A_rt)) Allocator_A_spec_attrs -[] -[A_ty])), len :@: (int USize), additional :@: (int USize), elem_layout :@: (layout_Layout_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, (⌜(name_hint "Hlen_capacity" (len ≤ Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) self.cur.1.2))%Z)%Z⌝)
+        ∗ (⌜(name_hint "Hadditional_positive" (0 < additional)%Z)%Z⌝)
+        ∗ (⌜(name_hint "Hgrow_requested" (elem_layout.(layout_sz) = 0%nat ∨ Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) self.cur.1.2) < len + additional)%Z)%Z⌝)
+        ∗ (⌜(name_hint "Hallocation_size" ((elem_layout.(layout_sz) * self.cur.1.2 ≤ MaxInt ISize)%Z)%Z)%Z⌝)
+        ∗ (raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (res, l, suffix) : (((result unit reserve_error) * (loc) * (val))), res @ (Result_ty (unit) ((((errors_TryReserveError_inv_t_rt)))) -[] -[unit_t; (errors_TryReserveError_inv_t  -[] -[])]);
+      (* postcondition *) (λ π : thread_id, (gvar_pobs self.ghost (match res with | inl _ => (l, Z.to_nat (raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional)), $# self.cur.2) | inr _ => (self.cur.1.1, self.cur.1.2, $# self.cur.2) end))
+      ∗ (if_iOk res (λ _, raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) self.cur.2) l (Z.to_nat (raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional))) elem_layout (v ++ suffix)))
+      ∗ (if_iErr res (λ _, raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v))
+      ∗ (⌜(if_Ok res (λ _, elem_layout.(layout_sz) ≠ 0%nat ∧ (len + additional ≤ MaxInt USize)%Z ∧ (elem_layout.(layout_sz) * Z.to_nat (raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional)) ≤ MaxInt ISize)%Z))%Z⌝)
+      ∗ (⌜(if_Err res (λ err, match err with | ReserveCapacityOverflow => elem_layout.(layout_sz) = 0%nat ∨ (MaxInt USize < len + additional)%Z ∨ (MaxInt ISize < Z.of_nat elem_layout.(layout_sz) * raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional))%Z | ReserveAllocError layout extra => layout = #(mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat (raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional))) elem_layout.(layout_alignment)) ∧ extra = #tt ∧ (0 < Z.of_nat elem_layout.(layout_sz) * raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional) ≤ MaxInt ISize)%Z end))%Z⌝)) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecInnerA_grow_exact (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecInnerA_grow_exact (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (v, self, len, additional, elem_layout) : (((val) * _ * _ * _ * _)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (mut_ref ulft_1 (RawVecInner_inv_t ((A_rt)) Allocator_A_spec_attrs -[] -[A_ty])), len :@: (int USize), additional :@: (int USize), elem_layout :@: (layout_Layout_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, (⌜(name_hint "Hgrow_requested" (Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) self.cur.1.2) < len + additional)%Z)%Z⌝)
+        ∗ (⌜(name_hint "Hallocation_size" ((elem_layout.(layout_sz) * self.cur.1.2 ≤ MaxInt ISize)%Z)%Z)%Z⌝)
+        ∗ (raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (res, l, suffix) : (((result unit reserve_error) * (loc) * (val))), res @ (Result_ty (unit) ((((errors_TryReserveError_inv_t_rt)))) -[] -[unit_t; (errors_TryReserveError_inv_t  -[] -[])]);
+      (* postcondition *) (λ π : thread_id, (gvar_pobs self.ghost (match res with | inl _ => (l, Z.to_nat (len + additional), $# self.cur.2) | inr _ => (self.cur.1.1, self.cur.1.2, $# self.cur.2) end))
+      ∗ (if_iOk res (λ _, raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) self.cur.2) l (Z.to_nat (len + additional)) elem_layout (v ++ suffix)))
+      ∗ (if_iErr res (λ _, raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v))
+      ∗ (⌜(if_Ok res (λ _, elem_layout.(layout_sz) ≠ 0%nat ∧ (len + additional ≤ MaxInt USize)%Z ∧ (elem_layout.(layout_sz) * Z.to_nat (len + additional) ≤ MaxInt ISize)%Z))%Z⌝)
+      ∗ (⌜(if_Err res (λ err, match err with | ReserveCapacityOverflow => elem_layout.(layout_sz) = 0%nat ∨ (MaxInt USize < len + additional)%Z ∨ (MaxInt ISize < Z.of_nat elem_layout.(layout_sz) * (len + additional))%Z | ReserveAllocError layout extra => layout = #(mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat (len + additional)) elem_layout.(layout_alignment)) ∧ extra = #tt ∧ (0 < Z.of_nat elem_layout.(layout_sz) * (len + additional) ≤ MaxInt ISize)%Z end))%Z⌝)) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecTA_grow_one (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), (λ π, ((∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π)
+    ∗ (∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecTA_grow_one (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[T_ty; A_ty]) : ([(T_rt, T_st); (A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (self) : ((_)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (mut_ref ulft_1 (RawVec_inv_t ((T_rt)) ((A_rt)) Allocator_A_spec_attrs -[] -[T_ty; A_ty]));
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (l, cap, ret) : (((loc) * (nat) * _)), ret @ unit_t;
+      (* postcondition *) (λ π : thread_id, (gvar_pobs self.ghost ((l, cap, RT_xrt (listRT (place_rfnRT (optionRT (place_rfnRT (T_rt))))) (self.cur.2 ++ replicate (cap - self.cur.1.2) None))))
+      ∗ (⌜((self.cur.1.2 < cap)%nat ∧ cap = Z.to_nat (raw_vec_amortized_capacity (size_of_st (ty_syn_type T_ty MetaNone)) self.cur.1.2 (Z.of_nat self.cur.1.2 + 1)))%Z⌝)) |
+      (* unwind cond... *) True |
+      (* unwind post... *) (λ π : thread_id, (Obs self.ghost (self.cur.1.1, self.cur.1.2, RT_xrt (listRT (place_rfnRT (optionRT (place_rfnRT (T_rt))))) self.cur.2))).
+
+Definition trait_incl_of_raw_vec_implRawVecInnerA_grow_one (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecInnerA_grow_one (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (v, self, elem_layout) : (((val) * _ * _)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (mut_ref ulft_1 (RawVecInner_inv_t ((A_rt)) Allocator_A_spec_attrs -[] -[A_ty])), elem_layout :@: (layout_Layout_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, (⌜(name_hint "Hallocation_size" ((elem_layout.(layout_sz) * self.cur.1.2 ≤ MaxInt ISize)%Z)%Z)%Z⌝)
+        ∗ (raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (l, suffix, ret) : (((loc) * (val) * _)), ret @ unit_t;
+      (* postcondition *) (λ π : thread_id, (gvar_pobs self.ghost ((l, Z.to_nat (raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (Z.of_nat self.cur.1.2 + 1)), $# self.cur.2)))
+      ∗ (raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) self.cur.2) l (Z.to_nat (raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (Z.of_nat self.cur.1.2 + 1))) elem_layout (v ++ suffix))
+      ∗ (⌜(elem_layout.(layout_sz) ≠ 0%nat ∧ self.cur.1.2 < Z.to_nat (raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (Z.of_nat self.cur.1.2 + 1)) ∧ (elem_layout.(layout_sz) * Z.to_nat (raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (Z.of_nat self.cur.1.2 + 1)) ≤ MaxInt ISize)%Z)%Z⌝)) |
+      (* unwind cond... *) True |
+      (* unwind post... *) (λ π : thread_id, (Obs self.ghost (self.cur.1.1, self.cur.1.2, $# self.cur.2))
+      ∗ (raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v)).
+
+Definition trait_incl_of_raw_vec_layout_array  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_raw_vec_layout_array  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (cap, elem_layout) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) cap :@: (int USize), elem_layout :@: (layout_Layout_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, if bool_decide (Z.of_nat elem_layout.(layout_sz) * cap ≤ MaxInt ISize) then Ok (mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat cap) elem_layout.(layout_alignment)) else Err ReserveCapacityOverflow @ (Result_ty ((((layout_Layout_inv_t_rt)))) ((((errors_TryReserveError_inv_t_rt)))) -[] -[(layout_Layout_inv_t  -[] -[]); (errors_TryReserveError_inv_t  -[] -[])]);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_min_non_zero_cap  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_raw_vec_min_non_zero_cap  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (size) : ((_)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) size :@: (int USize);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, raw_vec_min_non_zero_cap size @ (int USize);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecInnerA_needs_to_grow (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecInnerA_needs_to_grow (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (self, len, additional, elem_layout) : ((_ * _ * _ * _)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (shr_ref ulft_1 (RawVecInner_inv_t ((A_rt)) Allocator_A_spec_attrs -[] -[A_ty])), len :@: (int USize), additional :@: (int USize), elem_layout :@: (layout_Layout_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, bool_decide (additional > (Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) self.1.2) - len) mod (MaxInt USize + 1)) @ bool_t;
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecT_new (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), (λ π, ((∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecT_new (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
+  fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) _ : unit,
+      (* elctx........ *) (λ ϝ, []);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (l) : (((loc))), (l, raw_vec_effective_capacity (size_of_st (ty_syn_type T_ty MetaNone)) 0, replicate (raw_vec_effective_capacity (size_of_st (ty_syn_type T_ty MetaNone)) 0) None) @ (RawVec_inv_t ((T_rt)) ((((Global_inv_t_rt)))) GlobalasAllocator_spec_attrs -[] -[T_ty; (Global_inv_t  -[] -[])]);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_new_cap (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), (λ π, ((∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π))%I).
+
+Definition type_of_raw_vec_new_cap (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
+  fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (cap) : ((_)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) cap :@: (int USize);
+      (* precondition. *) (λ π : thread_id, (⌜(name_hint "Hcapacity" (size_of_st (ty_syn_type T_ty MetaNone) = 0%nat ∨ cap ≤ MaxInt ISize)%Z)%Z⌝)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, if decide (size_of_st (ty_syn_type T_ty MetaNone) = 0%nat) then 0 else cap @ (int USize);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecTA_new_in (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), (λ π, ((∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π)
+    ∗ (∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecTA_new_in (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[]) : 0 | ( *[T_ty; A_ty]) : ([(T_rt, T_st); (A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (alloc) : ((_)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) alloc :@: A_ty;
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (l) : (((loc))), (l, raw_vec_effective_capacity (size_of_st (ty_syn_type T_ty MetaNone)) 0, replicate (raw_vec_effective_capacity (size_of_st (ty_syn_type T_ty MetaNone)) 0) None) @ (RawVec_inv_t ((T_rt)) ((A_rt)) Allocator_A_spec_attrs -[] -[T_ty; A_ty]);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecTA_non_null (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), (λ π, ((∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π)
+    ∗ (∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecTA_non_null (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[T_ty; A_ty]) : ([(T_rt, T_st); (A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (self) : ((_)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (shr_ref ulft_1 (RawVec_inv_t ((T_rt)) ((A_rt)) Allocator_A_spec_attrs -[] -[T_ty; A_ty]));
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, self.1.1 @ (nonnull_NonNull_inv_t ((T_rt)) -[] -[T_ty]);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecInnerA_non_null (A_rt: RT) (T_rt: RT) (A_st: syn_type) (T_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[A_ty; T_ty]) : ([A_rt; T_rt] : list RT), (λ π, ((∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π)
+    ∗ (∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecInnerA_non_null (A_rt: RT) (T_rt: RT) (A_st: syn_type) (T_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[A_ty; T_ty]) : ([(A_rt, A_st); (T_rt, T_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (self) : ((_)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (shr_ref ulft_1 (RawVecInner_inv_t ((A_rt)) Allocator_A_spec_attrs -[] -[A_ty]));
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, self.1.1 @ (nonnull_NonNull_inv_t ((T_rt)) -[] -[T_ty]);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecTA_ptr (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), (λ π, ((∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π)
+    ∗ (∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecTA_ptr (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[T_ty; A_ty]) : ([(T_rt, T_st); (A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (self) : ((_)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (shr_ref ulft_1 (RawVec_inv_t ((T_rt)) ((A_rt)) Allocator_A_spec_attrs -[] -[T_ty; A_ty]));
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, self.1.1 @ alias_ptr_t;
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecInnerA_ptr (A_rt: RT) (T_rt: RT) (A_st: syn_type) (T_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[A_ty; T_ty]) : ([A_rt; T_rt] : list RT), (λ π, ((∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π)
+    ∗ (∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecInnerA_ptr (A_rt: RT) (T_rt: RT) (A_st: syn_type) (T_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[A_ty; T_ty]) : ([(A_rt, A_st); (T_rt, T_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (self) : ((_)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (shr_ref ulft_1 (RawVecInner_inv_t ((A_rt)) Allocator_A_spec_attrs -[] -[A_ty]));
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, self.1.1 @ alias_ptr_t;
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecTA_reserve (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), (λ π, ((∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π)
+    ∗ (∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecTA_reserve (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[T_ty; A_ty]) : ([(T_rt, T_st); (A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (self, len, additional) : ((_ * _ * _)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (mut_ref ulft_1 (RawVec_inv_t ((T_rt)) ((A_rt)) Allocator_A_spec_attrs -[] -[T_ty; A_ty])), len :@: (int USize), additional :@: (int USize);
+      (* precondition. *) (λ π : thread_id, (⌜(len ≤ self.cur.1.2)%Z⌝)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (l, cap, ret) : (((loc) * (nat) * _)), ret @ unit_t;
+      (* postcondition *) (λ π : thread_id, (gvar_pobs self.ghost ((l, cap, RT_xrt (listRT (place_rfnRT (optionRT (place_rfnRT (T_rt))))) (self.cur.2 ++ replicate (cap - self.cur.1.2) None))))
+      ∗ (⌜((self.cur.1.2 ≤ cap)%nat ∧ len + additional ≤ cap)%Z⌝)
+      ∗ (⌜(cap = (if decide (len + additional ≤ self.cur.1.2) then self.cur.1.2 else Z.to_nat (raw_vec_amortized_capacity (size_of_st (ty_syn_type T_ty MetaNone)) self.cur.1.2 (len + additional))))%Z⌝)) |
+      (* unwind cond... *) True |
+      (* unwind post... *) (λ π : thread_id, (Obs self.ghost (self.cur.1.1, self.cur.1.2, RT_xrt (listRT (place_rfnRT (optionRT (place_rfnRT (T_rt))))) self.cur.2))).
+
+Definition trait_incl_of_raw_vec_implRawVecInnerA_reserve (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecInnerA_reserve (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (v, self, len, additional, elem_layout) : (((val) * _ * _ * _ * _)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (mut_ref ulft_1 (RawVecInner_inv_t ((A_rt)) Allocator_A_spec_attrs -[] -[A_ty])), len :@: (int USize), additional :@: (int USize), elem_layout :@: (layout_Layout_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, (⌜(name_hint "Hlen_capacity" (len ≤ Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) self.cur.1.2))%Z)%Z⌝)
+        ∗ (⌜(name_hint "Hallocation_size" ((elem_layout.(layout_sz) * self.cur.1.2 ≤ MaxInt ISize)%Z)%Z)%Z⌝)
+        ∗ (raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (l, cap, suffix, ret) : (((loc) * (nat) * (val) * _)), ret @ unit_t;
+      (* postcondition *) (λ π : thread_id, (gvar_pobs self.ghost ((l, cap, $# self.cur.2)))
+      ∗ (raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) self.cur.2) l cap elem_layout (v ++ suffix))
+      ∗ (⌜(len + additional ≤ Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) cap) ∧ cap = (if decide (len + additional ≤ Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) self.cur.1.2)) then self.cur.1.2 else Z.to_nat (raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional))) ∧ (elem_layout.(layout_sz) * cap ≤ MaxInt ISize)%Z)%Z⌝)) |
+      (* unwind cond... *) True |
+      (* unwind post... *) (λ π : thread_id, (Obs self.ghost (self.cur.1.1, self.cur.1.2, $# self.cur.2))
+      ∗ (raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v)).
+
+Definition trait_incl_of_raw_vec_implRawVecInnerA_reserve_do_reserve_and_handle (A_rt: RT) (A_st: syn_type) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π)
+    ∗ (∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecInnerA_reserve_do_reserve_and_handle (A_rt: RT) (A_st: syn_type) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (v, slf, len, additional, elem_layout) : (((val) * _ * _ * _ * _)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) slf :@: (mut_ref ulft_1 (RawVecInner_inv_t ((A_rt)) Allocator_A_spec_attrs -[] -[A_ty])), len :@: (int USize), additional :@: (int USize), elem_layout :@: (layout_Layout_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, (⌜(name_hint "Hlen_capacity" (len ≤ Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) slf.cur.1.2))%Z)%Z⌝)
+        ∗ (⌜(name_hint "Hgrow_requested" (Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) slf.cur.1.2) < len + additional)%Z)%Z⌝)
+        ∗ (⌜(name_hint "Hallocation_size" ((elem_layout.(layout_sz) * slf.cur.1.2 ≤ MaxInt ISize)%Z)%Z)%Z⌝)
+        ∗ (raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) slf.cur.2) slf.cur.1.1 slf.cur.1.2 elem_layout v)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (l, suffix, ret) : (((loc) * (val) * _)), ret @ unit_t;
+      (* postcondition *) (λ π : thread_id, (gvar_pobs slf.ghost ((l, Z.to_nat (raw_vec_amortized_capacity elem_layout.(layout_sz) slf.cur.1.2 (len + additional)), $# slf.cur.2)))
+      ∗ (raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) slf.cur.2) l (Z.to_nat (raw_vec_amortized_capacity elem_layout.(layout_sz) slf.cur.1.2 (len + additional))) elem_layout (v ++ suffix))
+      ∗ (⌜(elem_layout.(layout_sz) ≠ 0%nat ∧ (len + additional ≤ MaxInt USize)%Z ∧ (elem_layout.(layout_sz) * Z.to_nat (raw_vec_amortized_capacity elem_layout.(layout_sz) slf.cur.1.2 (len + additional)) ≤ MaxInt ISize)%Z)%Z⌝)) |
+      (* unwind cond... *) True |
+      (* unwind post... *) (λ π : thread_id, (Obs slf.ghost (slf.cur.1.1, slf.cur.1.2, $# slf.cur.2))
+      ∗ (raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) slf.cur.2) slf.cur.1.1 slf.cur.1.2 elem_layout v)).
+
+Definition trait_incl_of_raw_vec_implRawVecTA_reserve_exact (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), (λ π, ((∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π)
+    ∗ (∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecTA_reserve_exact (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[T_ty; A_ty]) : ([(T_rt, T_st); (A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (self, len, additional) : ((_ * _ * _)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (mut_ref ulft_1 (RawVec_inv_t ((T_rt)) ((A_rt)) Allocator_A_spec_attrs -[] -[T_ty; A_ty])), len :@: (int USize), additional :@: (int USize);
+      (* precondition. *) (λ π : thread_id, (⌜(len ≤ self.cur.1.2)%Z⌝)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (l, cap, ret) : (((loc) * (nat) * _)), ret @ unit_t;
+      (* postcondition *) (λ π : thread_id, (gvar_pobs self.ghost ((l, cap, RT_xrt (listRT (place_rfnRT (optionRT (place_rfnRT (T_rt))))) (self.cur.2 ++ replicate (cap - self.cur.1.2) None))))
+      ∗ (⌜((self.cur.1.2 ≤ cap)%nat ∧ len + additional ≤ cap)%Z⌝)
+      ∗ (⌜(cap = (if decide (len + additional ≤ self.cur.1.2) then self.cur.1.2 else Z.to_nat (len + additional)))%Z⌝)) |
+      (* unwind cond... *) True |
+      (* unwind post... *) (λ π : thread_id, (Obs self.ghost (self.cur.1.1, self.cur.1.2, RT_xrt (listRT (place_rfnRT (optionRT (place_rfnRT (T_rt))))) self.cur.2))).
+
+Definition trait_incl_of_raw_vec_implRawVecInnerA_reserve_exact (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecInnerA_reserve_exact (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (v, self, len, additional, elem_layout) : (((val) * _ * _ * _ * _)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (mut_ref ulft_1 (RawVecInner_inv_t ((A_rt)) Allocator_A_spec_attrs -[] -[A_ty])), len :@: (int USize), additional :@: (int USize), elem_layout :@: (layout_Layout_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, (⌜(name_hint "Hlen_capacity" (len ≤ Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) self.cur.1.2))%Z)%Z⌝)
+        ∗ (⌜(name_hint "Hallocation_size" ((elem_layout.(layout_sz) * self.cur.1.2 ≤ MaxInt ISize)%Z)%Z)%Z⌝)
+        ∗ (raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (l, cap, suffix, ret) : (((loc) * (nat) * (val) * _)), ret @ unit_t;
+      (* postcondition *) (λ π : thread_id, (gvar_pobs self.ghost ((l, cap, $# self.cur.2)))
+      ∗ (raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) self.cur.2) l cap elem_layout (v ++ suffix))
+      ∗ (⌜(len + additional ≤ Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) cap) ∧ cap = (if decide (len + additional ≤ Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) self.cur.1.2)) then self.cur.1.2 else Z.to_nat (len + additional)) ∧ (elem_layout.(layout_sz) * cap ≤ MaxInt ISize)%Z)%Z⌝)) |
+      (* unwind cond... *) True |
+      (* unwind post... *) (λ π : thread_id, (Obs self.ghost (self.cur.1.1, self.cur.1.2, $# self.cur.2))
+      ∗ (raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v)).
+
+Definition trait_incl_of_raw_vec_implRawVecInnerA_set_ptr_and_cap (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecInnerA_set_ptr_and_cap (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (self, ptr, cap) : ((_ * _ * _)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (mut_ref ulft_1 (RawVecInner_inv_t ((A_rt)) Allocator_A_spec_attrs -[] -[A_ty])), ptr :@: alias_ptr_t, cap :@: (int USize);
+      (* precondition. *) (λ π : thread_id, (⌜(name_hint "Hptr_nonnull" (ptr.(loc_a) ≠ 0)%Z)%Z⌝)
+        ∗ (⌜(name_hint "Hnew_cap" (cap ≤ MaxInt ISize)%Z)%Z⌝)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (ret) : ((_)), ret @ unit_t;
+      (* postcondition *) (λ π : thread_id, (gvar_pobs self.ghost ((ptr, Z.to_nat cap, $# self.cur.2)))) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecInnerA_try_allocate_in (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecInnerA_try_allocate_in (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[]) : 0 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (capacity, init, alloc, elem_layout) : ((_ * _ * _ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) capacity :@: (int USize), init :@: (raw_vec_AllocInit_ty  -[] -[]), alloc :@: A_ty, elem_layout :@: (layout_Layout_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (res, v) : (((result (loc * nat * (RT_xt (A_rt)))%type reserve_error) * (val))), res @ (Result_ty (((RawVecInner_inv_t_rt ((A_rt))))) ((((errors_TryReserveError_inv_t_rt)))) -[] -[(RawVecInner_inv_t ((A_rt)) Allocator_A_spec_attrs -[] -[A_ty]); (errors_TryReserveError_inv_t  -[] -[])]);
+      (* postcondition *) (λ π : thread_id, (if_iOk res (λ '(l, cap, _), raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) alloc) l cap elem_layout v))
+      ∗ (⌜(if_Ok res (λ '(_, cap, a), a = alloc ∧ cap = (if decide (elem_layout.(layout_sz) = 0%nat) then 0%nat else Z.to_nat capacity) ∧ (init = true → v = replicate (elem_layout.(layout_sz) * cap) (MByte byte0)) ∧ (elem_layout.(layout_sz) * cap ≤ MaxInt ISize)%Z))%Z⌝)
+      ∗ (⌜(if_Err res (λ err, match err with | ReserveCapacityOverflow => (MaxInt ISize < Z.of_nat elem_layout.(layout_sz) * capacity)%Z | ReserveAllocError layout extra => layout = #(mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat capacity) elem_layout.(layout_alignment)) ∧ extra = #tt ∧ (0 < Z.of_nat elem_layout.(layout_sz) * capacity ≤ MaxInt ISize)%Z end))%Z⌝)) |
+      (* unwind cond... *) True |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecTA_try_reserve (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), (λ π, ((∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π)
+    ∗ (∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecTA_try_reserve (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[T_ty; A_ty]) : ([(T_rt, T_st); (A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (self, len, additional) : ((_ * _ * _)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (mut_ref ulft_1 (RawVec_inv_t ((T_rt)) ((A_rt)) Allocator_A_spec_attrs -[] -[T_ty; A_ty])), len :@: (int USize), additional :@: (int USize);
+      (* precondition. *) (λ π : thread_id, (⌜(len ≤ self.cur.1.2)%Z⌝)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (res, l, cap) : (((result unit reserve_error) * (loc) * (nat))), res @ (Result_ty (unit) ((((errors_TryReserveError_inv_t_rt)))) -[] -[unit_t; (errors_TryReserveError_inv_t  -[] -[])]);
+      (* postcondition *) (λ π : thread_id, (gvar_pobs self.ghost (match res with | Ok _ => (l, cap, RT_xrt (listRT (place_rfnRT (optionRT (place_rfnRT (T_rt))))) (self.cur.2 ++ replicate (cap - self.cur.1.2) None)) | Err _ => (self.cur.1.1, self.cur.1.2, RT_xrt (listRT (place_rfnRT (optionRT (place_rfnRT (T_rt))))) self.cur.2) end))
+      ∗ (⌜(if_Ok res (λ _, (self.cur.1.2 ≤ cap)%nat ∧ len + additional ≤ cap ∧ cap = (if decide (len + additional ≤ self.cur.1.2) then self.cur.1.2 else Z.to_nat (raw_vec_amortized_capacity (size_of_st (ty_syn_type T_ty MetaNone)) self.cur.1.2 (len + additional)))))%Z⌝)
+      ∗ (⌜(if_Err res (λ err, match err with | ReserveCapacityOverflow => (MaxInt USize < len + additional ∨ MaxInt ISize < Z.of_nat (size_of_st (ty_syn_type T_ty MetaNone)) * raw_vec_amortized_capacity (size_of_st (ty_syn_type T_ty MetaNone)) self.cur.1.2 (len + additional))%Z | ReserveAllocError layout extra => layout = #(mk_rust_layout (size_of_st (ty_syn_type T_ty MetaNone) * Z.to_nat (raw_vec_amortized_capacity (size_of_st (ty_syn_type T_ty MetaNone)) self.cur.1.2 (len + additional))) (alignment_of_align (ly_align (use_layout_alg' (ty_syn_type T_ty MetaNone))))) ∧ extra = #tt ∧ (0 < Z.of_nat (size_of_st (ty_syn_type T_ty MetaNone)) * raw_vec_amortized_capacity (size_of_st (ty_syn_type T_ty MetaNone)) self.cur.1.2 (len + additional) ≤ MaxInt ISize)%Z end))%Z⌝)) |
+      (* unwind cond... *) True |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecInnerA_try_reserve (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecInnerA_try_reserve (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (v, self, len, additional, elem_layout) : (((val) * _ * _ * _ * _)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (mut_ref ulft_1 (RawVecInner_inv_t ((A_rt)) Allocator_A_spec_attrs -[] -[A_ty])), len :@: (int USize), additional :@: (int USize), elem_layout :@: (layout_Layout_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, (⌜(name_hint "Hlen_capacity" (len ≤ Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) self.cur.1.2))%Z)%Z⌝)
+        ∗ (⌜(name_hint "Hallocation_size" ((elem_layout.(layout_sz) * self.cur.1.2 ≤ MaxInt ISize)%Z)%Z)%Z⌝)
+        ∗ (raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (res, l, cap, suffix) : (((result unit reserve_error) * (loc) * (nat) * (val))), res @ (Result_ty (unit) ((((errors_TryReserveError_inv_t_rt)))) -[] -[unit_t; (errors_TryReserveError_inv_t  -[] -[])]);
+      (* postcondition *) (λ π : thread_id, (gvar_pobs self.ghost (match res with | inl _ => (l, cap, $# self.cur.2) | inr _ => (self.cur.1.1, self.cur.1.2, $# self.cur.2) end))
+      ∗ (if_iOk res (λ _, raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) self.cur.2) l cap elem_layout (v ++ suffix)))
+      ∗ (if_iErr res (λ _, raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v))
+      ∗ (⌜(if_Ok res (λ _, len + additional ≤ Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) cap) ∧ cap = (if decide (len + additional ≤ Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) self.cur.1.2)) then self.cur.1.2 else Z.to_nat (raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional))) ∧ (elem_layout.(layout_sz) * cap ≤ MaxInt ISize)%Z))%Z⌝)
+      ∗ (⌜(if_Err res (λ err, match err with | ReserveCapacityOverflow => elem_layout.(layout_sz) = 0%nat ∨ (MaxInt USize < len + additional)%Z ∨ (MaxInt ISize < Z.of_nat elem_layout.(layout_sz) * raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional))%Z | ReserveAllocError layout extra => layout = #(mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat (raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional))) elem_layout.(layout_alignment)) ∧ extra = #tt ∧ (0 < Z.of_nat elem_layout.(layout_sz) * raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional) ≤ MaxInt ISize)%Z end))%Z⌝)
+      ∗ (⌜(if_Err res (λ _, Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) self.cur.1.2) < len + additional))%Z⌝)) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecTA_try_reserve_exact (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), (λ π, ((∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π)
+    ∗ (∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecTA_try_reserve_exact (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[T_ty; A_ty]) : ([(T_rt, T_st); (A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (self, len, additional) : ((_ * _ * _)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (mut_ref ulft_1 (RawVec_inv_t ((T_rt)) ((A_rt)) Allocator_A_spec_attrs -[] -[T_ty; A_ty])), len :@: (int USize), additional :@: (int USize);
+      (* precondition. *) (λ π : thread_id, (⌜(len ≤ self.cur.1.2)%Z⌝)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (res, l, cap) : (((result unit reserve_error) * (loc) * (nat))), res @ (Result_ty (unit) ((((errors_TryReserveError_inv_t_rt)))) -[] -[unit_t; (errors_TryReserveError_inv_t  -[] -[])]);
+      (* postcondition *) (λ π : thread_id, (gvar_pobs self.ghost (match res with | Ok _ => (l, cap, RT_xrt (listRT (place_rfnRT (optionRT (place_rfnRT (T_rt))))) (self.cur.2 ++ replicate (cap - self.cur.1.2) None)) | Err _ => (self.cur.1.1, self.cur.1.2, RT_xrt (listRT (place_rfnRT (optionRT (place_rfnRT (T_rt))))) self.cur.2) end))
+      ∗ (⌜(if_Ok res (λ _, (self.cur.1.2 ≤ cap)%nat ∧ len + additional ≤ cap ∧ cap = (if decide (len + additional ≤ self.cur.1.2) then self.cur.1.2 else Z.to_nat (len + additional))))%Z⌝)
+      ∗ (⌜(if_Err res (λ err, match err with | ReserveCapacityOverflow => (MaxInt USize < len + additional ∨ MaxInt ISize < Z.of_nat (size_of_st (ty_syn_type T_ty MetaNone)) * (len + additional))%Z | ReserveAllocError layout extra => layout = #(mk_rust_layout (size_of_st (ty_syn_type T_ty MetaNone) * Z.to_nat (len + additional)) (alignment_of_align (ly_align (use_layout_alg' (ty_syn_type T_ty MetaNone))))) ∧ extra = #tt ∧ (0 < Z.of_nat (size_of_st (ty_syn_type T_ty MetaNone)) * (len + additional) ≤ MaxInt ISize)%Z end))%Z⌝)) |
+      (* unwind cond... *) True |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecInnerA_try_reserve_exact (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecInnerA_try_reserve_exact (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (v, self, len, additional, elem_layout) : (((val) * _ * _ * _ * _)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) self :@: (mut_ref ulft_1 (RawVecInner_inv_t ((A_rt)) Allocator_A_spec_attrs -[] -[A_ty])), len :@: (int USize), additional :@: (int USize), elem_layout :@: (layout_Layout_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, (⌜(name_hint "Hlen_capacity" (len ≤ Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) self.cur.1.2))%Z)%Z⌝)
+        ∗ (⌜(name_hint "Hallocation_size" ((elem_layout.(layout_sz) * self.cur.1.2 ≤ MaxInt ISize)%Z)%Z)%Z⌝)
+        ∗ (raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (res, l, cap, suffix) : (((result unit reserve_error) * (loc) * (nat) * (val))), res @ (Result_ty (unit) ((((errors_TryReserveError_inv_t_rt)))) -[] -[unit_t; (errors_TryReserveError_inv_t  -[] -[])]);
+      (* postcondition *) (λ π : thread_id, (gvar_pobs self.ghost (match res with | inl _ => (l, cap, $# self.cur.2) | inr _ => (self.cur.1.1, self.cur.1.2, $# self.cur.2) end))
+      ∗ (if_iOk res (λ _, raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) self.cur.2) l cap elem_layout (v ++ suffix)))
+      ∗ (if_iErr res (λ _, raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v))
+      ∗ (⌜(if_Ok res (λ _, len + additional ≤ Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) cap) ∧ cap = (if decide (len + additional ≤ Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) self.cur.1.2)) then self.cur.1.2 else Z.to_nat (len + additional)) ∧ (elem_layout.(layout_sz) * cap ≤ MaxInt ISize)%Z))%Z⌝)
+      ∗ (⌜(if_Err res (λ err, match err with | ReserveCapacityOverflow => elem_layout.(layout_sz) = 0%nat ∨ (MaxInt USize < len + additional)%Z ∨ (MaxInt ISize < Z.of_nat elem_layout.(layout_sz) * (len + additional))%Z | ReserveAllocError layout extra => layout = #(mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat (len + additional)) elem_layout.(layout_alignment)) ∧ extra = #tt ∧ (0 < Z.of_nat elem_layout.(layout_sz) * (len + additional) ≤ MaxInt ISize)%Z end))%Z⌝)
+      ∗ (⌜(if_Err res (λ _, Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) self.cur.1.2) < len + additional))%Z⌝)) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecTA_try_with_capacity_in (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), (λ π, ((∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π)
+    ∗ (∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecTA_try_with_capacity_in (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[]) : 0 | ( *[T_ty; A_ty]) : ([(T_rt, T_st); (A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (capacity, alloc) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) capacity :@: (int USize), alloc :@: A_ty;
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (res) : (((result (loc * nat * list (option (RT_xt (T_rt))))%type reserve_error))), res @ (Result_ty (((RawVec_inv_t_rt ((T_rt)) ((A_rt))))) ((((errors_TryReserveError_inv_t_rt)))) -[] -[(RawVec_inv_t ((T_rt)) ((A_rt)) Allocator_A_spec_attrs -[] -[T_ty; A_ty]); (errors_TryReserveError_inv_t  -[] -[])]);
+      (* postcondition *) (λ π : thread_id, (⌜(match res with | inl (l, cap, els) => cap = raw_vec_effective_capacity (size_of_st (ty_syn_type T_ty MetaNone)) (Z.to_nat capacity) ∧ els = replicate cap None | inr _ => True end)%Z⌝)
+      ∗ (⌜(match res with | inl _ => True | inr ReserveCapacityOverflow => (MaxInt ISize < Z.of_nat (size_of_st (ty_syn_type T_ty MetaNone)) * capacity)%Z | inr (ReserveAllocError layout extra) => layout = #(mk_rust_layout (size_of_st (ty_syn_type T_ty MetaNone) * Z.to_nat capacity) (alignment_of_align (ly_align (use_layout_alg' (ty_syn_type T_ty MetaNone))))) ∧ extra = #tt ∧ (0 < Z.of_nat (size_of_st (ty_syn_type T_ty MetaNone)) * capacity ≤ MaxInt ISize)%Z end)%Z⌝)) |
+      (* unwind cond... *) True |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecInnerA_try_with_capacity_in (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecInnerA_try_with_capacity_in (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[]) : 0 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (capacity, alloc, elem_layout) : ((_ * _ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) capacity :@: (int USize), alloc :@: A_ty, elem_layout :@: (layout_Layout_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (res, v) : (((result (loc * nat * (RT_xt (A_rt)))%type reserve_error) * (val))), res @ (Result_ty (((RawVecInner_inv_t_rt ((A_rt))))) ((((errors_TryReserveError_inv_t_rt)))) -[] -[(RawVecInner_inv_t ((A_rt)) Allocator_A_spec_attrs -[] -[A_ty]); (errors_TryReserveError_inv_t  -[] -[])]);
+      (* postcondition *) (λ π : thread_id, (if_iOk res (λ '(l, cap, _), raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) alloc) l cap elem_layout v))
+      ∗ (⌜(if_Ok res (λ '(_, cap, a), a = alloc ∧ cap = (if decide (elem_layout.(layout_sz) = 0%nat) then 0%nat else Z.to_nat capacity) ∧ (elem_layout.(layout_sz) * cap ≤ MaxInt ISize)%Z))%Z⌝)
+      ∗ (⌜(if_Err res (λ err, match err with | ReserveCapacityOverflow => (MaxInt ISize < Z.of_nat elem_layout.(layout_sz) * capacity)%Z | ReserveAllocError layout extra => layout = #(mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat capacity) elem_layout.(layout_alignment)) ∧ extra = #tt ∧ (0 < Z.of_nat elem_layout.(layout_sz) * capacity ≤ MaxInt ISize)%Z end))%Z⌝)) |
+      (* unwind cond... *) True |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecT_with_capacity (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), (λ π, ((∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecT_with_capacity (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
+  fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (capacity) : ((_)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) capacity :@: (int USize);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (l) : (((loc))), (l, raw_vec_effective_capacity (size_of_st (ty_syn_type T_ty MetaNone)) (Z.to_nat capacity), replicate (raw_vec_effective_capacity (size_of_st (ty_syn_type T_ty MetaNone)) (Z.to_nat capacity)) None) @ (RawVec_inv_t ((T_rt)) ((((Global_inv_t_rt)))) GlobalasAllocator_spec_attrs -[] -[T_ty; (Global_inv_t  -[] -[])]);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) True |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecInner_with_capacity  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_raw_vec_implRawVecInner_with_capacity  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (capacity, elem_layout) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) capacity :@: (int USize), elem_layout :@: (layout_Layout_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (l, cap, v) : (((loc) * (nat) * (val))), (l, cap, tt) @ (RawVecInner_inv_t ((((Global_inv_t_rt)))) GlobalasAllocator_spec_attrs -[] -[(Global_inv_t  -[] -[])]);
+      (* postcondition *) (λ π : thread_id, (⌜(cap = (if decide (elem_layout.(layout_sz) = 0%nat) then 0%nat else Z.to_nat capacity))%Z⌝)
+      ∗ (⌜((elem_layout.(layout_sz) * cap ≤ MaxInt ISize)%Z)%Z⌝)
+      ∗ (raw_vec_storage π (λ l sz, freeable_nz l sz 1 HeapAlloc) l cap elem_layout v)) |
+      (* unwind cond... *) True |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecTA_with_capacity_in (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), (λ π, ((∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π)
+    ∗ (∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecTA_with_capacity_in (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[]) : 0 | ( *[T_ty; A_ty]) : ([(T_rt, T_st); (A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (capacity, alloc) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) capacity :@: (int USize), alloc :@: A_ty;
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (l) : (((loc))), (l, raw_vec_effective_capacity (size_of_st (ty_syn_type T_ty MetaNone)) (Z.to_nat capacity), replicate (raw_vec_effective_capacity (size_of_st (ty_syn_type T_ty MetaNone)) (Z.to_nat capacity)) None) @ (RawVec_inv_t ((T_rt)) ((A_rt)) Allocator_A_spec_attrs -[] -[T_ty; A_ty]);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) True |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecInnerA_with_capacity_in (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecInnerA_with_capacity_in (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[]) : 0 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (capacity, alloc, elem_layout) : ((_ * _ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) capacity :@: (int USize), alloc :@: A_ty, elem_layout :@: (layout_Layout_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (l, cap, v) : (((loc) * (nat) * (val))), (l, cap, alloc) @ (RawVecInner_inv_t ((A_rt)) Allocator_A_spec_attrs -[] -[A_ty]);
+      (* postcondition *) (λ π : thread_id, (⌜(cap = (if decide (elem_layout.(layout_sz) = 0%nat) then 0%nat else Z.to_nat capacity))%Z⌝)
+      ∗ (⌜((elem_layout.(layout_sz) * cap ≤ MaxInt ISize)%Z)%Z⌝)
+      ∗ (raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) alloc) l cap elem_layout v)) |
+      (* unwind cond... *) True |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecT_with_capacity_zeroed (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), (λ π, ((∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecT_with_capacity_zeroed (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
+  fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (capacity) : ((_)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) capacity :@: (int USize);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (l) : (((loc))), (l, raw_vec_effective_capacity (size_of_st (ty_syn_type T_ty MetaNone)) (Z.to_nat capacity), replicate (raw_vec_effective_capacity (size_of_st (ty_syn_type T_ty MetaNone)) (Z.to_nat capacity)) None) @ (RawVec_inv_t ((T_rt)) ((((Global_inv_t_rt)))) GlobalasAllocator_spec_attrs -[] -[T_ty; (Global_inv_t  -[] -[])]);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) True |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecTA_with_capacity_zeroed_in (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), (λ π, ((∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π)
+    ∗ (∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecTA_with_capacity_zeroed_in (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[]) : 0 | ( *[T_ty; A_ty]) : ([(T_rt, T_st); (A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (capacity, alloc) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) capacity :@: (int USize), alloc :@: A_ty;
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (l) : (((loc))), (l, raw_vec_effective_capacity (size_of_st (ty_syn_type T_ty MetaNone)) (Z.to_nat capacity), replicate (raw_vec_effective_capacity (size_of_st (ty_syn_type T_ty MetaNone)) (Z.to_nat capacity)) None) @ (RawVec_inv_t ((T_rt)) ((A_rt)) Allocator_A_spec_attrs -[] -[T_ty; A_ty]);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) True |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecInnerA_with_capacity_zeroed_in (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecInnerA_with_capacity_zeroed_in (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[]) : 0 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (capacity, alloc, elem_layout) : ((_ * _ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) capacity :@: (int USize), alloc :@: A_ty, elem_layout :@: (layout_Layout_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (l, cap) : (((loc) * (nat))), (l, cap, alloc) @ (RawVecInner_inv_t ((A_rt)) Allocator_A_spec_attrs -[] -[A_ty]);
+      (* postcondition *) (λ π : thread_id, (⌜(cap = (if decide (elem_layout.(layout_sz) = 0%nat) then 0%nat else Z.to_nat capacity))%Z⌝)
+      ∗ (⌜((elem_layout.(layout_sz) * cap ≤ MaxInt ISize)%Z)%Z⌝)
+      ∗ (raw_vec_storage π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) alloc) l cap elem_layout (replicate (elem_layout.(layout_sz) * cap) (MByte byte0)))) |
+      (* unwind cond... *) True |
+      (* unwind post... *) (λ π : thread_id, True).
+
 Definition trait_incl_of_drop_glue_IntoIter (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[]) : 0 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), (λ π, ((∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π)
     ∗ (∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π)
@@ -1517,8 +2416,8 @@ Definition type_of_RawVecTAasstd_ops_Drop_drop (T_rt: RT) (A_rt: RT) (T_st: syn_
       (* args......... *) l :@: alias_ref_t;
       (* precondition. *) (λ π : thread_id, (l ◁ₗ[π, Owned] #((lmem, cap, els)) @ (◁ RawVec_inv_t T_rt A_rt Allocator_A_spec_attrs -[] -[T_ty; A_ty]))) |
       (* trait reqs... *) (λ π : thread_id, True)) →
-      (* existential.. *) ∃ (a, ret) : ((_ * _)), ret @ unit_t;
-      (* postcondition *) (λ π : thread_id, (l ◁ₗ[π, Owned] #(-[ #(l, cap, a); #tt]) @ (◁ RawVec_ty T_rt A_rt Allocator_A_spec_attrs -[] -[T_ty; A_ty]))) |
+      (* existential.. *) ∃ (a, stored_cap, ret) : ((_ * (nat) * _)), ret @ unit_t;
+      (* postcondition *) (λ π : thread_id, (l ◁ₗ[π, Owned] #(-[ #(lmem, stored_cap, a); #tt]) @ (◁ RawVec_ty T_rt A_rt Allocator_A_spec_attrs -[] -[T_ty; A_ty]))) |
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
 
@@ -1559,6 +2458,137 @@ Definition trait_incl_of_VecTasstd_iter_FromIteratorT_from_iter (T_rt: RT) (I_rt
 Definition type_of_VecTasstd_iter_FromIteratorT_from_iter (T_rt: RT) (I_rt: RT) (traits_iterator_IntoIterator_I_IntoIter_rt: RT) (T_st: syn_type) (I_st: syn_type) (traits_iterator_IntoIterator_I_IntoIter_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (traits_iterator_Iterator_Iasstd_iter_IntoIterator_IntoIter_spec_attrs: (traits_iterator_Iterator_spec_attrs (RRGS:=RRGS) (traits_iterator_IntoIterator_I_IntoIter_rt) (T_rt) )) (traits_iterator_IntoIterator_I_spec_attrs: (traits_iterator_IntoIterator_spec_attrs (RRGS:=RRGS) (I_rt) (traits_iterator_IntoIterator_I_IntoIter_rt) (T_rt) )) (DropGlue_I_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (I_rt) )) (DropGlue_Iasstd_iter_IntoIterator_IntoIter_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (traits_iterator_IntoIterator_I_IntoIter_rt) )) :=
   spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT),(λ a b, scope_add_typarams _ -[T_ty] (scope_add_elctx (λ ϝ, []) (((traits_iterator_FromIterator_base_spec (((Vec_inv_t_rt ((T_rt)) ((((Global_inv_t_rt))))))) ((T_rt)) ((Vec_st (T_st) ((Global_sls : syn_type)))) (T_st) ((drop_glue_Vec_spec_attrs ((T_rt)) ((((Global_inv_t_rt)))) (GlobalasAllocator_spec_attrs) (DropGlue_T_spec_attrs) ((drop_glue_trivial_spec_attrs ((((Global_inv_t_rt)))))))) (DropGlue_T_spec_attrs) ((VecTasstd_iter_FromIteratorT_spec_attrs (T_rt) (DropGlue_T_spec_attrs))))
     -[] -[(Vec_inv_t ((T_rt)) ((((Global_inv_t_rt)))) GlobalasAllocator_spec_attrs -[] -[T_ty; (Global_inv_t  -[] -[])]); T_ty]).(traits_iterator_FromIterator_from_iter_spec) I_rt traits_iterator_IntoIterator_I_IntoIter_rt I_st traits_iterator_IntoIterator_I_IntoIter_st traits_iterator_Iterator_Iasstd_iter_IntoIterator_IntoIter_spec_attrs traits_iterator_IntoIterator_I_spec_attrs DropGlue_I_spec_attrs DropGlue_Iasstd_iter_IntoIterator_IntoIter_spec_attrs a b))) <MERGE!>.
+
+Definition trait_incl_of_allocation_allocate_raw (A_rt: RT) (A_st: syn_type) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π)
+    ∗ (∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π))%I).
+
+Definition type_of_allocation_allocate_raw (A_rt: RT) (A_st: syn_type) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (alloc, layout) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) alloc :@: (shr_ref ulft_1 A_ty), layout :@: (layout_Layout_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (res, v) : ((((loc + unit)%type) * (val))), res @ (Result_ty (loc) ((((errors_AllocError_inv_t_rt)))) -[] -[alias_ptr_t; (errors_AllocError_inv_t  -[] -[])]);
+      (* postcondition *) (λ π : thread_id, (if_iOk res (λ l, raw_allocation π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) alloc) l layout v))) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_allocation_allocate_zeroed_raw (A_rt: RT) (A_st: syn_type) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π)
+    ∗ (∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π))%I).
+
+Definition type_of_allocation_allocate_zeroed_raw (A_rt: RT) (A_st: syn_type) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (alloc, layout) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) alloc :@: (shr_ref ulft_1 A_ty), layout :@: (layout_Layout_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (res) : ((((loc + unit)%type))), res @ (Result_ty (loc) ((((errors_AllocError_inv_t_rt)))) -[] -[alias_ptr_t; (errors_AllocError_inv_t  -[] -[])]);
+      (* postcondition *) (λ π : thread_id, (if_iOk res (λ l, raw_allocation π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) alloc) l layout (replicate layout.(layout_sz) (MByte byte0))))) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_allocation_deallocate_raw (A_rt: RT) (A_st: syn_type) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π)
+    ∗ (∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π))%I).
+
+Definition type_of_allocation_deallocate_raw (A_rt: RT) (A_st: syn_type) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (v, alloc, ptr, layout) : (((val) * _ * _ * _)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) alloc :@: (shr_ref ulft_1 A_ty), ptr :@: (nonnull_NonNull_inv_t (Z) -[] -[(int U8)]), layout :@: (layout_Layout_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, (raw_allocation π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) alloc) ptr layout v)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (ret) : ((_)), ret @ unit_t;
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_allocation_grow_raw (A_rt: RT) (A_st: syn_type) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π)
+    ∗ (∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π))%I).
+
+Definition type_of_allocation_grow_raw (A_rt: RT) (A_st: syn_type) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (v, alloc, ptr, old_layout, new_layout) : (((val) * _ * _ * _ * _)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) alloc :@: (shr_ref ulft_1 A_ty), ptr :@: (nonnull_NonNull_inv_t (Z) -[] -[(int U8)]), old_layout :@: (layout_Layout_inv_t  -[] -[]), new_layout :@: (layout_Layout_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, (⌜(name_hint "Hgrow_size" ((old_layout.(layout_sz) ≤ new_layout.(layout_sz))%nat)%Z)%Z⌝)
+        ∗ (raw_allocation π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) alloc) ptr old_layout v)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (res, suffix) : ((((loc + unit)%type) * (val))), res @ (Result_ty (loc) ((((errors_AllocError_inv_t_rt)))) -[] -[alias_ptr_t; (errors_AllocError_inv_t  -[] -[])]);
+      (* postcondition *) (λ π : thread_id, (if_iOk res (λ l, raw_allocation π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) alloc) l new_layout (v ++ suffix)))
+      ∗ (if_iErr res (λ _, raw_allocation π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) alloc) ptr old_layout v))) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_allocation_shrink_raw (A_rt: RT) (A_st: syn_type) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π)
+    ∗ (∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π))%I).
+
+Definition type_of_allocation_shrink_raw (A_rt: RT) (A_st: syn_type) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (v, alloc, ptr, old_layout, new_layout) : (((val) * _ * _ * _ * _)),
+      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* args......... *) alloc :@: (shr_ref ulft_1 A_ty), ptr :@: (nonnull_NonNull_inv_t (Z) -[] -[(int U8)]), old_layout :@: (layout_Layout_inv_t  -[] -[]), new_layout :@: (layout_Layout_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, (⌜(name_hint "Hshrink_size" ((new_layout.(layout_sz) ≤ old_layout.(layout_sz))%nat)%Z)%Z⌝)
+        ∗ (raw_allocation π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) alloc) ptr old_layout v)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (res) : ((((loc + unit)%type))), res @ (Result_ty (loc) ((((errors_AllocError_inv_t_rt)))) -[] -[alias_ptr_t; (errors_AllocError_inv_t  -[] -[])]);
+      (* postcondition *) (λ π : thread_id, (if_iOk res (λ l, raw_allocation π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) alloc) l new_layout (take new_layout.(layout_sz) v)))
+      ∗ (if_iErr res (λ _, raw_allocation π (Allocator_A_spec_attrs.(Allocator_FreeablePerm) alloc) ptr old_layout v))) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_assert_unchecked  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_raw_vec_assert_unchecked  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (condition) : ((_)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) condition :@: bool_t;
+      (* precondition. *) (λ π : thread_id, (⌜(name_hint "Hcondition" (condition = true)%Z)%Z⌝)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (ret) : ((_)), ret @ unit_t;
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_handle_error  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_raw_vec_handle_error  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (e) : ((_)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) e :@: (errors_TryReserveError_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (ret) : ((_)), ret @ never_t;
+      (* postcondition *) (λ π : thread_id, (⌜(False)%Z⌝)) |
+      (* unwind cond... *) True |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_raw_vec_implRawVecInnerA_new_in (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_realization: (trait_spec_realization (spec_with 0 [] (Allocator_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[A_ty]) : ([A_rt] : list RT), (λ π, ((∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
+    ∗ (∃ (Allocator_A_lfts_inst : prod_vec lft Allocator_A_realization.(trait_ctx_lfts)) (Allocator_A_tys_inst : plist type Allocator_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl Allocator_spec_incl (Allocator_A_realization.(trait_ctx_spec) Allocator_A_lfts_inst Allocator_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), Allocator_base_spec (A_rt) A_st DropGlue_A_spec_attrs Allocator_A_spec_attrs-[] -[A_ty]))⌝ ∗ Allocator_A_realization.(trait_ctx_wf) Allocator_A_lfts_inst Allocator_A_tys_inst π))%I).
+
+Definition type_of_raw_vec_implRawVecInnerA_new_in (A_rt: RT) (A_st: syn_type) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
+  fn(∀ ( *[]) : 0 | ( *[A_ty]) : ([(A_rt, A_st)] : list (RT * syn_type)%type) | 
+      (* params....... *) (alloc, align) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, []);
+      (* args......... *) alloc :@: A_ty, align :@: (alignment_Alignment_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ (l) : (((loc))), (l, 0%nat, alloc) @ (RawVecInner_inv_t ((A_rt)) Allocator_A_spec_attrs -[] -[A_ty]);
+      (* postcondition *) (λ π : thread_id, (⌜(l.(loc_a) ≠ 0 ∧ l `aligned_to` (alignment_to_align_nat align))%Z⌝)
+      ∗ (loc_in_bounds l 0 0)) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
 
 Definition trait_incl_of_vec_iter_mut (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1]) : 1 | ( *[T_ty]) : ([T_rt] : list RT), (λ π, ((∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π))%I).

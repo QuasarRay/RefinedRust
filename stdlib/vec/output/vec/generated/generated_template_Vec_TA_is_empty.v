@@ -7,11 +7,15 @@ From rrstd.cmp.cmp.generated Require Export generated_specs_cmp.
 From rrstd.controlflow.controlflow.generated Require Export generated_specs_controlflow.
 From rrstd.index.index.generated Require Export generated_specs_index.
 From rrstd.iterator.iterator.generated Require Export generated_specs_iterator.
+From rrstd.mem.mem.generated Require Export generated_specs_mem.
+From rrstd.num.num.generated Require Export generated_specs_num.
 From rrstd.option.option.generated Require Export generated_specs_option.
+From rrstd.ptr.ptr.generated Require Export generated_specs_ptr.
 From rrstd.ptr_advanced.ptr_advanced.generated Require Export generated_specs_ptr_advanced.
+From rrstd.result.result.generated Require Export generated_specs_result.
 From rrstd.rr_internal.rr_internal.generated Require Export generated_specs_rr_internal.
 From rrstd.sized.sized.generated Require Export generated_specs_sized.
-From rrstd.vec.theories Require Export vec.
+From rrstd.vec.theories Require Export allocation vec.
 From rrstd.vec.vec Require Export generated_code_vec generated_specs_vec.
 
 Set Default Proof Using "Type".

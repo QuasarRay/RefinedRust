@@ -11,7 +11,10 @@ Section Vec_inv_t_ne.
     intros X.
     apply ex_plain_t_contr.
     - constructor.
-      + solve_type_proper.
+      + solve_type_proper_prepare; solve_proper_prepare.
+        repeat solve_proper_step.
+        rewrite type_dist2_st.
+        done.
       + solve_type_proper.
     - cbn; apply _.
   Qed.
@@ -149,7 +152,7 @@ Proof.
   { done. }
   simpl. iDestruct "Hrfn" as "<-".
   rewrite {1}ex_plain_t_unfold_val/=.
-  iDestruct "Hv" as "(%fields' & (%a & -> & Hls & Hfreeable & _) & Hv)".
+  iDestruct "Hv" as "(%fields' & (%a & %stored_cap & -> & Hls & %Hcapacity & %Hptr_nonnull & %Hptr_aligned & Hfreeable & _) & Hv)".
 
   rewrite /guarded.
   iDestruct "Hls" as "(Hcred & Hls)".
@@ -272,12 +275,15 @@ Proof.
   iExists _. iFrame.
 
   iPoseProof ("Hcl_raw" $! _ (RawVec_inv_t T_rt' A_rt A_attrs -[] -[T_ty'; A_ty]) (l', cap, (<#> (Some <$> <#> rs') ++ <#> replicate (cap - length rs) None))  with "[//] [Hcred Hls Hv Hfreeable]") as "Hv".
-  { rewrite ex_plain_t_unfold_val/=. iFrame.
+  { rewrite ex_plain_t_unfold_val/=.
     rewrite /inv_P/=/name_hint_ty/name_hint/=.
     rewrite Hst''.
     rewrite /guarded.
-    iFrame. iExists _. iSplitR "Hv".
-    { iR. iNext. replace (length rs + (cap - length rs))%nat with cap by lia. done. }
+    iExists -[#((l', stored_cap, $# a)); #tt]. iSplitR "Hv".
+    { iExists a, stored_cap. iR.
+      iSplitL "Hls Hcred".
+      { iFrame "Hcred". iNext. replace (length rs + (cap - length rs))%nat with cap by lia. done. }
+      iR. iR. iR. iFrame. }
     iApply (struct_t_own_val_mono _ false); last iApply "Hv".
     unfold struct_t_incl_precond. simpl.
     iSplitR; first last.

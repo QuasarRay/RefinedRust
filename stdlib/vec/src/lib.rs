@@ -7,6 +7,8 @@
 #![allow(internal_features)]
 #![feature(ptr_internals)]
 #![feature(sized_type_properties)]
+#![feature(ptr_alignment_type)]
+#![feature(try_reserve_kind)]
 
 #![rr::import("rrstd.vec.theories", "vec")]
 
@@ -16,6 +18,7 @@
 #![rr::include("alloc")]
 #![rr::include("iterator")]
 #![rr::include("option")]
+#![rr::include("result")]
 #![rr::include("rr_internal")]
 #![rr::include("closures")]
 #![rr::include("cmp")]
@@ -24,6 +27,9 @@
 #![rr::include("clone")]
 #![rr::include("controlflow")]
 #![rr::include("sized")]
+#![rr::include("num")]
+#![rr::include("ptr")]
+#![rr::include("mem")]
 
 use std::alloc::{Allocator, Global};
 use std::marker::PhantomData;
@@ -32,8 +38,11 @@ use std::ptr;
 use std::alloc::Layout;
 use std::mem::SizedTypeProperties;
 
+mod allocation;
+mod raw_vec;
 
-// NB: The real rustc impl uses usize with a niche on the highest bit, but we can't handle that.
+// TODO(verification): Replace the upstream high-bit niche type with usize because
+// RefinedRust cannot represent the niche; prove the capacity bound separately.
 type Cap = usize;
 
 /// Like a `RawVec`, but only generic over the allocator, not the type.
@@ -43,6 +52,9 @@ type Cap = usize;
 /// Having this separation reduces the amount of code we need to monomorphize,
 /// as most operations don't need the actual type, just its layout.
 #[rr::refined_by("(l, cap, alloc)" : "(loc * nat * {rt_of A} : RT)%type")]
+// TODO(verification): Model the bound supplied by upstream's UsizeNoHighBit
+// niche explicitly because the port stores a plain usize.
+#[rr::invariant("Hstored_cap" : "cap ≤ Z.to_nat (MaxInt ISize)")]
 #[rr::trust_me(drop_glue)]
 #[rr::derive_instantiate("DropGlueUnwind" := "{A::DropGlueUnwind}")]
 struct RawVecInner<A: Allocator = Global> {
@@ -54,41 +66,6 @@ struct RawVecInner<A: Allocator = Global> {
     alloc: A,
 }
 
-#[rr::skip]
-impl<A: Allocator> RawVecInner<A> {
-    unsafe fn current_memory(&self, elem_layout: Layout) -> Option<(NonNull<u8>, Layout)> {
-        if elem_layout.size() == 0 || self.cap == 0 {
-            None
-        } else {
-            // We could use Layout::array here which ensures the absence of isize and usize overflows
-            // and could hypothetically handle differences between stride and size, but this memory
-            // has already been allocated so we know it can't overflow and currently Rust does not
-            // support such types. So we can do better by skipping some checks and avoid an unwrap.
-            unsafe {
-                let alloc_size = elem_layout.size().unchecked_mul(self.cap);
-                let layout = Layout::from_size_align_unchecked(alloc_size, elem_layout.align());
-                Some((self.ptr.into(), layout))
-            }
-        }
-    }
-
-    /// # Safety
-    ///
-    /// This function deallocates the owned allocation, but does not update `ptr` or `cap` to
-    /// prevent double-free or use-after-free. Essentially, do not do anything with the caller
-    /// after this function returns.
-    /// Ideally this function would take `self` by move, but it cannot because it exists to be
-    /// called from a `Drop` impl.
-    unsafe fn deallocate(&mut self, elem_layout: Layout) {
-        // SAFETY: Precondition passed to caller
-        if let Some((ptr, layout)) = unsafe { self.current_memory(elem_layout) } {
-            unsafe {
-                self.alloc.deallocate(ptr, layout);
-            }
-        }
-    }
-}
-
 
 // TODO: maybe expose a value interface instead
 #[rr::only_spec(drop_glue)]
@@ -96,18 +73,28 @@ impl<A: Allocator> RawVecInner<A> {
 #[rr::export_as(alloc::raw_vec::RawVec)]
 #[rr::refined_by("(l, cap, els)" : "(loc * nat * list (place_rfn (option (place_rfn {rt_of T}))))")]
 #[rr::exists("a")]
-#[rr::invariant(#iris "{A::FreeablePerm} a l (size_of_array_in_bytes {st_of T} cap)")]
+#[rr::exists("stored_cap" : "nat")]
+// cap is the effective capacity; the physical field is zero
+// for ZSTs, whose effective capacity is usize::MAX. The logical element list is
+// retained for element ownership, including ZSTs; it is not an allocated buffer.
+#[rr::invariant("Hcapacity" : "raw_vec_capacity_valid {st_of T} stored_cap cap")]
+#[rr::invariant("Hptr_nonnull" : "l.(loc_a) ≠ 0")]
+#[rr::invariant("Hptr_aligned" : "l `has_layout_loc` {ly_of T}")]
+// Empty/ZST buffers are dangling and do not obtain a token
+// from the allocator. Positive buffers own a fitting-layout allocation token.
+#[rr::invariant(#iris "(if decide (size_of_array_in_bytes {st_of T} cap = 0%nat) then True else {A::FreeablePerm} a l (size_of_array_in_bytes {st_of T} cap))")]
 // Ownership needs to be here in order to allow drop glue to safely call Drop
 #[rr::invariant(#type "l" : "els" @ "array_t cap (maybe_uninit {T})")]
 pub(crate) struct RawVec<T, A: Allocator = Global> {
-    #[rr::field("#((l, cap, $# a))")]
+    #[rr::field("#((l, stored_cap, $# a))")]
     inner: RawVecInner<A>,
     #[rr::field("#(tt)")]
     _marker: PhantomData<T>,
 }
 
 
-// TODO: may_dangle
+// TODO(verification): Use a non-const Drop impl without may_dangle while retaining
+// the existing drop contract; const-trait bounds and may_dangle are deferred.
 #[rr::only_spec]
 impl<T, A: Allocator> Drop for RawVec<T, A> {
     /// Frees the memory owned by the `RawVec` *without* trying to drop its contents.
@@ -115,7 +102,10 @@ impl<T, A: Allocator> Drop for RawVec<T, A> {
     #[rr::args("l" @ "alias_ref_t")]
     #[rr::requires(#type "l" : "(lmem, cap, els)" @ "RawVec_inv_t T_rt A_rt Allocator_A_spec_attrs -[] -[T_ty; A_ty]")]
     #[rr::exists("a")]
-    #[rr::ensures(#type "l" : "-[ #(l, cap, a); #tt]" @ "RawVec_ty T_rt A_rt Allocator_A_spec_attrs -[] -[T_ty; A_ty]")]
+    #[rr::exists("stored_cap" : "nat")]
+    // Drop exposes the physical stored capacity, not the
+    // ZST effective capacity, and retains the allocation pointer lmem.
+    #[rr::ensures(#type "l" : "-[ #(lmem, stored_cap, a); #tt]" @ "RawVec_ty T_rt A_rt Allocator_A_spec_attrs -[] -[T_ty; A_ty]")]
     fn drop(&mut self) {
         // SAFETY: We are in a Drop impl, self.inner will not be used again.
         unsafe { self.inner.deallocate(T::LAYOUT) }
