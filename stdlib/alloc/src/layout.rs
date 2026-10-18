@@ -1,14 +1,17 @@
 #![rr::include("ptr")]
 #![rr::include("result")]
 #![rr::include("mem")]
+#![rr::include("num")]
+#![rr::include("option")]
 #![rr::import("rrstd.alloc.theories", "layout")]
 
-use std::ptr::Alignment;
+use std::mem::Alignment;
 use core::mem;
 
 
 #[rr::export_as(alloc::alloc::Layout)]
 #[rr::refined_by("l" : "rust_layout")]
+#[derive(Copy, Clone)]
 // Rust requires:
 // > All layouts have an associated size and a power-of-two alignment. The size, when rounded up to
 // > the nearest multiple of `align`, does not overflow `isize` (i.e., the rounded value will always be
@@ -47,6 +50,39 @@ impl Layout {
     #[rr::returns("Z.of_nat (layout_alignment_nat self)")]
     pub const fn align(&self) -> usize {
         self.align.as_usize()
+    }
+
+    #[rr::returns("self.(layout_alignment)")]
+    pub const fn alignment(&self) -> Alignment {
+        self.align
+    }
+
+    #[rr::returns("self")]
+    pub const fn pad_to_align(&self) -> Self {
+        // TODO(verification): The current Layout invariant already requires
+        // size to be a multiple of alignment, so upstream's rounding is the
+        // identity. Revisit this body and spec if that invariant is relaxed.
+        Layout { size: self.size, align: self.align }
+    }
+
+    #[rr::returns("if bool_decide (Z.of_nat self.(layout_sz) * n ≤ MaxInt ISize) then Ok (mk_rust_layout (self.(layout_sz) * Z.to_nat n) self.(layout_alignment)) else Err ( *[])")]
+    pub const fn repeat_packed(&self, n: usize) -> Result<Self, LayoutError> {
+        if let Some(size) = self.size.checked_mul(n) {
+            // TODO(verification): Inline the size check from upstream's
+            // from_size_alignment instead of adding that constructor now.
+            // Multiplication preserves the current alignment-divisibility
+            // invariant, so only the isize size limit needs checking here.
+            if size > isize::MAX as usize {
+                Err(LayoutError)
+            } else {
+                // TODO(verification): Use the existing unchecked constructor
+                // rather than upstream's Alignment-valued constructor. The
+                // original layout and the check above establish its premises.
+                Ok(unsafe { Self::from_size_align_unchecked(size, self.align.as_usize()) })
+            }
+        } else {
+            Err(LayoutError)
+        }
     }
 
     // TODO: for stronger spec we'd need the weaker invariant on the size...
