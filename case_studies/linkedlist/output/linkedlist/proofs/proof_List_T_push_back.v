@@ -117,6 +117,7 @@ Proof.
   - replace (S (length self) - length self)%nat with 1%nat by lia.
     rename select ((NULL_loc :: locs) !! Nat.pred (length self) = Some lprev)
       into Htail_prev_lookup.
+    apply symmetry, list_lookup_total_correct.
     change (((NULL_loc :: locs) ++ [x']) !! Nat.pred (length self) = Some lprev).
     apply lookup_app_l_Some. exact Htail_prev_lookup.
 
