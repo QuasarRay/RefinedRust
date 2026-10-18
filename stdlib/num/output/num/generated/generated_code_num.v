@@ -391,6 +391,201 @@ Qed.
 
 
 
+Program Definition u128_checked_add_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U128) : layout);
+     ("rhs", (it_layout U128) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ ((Option_els ((IntSynType U128))) : syn_type) } "__0";
+      local_live{ ((tuple2_sls ((IntSynType U128)) (BoolSynType)) : syn_type) } "__7";
+      local_live{ ((tuple2_sls ((IntSynType U128)) (BoolSynType)) : syn_type) } "__11";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U128) } "__4";
+      "__4" <-{ (IntOp U128) } copy{ (IntOp U128) } ("x");
+      local_live{ (IntSynType U128) } "__5";
+      local_live{ (IntSynType U128) } "__6";
+      "__6" <-{ (IntOp U128) } copy{ (IntOp U128) } ("rhs");
+      "__7" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U128)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U128)) BoolSynType) [("0", (i2v (340282366920938463463374607431768211455) U128) -{ (IntOp U128) , (IntOp U128) } (copy{ (IntOp U128) } ("__6")) : expr); ("1", (i2v (340282366920938463463374607431768211455) U128) -c{ (IntOp U128) , (IntOp U128) } (copy{ (IntOp U128) } ("__6")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__7") at{ (tuple2_sls ((IntSynType U128)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb1"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      "__5" <-{ (IntOp U128) } move{ (IntOp U128) } (("__7") at{ (tuple2_sls ((IntSynType U128)) (BoolSynType)) } "0");
+      local_dead "__6";
+      "__3" <-{ BoolOp } (move{ (IntOp U128) } ("__4")) >{ (IntOp U128) , (IntOp U128) , U8 } (move{ (IntOp U128) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb2"
+      else
+       Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U128))) : syn_type)) } EnumInit (Option_els ((IntSynType U128))) "None" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U128] [])) (StructInit (Option_None_sls ((IntSynType U128))) []);
+      Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_live{ (IntSynType U128) } "__8";
+      local_live{ (IntSynType U128) } "__9";
+      "__9" <-{ (IntOp U128) } copy{ (IntOp U128) } ("x");
+      local_live{ (IntSynType U128) } "__10";
+      "__10" <-{ (IntOp U128) } copy{ (IntOp U128) } ("rhs");
+      "__11" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U128)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U128)) BoolSynType) [("0", (copy{ (IntOp U128) } ("__9")) +{ (IntOp U128) , (IntOp U128) } (copy{ (IntOp U128) } ("__10")) : expr); ("1", (copy{ (IntOp U128) } ("__9")) +c{ (IntOp U128) , (IntOp U128) } (copy{ (IntOp U128) } ("__10")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__11") at{ (tuple2_sls ((IntSynType U128)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb4"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb4" :=
+      "__8" <-{ (IntOp U128) } move{ (IntOp U128) } (("__11") at{ (tuple2_sls ((IntSynType U128)) (BoolSynType)) } "0");
+      local_dead "__10";
+      local_dead "__9";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U128))) : syn_type)) } EnumInit (Option_els ((IntSynType U128))) "Some" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U128] [])) (StructInit (Option_Some_sls ((IntSynType U128))) [("0", move{ (IntOp U128) } ("__8") : expr)]);
+      local_dead "__8";
+      Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb5" :=
+      local_dead "__3";
+      return (move{ (use_op_alg' ((Option_els ((IntSynType U128))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u128_checked_mul_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U128) : layout);
+     ("rhs", (it_layout U128) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ ((Option_els ((IntSynType U128))) : syn_type) } "__0";
+      local_live{ BoolSynType } "__9";
+      local_live{ ((tuple2_sls ((IntSynType U128)) (BoolSynType)) : syn_type) } "__13";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U128) } "__4";
+      "__4" <-{ (IntOp U128) } copy{ (IntOp U128) } ("rhs");
+      "__3" <-{ BoolOp } (move{ (IntOp U128) } ("__4")) = { (IntOp U128) , (IntOp U128) , U8 } (i2v (0) U128);
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__4";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U128))) : syn_type)) } EnumInit (Option_els ((IntSynType U128))) "Some" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U128] [])) (StructInit (Option_Some_sls ((IntSynType U128))) [("0", i2v (0) U128 : expr)]);
+      Goto "_bb8"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__4";
+      local_live{ BoolSynType } "__5";
+      local_live{ (IntSynType U128) } "__6";
+      "__6" <-{ (IntOp U128) } copy{ (IntOp U128) } ("x");
+      local_live{ (IntSynType U128) } "__7";
+      local_live{ (IntSynType U128) } "__8";
+      "__8" <-{ (IntOp U128) } copy{ (IntOp U128) } ("rhs");
+      "__9" <-{ BoolOp } (copy{ (IntOp U128) } ("__8")) = { (IntOp U128) , (IntOp U128) , U8 } (i2v (0) U128);
+      if{ BoolOp }: (move{ BoolOp } ("__9")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb3"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb3" :=
+      "__7" <-{ (IntOp U128) } (i2v (340282366920938463463374607431768211455) U128) /{ (IntOp U128) , (IntOp U128) } (move{ (IntOp U128) } ("__8"));
+      local_dead "__8";
+      "__5" <-{ BoolOp } (move{ (IntOp U128) } ("__6")) >{ (IntOp U128) , (IntOp U128) , U8 } (move{ (IntOp U128) } ("__7"));
+      if{ BoolOp }: move{ BoolOp } ("__5") then
+       Goto "_bb4"
+      else
+       Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb4" :=
+      local_dead "__7";
+      local_dead "__6";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U128))) : syn_type)) } EnumInit (Option_els ((IntSynType U128))) "None" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U128] [])) (StructInit (Option_None_sls ((IntSynType U128))) []);
+      Goto "_bb7"
+     ]>%E $
+     <[
+     "_bb5" :=
+      local_dead "__7";
+      local_dead "__6";
+      local_live{ (IntSynType U128) } "__10";
+      local_live{ (IntSynType U128) } "__11";
+      "__11" <-{ (IntOp U128) } copy{ (IntOp U128) } ("x");
+      local_live{ (IntSynType U128) } "__12";
+      "__12" <-{ (IntOp U128) } copy{ (IntOp U128) } ("rhs");
+      "__13" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U128)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U128)) BoolSynType) [("0", (copy{ (IntOp U128) } ("__11")) ×{ (IntOp U128) , (IntOp U128) } (copy{ (IntOp U128) } ("__12")) : expr); ("1", (copy{ (IntOp U128) } ("__11")) ×c{ (IntOp U128) , (IntOp U128) } (copy{ (IntOp U128) } ("__12")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__13") at{ (tuple2_sls ((IntSynType U128)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb6"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb6" :=
+      "__10" <-{ (IntOp U128) } move{ (IntOp U128) } (("__13") at{ (tuple2_sls ((IntSynType U128)) (BoolSynType)) } "0");
+      local_dead "__12";
+      local_dead "__11";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U128))) : syn_type)) } EnumInit (Option_els ((IntSynType U128))) "Some" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U128] [])) (StructInit (Option_Some_sls ((IntSynType U128))) [("0", move{ (IntOp U128) } ("__10") : expr)]);
+      local_dead "__10";
+      Goto "_bb7"
+     ]>%E $
+     <[
+     "_bb7" :=
+      local_dead "__5";
+      Goto "_bb8"
+     ]>%E $
+     <[
+     "_bb8" :=
+      local_dead "__3";
+      return (move{ (use_op_alg' ((Option_els ((IntSynType U128))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
 Program Definition u128_checked_sub_def (u128_unchecked_sub_loc: loc) : function :=
   {|
      f_args := [
@@ -445,6 +640,204 @@ Program Definition u128_checked_sub_def (u128_unchecked_sub_loc: loc) : function
      "_bb4" :=
       local_dead "__3";
       return (move{ (use_op_alg' ((Option_els ((IntSynType U128))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u128_unchecked_add_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U128) : layout);
+     ("rhs", (it_layout U128) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType U128) } "__0";
+      local_live{ ((tuple2_sls ((IntSynType U128)) (BoolSynType)) : syn_type) } "__5";
+      local_live{ (IntSynType U128) } "__3";
+      "__3" <-{ (IntOp U128) } copy{ (IntOp U128) } ("x");
+      local_live{ (IntSynType U128) } "__4";
+      "__4" <-{ (IntOp U128) } copy{ (IntOp U128) } ("rhs");
+      "__5" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U128)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U128)) BoolSynType) [("0", (copy{ (IntOp U128) } ("__3")) +{ (IntOp U128) , (IntOp U128) } (copy{ (IntOp U128) } ("__4")) : expr); ("1", (copy{ (IntOp U128) } ("__3")) +c{ (IntOp U128) , (IntOp U128) } (copy{ (IntOp U128) } ("__4")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__5") at{ (tuple2_sls ((IntSynType U128)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb1"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      "__0" <-{ (IntOp U128) } move{ (IntOp U128) } (("__5") at{ (tuple2_sls ((IntSynType U128)) (BoolSynType)) } "0");
+      local_dead "__4";
+      local_dead "__3";
+      return (move{ (IntOp U128) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u128_unchecked_mul_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U128) : layout);
+     ("rhs", (it_layout U128) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType U128) } "__0";
+      local_live{ ((tuple2_sls ((IntSynType U128)) (BoolSynType)) : syn_type) } "__5";
+      local_live{ (IntSynType U128) } "__3";
+      "__3" <-{ (IntOp U128) } copy{ (IntOp U128) } ("x");
+      local_live{ (IntSynType U128) } "__4";
+      "__4" <-{ (IntOp U128) } copy{ (IntOp U128) } ("rhs");
+      "__5" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U128)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U128)) BoolSynType) [("0", (copy{ (IntOp U128) } ("__3")) ×{ (IntOp U128) , (IntOp U128) } (copy{ (IntOp U128) } ("__4")) : expr); ("1", (copy{ (IntOp U128) } ("__3")) ×c{ (IntOp U128) , (IntOp U128) } (copy{ (IntOp U128) } ("__4")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__5") at{ (tuple2_sls ((IntSynType U128)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb1"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      "__0" <-{ (IntOp U128) } move{ (IntOp U128) } (("__5") at{ (tuple2_sls ((IntSynType U128)) (BoolSynType)) } "0");
+      local_dead "__4";
+      local_dead "__3";
+      return (move{ (IntOp U128) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u128_wrapping_sub_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U128) : layout);
+     ("rhs", (it_layout U128) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType U128) } "__0";
+      local_live{ ((tuple2_sls ((IntSynType U128)) (BoolSynType)) : syn_type) } "__10";
+      local_live{ ((tuple2_sls ((IntSynType U128)) (BoolSynType)) : syn_type) } "__11";
+      local_live{ ((tuple2_sls ((IntSynType U128)) (BoolSynType)) : syn_type) } "__12";
+      local_live{ ((tuple2_sls ((IntSynType U128)) (BoolSynType)) : syn_type) } "__15";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U128) } "__4";
+      "__4" <-{ (IntOp U128) } copy{ (IntOp U128) } ("x");
+      local_live{ (IntSynType U128) } "__5";
+      "__5" <-{ (IntOp U128) } copy{ (IntOp U128) } ("rhs");
+      "__3" <-{ BoolOp } (move{ (IntOp U128) } ("__4")) <{ (IntOp U128) , (IntOp U128) , U8 } (move{ (IntOp U128) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_live{ (IntSynType U128) } "__6";
+      local_live{ (IntSynType U128) } "__7";
+      local_live{ (IntSynType U128) } "__8";
+      "__8" <-{ (IntOp U128) } copy{ (IntOp U128) } ("rhs");
+      local_live{ (IntSynType U128) } "__9";
+      "__9" <-{ (IntOp U128) } copy{ (IntOp U128) } ("x");
+      "__10" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U128)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U128)) BoolSynType) [("0", (copy{ (IntOp U128) } ("__8")) -{ (IntOp U128) , (IntOp U128) } (copy{ (IntOp U128) } ("__9")) : expr); ("1", (copy{ (IntOp U128) } ("__8")) -c{ (IntOp U128) , (IntOp U128) } (copy{ (IntOp U128) } ("__9")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__10") at{ (tuple2_sls ((IntSynType U128)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb2"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb2" :=
+      "__7" <-{ (IntOp U128) } move{ (IntOp U128) } (("__10") at{ (tuple2_sls ((IntSynType U128)) (BoolSynType)) } "0");
+      local_dead "__9";
+      local_dead "__8";
+      "__11" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U128)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U128)) BoolSynType) [("0", (i2v (340282366920938463463374607431768211455) U128) -{ (IntOp U128) , (IntOp U128) } (copy{ (IntOp U128) } ("__7")) : expr); ("1", (i2v (340282366920938463463374607431768211455) U128) -c{ (IntOp U128) , (IntOp U128) } (copy{ (IntOp U128) } ("__7")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__11") at{ (tuple2_sls ((IntSynType U128)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb3"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb3" :=
+      "__6" <-{ (IntOp U128) } move{ (IntOp U128) } (("__11") at{ (tuple2_sls ((IntSynType U128)) (BoolSynType)) } "0");
+      local_dead "__7";
+      "__12" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U128)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U128)) BoolSynType) [("0", (copy{ (IntOp U128) } ("__6")) +{ (IntOp U128) , (IntOp U128) } (i2v (1) U128) : expr); ("1", (copy{ (IntOp U128) } ("__6")) +c{ (IntOp U128) , (IntOp U128) } (i2v (1) U128) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__12") at{ (tuple2_sls ((IntSynType U128)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb4"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb4" :=
+      "__0" <-{ (IntOp U128) } move{ (IntOp U128) } (("__12") at{ (tuple2_sls ((IntSynType U128)) (BoolSynType)) } "0");
+      local_dead "__6";
+      Goto "_bb7"
+     ]>%E $
+     <[
+     "_bb5" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_live{ (IntSynType U128) } "__13";
+      "__13" <-{ (IntOp U128) } copy{ (IntOp U128) } ("x");
+      local_live{ (IntSynType U128) } "__14";
+      "__14" <-{ (IntOp U128) } copy{ (IntOp U128) } ("rhs");
+      "__15" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U128)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U128)) BoolSynType) [("0", (copy{ (IntOp U128) } ("__13")) -{ (IntOp U128) , (IntOp U128) } (copy{ (IntOp U128) } ("__14")) : expr); ("1", (copy{ (IntOp U128) } ("__13")) -c{ (IntOp U128) , (IntOp U128) } (copy{ (IntOp U128) } ("__14")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__15") at{ (tuple2_sls ((IntSynType U128)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb6"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb6" :=
+      "__0" <-{ (IntOp U128) } move{ (IntOp U128) } (("__15") at{ (tuple2_sls ((IntSynType U128)) (BoolSynType)) } "0");
+      local_dead "__14";
+      local_dead "__13";
+      Goto "_bb7"
+     ]>%E $
+     <[
+     "_bb7" :=
+      local_dead "__3";
+      return (move{ (IntOp U128) } ("__0"))
      ]>%E $
       ∅;
      f_init := "_bb0";
@@ -542,6 +935,201 @@ Qed.
 
 
 
+Program Definition u16_checked_add_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U16) : layout);
+     ("rhs", (it_layout U16) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ ((Option_els ((IntSynType U16))) : syn_type) } "__0";
+      local_live{ ((tuple2_sls ((IntSynType U16)) (BoolSynType)) : syn_type) } "__7";
+      local_live{ ((tuple2_sls ((IntSynType U16)) (BoolSynType)) : syn_type) } "__11";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U16) } "__4";
+      "__4" <-{ (IntOp U16) } copy{ (IntOp U16) } ("x");
+      local_live{ (IntSynType U16) } "__5";
+      local_live{ (IntSynType U16) } "__6";
+      "__6" <-{ (IntOp U16) } copy{ (IntOp U16) } ("rhs");
+      "__7" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U16)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U16)) BoolSynType) [("0", (i2v (65535) U16) -{ (IntOp U16) , (IntOp U16) } (copy{ (IntOp U16) } ("__6")) : expr); ("1", (i2v (65535) U16) -c{ (IntOp U16) , (IntOp U16) } (copy{ (IntOp U16) } ("__6")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__7") at{ (tuple2_sls ((IntSynType U16)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb1"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      "__5" <-{ (IntOp U16) } move{ (IntOp U16) } (("__7") at{ (tuple2_sls ((IntSynType U16)) (BoolSynType)) } "0");
+      local_dead "__6";
+      "__3" <-{ BoolOp } (move{ (IntOp U16) } ("__4")) >{ (IntOp U16) , (IntOp U16) , U8 } (move{ (IntOp U16) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb2"
+      else
+       Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U16))) : syn_type)) } EnumInit (Option_els ((IntSynType U16))) "None" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U16] [])) (StructInit (Option_None_sls ((IntSynType U16))) []);
+      Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_live{ (IntSynType U16) } "__8";
+      local_live{ (IntSynType U16) } "__9";
+      "__9" <-{ (IntOp U16) } copy{ (IntOp U16) } ("x");
+      local_live{ (IntSynType U16) } "__10";
+      "__10" <-{ (IntOp U16) } copy{ (IntOp U16) } ("rhs");
+      "__11" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U16)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U16)) BoolSynType) [("0", (copy{ (IntOp U16) } ("__9")) +{ (IntOp U16) , (IntOp U16) } (copy{ (IntOp U16) } ("__10")) : expr); ("1", (copy{ (IntOp U16) } ("__9")) +c{ (IntOp U16) , (IntOp U16) } (copy{ (IntOp U16) } ("__10")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__11") at{ (tuple2_sls ((IntSynType U16)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb4"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb4" :=
+      "__8" <-{ (IntOp U16) } move{ (IntOp U16) } (("__11") at{ (tuple2_sls ((IntSynType U16)) (BoolSynType)) } "0");
+      local_dead "__10";
+      local_dead "__9";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U16))) : syn_type)) } EnumInit (Option_els ((IntSynType U16))) "Some" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U16] [])) (StructInit (Option_Some_sls ((IntSynType U16))) [("0", move{ (IntOp U16) } ("__8") : expr)]);
+      local_dead "__8";
+      Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb5" :=
+      local_dead "__3";
+      return (move{ (use_op_alg' ((Option_els ((IntSynType U16))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u16_checked_mul_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U16) : layout);
+     ("rhs", (it_layout U16) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ ((Option_els ((IntSynType U16))) : syn_type) } "__0";
+      local_live{ BoolSynType } "__9";
+      local_live{ ((tuple2_sls ((IntSynType U16)) (BoolSynType)) : syn_type) } "__13";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U16) } "__4";
+      "__4" <-{ (IntOp U16) } copy{ (IntOp U16) } ("rhs");
+      "__3" <-{ BoolOp } (move{ (IntOp U16) } ("__4")) = { (IntOp U16) , (IntOp U16) , U8 } (i2v (0) U16);
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__4";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U16))) : syn_type)) } EnumInit (Option_els ((IntSynType U16))) "Some" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U16] [])) (StructInit (Option_Some_sls ((IntSynType U16))) [("0", i2v (0) U16 : expr)]);
+      Goto "_bb8"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__4";
+      local_live{ BoolSynType } "__5";
+      local_live{ (IntSynType U16) } "__6";
+      "__6" <-{ (IntOp U16) } copy{ (IntOp U16) } ("x");
+      local_live{ (IntSynType U16) } "__7";
+      local_live{ (IntSynType U16) } "__8";
+      "__8" <-{ (IntOp U16) } copy{ (IntOp U16) } ("rhs");
+      "__9" <-{ BoolOp } (copy{ (IntOp U16) } ("__8")) = { (IntOp U16) , (IntOp U16) , U8 } (i2v (0) U16);
+      if{ BoolOp }: (move{ BoolOp } ("__9")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb3"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb3" :=
+      "__7" <-{ (IntOp U16) } (i2v (65535) U16) /{ (IntOp U16) , (IntOp U16) } (move{ (IntOp U16) } ("__8"));
+      local_dead "__8";
+      "__5" <-{ BoolOp } (move{ (IntOp U16) } ("__6")) >{ (IntOp U16) , (IntOp U16) , U8 } (move{ (IntOp U16) } ("__7"));
+      if{ BoolOp }: move{ BoolOp } ("__5") then
+       Goto "_bb4"
+      else
+       Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb4" :=
+      local_dead "__7";
+      local_dead "__6";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U16))) : syn_type)) } EnumInit (Option_els ((IntSynType U16))) "None" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U16] [])) (StructInit (Option_None_sls ((IntSynType U16))) []);
+      Goto "_bb7"
+     ]>%E $
+     <[
+     "_bb5" :=
+      local_dead "__7";
+      local_dead "__6";
+      local_live{ (IntSynType U16) } "__10";
+      local_live{ (IntSynType U16) } "__11";
+      "__11" <-{ (IntOp U16) } copy{ (IntOp U16) } ("x");
+      local_live{ (IntSynType U16) } "__12";
+      "__12" <-{ (IntOp U16) } copy{ (IntOp U16) } ("rhs");
+      "__13" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U16)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U16)) BoolSynType) [("0", (copy{ (IntOp U16) } ("__11")) ×{ (IntOp U16) , (IntOp U16) } (copy{ (IntOp U16) } ("__12")) : expr); ("1", (copy{ (IntOp U16) } ("__11")) ×c{ (IntOp U16) , (IntOp U16) } (copy{ (IntOp U16) } ("__12")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__13") at{ (tuple2_sls ((IntSynType U16)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb6"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb6" :=
+      "__10" <-{ (IntOp U16) } move{ (IntOp U16) } (("__13") at{ (tuple2_sls ((IntSynType U16)) (BoolSynType)) } "0");
+      local_dead "__12";
+      local_dead "__11";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U16))) : syn_type)) } EnumInit (Option_els ((IntSynType U16))) "Some" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U16] [])) (StructInit (Option_Some_sls ((IntSynType U16))) [("0", move{ (IntOp U16) } ("__10") : expr)]);
+      local_dead "__10";
+      Goto "_bb7"
+     ]>%E $
+     <[
+     "_bb7" :=
+      local_dead "__5";
+      Goto "_bb8"
+     ]>%E $
+     <[
+     "_bb8" :=
+      local_dead "__3";
+      return (move{ (use_op_alg' ((Option_els ((IntSynType U16))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
 Program Definition u16_checked_sub_def (u16_unchecked_sub_loc: loc) : function :=
   {|
      f_args := [
@@ -596,6 +1184,204 @@ Program Definition u16_checked_sub_def (u16_unchecked_sub_loc: loc) : function :
      "_bb4" :=
       local_dead "__3";
       return (move{ (use_op_alg' ((Option_els ((IntSynType U16))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u16_unchecked_add_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U16) : layout);
+     ("rhs", (it_layout U16) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType U16) } "__0";
+      local_live{ ((tuple2_sls ((IntSynType U16)) (BoolSynType)) : syn_type) } "__5";
+      local_live{ (IntSynType U16) } "__3";
+      "__3" <-{ (IntOp U16) } copy{ (IntOp U16) } ("x");
+      local_live{ (IntSynType U16) } "__4";
+      "__4" <-{ (IntOp U16) } copy{ (IntOp U16) } ("rhs");
+      "__5" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U16)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U16)) BoolSynType) [("0", (copy{ (IntOp U16) } ("__3")) +{ (IntOp U16) , (IntOp U16) } (copy{ (IntOp U16) } ("__4")) : expr); ("1", (copy{ (IntOp U16) } ("__3")) +c{ (IntOp U16) , (IntOp U16) } (copy{ (IntOp U16) } ("__4")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__5") at{ (tuple2_sls ((IntSynType U16)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb1"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      "__0" <-{ (IntOp U16) } move{ (IntOp U16) } (("__5") at{ (tuple2_sls ((IntSynType U16)) (BoolSynType)) } "0");
+      local_dead "__4";
+      local_dead "__3";
+      return (move{ (IntOp U16) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u16_unchecked_mul_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U16) : layout);
+     ("rhs", (it_layout U16) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType U16) } "__0";
+      local_live{ ((tuple2_sls ((IntSynType U16)) (BoolSynType)) : syn_type) } "__5";
+      local_live{ (IntSynType U16) } "__3";
+      "__3" <-{ (IntOp U16) } copy{ (IntOp U16) } ("x");
+      local_live{ (IntSynType U16) } "__4";
+      "__4" <-{ (IntOp U16) } copy{ (IntOp U16) } ("rhs");
+      "__5" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U16)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U16)) BoolSynType) [("0", (copy{ (IntOp U16) } ("__3")) ×{ (IntOp U16) , (IntOp U16) } (copy{ (IntOp U16) } ("__4")) : expr); ("1", (copy{ (IntOp U16) } ("__3")) ×c{ (IntOp U16) , (IntOp U16) } (copy{ (IntOp U16) } ("__4")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__5") at{ (tuple2_sls ((IntSynType U16)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb1"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      "__0" <-{ (IntOp U16) } move{ (IntOp U16) } (("__5") at{ (tuple2_sls ((IntSynType U16)) (BoolSynType)) } "0");
+      local_dead "__4";
+      local_dead "__3";
+      return (move{ (IntOp U16) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u16_wrapping_sub_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U16) : layout);
+     ("rhs", (it_layout U16) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType U16) } "__0";
+      local_live{ ((tuple2_sls ((IntSynType U16)) (BoolSynType)) : syn_type) } "__10";
+      local_live{ ((tuple2_sls ((IntSynType U16)) (BoolSynType)) : syn_type) } "__11";
+      local_live{ ((tuple2_sls ((IntSynType U16)) (BoolSynType)) : syn_type) } "__12";
+      local_live{ ((tuple2_sls ((IntSynType U16)) (BoolSynType)) : syn_type) } "__15";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U16) } "__4";
+      "__4" <-{ (IntOp U16) } copy{ (IntOp U16) } ("x");
+      local_live{ (IntSynType U16) } "__5";
+      "__5" <-{ (IntOp U16) } copy{ (IntOp U16) } ("rhs");
+      "__3" <-{ BoolOp } (move{ (IntOp U16) } ("__4")) <{ (IntOp U16) , (IntOp U16) , U8 } (move{ (IntOp U16) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_live{ (IntSynType U16) } "__6";
+      local_live{ (IntSynType U16) } "__7";
+      local_live{ (IntSynType U16) } "__8";
+      "__8" <-{ (IntOp U16) } copy{ (IntOp U16) } ("rhs");
+      local_live{ (IntSynType U16) } "__9";
+      "__9" <-{ (IntOp U16) } copy{ (IntOp U16) } ("x");
+      "__10" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U16)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U16)) BoolSynType) [("0", (copy{ (IntOp U16) } ("__8")) -{ (IntOp U16) , (IntOp U16) } (copy{ (IntOp U16) } ("__9")) : expr); ("1", (copy{ (IntOp U16) } ("__8")) -c{ (IntOp U16) , (IntOp U16) } (copy{ (IntOp U16) } ("__9")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__10") at{ (tuple2_sls ((IntSynType U16)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb2"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb2" :=
+      "__7" <-{ (IntOp U16) } move{ (IntOp U16) } (("__10") at{ (tuple2_sls ((IntSynType U16)) (BoolSynType)) } "0");
+      local_dead "__9";
+      local_dead "__8";
+      "__11" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U16)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U16)) BoolSynType) [("0", (i2v (65535) U16) -{ (IntOp U16) , (IntOp U16) } (copy{ (IntOp U16) } ("__7")) : expr); ("1", (i2v (65535) U16) -c{ (IntOp U16) , (IntOp U16) } (copy{ (IntOp U16) } ("__7")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__11") at{ (tuple2_sls ((IntSynType U16)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb3"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb3" :=
+      "__6" <-{ (IntOp U16) } move{ (IntOp U16) } (("__11") at{ (tuple2_sls ((IntSynType U16)) (BoolSynType)) } "0");
+      local_dead "__7";
+      "__12" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U16)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U16)) BoolSynType) [("0", (copy{ (IntOp U16) } ("__6")) +{ (IntOp U16) , (IntOp U16) } (i2v (1) U16) : expr); ("1", (copy{ (IntOp U16) } ("__6")) +c{ (IntOp U16) , (IntOp U16) } (i2v (1) U16) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__12") at{ (tuple2_sls ((IntSynType U16)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb4"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb4" :=
+      "__0" <-{ (IntOp U16) } move{ (IntOp U16) } (("__12") at{ (tuple2_sls ((IntSynType U16)) (BoolSynType)) } "0");
+      local_dead "__6";
+      Goto "_bb7"
+     ]>%E $
+     <[
+     "_bb5" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_live{ (IntSynType U16) } "__13";
+      "__13" <-{ (IntOp U16) } copy{ (IntOp U16) } ("x");
+      local_live{ (IntSynType U16) } "__14";
+      "__14" <-{ (IntOp U16) } copy{ (IntOp U16) } ("rhs");
+      "__15" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U16)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U16)) BoolSynType) [("0", (copy{ (IntOp U16) } ("__13")) -{ (IntOp U16) , (IntOp U16) } (copy{ (IntOp U16) } ("__14")) : expr); ("1", (copy{ (IntOp U16) } ("__13")) -c{ (IntOp U16) , (IntOp U16) } (copy{ (IntOp U16) } ("__14")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__15") at{ (tuple2_sls ((IntSynType U16)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb6"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb6" :=
+      "__0" <-{ (IntOp U16) } move{ (IntOp U16) } (("__15") at{ (tuple2_sls ((IntSynType U16)) (BoolSynType)) } "0");
+      local_dead "__14";
+      local_dead "__13";
+      Goto "_bb7"
+     ]>%E $
+     <[
+     "_bb7" :=
+      local_dead "__3";
+      return (move{ (IntOp U16) } ("__0"))
      ]>%E $
       ∅;
      f_init := "_bb0";
@@ -693,6 +1479,201 @@ Qed.
 
 
 
+Program Definition u32_checked_add_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U32) : layout);
+     ("rhs", (it_layout U32) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ ((Option_els ((IntSynType U32))) : syn_type) } "__0";
+      local_live{ ((tuple2_sls ((IntSynType U32)) (BoolSynType)) : syn_type) } "__7";
+      local_live{ ((tuple2_sls ((IntSynType U32)) (BoolSynType)) : syn_type) } "__11";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U32) } "__4";
+      "__4" <-{ (IntOp U32) } copy{ (IntOp U32) } ("x");
+      local_live{ (IntSynType U32) } "__5";
+      local_live{ (IntSynType U32) } "__6";
+      "__6" <-{ (IntOp U32) } copy{ (IntOp U32) } ("rhs");
+      "__7" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U32)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U32)) BoolSynType) [("0", (i2v (4294967295) U32) -{ (IntOp U32) , (IntOp U32) } (copy{ (IntOp U32) } ("__6")) : expr); ("1", (i2v (4294967295) U32) -c{ (IntOp U32) , (IntOp U32) } (copy{ (IntOp U32) } ("__6")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__7") at{ (tuple2_sls ((IntSynType U32)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb1"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      "__5" <-{ (IntOp U32) } move{ (IntOp U32) } (("__7") at{ (tuple2_sls ((IntSynType U32)) (BoolSynType)) } "0");
+      local_dead "__6";
+      "__3" <-{ BoolOp } (move{ (IntOp U32) } ("__4")) >{ (IntOp U32) , (IntOp U32) , U8 } (move{ (IntOp U32) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb2"
+      else
+       Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U32))) : syn_type)) } EnumInit (Option_els ((IntSynType U32))) "None" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U32] [])) (StructInit (Option_None_sls ((IntSynType U32))) []);
+      Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_live{ (IntSynType U32) } "__8";
+      local_live{ (IntSynType U32) } "__9";
+      "__9" <-{ (IntOp U32) } copy{ (IntOp U32) } ("x");
+      local_live{ (IntSynType U32) } "__10";
+      "__10" <-{ (IntOp U32) } copy{ (IntOp U32) } ("rhs");
+      "__11" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U32)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U32)) BoolSynType) [("0", (copy{ (IntOp U32) } ("__9")) +{ (IntOp U32) , (IntOp U32) } (copy{ (IntOp U32) } ("__10")) : expr); ("1", (copy{ (IntOp U32) } ("__9")) +c{ (IntOp U32) , (IntOp U32) } (copy{ (IntOp U32) } ("__10")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__11") at{ (tuple2_sls ((IntSynType U32)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb4"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb4" :=
+      "__8" <-{ (IntOp U32) } move{ (IntOp U32) } (("__11") at{ (tuple2_sls ((IntSynType U32)) (BoolSynType)) } "0");
+      local_dead "__10";
+      local_dead "__9";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U32))) : syn_type)) } EnumInit (Option_els ((IntSynType U32))) "Some" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U32] [])) (StructInit (Option_Some_sls ((IntSynType U32))) [("0", move{ (IntOp U32) } ("__8") : expr)]);
+      local_dead "__8";
+      Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb5" :=
+      local_dead "__3";
+      return (move{ (use_op_alg' ((Option_els ((IntSynType U32))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u32_checked_mul_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U32) : layout);
+     ("rhs", (it_layout U32) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ ((Option_els ((IntSynType U32))) : syn_type) } "__0";
+      local_live{ BoolSynType } "__9";
+      local_live{ ((tuple2_sls ((IntSynType U32)) (BoolSynType)) : syn_type) } "__13";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U32) } "__4";
+      "__4" <-{ (IntOp U32) } copy{ (IntOp U32) } ("rhs");
+      "__3" <-{ BoolOp } (move{ (IntOp U32) } ("__4")) = { (IntOp U32) , (IntOp U32) , U8 } (i2v (0) U32);
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__4";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U32))) : syn_type)) } EnumInit (Option_els ((IntSynType U32))) "Some" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U32] [])) (StructInit (Option_Some_sls ((IntSynType U32))) [("0", i2v (0) U32 : expr)]);
+      Goto "_bb8"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__4";
+      local_live{ BoolSynType } "__5";
+      local_live{ (IntSynType U32) } "__6";
+      "__6" <-{ (IntOp U32) } copy{ (IntOp U32) } ("x");
+      local_live{ (IntSynType U32) } "__7";
+      local_live{ (IntSynType U32) } "__8";
+      "__8" <-{ (IntOp U32) } copy{ (IntOp U32) } ("rhs");
+      "__9" <-{ BoolOp } (copy{ (IntOp U32) } ("__8")) = { (IntOp U32) , (IntOp U32) , U8 } (i2v (0) U32);
+      if{ BoolOp }: (move{ BoolOp } ("__9")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb3"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb3" :=
+      "__7" <-{ (IntOp U32) } (i2v (4294967295) U32) /{ (IntOp U32) , (IntOp U32) } (move{ (IntOp U32) } ("__8"));
+      local_dead "__8";
+      "__5" <-{ BoolOp } (move{ (IntOp U32) } ("__6")) >{ (IntOp U32) , (IntOp U32) , U8 } (move{ (IntOp U32) } ("__7"));
+      if{ BoolOp }: move{ BoolOp } ("__5") then
+       Goto "_bb4"
+      else
+       Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb4" :=
+      local_dead "__7";
+      local_dead "__6";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U32))) : syn_type)) } EnumInit (Option_els ((IntSynType U32))) "None" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U32] [])) (StructInit (Option_None_sls ((IntSynType U32))) []);
+      Goto "_bb7"
+     ]>%E $
+     <[
+     "_bb5" :=
+      local_dead "__7";
+      local_dead "__6";
+      local_live{ (IntSynType U32) } "__10";
+      local_live{ (IntSynType U32) } "__11";
+      "__11" <-{ (IntOp U32) } copy{ (IntOp U32) } ("x");
+      local_live{ (IntSynType U32) } "__12";
+      "__12" <-{ (IntOp U32) } copy{ (IntOp U32) } ("rhs");
+      "__13" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U32)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U32)) BoolSynType) [("0", (copy{ (IntOp U32) } ("__11")) ×{ (IntOp U32) , (IntOp U32) } (copy{ (IntOp U32) } ("__12")) : expr); ("1", (copy{ (IntOp U32) } ("__11")) ×c{ (IntOp U32) , (IntOp U32) } (copy{ (IntOp U32) } ("__12")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__13") at{ (tuple2_sls ((IntSynType U32)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb6"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb6" :=
+      "__10" <-{ (IntOp U32) } move{ (IntOp U32) } (("__13") at{ (tuple2_sls ((IntSynType U32)) (BoolSynType)) } "0");
+      local_dead "__12";
+      local_dead "__11";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U32))) : syn_type)) } EnumInit (Option_els ((IntSynType U32))) "Some" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U32] [])) (StructInit (Option_Some_sls ((IntSynType U32))) [("0", move{ (IntOp U32) } ("__10") : expr)]);
+      local_dead "__10";
+      Goto "_bb7"
+     ]>%E $
+     <[
+     "_bb7" :=
+      local_dead "__5";
+      Goto "_bb8"
+     ]>%E $
+     <[
+     "_bb8" :=
+      local_dead "__3";
+      return (move{ (use_op_alg' ((Option_els ((IntSynType U32))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
 Program Definition u32_checked_sub_def (u32_unchecked_sub_loc: loc) : function :=
   {|
      f_args := [
@@ -747,6 +1728,204 @@ Program Definition u32_checked_sub_def (u32_unchecked_sub_loc: loc) : function :
      "_bb4" :=
       local_dead "__3";
       return (move{ (use_op_alg' ((Option_els ((IntSynType U32))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u32_unchecked_add_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U32) : layout);
+     ("rhs", (it_layout U32) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType U32) } "__0";
+      local_live{ ((tuple2_sls ((IntSynType U32)) (BoolSynType)) : syn_type) } "__5";
+      local_live{ (IntSynType U32) } "__3";
+      "__3" <-{ (IntOp U32) } copy{ (IntOp U32) } ("x");
+      local_live{ (IntSynType U32) } "__4";
+      "__4" <-{ (IntOp U32) } copy{ (IntOp U32) } ("rhs");
+      "__5" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U32)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U32)) BoolSynType) [("0", (copy{ (IntOp U32) } ("__3")) +{ (IntOp U32) , (IntOp U32) } (copy{ (IntOp U32) } ("__4")) : expr); ("1", (copy{ (IntOp U32) } ("__3")) +c{ (IntOp U32) , (IntOp U32) } (copy{ (IntOp U32) } ("__4")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__5") at{ (tuple2_sls ((IntSynType U32)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb1"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      "__0" <-{ (IntOp U32) } move{ (IntOp U32) } (("__5") at{ (tuple2_sls ((IntSynType U32)) (BoolSynType)) } "0");
+      local_dead "__4";
+      local_dead "__3";
+      return (move{ (IntOp U32) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u32_unchecked_mul_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U32) : layout);
+     ("rhs", (it_layout U32) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType U32) } "__0";
+      local_live{ ((tuple2_sls ((IntSynType U32)) (BoolSynType)) : syn_type) } "__5";
+      local_live{ (IntSynType U32) } "__3";
+      "__3" <-{ (IntOp U32) } copy{ (IntOp U32) } ("x");
+      local_live{ (IntSynType U32) } "__4";
+      "__4" <-{ (IntOp U32) } copy{ (IntOp U32) } ("rhs");
+      "__5" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U32)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U32)) BoolSynType) [("0", (copy{ (IntOp U32) } ("__3")) ×{ (IntOp U32) , (IntOp U32) } (copy{ (IntOp U32) } ("__4")) : expr); ("1", (copy{ (IntOp U32) } ("__3")) ×c{ (IntOp U32) , (IntOp U32) } (copy{ (IntOp U32) } ("__4")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__5") at{ (tuple2_sls ((IntSynType U32)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb1"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      "__0" <-{ (IntOp U32) } move{ (IntOp U32) } (("__5") at{ (tuple2_sls ((IntSynType U32)) (BoolSynType)) } "0");
+      local_dead "__4";
+      local_dead "__3";
+      return (move{ (IntOp U32) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u32_wrapping_sub_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U32) : layout);
+     ("rhs", (it_layout U32) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType U32) } "__0";
+      local_live{ ((tuple2_sls ((IntSynType U32)) (BoolSynType)) : syn_type) } "__10";
+      local_live{ ((tuple2_sls ((IntSynType U32)) (BoolSynType)) : syn_type) } "__11";
+      local_live{ ((tuple2_sls ((IntSynType U32)) (BoolSynType)) : syn_type) } "__12";
+      local_live{ ((tuple2_sls ((IntSynType U32)) (BoolSynType)) : syn_type) } "__15";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U32) } "__4";
+      "__4" <-{ (IntOp U32) } copy{ (IntOp U32) } ("x");
+      local_live{ (IntSynType U32) } "__5";
+      "__5" <-{ (IntOp U32) } copy{ (IntOp U32) } ("rhs");
+      "__3" <-{ BoolOp } (move{ (IntOp U32) } ("__4")) <{ (IntOp U32) , (IntOp U32) , U8 } (move{ (IntOp U32) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_live{ (IntSynType U32) } "__6";
+      local_live{ (IntSynType U32) } "__7";
+      local_live{ (IntSynType U32) } "__8";
+      "__8" <-{ (IntOp U32) } copy{ (IntOp U32) } ("rhs");
+      local_live{ (IntSynType U32) } "__9";
+      "__9" <-{ (IntOp U32) } copy{ (IntOp U32) } ("x");
+      "__10" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U32)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U32)) BoolSynType) [("0", (copy{ (IntOp U32) } ("__8")) -{ (IntOp U32) , (IntOp U32) } (copy{ (IntOp U32) } ("__9")) : expr); ("1", (copy{ (IntOp U32) } ("__8")) -c{ (IntOp U32) , (IntOp U32) } (copy{ (IntOp U32) } ("__9")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__10") at{ (tuple2_sls ((IntSynType U32)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb2"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb2" :=
+      "__7" <-{ (IntOp U32) } move{ (IntOp U32) } (("__10") at{ (tuple2_sls ((IntSynType U32)) (BoolSynType)) } "0");
+      local_dead "__9";
+      local_dead "__8";
+      "__11" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U32)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U32)) BoolSynType) [("0", (i2v (4294967295) U32) -{ (IntOp U32) , (IntOp U32) } (copy{ (IntOp U32) } ("__7")) : expr); ("1", (i2v (4294967295) U32) -c{ (IntOp U32) , (IntOp U32) } (copy{ (IntOp U32) } ("__7")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__11") at{ (tuple2_sls ((IntSynType U32)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb3"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb3" :=
+      "__6" <-{ (IntOp U32) } move{ (IntOp U32) } (("__11") at{ (tuple2_sls ((IntSynType U32)) (BoolSynType)) } "0");
+      local_dead "__7";
+      "__12" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U32)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U32)) BoolSynType) [("0", (copy{ (IntOp U32) } ("__6")) +{ (IntOp U32) , (IntOp U32) } (i2v (1) U32) : expr); ("1", (copy{ (IntOp U32) } ("__6")) +c{ (IntOp U32) , (IntOp U32) } (i2v (1) U32) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__12") at{ (tuple2_sls ((IntSynType U32)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb4"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb4" :=
+      "__0" <-{ (IntOp U32) } move{ (IntOp U32) } (("__12") at{ (tuple2_sls ((IntSynType U32)) (BoolSynType)) } "0");
+      local_dead "__6";
+      Goto "_bb7"
+     ]>%E $
+     <[
+     "_bb5" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_live{ (IntSynType U32) } "__13";
+      "__13" <-{ (IntOp U32) } copy{ (IntOp U32) } ("x");
+      local_live{ (IntSynType U32) } "__14";
+      "__14" <-{ (IntOp U32) } copy{ (IntOp U32) } ("rhs");
+      "__15" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U32)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U32)) BoolSynType) [("0", (copy{ (IntOp U32) } ("__13")) -{ (IntOp U32) , (IntOp U32) } (copy{ (IntOp U32) } ("__14")) : expr); ("1", (copy{ (IntOp U32) } ("__13")) -c{ (IntOp U32) , (IntOp U32) } (copy{ (IntOp U32) } ("__14")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__15") at{ (tuple2_sls ((IntSynType U32)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb6"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb6" :=
+      "__0" <-{ (IntOp U32) } move{ (IntOp U32) } (("__15") at{ (tuple2_sls ((IntSynType U32)) (BoolSynType)) } "0");
+      local_dead "__14";
+      local_dead "__13";
+      Goto "_bb7"
+     ]>%E $
+     <[
+     "_bb7" :=
+      local_dead "__3";
+      return (move{ (IntOp U32) } ("__0"))
      ]>%E $
       ∅;
      f_init := "_bb0";
@@ -844,6 +2023,201 @@ Qed.
 
 
 
+Program Definition u64_checked_add_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U64) : layout);
+     ("rhs", (it_layout U64) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ ((Option_els ((IntSynType U64))) : syn_type) } "__0";
+      local_live{ ((tuple2_sls ((IntSynType U64)) (BoolSynType)) : syn_type) } "__7";
+      local_live{ ((tuple2_sls ((IntSynType U64)) (BoolSynType)) : syn_type) } "__11";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U64) } "__4";
+      "__4" <-{ (IntOp U64) } copy{ (IntOp U64) } ("x");
+      local_live{ (IntSynType U64) } "__5";
+      local_live{ (IntSynType U64) } "__6";
+      "__6" <-{ (IntOp U64) } copy{ (IntOp U64) } ("rhs");
+      "__7" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U64)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U64)) BoolSynType) [("0", (i2v (18446744073709551615) U64) -{ (IntOp U64) , (IntOp U64) } (copy{ (IntOp U64) } ("__6")) : expr); ("1", (i2v (18446744073709551615) U64) -c{ (IntOp U64) , (IntOp U64) } (copy{ (IntOp U64) } ("__6")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__7") at{ (tuple2_sls ((IntSynType U64)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb1"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      "__5" <-{ (IntOp U64) } move{ (IntOp U64) } (("__7") at{ (tuple2_sls ((IntSynType U64)) (BoolSynType)) } "0");
+      local_dead "__6";
+      "__3" <-{ BoolOp } (move{ (IntOp U64) } ("__4")) >{ (IntOp U64) , (IntOp U64) , U8 } (move{ (IntOp U64) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb2"
+      else
+       Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U64))) : syn_type)) } EnumInit (Option_els ((IntSynType U64))) "None" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U64] [])) (StructInit (Option_None_sls ((IntSynType U64))) []);
+      Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_live{ (IntSynType U64) } "__8";
+      local_live{ (IntSynType U64) } "__9";
+      "__9" <-{ (IntOp U64) } copy{ (IntOp U64) } ("x");
+      local_live{ (IntSynType U64) } "__10";
+      "__10" <-{ (IntOp U64) } copy{ (IntOp U64) } ("rhs");
+      "__11" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U64)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U64)) BoolSynType) [("0", (copy{ (IntOp U64) } ("__9")) +{ (IntOp U64) , (IntOp U64) } (copy{ (IntOp U64) } ("__10")) : expr); ("1", (copy{ (IntOp U64) } ("__9")) +c{ (IntOp U64) , (IntOp U64) } (copy{ (IntOp U64) } ("__10")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__11") at{ (tuple2_sls ((IntSynType U64)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb4"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb4" :=
+      "__8" <-{ (IntOp U64) } move{ (IntOp U64) } (("__11") at{ (tuple2_sls ((IntSynType U64)) (BoolSynType)) } "0");
+      local_dead "__10";
+      local_dead "__9";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U64))) : syn_type)) } EnumInit (Option_els ((IntSynType U64))) "Some" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U64] [])) (StructInit (Option_Some_sls ((IntSynType U64))) [("0", move{ (IntOp U64) } ("__8") : expr)]);
+      local_dead "__8";
+      Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb5" :=
+      local_dead "__3";
+      return (move{ (use_op_alg' ((Option_els ((IntSynType U64))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u64_checked_mul_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U64) : layout);
+     ("rhs", (it_layout U64) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ ((Option_els ((IntSynType U64))) : syn_type) } "__0";
+      local_live{ BoolSynType } "__9";
+      local_live{ ((tuple2_sls ((IntSynType U64)) (BoolSynType)) : syn_type) } "__13";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U64) } "__4";
+      "__4" <-{ (IntOp U64) } copy{ (IntOp U64) } ("rhs");
+      "__3" <-{ BoolOp } (move{ (IntOp U64) } ("__4")) = { (IntOp U64) , (IntOp U64) , U8 } (i2v (0) U64);
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__4";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U64))) : syn_type)) } EnumInit (Option_els ((IntSynType U64))) "Some" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U64] [])) (StructInit (Option_Some_sls ((IntSynType U64))) [("0", i2v (0) U64 : expr)]);
+      Goto "_bb8"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__4";
+      local_live{ BoolSynType } "__5";
+      local_live{ (IntSynType U64) } "__6";
+      "__6" <-{ (IntOp U64) } copy{ (IntOp U64) } ("x");
+      local_live{ (IntSynType U64) } "__7";
+      local_live{ (IntSynType U64) } "__8";
+      "__8" <-{ (IntOp U64) } copy{ (IntOp U64) } ("rhs");
+      "__9" <-{ BoolOp } (copy{ (IntOp U64) } ("__8")) = { (IntOp U64) , (IntOp U64) , U8 } (i2v (0) U64);
+      if{ BoolOp }: (move{ BoolOp } ("__9")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb3"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb3" :=
+      "__7" <-{ (IntOp U64) } (i2v (18446744073709551615) U64) /{ (IntOp U64) , (IntOp U64) } (move{ (IntOp U64) } ("__8"));
+      local_dead "__8";
+      "__5" <-{ BoolOp } (move{ (IntOp U64) } ("__6")) >{ (IntOp U64) , (IntOp U64) , U8 } (move{ (IntOp U64) } ("__7"));
+      if{ BoolOp }: move{ BoolOp } ("__5") then
+       Goto "_bb4"
+      else
+       Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb4" :=
+      local_dead "__7";
+      local_dead "__6";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U64))) : syn_type)) } EnumInit (Option_els ((IntSynType U64))) "None" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U64] [])) (StructInit (Option_None_sls ((IntSynType U64))) []);
+      Goto "_bb7"
+     ]>%E $
+     <[
+     "_bb5" :=
+      local_dead "__7";
+      local_dead "__6";
+      local_live{ (IntSynType U64) } "__10";
+      local_live{ (IntSynType U64) } "__11";
+      "__11" <-{ (IntOp U64) } copy{ (IntOp U64) } ("x");
+      local_live{ (IntSynType U64) } "__12";
+      "__12" <-{ (IntOp U64) } copy{ (IntOp U64) } ("rhs");
+      "__13" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U64)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U64)) BoolSynType) [("0", (copy{ (IntOp U64) } ("__11")) ×{ (IntOp U64) , (IntOp U64) } (copy{ (IntOp U64) } ("__12")) : expr); ("1", (copy{ (IntOp U64) } ("__11")) ×c{ (IntOp U64) , (IntOp U64) } (copy{ (IntOp U64) } ("__12")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__13") at{ (tuple2_sls ((IntSynType U64)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb6"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb6" :=
+      "__10" <-{ (IntOp U64) } move{ (IntOp U64) } (("__13") at{ (tuple2_sls ((IntSynType U64)) (BoolSynType)) } "0");
+      local_dead "__12";
+      local_dead "__11";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U64))) : syn_type)) } EnumInit (Option_els ((IntSynType U64))) "Some" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U64] [])) (StructInit (Option_Some_sls ((IntSynType U64))) [("0", move{ (IntOp U64) } ("__10") : expr)]);
+      local_dead "__10";
+      Goto "_bb7"
+     ]>%E $
+     <[
+     "_bb7" :=
+      local_dead "__5";
+      Goto "_bb8"
+     ]>%E $
+     <[
+     "_bb8" :=
+      local_dead "__3";
+      return (move{ (use_op_alg' ((Option_els ((IntSynType U64))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
 Program Definition u64_checked_sub_def (u64_unchecked_sub_loc: loc) : function :=
   {|
      f_args := [
@@ -898,6 +2272,204 @@ Program Definition u64_checked_sub_def (u64_unchecked_sub_loc: loc) : function :
      "_bb4" :=
       local_dead "__3";
       return (move{ (use_op_alg' ((Option_els ((IntSynType U64))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u64_unchecked_add_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U64) : layout);
+     ("rhs", (it_layout U64) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType U64) } "__0";
+      local_live{ ((tuple2_sls ((IntSynType U64)) (BoolSynType)) : syn_type) } "__5";
+      local_live{ (IntSynType U64) } "__3";
+      "__3" <-{ (IntOp U64) } copy{ (IntOp U64) } ("x");
+      local_live{ (IntSynType U64) } "__4";
+      "__4" <-{ (IntOp U64) } copy{ (IntOp U64) } ("rhs");
+      "__5" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U64)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U64)) BoolSynType) [("0", (copy{ (IntOp U64) } ("__3")) +{ (IntOp U64) , (IntOp U64) } (copy{ (IntOp U64) } ("__4")) : expr); ("1", (copy{ (IntOp U64) } ("__3")) +c{ (IntOp U64) , (IntOp U64) } (copy{ (IntOp U64) } ("__4")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__5") at{ (tuple2_sls ((IntSynType U64)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb1"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      "__0" <-{ (IntOp U64) } move{ (IntOp U64) } (("__5") at{ (tuple2_sls ((IntSynType U64)) (BoolSynType)) } "0");
+      local_dead "__4";
+      local_dead "__3";
+      return (move{ (IntOp U64) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u64_unchecked_mul_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U64) : layout);
+     ("rhs", (it_layout U64) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType U64) } "__0";
+      local_live{ ((tuple2_sls ((IntSynType U64)) (BoolSynType)) : syn_type) } "__5";
+      local_live{ (IntSynType U64) } "__3";
+      "__3" <-{ (IntOp U64) } copy{ (IntOp U64) } ("x");
+      local_live{ (IntSynType U64) } "__4";
+      "__4" <-{ (IntOp U64) } copy{ (IntOp U64) } ("rhs");
+      "__5" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U64)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U64)) BoolSynType) [("0", (copy{ (IntOp U64) } ("__3")) ×{ (IntOp U64) , (IntOp U64) } (copy{ (IntOp U64) } ("__4")) : expr); ("1", (copy{ (IntOp U64) } ("__3")) ×c{ (IntOp U64) , (IntOp U64) } (copy{ (IntOp U64) } ("__4")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__5") at{ (tuple2_sls ((IntSynType U64)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb1"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      "__0" <-{ (IntOp U64) } move{ (IntOp U64) } (("__5") at{ (tuple2_sls ((IntSynType U64)) (BoolSynType)) } "0");
+      local_dead "__4";
+      local_dead "__3";
+      return (move{ (IntOp U64) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u64_wrapping_sub_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U64) : layout);
+     ("rhs", (it_layout U64) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType U64) } "__0";
+      local_live{ ((tuple2_sls ((IntSynType U64)) (BoolSynType)) : syn_type) } "__10";
+      local_live{ ((tuple2_sls ((IntSynType U64)) (BoolSynType)) : syn_type) } "__11";
+      local_live{ ((tuple2_sls ((IntSynType U64)) (BoolSynType)) : syn_type) } "__12";
+      local_live{ ((tuple2_sls ((IntSynType U64)) (BoolSynType)) : syn_type) } "__15";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U64) } "__4";
+      "__4" <-{ (IntOp U64) } copy{ (IntOp U64) } ("x");
+      local_live{ (IntSynType U64) } "__5";
+      "__5" <-{ (IntOp U64) } copy{ (IntOp U64) } ("rhs");
+      "__3" <-{ BoolOp } (move{ (IntOp U64) } ("__4")) <{ (IntOp U64) , (IntOp U64) , U8 } (move{ (IntOp U64) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_live{ (IntSynType U64) } "__6";
+      local_live{ (IntSynType U64) } "__7";
+      local_live{ (IntSynType U64) } "__8";
+      "__8" <-{ (IntOp U64) } copy{ (IntOp U64) } ("rhs");
+      local_live{ (IntSynType U64) } "__9";
+      "__9" <-{ (IntOp U64) } copy{ (IntOp U64) } ("x");
+      "__10" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U64)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U64)) BoolSynType) [("0", (copy{ (IntOp U64) } ("__8")) -{ (IntOp U64) , (IntOp U64) } (copy{ (IntOp U64) } ("__9")) : expr); ("1", (copy{ (IntOp U64) } ("__8")) -c{ (IntOp U64) , (IntOp U64) } (copy{ (IntOp U64) } ("__9")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__10") at{ (tuple2_sls ((IntSynType U64)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb2"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb2" :=
+      "__7" <-{ (IntOp U64) } move{ (IntOp U64) } (("__10") at{ (tuple2_sls ((IntSynType U64)) (BoolSynType)) } "0");
+      local_dead "__9";
+      local_dead "__8";
+      "__11" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U64)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U64)) BoolSynType) [("0", (i2v (18446744073709551615) U64) -{ (IntOp U64) , (IntOp U64) } (copy{ (IntOp U64) } ("__7")) : expr); ("1", (i2v (18446744073709551615) U64) -c{ (IntOp U64) , (IntOp U64) } (copy{ (IntOp U64) } ("__7")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__11") at{ (tuple2_sls ((IntSynType U64)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb3"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb3" :=
+      "__6" <-{ (IntOp U64) } move{ (IntOp U64) } (("__11") at{ (tuple2_sls ((IntSynType U64)) (BoolSynType)) } "0");
+      local_dead "__7";
+      "__12" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U64)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U64)) BoolSynType) [("0", (copy{ (IntOp U64) } ("__6")) +{ (IntOp U64) , (IntOp U64) } (i2v (1) U64) : expr); ("1", (copy{ (IntOp U64) } ("__6")) +c{ (IntOp U64) , (IntOp U64) } (i2v (1) U64) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__12") at{ (tuple2_sls ((IntSynType U64)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb4"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb4" :=
+      "__0" <-{ (IntOp U64) } move{ (IntOp U64) } (("__12") at{ (tuple2_sls ((IntSynType U64)) (BoolSynType)) } "0");
+      local_dead "__6";
+      Goto "_bb7"
+     ]>%E $
+     <[
+     "_bb5" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_live{ (IntSynType U64) } "__13";
+      "__13" <-{ (IntOp U64) } copy{ (IntOp U64) } ("x");
+      local_live{ (IntSynType U64) } "__14";
+      "__14" <-{ (IntOp U64) } copy{ (IntOp U64) } ("rhs");
+      "__15" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U64)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U64)) BoolSynType) [("0", (copy{ (IntOp U64) } ("__13")) -{ (IntOp U64) , (IntOp U64) } (copy{ (IntOp U64) } ("__14")) : expr); ("1", (copy{ (IntOp U64) } ("__13")) -c{ (IntOp U64) , (IntOp U64) } (copy{ (IntOp U64) } ("__14")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__15") at{ (tuple2_sls ((IntSynType U64)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb6"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb6" :=
+      "__0" <-{ (IntOp U64) } move{ (IntOp U64) } (("__15") at{ (tuple2_sls ((IntSynType U64)) (BoolSynType)) } "0");
+      local_dead "__14";
+      local_dead "__13";
+      Goto "_bb7"
+     ]>%E $
+     <[
+     "_bb7" :=
+      local_dead "__3";
+      return (move{ (IntOp U64) } ("__0"))
      ]>%E $
       ∅;
      f_init := "_bb0";
@@ -995,6 +2567,201 @@ Qed.
 
 
 
+Program Definition u8_checked_add_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U8) : layout);
+     ("rhs", (it_layout U8) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ ((Option_els ((IntSynType U8))) : syn_type) } "__0";
+      local_live{ ((tuple2_sls ((IntSynType U8)) (BoolSynType)) : syn_type) } "__7";
+      local_live{ ((tuple2_sls ((IntSynType U8)) (BoolSynType)) : syn_type) } "__11";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U8) } "__4";
+      "__4" <-{ (IntOp U8) } copy{ (IntOp U8) } ("x");
+      local_live{ (IntSynType U8) } "__5";
+      local_live{ (IntSynType U8) } "__6";
+      "__6" <-{ (IntOp U8) } copy{ (IntOp U8) } ("rhs");
+      "__7" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U8)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U8)) BoolSynType) [("0", (i2v (255) U8) -{ (IntOp U8) , (IntOp U8) } (copy{ (IntOp U8) } ("__6")) : expr); ("1", (i2v (255) U8) -c{ (IntOp U8) , (IntOp U8) } (copy{ (IntOp U8) } ("__6")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__7") at{ (tuple2_sls ((IntSynType U8)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb1"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      "__5" <-{ (IntOp U8) } move{ (IntOp U8) } (("__7") at{ (tuple2_sls ((IntSynType U8)) (BoolSynType)) } "0");
+      local_dead "__6";
+      "__3" <-{ BoolOp } (move{ (IntOp U8) } ("__4")) >{ (IntOp U8) , (IntOp U8) , U8 } (move{ (IntOp U8) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb2"
+      else
+       Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U8))) : syn_type)) } EnumInit (Option_els ((IntSynType U8))) "None" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U8] [])) (StructInit (Option_None_sls ((IntSynType U8))) []);
+      Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_live{ (IntSynType U8) } "__8";
+      local_live{ (IntSynType U8) } "__9";
+      "__9" <-{ (IntOp U8) } copy{ (IntOp U8) } ("x");
+      local_live{ (IntSynType U8) } "__10";
+      "__10" <-{ (IntOp U8) } copy{ (IntOp U8) } ("rhs");
+      "__11" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U8)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U8)) BoolSynType) [("0", (copy{ (IntOp U8) } ("__9")) +{ (IntOp U8) , (IntOp U8) } (copy{ (IntOp U8) } ("__10")) : expr); ("1", (copy{ (IntOp U8) } ("__9")) +c{ (IntOp U8) , (IntOp U8) } (copy{ (IntOp U8) } ("__10")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__11") at{ (tuple2_sls ((IntSynType U8)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb4"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb4" :=
+      "__8" <-{ (IntOp U8) } move{ (IntOp U8) } (("__11") at{ (tuple2_sls ((IntSynType U8)) (BoolSynType)) } "0");
+      local_dead "__10";
+      local_dead "__9";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U8))) : syn_type)) } EnumInit (Option_els ((IntSynType U8))) "Some" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U8] [])) (StructInit (Option_Some_sls ((IntSynType U8))) [("0", move{ (IntOp U8) } ("__8") : expr)]);
+      local_dead "__8";
+      Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb5" :=
+      local_dead "__3";
+      return (move{ (use_op_alg' ((Option_els ((IntSynType U8))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u8_checked_mul_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U8) : layout);
+     ("rhs", (it_layout U8) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ ((Option_els ((IntSynType U8))) : syn_type) } "__0";
+      local_live{ BoolSynType } "__9";
+      local_live{ ((tuple2_sls ((IntSynType U8)) (BoolSynType)) : syn_type) } "__13";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U8) } "__4";
+      "__4" <-{ (IntOp U8) } copy{ (IntOp U8) } ("rhs");
+      "__3" <-{ BoolOp } (move{ (IntOp U8) } ("__4")) = { (IntOp U8) , (IntOp U8) , U8 } (i2v (0) U8);
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__4";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U8))) : syn_type)) } EnumInit (Option_els ((IntSynType U8))) "Some" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U8] [])) (StructInit (Option_Some_sls ((IntSynType U8))) [("0", i2v (0) U8 : expr)]);
+      Goto "_bb8"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__4";
+      local_live{ BoolSynType } "__5";
+      local_live{ (IntSynType U8) } "__6";
+      "__6" <-{ (IntOp U8) } copy{ (IntOp U8) } ("x");
+      local_live{ (IntSynType U8) } "__7";
+      local_live{ (IntSynType U8) } "__8";
+      "__8" <-{ (IntOp U8) } copy{ (IntOp U8) } ("rhs");
+      "__9" <-{ BoolOp } (copy{ (IntOp U8) } ("__8")) = { (IntOp U8) , (IntOp U8) , U8 } (i2v (0) U8);
+      if{ BoolOp }: (move{ BoolOp } ("__9")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb3"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb3" :=
+      "__7" <-{ (IntOp U8) } (i2v (255) U8) /{ (IntOp U8) , (IntOp U8) } (move{ (IntOp U8) } ("__8"));
+      local_dead "__8";
+      "__5" <-{ BoolOp } (move{ (IntOp U8) } ("__6")) >{ (IntOp U8) , (IntOp U8) , U8 } (move{ (IntOp U8) } ("__7"));
+      if{ BoolOp }: move{ BoolOp } ("__5") then
+       Goto "_bb4"
+      else
+       Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb4" :=
+      local_dead "__7";
+      local_dead "__6";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U8))) : syn_type)) } EnumInit (Option_els ((IntSynType U8))) "None" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U8] [])) (StructInit (Option_None_sls ((IntSynType U8))) []);
+      Goto "_bb7"
+     ]>%E $
+     <[
+     "_bb5" :=
+      local_dead "__7";
+      local_dead "__6";
+      local_live{ (IntSynType U8) } "__10";
+      local_live{ (IntSynType U8) } "__11";
+      "__11" <-{ (IntOp U8) } copy{ (IntOp U8) } ("x");
+      local_live{ (IntSynType U8) } "__12";
+      "__12" <-{ (IntOp U8) } copy{ (IntOp U8) } ("rhs");
+      "__13" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U8)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U8)) BoolSynType) [("0", (copy{ (IntOp U8) } ("__11")) ×{ (IntOp U8) , (IntOp U8) } (copy{ (IntOp U8) } ("__12")) : expr); ("1", (copy{ (IntOp U8) } ("__11")) ×c{ (IntOp U8) , (IntOp U8) } (copy{ (IntOp U8) } ("__12")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__13") at{ (tuple2_sls ((IntSynType U8)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb6"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb6" :=
+      "__10" <-{ (IntOp U8) } move{ (IntOp U8) } (("__13") at{ (tuple2_sls ((IntSynType U8)) (BoolSynType)) } "0");
+      local_dead "__12";
+      local_dead "__11";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType U8))) : syn_type)) } EnumInit (Option_els ((IntSynType U8))) "Some" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt U8] [])) (StructInit (Option_Some_sls ((IntSynType U8))) [("0", move{ (IntOp U8) } ("__10") : expr)]);
+      local_dead "__10";
+      Goto "_bb7"
+     ]>%E $
+     <[
+     "_bb7" :=
+      local_dead "__5";
+      Goto "_bb8"
+     ]>%E $
+     <[
+     "_bb8" :=
+      local_dead "__3";
+      return (move{ (use_op_alg' ((Option_els ((IntSynType U8))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
 Program Definition u8_checked_sub_def (u8_unchecked_sub_loc: loc) : function :=
   {|
      f_args := [
@@ -1049,6 +2816,204 @@ Program Definition u8_checked_sub_def (u8_unchecked_sub_loc: loc) : function :=
      "_bb4" :=
       local_dead "__3";
       return (move{ (use_op_alg' ((Option_els ((IntSynType U8))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u8_unchecked_add_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U8) : layout);
+     ("rhs", (it_layout U8) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType U8) } "__0";
+      local_live{ ((tuple2_sls ((IntSynType U8)) (BoolSynType)) : syn_type) } "__5";
+      local_live{ (IntSynType U8) } "__3";
+      "__3" <-{ (IntOp U8) } copy{ (IntOp U8) } ("x");
+      local_live{ (IntSynType U8) } "__4";
+      "__4" <-{ (IntOp U8) } copy{ (IntOp U8) } ("rhs");
+      "__5" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U8)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U8)) BoolSynType) [("0", (copy{ (IntOp U8) } ("__3")) +{ (IntOp U8) , (IntOp U8) } (copy{ (IntOp U8) } ("__4")) : expr); ("1", (copy{ (IntOp U8) } ("__3")) +c{ (IntOp U8) , (IntOp U8) } (copy{ (IntOp U8) } ("__4")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__5") at{ (tuple2_sls ((IntSynType U8)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb1"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      "__0" <-{ (IntOp U8) } move{ (IntOp U8) } (("__5") at{ (tuple2_sls ((IntSynType U8)) (BoolSynType)) } "0");
+      local_dead "__4";
+      local_dead "__3";
+      return (move{ (IntOp U8) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u8_unchecked_mul_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U8) : layout);
+     ("rhs", (it_layout U8) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType U8) } "__0";
+      local_live{ ((tuple2_sls ((IntSynType U8)) (BoolSynType)) : syn_type) } "__5";
+      local_live{ (IntSynType U8) } "__3";
+      "__3" <-{ (IntOp U8) } copy{ (IntOp U8) } ("x");
+      local_live{ (IntSynType U8) } "__4";
+      "__4" <-{ (IntOp U8) } copy{ (IntOp U8) } ("rhs");
+      "__5" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U8)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U8)) BoolSynType) [("0", (copy{ (IntOp U8) } ("__3")) ×{ (IntOp U8) , (IntOp U8) } (copy{ (IntOp U8) } ("__4")) : expr); ("1", (copy{ (IntOp U8) } ("__3")) ×c{ (IntOp U8) , (IntOp U8) } (copy{ (IntOp U8) } ("__4")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__5") at{ (tuple2_sls ((IntSynType U8)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb1"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      "__0" <-{ (IntOp U8) } move{ (IntOp U8) } (("__5") at{ (tuple2_sls ((IntSynType U8)) (BoolSynType)) } "0");
+      local_dead "__4";
+      local_dead "__3";
+      return (move{ (IntOp U8) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u8_wrapping_sub_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout U8) : layout);
+     ("rhs", (it_layout U8) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType U8) } "__0";
+      local_live{ ((tuple2_sls ((IntSynType U8)) (BoolSynType)) : syn_type) } "__10";
+      local_live{ ((tuple2_sls ((IntSynType U8)) (BoolSynType)) : syn_type) } "__11";
+      local_live{ ((tuple2_sls ((IntSynType U8)) (BoolSynType)) : syn_type) } "__12";
+      local_live{ ((tuple2_sls ((IntSynType U8)) (BoolSynType)) : syn_type) } "__15";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U8) } "__4";
+      "__4" <-{ (IntOp U8) } copy{ (IntOp U8) } ("x");
+      local_live{ (IntSynType U8) } "__5";
+      "__5" <-{ (IntOp U8) } copy{ (IntOp U8) } ("rhs");
+      "__3" <-{ BoolOp } (move{ (IntOp U8) } ("__4")) <{ (IntOp U8) , (IntOp U8) , U8 } (move{ (IntOp U8) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_live{ (IntSynType U8) } "__6";
+      local_live{ (IntSynType U8) } "__7";
+      local_live{ (IntSynType U8) } "__8";
+      "__8" <-{ (IntOp U8) } copy{ (IntOp U8) } ("rhs");
+      local_live{ (IntSynType U8) } "__9";
+      "__9" <-{ (IntOp U8) } copy{ (IntOp U8) } ("x");
+      "__10" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U8)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U8)) BoolSynType) [("0", (copy{ (IntOp U8) } ("__8")) -{ (IntOp U8) , (IntOp U8) } (copy{ (IntOp U8) } ("__9")) : expr); ("1", (copy{ (IntOp U8) } ("__8")) -c{ (IntOp U8) , (IntOp U8) } (copy{ (IntOp U8) } ("__9")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__10") at{ (tuple2_sls ((IntSynType U8)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb2"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb2" :=
+      "__7" <-{ (IntOp U8) } move{ (IntOp U8) } (("__10") at{ (tuple2_sls ((IntSynType U8)) (BoolSynType)) } "0");
+      local_dead "__9";
+      local_dead "__8";
+      "__11" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U8)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U8)) BoolSynType) [("0", (i2v (255) U8) -{ (IntOp U8) , (IntOp U8) } (copy{ (IntOp U8) } ("__7")) : expr); ("1", (i2v (255) U8) -c{ (IntOp U8) , (IntOp U8) } (copy{ (IntOp U8) } ("__7")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__11") at{ (tuple2_sls ((IntSynType U8)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb3"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb3" :=
+      "__6" <-{ (IntOp U8) } move{ (IntOp U8) } (("__11") at{ (tuple2_sls ((IntSynType U8)) (BoolSynType)) } "0");
+      local_dead "__7";
+      "__12" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U8)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U8)) BoolSynType) [("0", (copy{ (IntOp U8) } ("__6")) +{ (IntOp U8) , (IntOp U8) } (i2v (1) U8) : expr); ("1", (copy{ (IntOp U8) } ("__6")) +c{ (IntOp U8) , (IntOp U8) } (i2v (1) U8) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__12") at{ (tuple2_sls ((IntSynType U8)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb4"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb4" :=
+      "__0" <-{ (IntOp U8) } move{ (IntOp U8) } (("__12") at{ (tuple2_sls ((IntSynType U8)) (BoolSynType)) } "0");
+      local_dead "__6";
+      Goto "_bb7"
+     ]>%E $
+     <[
+     "_bb5" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_live{ (IntSynType U8) } "__13";
+      "__13" <-{ (IntOp U8) } copy{ (IntOp U8) } ("x");
+      local_live{ (IntSynType U8) } "__14";
+      "__14" <-{ (IntOp U8) } copy{ (IntOp U8) } ("rhs");
+      "__15" <-{ (use_op_alg' ((tuple2_sls ((IntSynType U8)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType U8)) BoolSynType) [("0", (copy{ (IntOp U8) } ("__13")) -{ (IntOp U8) , (IntOp U8) } (copy{ (IntOp U8) } ("__14")) : expr); ("1", (copy{ (IntOp U8) } ("__13")) -c{ (IntOp U8) , (IntOp U8) } (copy{ (IntOp U8) } ("__14")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__15") at{ (tuple2_sls ((IntSynType U8)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb6"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb6" :=
+      "__0" <-{ (IntOp U8) } move{ (IntOp U8) } (("__15") at{ (tuple2_sls ((IntSynType U8)) (BoolSynType)) } "0");
+      local_dead "__14";
+      local_dead "__13";
+      Goto "_bb7"
+     ]>%E $
+     <[
+     "_bb7" :=
+      local_dead "__3";
+      return (move{ (IntOp U8) } ("__0"))
      ]>%E $
       ∅;
      f_init := "_bb0";
@@ -1146,6 +3111,201 @@ Qed.
 
 
 
+Program Definition usize_checked_add_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout USize) : layout);
+     ("rhs", (it_layout USize) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ ((Option_els ((IntSynType USize))) : syn_type) } "__0";
+      local_live{ ((tuple2_sls ((IntSynType USize)) (BoolSynType)) : syn_type) } "__7";
+      local_live{ ((tuple2_sls ((IntSynType USize)) (BoolSynType)) : syn_type) } "__11";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType USize) } "__4";
+      "__4" <-{ (IntOp USize) } copy{ (IntOp USize) } ("x");
+      local_live{ (IntSynType USize) } "__5";
+      local_live{ (IntSynType USize) } "__6";
+      "__6" <-{ (IntOp USize) } copy{ (IntOp USize) } ("rhs");
+      "__7" <-{ (use_op_alg' ((tuple2_sls ((IntSynType USize)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType USize)) BoolSynType) [("0", (i2v (18446744073709551615) USize) -{ (IntOp USize) , (IntOp USize) } (copy{ (IntOp USize) } ("__6")) : expr); ("1", (i2v (18446744073709551615) USize) -c{ (IntOp USize) , (IntOp USize) } (copy{ (IntOp USize) } ("__6")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__7") at{ (tuple2_sls ((IntSynType USize)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb1"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      "__5" <-{ (IntOp USize) } move{ (IntOp USize) } (("__7") at{ (tuple2_sls ((IntSynType USize)) (BoolSynType)) } "0");
+      local_dead "__6";
+      "__3" <-{ BoolOp } (move{ (IntOp USize) } ("__4")) >{ (IntOp USize) , (IntOp USize) , U8 } (move{ (IntOp USize) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb2"
+      else
+       Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType USize))) : syn_type)) } EnumInit (Option_els ((IntSynType USize))) "None" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt USize] [])) (StructInit (Option_None_sls ((IntSynType USize))) []);
+      Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_live{ (IntSynType USize) } "__8";
+      local_live{ (IntSynType USize) } "__9";
+      "__9" <-{ (IntOp USize) } copy{ (IntOp USize) } ("x");
+      local_live{ (IntSynType USize) } "__10";
+      "__10" <-{ (IntOp USize) } copy{ (IntOp USize) } ("rhs");
+      "__11" <-{ (use_op_alg' ((tuple2_sls ((IntSynType USize)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType USize)) BoolSynType) [("0", (copy{ (IntOp USize) } ("__9")) +{ (IntOp USize) , (IntOp USize) } (copy{ (IntOp USize) } ("__10")) : expr); ("1", (copy{ (IntOp USize) } ("__9")) +c{ (IntOp USize) , (IntOp USize) } (copy{ (IntOp USize) } ("__10")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__11") at{ (tuple2_sls ((IntSynType USize)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb4"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb4" :=
+      "__8" <-{ (IntOp USize) } move{ (IntOp USize) } (("__11") at{ (tuple2_sls ((IntSynType USize)) (BoolSynType)) } "0");
+      local_dead "__10";
+      local_dead "__9";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType USize))) : syn_type)) } EnumInit (Option_els ((IntSynType USize))) "Some" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt USize] [])) (StructInit (Option_Some_sls ((IntSynType USize))) [("0", move{ (IntOp USize) } ("__8") : expr)]);
+      local_dead "__8";
+      Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb5" :=
+      local_dead "__3";
+      return (move{ (use_op_alg' ((Option_els ((IntSynType USize))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition usize_checked_mul_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout USize) : layout);
+     ("rhs", (it_layout USize) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ ((Option_els ((IntSynType USize))) : syn_type) } "__0";
+      local_live{ BoolSynType } "__9";
+      local_live{ ((tuple2_sls ((IntSynType USize)) (BoolSynType)) : syn_type) } "__13";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType USize) } "__4";
+      "__4" <-{ (IntOp USize) } copy{ (IntOp USize) } ("rhs");
+      "__3" <-{ BoolOp } (move{ (IntOp USize) } ("__4")) = { (IntOp USize) , (IntOp USize) , U8 } (i2v (0) USize);
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__4";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType USize))) : syn_type)) } EnumInit (Option_els ((IntSynType USize))) "Some" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt USize] [])) (StructInit (Option_Some_sls ((IntSynType USize))) [("0", i2v (0) USize : expr)]);
+      Goto "_bb8"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__4";
+      local_live{ BoolSynType } "__5";
+      local_live{ (IntSynType USize) } "__6";
+      "__6" <-{ (IntOp USize) } copy{ (IntOp USize) } ("x");
+      local_live{ (IntSynType USize) } "__7";
+      local_live{ (IntSynType USize) } "__8";
+      "__8" <-{ (IntOp USize) } copy{ (IntOp USize) } ("rhs");
+      "__9" <-{ BoolOp } (copy{ (IntOp USize) } ("__8")) = { (IntOp USize) , (IntOp USize) , U8 } (i2v (0) USize);
+      if{ BoolOp }: (move{ BoolOp } ("__9")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb3"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb3" :=
+      "__7" <-{ (IntOp USize) } (i2v (18446744073709551615) USize) /{ (IntOp USize) , (IntOp USize) } (move{ (IntOp USize) } ("__8"));
+      local_dead "__8";
+      "__5" <-{ BoolOp } (move{ (IntOp USize) } ("__6")) >{ (IntOp USize) , (IntOp USize) , U8 } (move{ (IntOp USize) } ("__7"));
+      if{ BoolOp }: move{ BoolOp } ("__5") then
+       Goto "_bb4"
+      else
+       Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb4" :=
+      local_dead "__7";
+      local_dead "__6";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType USize))) : syn_type)) } EnumInit (Option_els ((IntSynType USize))) "None" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt USize] [])) (StructInit (Option_None_sls ((IntSynType USize))) []);
+      Goto "_bb7"
+     ]>%E $
+     <[
+     "_bb5" :=
+      local_dead "__7";
+      local_dead "__6";
+      local_live{ (IntSynType USize) } "__10";
+      local_live{ (IntSynType USize) } "__11";
+      "__11" <-{ (IntOp USize) } copy{ (IntOp USize) } ("x");
+      local_live{ (IntSynType USize) } "__12";
+      "__12" <-{ (IntOp USize) } copy{ (IntOp USize) } ("rhs");
+      "__13" <-{ (use_op_alg' ((tuple2_sls ((IntSynType USize)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType USize)) BoolSynType) [("0", (copy{ (IntOp USize) } ("__11")) ×{ (IntOp USize) , (IntOp USize) } (copy{ (IntOp USize) } ("__12")) : expr); ("1", (copy{ (IntOp USize) } ("__11")) ×c{ (IntOp USize) , (IntOp USize) } (copy{ (IntOp USize) } ("__12")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__13") at{ (tuple2_sls ((IntSynType USize)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb6"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb6" :=
+      "__10" <-{ (IntOp USize) } move{ (IntOp USize) } (("__13") at{ (tuple2_sls ((IntSynType USize)) (BoolSynType)) } "0");
+      local_dead "__12";
+      local_dead "__11";
+      "__0" <-{ (use_op_alg' ((Option_els ((IntSynType USize))) : syn_type)) } EnumInit (Option_els ((IntSynType USize))) "Some" (RSTEnumDef ["Option_enum"] (RSTScopeInst [] [RSTInt USize] [])) (StructInit (Option_Some_sls ((IntSynType USize))) [("0", move{ (IntOp USize) } ("__10") : expr)]);
+      local_dead "__10";
+      Goto "_bb7"
+     ]>%E $
+     <[
+     "_bb7" :=
+      local_dead "__5";
+      Goto "_bb8"
+     ]>%E $
+     <[
+     "_bb8" :=
+      local_dead "__3";
+      return (move{ (use_op_alg' ((Option_els ((IntSynType USize))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
 Program Definition usize_checked_sub_def (usize_unchecked_sub_loc: loc) : function :=
   {|
      f_args := [
@@ -1200,6 +3360,204 @@ Program Definition usize_checked_sub_def (usize_unchecked_sub_loc: loc) : functi
      "_bb4" :=
       local_dead "__3";
       return (move{ (use_op_alg' ((Option_els ((IntSynType USize))) : syn_type)) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition usize_unchecked_add_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout USize) : layout);
+     ("rhs", (it_layout USize) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType USize) } "__0";
+      local_live{ ((tuple2_sls ((IntSynType USize)) (BoolSynType)) : syn_type) } "__5";
+      local_live{ (IntSynType USize) } "__3";
+      "__3" <-{ (IntOp USize) } copy{ (IntOp USize) } ("x");
+      local_live{ (IntSynType USize) } "__4";
+      "__4" <-{ (IntOp USize) } copy{ (IntOp USize) } ("rhs");
+      "__5" <-{ (use_op_alg' ((tuple2_sls ((IntSynType USize)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType USize)) BoolSynType) [("0", (copy{ (IntOp USize) } ("__3")) +{ (IntOp USize) , (IntOp USize) } (copy{ (IntOp USize) } ("__4")) : expr); ("1", (copy{ (IntOp USize) } ("__3")) +c{ (IntOp USize) , (IntOp USize) } (copy{ (IntOp USize) } ("__4")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__5") at{ (tuple2_sls ((IntSynType USize)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb1"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      "__0" <-{ (IntOp USize) } move{ (IntOp USize) } (("__5") at{ (tuple2_sls ((IntSynType USize)) (BoolSynType)) } "0");
+      local_dead "__4";
+      local_dead "__3";
+      return (move{ (IntOp USize) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition usize_unchecked_mul_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout USize) : layout);
+     ("rhs", (it_layout USize) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType USize) } "__0";
+      local_live{ ((tuple2_sls ((IntSynType USize)) (BoolSynType)) : syn_type) } "__5";
+      local_live{ (IntSynType USize) } "__3";
+      "__3" <-{ (IntOp USize) } copy{ (IntOp USize) } ("x");
+      local_live{ (IntSynType USize) } "__4";
+      "__4" <-{ (IntOp USize) } copy{ (IntOp USize) } ("rhs");
+      "__5" <-{ (use_op_alg' ((tuple2_sls ((IntSynType USize)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType USize)) BoolSynType) [("0", (copy{ (IntOp USize) } ("__3")) ×{ (IntOp USize) , (IntOp USize) } (copy{ (IntOp USize) } ("__4")) : expr); ("1", (copy{ (IntOp USize) } ("__3")) ×c{ (IntOp USize) , (IntOp USize) } (copy{ (IntOp USize) } ("__4")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__5") at{ (tuple2_sls ((IntSynType USize)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb1"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb1" :=
+      "__0" <-{ (IntOp USize) } move{ (IntOp USize) } (("__5") at{ (tuple2_sls ((IntSynType USize)) (BoolSynType)) } "0");
+      local_dead "__4";
+      local_dead "__3";
+      return (move{ (IntOp USize) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition usize_wrapping_sub_def (panic_shim_loc: loc) : function :=
+  {|
+     f_args := [
+      ("x", (it_layout USize) : layout);
+     ("rhs", (it_layout USize) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType USize) } "__0";
+      local_live{ ((tuple2_sls ((IntSynType USize)) (BoolSynType)) : syn_type) } "__10";
+      local_live{ ((tuple2_sls ((IntSynType USize)) (BoolSynType)) : syn_type) } "__11";
+      local_live{ ((tuple2_sls ((IntSynType USize)) (BoolSynType)) : syn_type) } "__12";
+      local_live{ ((tuple2_sls ((IntSynType USize)) (BoolSynType)) : syn_type) } "__15";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType USize) } "__4";
+      "__4" <-{ (IntOp USize) } copy{ (IntOp USize) } ("x");
+      local_live{ (IntSynType USize) } "__5";
+      "__5" <-{ (IntOp USize) } copy{ (IntOp USize) } ("rhs");
+      "__3" <-{ BoolOp } (move{ (IntOp USize) } ("__4")) <{ (IntOp USize) , (IntOp USize) , U8 } (move{ (IntOp USize) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb5"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_live{ (IntSynType USize) } "__6";
+      local_live{ (IntSynType USize) } "__7";
+      local_live{ (IntSynType USize) } "__8";
+      "__8" <-{ (IntOp USize) } copy{ (IntOp USize) } ("rhs");
+      local_live{ (IntSynType USize) } "__9";
+      "__9" <-{ (IntOp USize) } copy{ (IntOp USize) } ("x");
+      "__10" <-{ (use_op_alg' ((tuple2_sls ((IntSynType USize)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType USize)) BoolSynType) [("0", (copy{ (IntOp USize) } ("__8")) -{ (IntOp USize) , (IntOp USize) } (copy{ (IntOp USize) } ("__9")) : expr); ("1", (copy{ (IntOp USize) } ("__8")) -c{ (IntOp USize) , (IntOp USize) } (copy{ (IntOp USize) } ("__9")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__10") at{ (tuple2_sls ((IntSynType USize)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb2"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb2" :=
+      "__7" <-{ (IntOp USize) } move{ (IntOp USize) } (("__10") at{ (tuple2_sls ((IntSynType USize)) (BoolSynType)) } "0");
+      local_dead "__9";
+      local_dead "__8";
+      "__11" <-{ (use_op_alg' ((tuple2_sls ((IntSynType USize)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType USize)) BoolSynType) [("0", (i2v (18446744073709551615) USize) -{ (IntOp USize) , (IntOp USize) } (copy{ (IntOp USize) } ("__7")) : expr); ("1", (i2v (18446744073709551615) USize) -c{ (IntOp USize) , (IntOp USize) } (copy{ (IntOp USize) } ("__7")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__11") at{ (tuple2_sls ((IntSynType USize)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb3"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb3" :=
+      "__6" <-{ (IntOp USize) } move{ (IntOp USize) } (("__11") at{ (tuple2_sls ((IntSynType USize)) (BoolSynType)) } "0");
+      local_dead "__7";
+      "__12" <-{ (use_op_alg' ((tuple2_sls ((IntSynType USize)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType USize)) BoolSynType) [("0", (copy{ (IntOp USize) } ("__6")) +{ (IntOp USize) , (IntOp USize) } (i2v (1) USize) : expr); ("1", (copy{ (IntOp USize) } ("__6")) +c{ (IntOp USize) , (IntOp USize) } (i2v (1) USize) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__12") at{ (tuple2_sls ((IntSynType USize)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb4"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb4" :=
+      "__0" <-{ (IntOp USize) } move{ (IntOp USize) } (("__12") at{ (tuple2_sls ((IntSynType USize)) (BoolSynType)) } "0");
+      local_dead "__6";
+      Goto "_bb7"
+     ]>%E $
+     <[
+     "_bb5" :=
+      local_dead "__5";
+      local_dead "__4";
+      local_live{ (IntSynType USize) } "__13";
+      "__13" <-{ (IntOp USize) } copy{ (IntOp USize) } ("x");
+      local_live{ (IntSynType USize) } "__14";
+      "__14" <-{ (IntOp USize) } copy{ (IntOp USize) } ("rhs");
+      "__15" <-{ (use_op_alg' ((tuple2_sls ((IntSynType USize)) (BoolSynType)) : syn_type)) } StructInit (tuple2_sls ((IntSynType USize)) BoolSynType) [("0", (copy{ (IntOp USize) } ("__13")) -{ (IntOp USize) , (IntOp USize) } (copy{ (IntOp USize) } ("__14")) : expr); ("1", (copy{ (IntOp USize) } ("__13")) -c{ (IntOp USize) , (IntOp USize) } (copy{ (IntOp USize) } ("__14")) : expr)];
+      if{ BoolOp }: (move{ BoolOp } (("__15") at{ (tuple2_sls ((IntSynType USize)) (BoolSynType)) } "1")) = { BoolOp , BoolOp , U8 } (val_of_bool false) then
+       Goto "_bb6"
+      else
+       CallS panic_shim_loc [] [] [@{expr} ] None
+       ( StuckS)
+       ( annot{ 1 }: UnwindFreeAnnot; (* unwind condition is False *)
+        Unwind)
+     ]>%E $
+     <[
+     "_bb6" :=
+      "__0" <-{ (IntOp USize) } move{ (IntOp USize) } (("__15") at{ (tuple2_sls ((IntSynType USize)) (BoolSynType)) } "0");
+      local_dead "__14";
+      local_dead "__13";
+      Goto "_bb7"
+     ]>%E $
+     <[
+     "_bb7" :=
+      local_dead "__3";
+      return (move{ (IntOp USize) } ("__0"))
      ]>%E $
       ∅;
      f_init := "_bb0";

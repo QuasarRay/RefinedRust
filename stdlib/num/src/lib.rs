@@ -178,3 +178,112 @@ u_checked_sub_impl!(u32);
 u_checked_sub_impl!(u64);
 u_checked_sub_impl!(u128);
 u_checked_sub_impl!(usize);
+
+macro_rules! u_checked_add_impl {
+    ($t:ty, $spec:tt) => {
+        paste! {
+            #[rr::export_as(#method core::num::$t::checked_add)]
+            #[rr::returns($spec)]
+            pub fn [<$t _checked_add>](x: $t, rhs: $t) -> Option<$t> {
+                // TODO(verification): Replace upstream add_with_overflow/unchecked_add with
+                // an explicit bound check and ordinary addition, avoiding new intrinsics.
+                if x > <$t>::MAX - rhs {
+                    None
+                } else {
+                    Some(x + rhs)
+                }
+            }
+        }
+    }
+}
+
+u_checked_add_impl!(u8, "if bool_decide (x + rhs ≤ MaxInt u8) then Some (x + rhs)%Z else None");
+u_checked_add_impl!(u16, "if bool_decide (x + rhs ≤ MaxInt u16) then Some (x + rhs)%Z else None");
+u_checked_add_impl!(u32, "if bool_decide (x + rhs ≤ MaxInt u32) then Some (x + rhs)%Z else None");
+u_checked_add_impl!(u64, "if bool_decide (x + rhs ≤ MaxInt u64) then Some (x + rhs)%Z else None");
+u_checked_add_impl!(u128, "if bool_decide (x + rhs ≤ MaxInt u128) then Some (x + rhs)%Z else None");
+u_checked_add_impl!(usize, "if bool_decide (x + rhs ≤ MaxInt usize) then Some (x + rhs)%Z else None");
+
+macro_rules! u_checked_mul_impl {
+    ($t:ty, $spec:tt, $range:tt) => {
+        paste! {
+            #[rr::export_as(#method core::num::$t::checked_mul)]
+            #[rr::returns($spec)]
+            pub fn [<$t _checked_mul>](x: $t, rhs: $t) -> Option<$t> {
+                // TODO(verification): Replace upstream mul_with_overflow/unchecked_mul with
+                // a division-based bound check and ordinary multiplication.
+                if rhs == 0 {
+                    Some(0)
+                } else if x > <$t>::MAX / rhs {
+                    None
+                } else {
+                    Some(x * rhs)
+                }
+            }
+
+            #[rr::export_as(#method core::num::$t::unchecked_mul)]
+            #[rr::requires("Hproduct_in_range": $range)]
+            #[rr::returns("(x * rhs)%Z")]
+            pub unsafe fn [<$t _unchecked_mul>](x: $t, rhs: $t) -> $t {
+                // TODO(verification): Use ordinary multiplication under the caller's
+                // no-overflow precondition rather than the upstream unchecked intrinsic.
+                x * rhs
+            }
+        }
+    }
+}
+
+u_checked_mul_impl!(u8, "if bool_decide (x * rhs ≤ MaxInt u8) then Some (x * rhs)%Z else None", "x * rhs ∈ u8");
+u_checked_mul_impl!(u16, "if bool_decide (x * rhs ≤ MaxInt u16) then Some (x * rhs)%Z else None", "x * rhs ∈ u16");
+u_checked_mul_impl!(u32, "if bool_decide (x * rhs ≤ MaxInt u32) then Some (x * rhs)%Z else None", "x * rhs ∈ u32");
+u_checked_mul_impl!(u64, "if bool_decide (x * rhs ≤ MaxInt u64) then Some (x * rhs)%Z else None", "x * rhs ∈ u64");
+u_checked_mul_impl!(u128, "if bool_decide (x * rhs ≤ MaxInt u128) then Some (x * rhs)%Z else None", "x * rhs ∈ u128");
+u_checked_mul_impl!(usize, "if bool_decide (x * rhs ≤ MaxInt usize) then Some (x * rhs)%Z else None", "x * rhs ∈ usize");
+
+macro_rules! u_unchecked_add_impl {
+    ($t:ty, $range:tt) => {
+        paste! {
+            #[rr::export_as(#method core::num::$t::unchecked_add)]
+            #[rr::requires("Hsum_in_range": $range)]
+            #[rr::returns("(x + rhs)%Z")]
+            pub unsafe fn [<$t _unchecked_add>](x: $t, rhs: $t) -> $t {
+                // TODO(verification): Use ordinary addition under the caller's
+                // no-overflow precondition rather than the upstream unchecked intrinsic.
+                x + rhs
+            }
+        }
+    }
+}
+
+u_unchecked_add_impl!(u8, "x + rhs ∈ u8");
+u_unchecked_add_impl!(u16, "x + rhs ∈ u16");
+u_unchecked_add_impl!(u32, "x + rhs ∈ u32");
+u_unchecked_add_impl!(u64, "x + rhs ∈ u64");
+u_unchecked_add_impl!(u128, "x + rhs ∈ u128");
+u_unchecked_add_impl!(usize, "x + rhs ∈ usize");
+
+macro_rules! u_wrapping_sub_impl {
+    ($t:ty, $spec:tt) => {
+        paste! {
+            #[rr::export_as(#method core::num::$t::wrapping_sub)]
+            #[rr::returns($spec)]
+            pub fn [<$t _wrapping_sub>](x: $t, rhs: $t) -> $t {
+                // TODO(verification): Replace the upstream wrapping intrinsic with
+                // range-checked arithmetic; the underflow branch adds the modulus
+                // without representing MAX + 1 in the Rust integer type.
+                if x < rhs {
+                    (<$t>::MAX - (rhs - x)) + 1
+                } else {
+                    x - rhs
+                }
+            }
+        }
+    }
+}
+
+u_wrapping_sub_impl!(u8, "((x - rhs) `mod` (MaxInt u8 + 1))%Z");
+u_wrapping_sub_impl!(u16, "((x - rhs) `mod` (MaxInt u16 + 1))%Z");
+u_wrapping_sub_impl!(u32, "((x - rhs) `mod` (MaxInt u32 + 1))%Z");
+u_wrapping_sub_impl!(u64, "((x - rhs) `mod` (MaxInt u64 + 1))%Z");
+u_wrapping_sub_impl!(u128, "((x - rhs) `mod` (MaxInt u128 + 1))%Z");
+u_wrapping_sub_impl!(usize, "((x - rhs) `mod` (MaxInt usize + 1))%Z");
