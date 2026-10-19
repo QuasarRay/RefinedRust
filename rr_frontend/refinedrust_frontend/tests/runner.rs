@@ -247,7 +247,8 @@ mod tests {
         build_refinedrust();
         build_subproject("./tests/drop_realization_lifetimes/");
 
-        for name in ["drop_box", "drop_option", "drop_tuple", "drop_glue_Wrapper", "drop_glue_TupleWrapper"] {
+        for name in ["drop_owned", "drop_maybe", "drop_tuple", "drop_glue_Wrapper", "drop_glue_TupleWrapper"]
+        {
             let template = fs::read_to_string(
                 output
                     .path()

@@ -1,2 +1,1 @@
-lib_load_paths = ["../../../../stdlib/"]
 generate_linking_requirements = true
