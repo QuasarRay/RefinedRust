@@ -21,9 +21,15 @@ pub enum TryReserveErrorKind {
     #[rr::pattern("ReserveCapacityOverflow")]
     #[rr::refinement("*[]")]
     CapacityOverflow,
-    #[rr::pattern("ReserveAllocError" $ "layout", "extra")]
-    #[rr::refinement("*[layout; extra]")]
-    AllocError { layout: Layout, non_exhaustive: () },
+    #[rr::pattern("ReserveAllocError" $ "layout")]
+    #[rr::refinement("layout")]
+    #[rr::refined_by("layout" : "rust_layout")]
+    AllocError {
+        #[rr::field("#layout")]
+        layout: Layout,
+        #[rr::field("#tt")]
+        non_exhaustive: (),
+    },
 }
 
 #[rr::export_as(alloc::collections::TryReserveError)]
@@ -36,19 +42,17 @@ impl TryReserveError {
     }
 }
 
-// TODO(verification): This local Copy implementation permits cloning the whole
-// enum instead of projecting invariant-bearing fields through shared ownership.
-// All payloads are Copy (Layout and unit). Upstream does not expose Copy for this
-// enum, so omit this implementation from the exported verification interface.
-#[rr::skip]
-impl Copy for TryReserveErrorKind {}
-
-// TODO(verification): Replace upstream's manual const Clone with an ordinary
-// whole-value copy, preserving both payload refinements.
+// TODO(verification): Use an ordinary Clone impl until const trait calls are
+// supported by the model; retain upstream's field-by-field implementation.
 impl Clone for TryReserveErrorKind {
     #[rr::default_spec]
     fn clone(&self) -> Self {
-        *self
+        match self {
+            Self::CapacityOverflow => Self::CapacityOverflow,
+            Self::AllocError { layout, non_exhaustive: () } => {
+                Self::AllocError { layout: *layout, non_exhaustive: () }
+            }
+        }
     }
 }
 
