@@ -251,8 +251,6 @@ pub(crate) fn try_resolve_trait_impl_did<'tcx>(
 
         solution
     } else {
-        let mut unification_map = HashMap::new();
-
         // this is a non-blanket impl
         let simplified_type = ty::fast_reject::simplify_type(
             tcx,
@@ -264,6 +262,9 @@ pub(crate) fn try_resolve_trait_impl_did<'tcx>(
 
         let mut solution = None;
         for did in defs {
+            // Failed candidates can bind generic parameters before their trait
+            // arguments mismatch. Those bindings must not constrain later impls.
+            let mut unification_map = HashMap::new();
             let impl_self_ty: ty::Ty<'tcx> = tcx.type_of(*did).instantiate_identity().skip_norm_wip();
             let impl_self_ty = types::normalize_in_function(*did, tcx, impl_self_ty).unwrap();
 
