@@ -574,13 +574,21 @@ pub(crate) trait MirRvalueTranslation<'def, 'tcx: 'def>:
             // result has the same syntype
             let result_st = e1_st.clone();
 
+            // Checked integer operations read each MIR operand for both tuple
+            // fields. Copy for the first read and consume a Move operand only
+            // in the overflow check; duplicating Move loses its typed value.
+            let read_operand = |expr: &code::Expr| match expr {
+                code::Expr::Move { ot, e } => code::Expr::Copy { ot: ot.clone(), e: e.clone() },
+                _ => expr.clone(),
+            };
+
             // the actual value
             let op_term = code::Expr::BinOp {
                 o: op.clone(),
                 ot1: e1_st.clone().into(),
                 ot2: e2_st.clone().into(),
-                e1: Box::new(translated_e1.clone()),
-                e2: Box::new(translated_e2.clone()),
+                e1: Box::new(read_operand(&translated_e1)),
+                e2: Box::new(read_operand(&translated_e2)),
             };
             let overflow_check = code::Expr::CheckBinOp {
                 o: op,
