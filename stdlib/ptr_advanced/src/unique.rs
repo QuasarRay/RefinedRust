@@ -28,6 +28,16 @@ impl<T: ?Sized> Clone for Unique<T> {
 #[rr::verify]
 impl<T: ?Sized> Copy for Unique<T> {}
 
+// TODO(verification): Use an ordinary impl, as for the opposite conversion,
+// until the conversion models support upstream's const trait implementations.
+#[rr::instantiate("FromFn" := "id")]
+impl<T: ?Sized> From<NonNull<T>> for Unique<T> {
+    #[rr::default_spec]
+    fn from(pointer: NonNull<T>) -> Self {
+        Self { pointer, _marker: PhantomData }
+    }
+}
+
 #[rr::export_as(core::ptr::Unique)]
 impl<T: Sized> Unique<T> {
     #[rr::exists("l")]
