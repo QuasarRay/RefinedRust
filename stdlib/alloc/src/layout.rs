@@ -59,10 +59,20 @@ impl Layout {
 
     #[rr::returns("self")]
     pub const fn pad_to_align(&self) -> Self {
-        // TODO(verification): The current Layout invariant already requires
-        // size to be a multiple of alignment, so upstream's rounding is the
-        // identity. Revisit this body and spec if that invariant is relaxed.
-        Layout { size: self.size, align: self.align }
+        let new_size = self.size_rounded_up_to_custom_alignment(self.align);
+        unsafe { Layout::from_size_alignment_unchecked(new_size, self.alignment()) }
+    }
+
+    // TODO(verification): Keep the existing aligned-size domain in the helper
+    // contract. The upstream computation is unchanged; padding on this domain
+    // is zero, including when called by pad_to_align.
+    #[rr::requires("Hsize_aligned": "Z.divide (alignment_to_align alignment) (Z.of_nat self.(layout_sz))")]
+    #[rr::returns("Z.of_nat self.(layout_sz)")]
+    const fn size_rounded_up_to_custom_alignment(&self, alignment: Alignment) -> usize {
+        unsafe {
+            let align_m1 = alignment.as_usize().unchecked_sub(1);
+            self.size.unchecked_add(align_m1) & !align_m1
+        }
     }
 
     #[rr::returns("if bool_decide (Z.of_nat self.(layout_sz) * n ≤ MaxInt ISize) then Ok (mk_rust_layout (self.(layout_sz) * Z.to_nat n) self.(layout_alignment)) else Err ( *[])")]
@@ -78,11 +88,8 @@ impl Layout {
     #[rr::requires("Hsize_aligned": "Z.divide (alignment_to_align alignment) size")]
     #[rr::returns("if bool_decide (size ≤ MaxInt ISize) then Ok (mk_rust_layout (Z.to_nat size) alignment) else Err ( *[])")]
     pub const fn from_size_alignment(size: usize, alignment: Alignment) -> Result<Self, LayoutError> {
-        // TODO(verification): The modeled Layout domain requires exact size
-        // divisibility. Under that precondition upstream's rounded-size check
-        // reduces to the isize bound; general layouts need a weaker invariant.
-        if size <= isize::MAX as usize {
-            Ok(unsafe { Self::from_size_alignment_unchecked(size, alignment) })
+        if Self::is_size_alignment_valid(size, alignment) {
+            Ok(Layout { size, align: alignment })
         } else {
             Err(LayoutError)
         }
@@ -102,15 +109,14 @@ impl Layout {
     #[rr::requires("Z.divide align size")]
     #[rr::returns("Ok (mk_rust_layout (Z.to_nat size) (alignment_of_align align))")]
     pub const fn from_size_align(size: usize, align: usize) -> Result<Self, LayoutError> {
-        Ok(unsafe {Self::from_size_align_unchecked(size, align) })
-        /*
         if Layout::is_size_align_valid(size, align) {
             // SAFETY: Layout::is_size_align_valid checks the preconditions for this call.
+            // TODO(verification): Use the modeled Alignment constructor in place
+            // of upstream's transmute from a validated power-of-two integer.
             unsafe { Ok(Layout { size, align: Alignment::new_unchecked(align) }) }
         } else {
             Err(LayoutError)
         }
-        */
     }
 
     #[rr::requires("is_power_of_two (Z.to_nat align)")]
@@ -123,36 +129,22 @@ impl Layout {
     }
 
 
-    /*
+    #[rr::requires("is_power_of_two (Z.to_nat align)")]
+    #[rr::returns("bool_decide (size ≤ MaxInt ISize + 1 - align)")]
     const fn is_size_align_valid(size: usize, align: usize) -> bool {
-        let Some(align) = Alignment::new(align) else { return false };
-        if size > Self::max_size_for_align(align) {
-            return false;
-        }
-        true
+        let Some(alignment) = Alignment::new(align) else { return false };
+        Self::is_size_alignment_valid(size, alignment)
     }
 
-    const fn max_size_for_align(align: Alignment) -> usize {
-        // (power-of-two implies align != 0.)
-        // Rounded up size is:
-        //   size_rounded_up = (size + align - 1) & !(align - 1);
-        //
-        // We know from above that align != 0. If adding (align - 1)
-        // does not overflow, then rounding up will be fine.
-        //
-
-        // Conversely, &-masking with !(align - 1) will subtract off
-        // only low-order-bits. Thus if overflow occurs with the sum,
-        // the &-mask cannot subtract enough to undo that overflow.
-        //
-        // Above implies that checking for summation overflow is both
-        // necessary and sufficient.
-
-        // SAFETY: the maximum possible alignment is `isize::MAX + 1`,
-        // so the subtraction cannot overflow.
-        unsafe { unchecked_sub(isize::MAX as usize + 1, align.as_usize()) }
+    #[rr::returns("bool_decide (size ≤ MaxInt ISize + 1 - alignment_to_align alignment)")]
+    const fn is_size_alignment_valid(size: usize, alignment: Alignment) -> bool {
+        size <= Self::max_size_for_alignment(alignment)
     }
-    */
+
+    #[rr::returns("MaxInt ISize + 1 - alignment_to_align alignment")]
+    const fn max_size_for_alignment(alignment: Alignment) -> usize {
+        unsafe { (isize::MAX as usize + 1).unchecked_sub(alignment.as_usize()) }
+    }
 
     #[rr::returns("mk_rust_layout (ly_size {ly_of T}) (alignment_of_align (ly_align {ly_of T}))")]
     pub const fn new<T>() -> Self {
