@@ -83,7 +83,7 @@ Proof.
   1-8: sidecond_hammer.
   Unshelve.
   + by rewrite Hcap.
-  + destruct Herror as (layout & extra & Herr & Hlayout & Hextra & Hpositive & Helem_nonzero).
+   + destruct Herror as (layout & Herr & Hlayout & Hpositive & Helem_nonzero).
     unfold raw_vec_effective_capacity in Heffective.
     rewrite decide_False in Heffective; done.
 Qed.

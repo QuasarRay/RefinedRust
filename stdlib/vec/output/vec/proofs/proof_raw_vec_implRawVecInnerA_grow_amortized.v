@@ -85,13 +85,13 @@ Proof.
     pose proof (raw_vec_min_non_zero_cap_positive (layout_sz elem_layout)) as Hmin_positive.
     rename select (layout_sz elem_layout ≠ 0%nat) into Helem_nonzero.
     match goal with
-    | H : match x'2 with | ReserveCapacityOverflow => _ | ReserveAllocError _ _ => _ end |- _ =>
+    | H : match x'2 with | ReserveCapacityOverflow => _ | ReserveAllocError _ => _ end |- _ =>
         rename H into Herror
     end.
      clear -Herror Hmin_bound Hmin_positive Helem_nonzero.
      destruct x'2; simpl in *. 
      + right; right; exact Herror.
-     + destruct Herror as (Hlayout & Hextra & Hsize).
+     + destruct Herror as (Hlayout & Hsize).
        repeat split; try assumption; nia.
 Qed.
 End proof.

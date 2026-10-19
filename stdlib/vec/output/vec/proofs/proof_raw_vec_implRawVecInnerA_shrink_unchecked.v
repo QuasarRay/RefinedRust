@@ -67,6 +67,6 @@ Proof.
     rewrite raw_vec_alignment_roundtrip in Hnewalign. exact Hnewalign.
   - rewrite raw_vec_alignment_roundtrip. reflexivity.
   - rewrite raw_vec_alignment_roundtrip.
-    eexists _, _. repeat split; try reflexivity; lia.
+     eexists _. repeat split; try reflexivity; lia.
 Qed.
 End proof.

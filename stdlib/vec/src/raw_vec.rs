@@ -127,7 +127,7 @@ impl<T, A: Allocator> RawVec<T, A> {
     #[rr::exists("res" : "result (loc * nat * list (option {xt_of T}))%type reserve_error")]
     #[rr::returns("res")]
     #[rr::ensures("match res with | inl (l, cap, els) => cap = raw_vec_effective_capacity (size_of_st {st_of T}) (Z.to_nat capacity) ∧ els = replicate cap None | inr _ => True end")]
-    #[rr::ensures("match res with | inl _ => True | inr ReserveCapacityOverflow => (MaxInt ISize < Z.of_nat (size_of_st {st_of T}) * capacity)%Z | inr (ReserveAllocError layout extra) => layout = #(mk_rust_layout (size_of_st {st_of T} * Z.to_nat capacity) (alignment_of_align (ly_align {ly_of T}))) ∧ extra = #tt ∧ (0 < Z.of_nat (size_of_st {st_of T}) * capacity ≤ MaxInt ISize)%Z end")]
+    #[rr::ensures("match res with | inl _ => True | inr ReserveCapacityOverflow => (MaxInt ISize < Z.of_nat (size_of_st {st_of T}) * capacity)%Z | inr (ReserveAllocError layout) => layout = mk_rust_layout (size_of_st {st_of T} * Z.to_nat capacity) (alignment_of_align (ly_align {ly_of T})) ∧ (0 < Z.of_nat (size_of_st {st_of T}) * capacity ≤ MaxInt ISize)%Z end")]
     pub(crate) fn try_with_capacity_in(capacity: usize, alloc: A) -> Result<Self, TryReserveError> {
         // TODO(verification): Use modeled Layout::new instead of generic T::LAYOUT.
         match RawVecInner::try_with_capacity_in(capacity, alloc, Layout::new::<T>()) {
@@ -228,7 +228,7 @@ impl<T, A: Allocator> RawVec<T, A> {
     #[rr::returns("res")]
     #[rr::observe("self.ghost": "match res with | Ok _ => (l, cap, RT_xrt (listRT (place_rfnRT (optionRT (place_rfnRT {rt_of T})))) (self.cur.2 ++ replicate (cap - self.cur.1.2) None)) | Err _ => (self.cur.1.1, self.cur.1.2, RT_xrt (listRT (place_rfnRT (optionRT (place_rfnRT {rt_of T})))) self.cur.2) end")]
     #[rr::ensures("if_Ok res (λ _, (self.cur.1.2 ≤ cap)%nat ∧ len + additional ≤ cap ∧ cap = (if decide (len + additional ≤ self.cur.1.2) then self.cur.1.2 else Z.to_nat (raw_vec_amortized_capacity (size_of_st {st_of T}) self.cur.1.2 (len + additional))))")]
-    #[rr::ensures("if_Err res (λ err, match err with | ReserveCapacityOverflow => (MaxInt USize < len + additional ∨ MaxInt ISize < Z.of_nat (size_of_st {st_of T}) * raw_vec_amortized_capacity (size_of_st {st_of T}) self.cur.1.2 (len + additional))%Z | ReserveAllocError layout extra => layout = #(mk_rust_layout (size_of_st {st_of T} * Z.to_nat (raw_vec_amortized_capacity (size_of_st {st_of T}) self.cur.1.2 (len + additional))) (alignment_of_align (ly_align {ly_of T}))) ∧ extra = #tt ∧ (0 < Z.of_nat (size_of_st {st_of T}) * raw_vec_amortized_capacity (size_of_st {st_of T}) self.cur.1.2 (len + additional) ≤ MaxInt ISize)%Z end)")]
+    #[rr::ensures("if_Err res (λ err, match err with | ReserveCapacityOverflow => (MaxInt USize < len + additional ∨ MaxInt ISize < Z.of_nat (size_of_st {st_of T}) * raw_vec_amortized_capacity (size_of_st {st_of T}) self.cur.1.2 (len + additional))%Z | ReserveAllocError layout => layout = mk_rust_layout (size_of_st {st_of T} * Z.to_nat (raw_vec_amortized_capacity (size_of_st {st_of T}) self.cur.1.2 (len + additional))) (alignment_of_align (ly_align {ly_of T})) ∧ (0 < Z.of_nat (size_of_st {st_of T}) * raw_vec_amortized_capacity (size_of_st {st_of T}) self.cur.1.2 (len + additional) ≤ MaxInt ISize)%Z end)")]
     pub(crate) fn try_reserve(&mut self, len: usize, additional: usize) -> Result<(), TryReserveError> {
         // TODO(verification): Use the modeled constructor instead of the
         // unsupported generic associated layout constant.
@@ -254,7 +254,7 @@ impl<T, A: Allocator> RawVec<T, A> {
     #[rr::returns("res")]
     #[rr::observe("self.ghost": "match res with | Ok _ => (l, cap, RT_xrt (listRT (place_rfnRT (optionRT (place_rfnRT {rt_of T})))) (self.cur.2 ++ replicate (cap - self.cur.1.2) None)) | Err _ => (self.cur.1.1, self.cur.1.2, RT_xrt (listRT (place_rfnRT (optionRT (place_rfnRT {rt_of T})))) self.cur.2) end")]
     #[rr::ensures("if_Ok res (λ _, (self.cur.1.2 ≤ cap)%nat ∧ len + additional ≤ cap ∧ cap = (if decide (len + additional ≤ self.cur.1.2) then self.cur.1.2 else Z.to_nat (len + additional)))")]
-    #[rr::ensures("if_Err res (λ err, match err with | ReserveCapacityOverflow => (MaxInt USize < len + additional ∨ MaxInt ISize < Z.of_nat (size_of_st {st_of T}) * (len + additional))%Z | ReserveAllocError layout extra => layout = #(mk_rust_layout (size_of_st {st_of T} * Z.to_nat (len + additional)) (alignment_of_align (ly_align {ly_of T}))) ∧ extra = #tt ∧ (0 < Z.of_nat (size_of_st {st_of T}) * (len + additional) ≤ MaxInt ISize)%Z end)")]
+    #[rr::ensures("if_Err res (λ err, match err with | ReserveCapacityOverflow => (MaxInt USize < len + additional ∨ MaxInt ISize < Z.of_nat (size_of_st {st_of T}) * (len + additional))%Z | ReserveAllocError layout => layout = mk_rust_layout (size_of_st {st_of T} * Z.to_nat (len + additional)) (alignment_of_align (ly_align {ly_of T})) ∧ (0 < Z.of_nat (size_of_st {st_of T}) * (len + additional) ≤ MaxInt ISize)%Z end)")]
     pub(crate) fn try_reserve_exact(&mut self, len: usize, additional: usize) -> Result<(), TryReserveError> {
         // TODO(verification): Use Layout::new to avoid the unsupported generic
         // associated constant while retaining the same element layout.
@@ -277,7 +277,7 @@ impl<T, A: Allocator> RawVec<T, A> {
     #[rr::exists("res" : "result unit reserve_error", "l" : "loc")]
     #[rr::returns("res")]
     #[rr::observe("self.ghost": "match res with | Ok _ => (l, raw_vec_effective_capacity (size_of_st {st_of T}) (Z.to_nat cap), RT_xrt (listRT (place_rfnRT (optionRT (place_rfnRT {rt_of T})))) (take (raw_vec_effective_capacity (size_of_st {st_of T}) (Z.to_nat cap)) self.cur.2)) | Err _ => (self.cur.1.1, self.cur.1.2, RT_xrt (listRT (place_rfnRT (optionRT (place_rfnRT {rt_of T})))) self.cur.2) end")]
-    #[rr::ensures("if_Err res (λ err, err = ReserveAllocError (#(mk_rust_layout (size_of_st {st_of T} * Z.to_nat cap) (alignment_of_align (ly_align {ly_of T})))) (#tt) ∧ 0 < cap ∧ size_of_st {st_of T} ≠ 0%nat)")]
+    #[rr::ensures("if_Err res (λ err, err = ReserveAllocError (mk_rust_layout (size_of_st {st_of T} * Z.to_nat cap) (alignment_of_align (ly_align {ly_of T}))) ∧ 0 < cap ∧ size_of_st {st_of T} ≠ 0%nat)")]
     pub(crate) fn try_shrink_to_fit(&mut self, cap: usize) -> Result<(), TryReserveError> {
         // TODO(verification): Use the modeled layout constructor instead of the
         // generic associated layout constant unsupported by the frontend.
@@ -321,7 +321,7 @@ impl<A: Allocator> RawVecInner<A> {
     #[rr::returns("res")]
     #[rr::ensures(#iris "if_iOk res (λ '(l, cap, _), raw_vec_storage π ({A::FreeablePerm} alloc) l cap elem_layout v)")]
     #[rr::ensures("if_Ok res (λ '(_, cap, a), a = alloc ∧ cap = (if decide (elem_layout.(layout_sz) = 0%nat) then 0%nat else Z.to_nat capacity) ∧ (elem_layout.(layout_sz) * cap ≤ MaxInt ISize)%Z)")]
-    #[rr::ensures("if_Err res (λ err, match err with | ReserveCapacityOverflow => (MaxInt ISize < Z.of_nat elem_layout.(layout_sz) * capacity)%Z | ReserveAllocError layout extra => layout = #(mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat capacity) elem_layout.(layout_alignment)) ∧ extra = #tt ∧ (0 < Z.of_nat elem_layout.(layout_sz) * capacity ≤ MaxInt ISize)%Z end)")]
+    #[rr::ensures("if_Err res (λ err, match err with | ReserveCapacityOverflow => (MaxInt ISize < Z.of_nat elem_layout.(layout_sz) * capacity)%Z | ReserveAllocError layout => layout = mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat capacity) elem_layout.(layout_alignment) ∧ (0 < Z.of_nat elem_layout.(layout_sz) * capacity ≤ MaxInt ISize)%Z end)")]
     fn try_with_capacity_in(capacity: usize, alloc: A, elem_layout: Layout) -> Result<Self, TryReserveError> {
         Self::try_allocate_in(capacity, AllocInit::Uninitialized, alloc, elem_layout)
     }
@@ -344,7 +344,7 @@ impl<A: Allocator> RawVecInner<A> {
     #[rr::returns("res")]
     #[rr::ensures(#iris "if_iOk res (λ '(l, cap, _), raw_vec_storage π ({A::FreeablePerm} alloc) l cap elem_layout v)")]
     #[rr::ensures("if_Ok res (λ '(_, cap, a), a = alloc ∧ cap = (if decide (elem_layout.(layout_sz) = 0%nat) then 0%nat else Z.to_nat capacity) ∧ (init = true → v = replicate (elem_layout.(layout_sz) * cap) (MByte byte0)) ∧ (elem_layout.(layout_sz) * cap ≤ MaxInt ISize)%Z)")]
-    #[rr::ensures("if_Err res (λ err, match err with | ReserveCapacityOverflow => (MaxInt ISize < Z.of_nat elem_layout.(layout_sz) * capacity)%Z | ReserveAllocError layout extra => layout = #(mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat capacity) elem_layout.(layout_alignment)) ∧ extra = #tt ∧ (0 < Z.of_nat elem_layout.(layout_sz) * capacity ≤ MaxInt ISize)%Z end)")]
+    #[rr::ensures("if_Err res (λ err, match err with | ReserveCapacityOverflow => (MaxInt ISize < Z.of_nat elem_layout.(layout_sz) * capacity)%Z | ReserveAllocError layout => layout = mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat capacity) elem_layout.(layout_alignment) ∧ (0 < Z.of_nat elem_layout.(layout_sz) * capacity ≤ MaxInt ISize)%Z end)")]
     fn try_allocate_in(capacity: usize, init: AllocInit, alloc: A, elem_layout: Layout) -> Result<Self, TryReserveError> {
         let layout = match layout_array(capacity, elem_layout) {
             Ok(layout) => layout,
@@ -382,9 +382,7 @@ impl<A: Allocator> RawVecInner<A> {
     #[rr::requires("Hstored_cap" : "cap ≤ MaxInt ISize")]
     #[rr::returns("(ptr, Z.to_nat cap, alloc)")]
     unsafe fn from_nonnull_in(ptr: NonNull<u8>, cap: Cap, alloc: A) -> Self {
-        // TODO(verification): Use the already modeled equivalent constructor
-        // instead of adding the reverse From<NonNull<_>> conversion dependency.
-        Self { ptr: Unique::from_non_null(ptr), cap, alloc }
+        Self { ptr: ptr.into(), cap, alloc }
     }
 
     #[rr::returns("self.1.1")]
@@ -463,7 +461,7 @@ impl<A: Allocator> RawVecInner<A> {
     #[rr::ensures(#iris "if_iOk res (λ _, raw_vec_storage π ({A::FreeablePerm} self.cur.2) l cap elem_layout (v ++ suffix))")]
     #[rr::ensures(#iris "if_iErr res (λ _, raw_vec_storage π ({A::FreeablePerm} self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v)")]
     #[rr::ensures("if_Ok res (λ _, len + additional ≤ Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) cap) ∧ cap = (if decide (len + additional ≤ Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) self.cur.1.2)) then self.cur.1.2 else Z.to_nat (raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional))) ∧ (elem_layout.(layout_sz) * cap ≤ MaxInt ISize)%Z)")]
-    #[rr::ensures("if_Err res (λ err, match err with | ReserveCapacityOverflow => elem_layout.(layout_sz) = 0%nat ∨ (MaxInt USize < len + additional)%Z ∨ (MaxInt ISize < Z.of_nat elem_layout.(layout_sz) * raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional))%Z | ReserveAllocError layout extra => layout = #(mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat (raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional))) elem_layout.(layout_alignment)) ∧ extra = #tt ∧ (0 < Z.of_nat elem_layout.(layout_sz) * raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional) ≤ MaxInt ISize)%Z end)")]
+    #[rr::ensures("if_Err res (λ err, match err with | ReserveCapacityOverflow => elem_layout.(layout_sz) = 0%nat ∨ (MaxInt USize < len + additional)%Z ∨ (MaxInt ISize < Z.of_nat elem_layout.(layout_sz) * raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional))%Z | ReserveAllocError layout => layout = mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat (raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional))) elem_layout.(layout_alignment) ∧ (0 < Z.of_nat elem_layout.(layout_sz) * raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional) ≤ MaxInt ISize)%Z end)")]
     #[rr::ensures("if_Err res (λ _, Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) self.cur.1.2) < len + additional)")]
     unsafe fn try_reserve(&mut self, len: usize, additional: usize, elem_layout: Layout) -> Result<(), TryReserveError> {
         if self.needs_to_grow(len, additional, elem_layout) {
@@ -522,7 +520,7 @@ impl<A: Allocator> RawVecInner<A> {
     #[rr::ensures(#iris "if_iOk res (λ _, raw_vec_storage π ({A::FreeablePerm} self.cur.2) l cap elem_layout (v ++ suffix))")]
     #[rr::ensures(#iris "if_iErr res (λ _, raw_vec_storage π ({A::FreeablePerm} self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v)")]
     #[rr::ensures("if_Ok res (λ _, len + additional ≤ Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) cap) ∧ cap = (if decide (len + additional ≤ Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) self.cur.1.2)) then self.cur.1.2 else Z.to_nat (len + additional)) ∧ (elem_layout.(layout_sz) * cap ≤ MaxInt ISize)%Z)")]
-    #[rr::ensures("if_Err res (λ err, match err with | ReserveCapacityOverflow => elem_layout.(layout_sz) = 0%nat ∨ (MaxInt USize < len + additional)%Z ∨ (MaxInt ISize < Z.of_nat elem_layout.(layout_sz) * (len + additional))%Z | ReserveAllocError layout extra => layout = #(mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat (len + additional)) elem_layout.(layout_alignment)) ∧ extra = #tt ∧ (0 < Z.of_nat elem_layout.(layout_sz) * (len + additional) ≤ MaxInt ISize)%Z end)")]
+    #[rr::ensures("if_Err res (λ err, match err with | ReserveCapacityOverflow => elem_layout.(layout_sz) = 0%nat ∨ (MaxInt USize < len + additional)%Z ∨ (MaxInt ISize < Z.of_nat elem_layout.(layout_sz) * (len + additional))%Z | ReserveAllocError layout => layout = mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat (len + additional)) elem_layout.(layout_alignment) ∧ (0 < Z.of_nat elem_layout.(layout_sz) * (len + additional) ≤ MaxInt ISize)%Z end)")]
     #[rr::ensures("if_Err res (λ _, Z.of_nat (raw_vec_effective_capacity elem_layout.(layout_sz) self.cur.1.2) < len + additional)")]
     unsafe fn try_reserve_exact(&mut self, len: usize, additional: usize, elem_layout: Layout) -> Result<(), TryReserveError> {
         if self.needs_to_grow(len, additional, elem_layout) {
@@ -566,7 +564,7 @@ impl<A: Allocator> RawVecInner<A> {
     #[rr::ensures(#iris "if_iOk res (λ _, raw_vec_storage π ({A::FreeablePerm} self.cur.2) l (Z.to_nat (raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional))) elem_layout (v ++ suffix))")]
     #[rr::ensures(#iris "if_iErr res (λ _, raw_vec_storage π ({A::FreeablePerm} self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v)")]
     #[rr::ensures("if_Ok res (λ _, elem_layout.(layout_sz) ≠ 0%nat ∧ (len + additional ≤ MaxInt USize)%Z ∧ (elem_layout.(layout_sz) * Z.to_nat (raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional)) ≤ MaxInt ISize)%Z)")]
-    #[rr::ensures("if_Err res (λ err, match err with | ReserveCapacityOverflow => elem_layout.(layout_sz) = 0%nat ∨ (MaxInt USize < len + additional)%Z ∨ (MaxInt ISize < Z.of_nat elem_layout.(layout_sz) * raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional))%Z | ReserveAllocError layout extra => layout = #(mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat (raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional))) elem_layout.(layout_alignment)) ∧ extra = #tt ∧ (0 < Z.of_nat elem_layout.(layout_sz) * raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional) ≤ MaxInt ISize)%Z end)")]
+    #[rr::ensures("if_Err res (λ err, match err with | ReserveCapacityOverflow => elem_layout.(layout_sz) = 0%nat ∨ (MaxInt USize < len + additional)%Z ∨ (MaxInt ISize < Z.of_nat elem_layout.(layout_sz) * raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional))%Z | ReserveAllocError layout => layout = mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat (raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional))) elem_layout.(layout_alignment) ∧ (0 < Z.of_nat elem_layout.(layout_sz) * raw_vec_amortized_capacity elem_layout.(layout_sz) self.cur.1.2 (len + additional) ≤ MaxInt ISize)%Z end)")]
     unsafe fn grow_amortized(&mut self, len: usize, additional: usize, elem_layout: Layout) -> Result<(), TryReserveError> {
         debug_assert!(additional > 0);
         if elem_layout.size() == 0 {
@@ -591,7 +589,7 @@ impl<A: Allocator> RawVecInner<A> {
     #[rr::ensures(#iris "if_iOk res (λ _, raw_vec_storage π ({A::FreeablePerm} self.cur.2) l (Z.to_nat (len + additional)) elem_layout (v ++ suffix))")]
     #[rr::ensures(#iris "if_iErr res (λ _, raw_vec_storage π ({A::FreeablePerm} self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v)")]
     #[rr::ensures("if_Ok res (λ _, elem_layout.(layout_sz) ≠ 0%nat ∧ (len + additional ≤ MaxInt USize)%Z ∧ (elem_layout.(layout_sz) * Z.to_nat (len + additional) ≤ MaxInt ISize)%Z)")]
-    #[rr::ensures("if_Err res (λ err, match err with | ReserveCapacityOverflow => elem_layout.(layout_sz) = 0%nat ∨ (MaxInt USize < len + additional)%Z ∨ (MaxInt ISize < Z.of_nat elem_layout.(layout_sz) * (len + additional))%Z | ReserveAllocError layout extra => layout = #(mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat (len + additional)) elem_layout.(layout_alignment)) ∧ extra = #tt ∧ (0 < Z.of_nat elem_layout.(layout_sz) * (len + additional) ≤ MaxInt ISize)%Z end)")]
+    #[rr::ensures("if_Err res (λ err, match err with | ReserveCapacityOverflow => elem_layout.(layout_sz) = 0%nat ∨ (MaxInt USize < len + additional)%Z ∨ (MaxInt ISize < Z.of_nat elem_layout.(layout_sz) * (len + additional))%Z | ReserveAllocError layout => layout = mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat (len + additional)) elem_layout.(layout_alignment) ∧ (0 < Z.of_nat elem_layout.(layout_sz) * (len + additional) ≤ MaxInt ISize)%Z end)")]
     unsafe fn grow_exact(&mut self, len: usize, additional: usize, elem_layout: Layout) -> Result<(), TryReserveError> {
         if elem_layout.size() == 0 {
             return Err(CapacityOverflow.into());
@@ -619,7 +617,7 @@ impl<A: Allocator> RawVecInner<A> {
     #[rr::ensures(#iris "if_iOk res (λ l, raw_vec_storage π ({A::FreeablePerm} self.2) l (Z.to_nat cap) elem_layout (v ++ suffix))")]
     #[rr::ensures(#iris "if_iErr res (λ _, raw_vec_storage π ({A::FreeablePerm} self.2) self.1.1 self.1.2 elem_layout v)")]
     #[rr::ensures("if_Ok res (λ _, (elem_layout.(layout_sz) * Z.to_nat cap ≤ MaxInt ISize)%Z)")]
-    #[rr::ensures("if_Err res (λ err, match err with | ReserveCapacityOverflow => (MaxInt ISize < Z.of_nat elem_layout.(layout_sz) * cap)%Z | ReserveAllocError layout extra => layout = #(mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat cap) elem_layout.(layout_alignment)) ∧ extra = #tt ∧ (Z.of_nat elem_layout.(layout_sz) * cap ≤ MaxInt ISize)%Z end)")]
+    #[rr::ensures("if_Err res (λ err, match err with | ReserveCapacityOverflow => (MaxInt ISize < Z.of_nat elem_layout.(layout_sz) * cap)%Z | ReserveAllocError layout => layout = mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat cap) elem_layout.(layout_alignment) ∧ (Z.of_nat elem_layout.(layout_sz) * cap ≤ MaxInt ISize)%Z end)")]
     unsafe fn finish_grow(&self, cap: usize, elem_layout: Layout) -> Result<*mut u8, TryReserveError> {
         let new_layout = layout_array(cap, elem_layout)?;
         let memory = if let Some((ptr, old_layout)) = unsafe { self.current_memory(elem_layout) } {
@@ -633,12 +631,10 @@ impl<A: Allocator> RawVecInner<A> {
         } else {
             allocate_raw(&self.alloc, new_layout)
         };
-        // TODO(verification): Spell out map_err to avoid a closure contract for
-        // this fixed allocation-error conversion.
-        match memory {
-            Ok(ptr) => Ok(ptr),
-            Err(_) => Err(AllocError { layout: new_layout, non_exhaustive: () }.into()),
-        }
+        memory.map_err(
+            #[rr::returns("ReserveAllocError {new_layout}")]
+            |_| AllocError { layout: new_layout, non_exhaustive: () }.into(),
+        )
     }
 
     #[rr::may_unwind_if("True")]
@@ -667,7 +663,7 @@ impl<A: Allocator> RawVecInner<A> {
     #[rr::observe("self.ghost": "match res with | Ok _ => (l, (if decide (elem_layout.(layout_sz) * self.cur.1.2 = 0)%nat then self.cur.1.2 else Z.to_nat cap), $# self.cur.2) | Err _ => (self.cur.1.1, self.cur.1.2, $# self.cur.2) end")]
     #[rr::ensures(#iris "if_iOk res (λ _, raw_vec_storage π ({A::FreeablePerm} self.cur.2) l (if decide (elem_layout.(layout_sz) * self.cur.1.2 = 0)%nat then self.cur.1.2 else Z.to_nat cap) elem_layout (take (elem_layout.(layout_sz) * Z.to_nat cap) v))")]
     #[rr::ensures(#iris "if_iErr res (λ _, raw_vec_storage π ({A::FreeablePerm} self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v)")]
-    #[rr::ensures("if_Err res (λ err, ∃ layout extra, err = ReserveAllocError layout extra ∧ layout = #(mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat cap) elem_layout.(layout_alignment)) ∧ extra = #tt ∧ (0 < cap ∧ elem_layout.(layout_sz) ≠ 0%nat))")]
+    #[rr::ensures("if_Err res (λ err, ∃ layout, err = ReserveAllocError layout ∧ layout = mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat cap) elem_layout.(layout_alignment) ∧ (0 < cap ∧ elem_layout.(layout_sz) ≠ 0%nat))")]
     unsafe fn try_shrink_to_fit(&mut self, cap: usize, elem_layout: Layout) -> Result<(), TryReserveError> {
         unsafe { self.shrink(cap, elem_layout) }
     }
@@ -682,7 +678,7 @@ impl<A: Allocator> RawVecInner<A> {
     #[rr::observe("self.ghost": "match res with | Ok _ => (l, (if decide (elem_layout.(layout_sz) * self.cur.1.2 = 0)%nat then self.cur.1.2 else Z.to_nat cap), $# self.cur.2) | Err _ => (self.cur.1.1, self.cur.1.2, $# self.cur.2) end")]
     #[rr::ensures(#iris "if_iOk res (λ _, raw_vec_storage π ({A::FreeablePerm} self.cur.2) l (if decide (elem_layout.(layout_sz) * self.cur.1.2 = 0)%nat then self.cur.1.2 else Z.to_nat cap) elem_layout (take (elem_layout.(layout_sz) * Z.to_nat cap) v))")]
     #[rr::ensures(#iris "if_iErr res (λ _, raw_vec_storage π ({A::FreeablePerm} self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v)")]
-    #[rr::ensures("if_Err res (λ err, ∃ layout extra, err = ReserveAllocError layout extra ∧ layout = #(mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat cap) elem_layout.(layout_alignment)) ∧ extra = #tt ∧ (0 < cap ∧ elem_layout.(layout_sz) ≠ 0%nat))")]
+    #[rr::ensures("if_Err res (λ err, ∃ layout, err = ReserveAllocError layout ∧ layout = mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat cap) elem_layout.(layout_alignment) ∧ (0 < cap ∧ elem_layout.(layout_sz) ≠ 0%nat))")]
     unsafe fn shrink(&mut self, cap: usize, elem_layout: Layout) -> Result<(), TryReserveError> {
         // TODO(verification): Omit the custom panic message: its formatting
         // machinery contains function pointers unsupported by the frontend.
@@ -700,7 +696,7 @@ impl<A: Allocator> RawVecInner<A> {
     #[rr::observe("self.ghost": "match res with | Ok _ => (l, (if decide (elem_layout.(layout_sz) * self.cur.1.2 = 0)%nat then self.cur.1.2 else Z.to_nat cap), $# self.cur.2) | Err _ => (self.cur.1.1, self.cur.1.2, $# self.cur.2) end")]
     #[rr::ensures(#iris "if_iOk res (λ _, raw_vec_storage π ({A::FreeablePerm} self.cur.2) l (if decide (elem_layout.(layout_sz) * self.cur.1.2 = 0)%nat then self.cur.1.2 else Z.to_nat cap) elem_layout (take (elem_layout.(layout_sz) * Z.to_nat cap) v))")]
     #[rr::ensures(#iris "if_iErr res (λ _, raw_vec_storage π ({A::FreeablePerm} self.cur.2) self.cur.1.1 self.cur.1.2 elem_layout v)")]
-    #[rr::ensures("if_Err res (λ err, ∃ layout extra, err = ReserveAllocError layout extra ∧ layout = #(mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat cap) elem_layout.(layout_alignment)) ∧ extra = #tt ∧ (0 < cap ∧ elem_layout.(layout_sz) ≠ 0%nat))")]
+    #[rr::ensures("if_Err res (λ err, ∃ layout, err = ReserveAllocError layout ∧ layout = mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat cap) elem_layout.(layout_alignment) ∧ (0 < cap ∧ elem_layout.(layout_sz) ≠ 0%nat))")]
     unsafe fn shrink_unchecked(&mut self, cap: usize, elem_layout: Layout) -> Result<(), TryReserveError> {
         let Some((ptr, layout)) = (unsafe { self.current_memory(elem_layout) }) else {
             return Ok(());
@@ -718,7 +714,7 @@ impl<A: Allocator> RawVecInner<A> {
                 // with the raw-pointer wrapper result.
                 shrink_raw(&self.alloc, ptr, layout, new_layout)
                     .map_err(
-                        #[rr::returns("ReserveAllocError (#{new_layout}) (#tt)")]
+                        #[rr::returns("ReserveAllocError {new_layout}")]
                         |_| AllocError { layout: new_layout, non_exhaustive: () },
                     )?
             };
@@ -757,10 +753,8 @@ fn handle_error(e: TryReserveError) -> ! {
 #[rr::returns("if bool_decide (Z.of_nat elem_layout.(layout_sz) * cap ≤ MaxInt ISize) then Ok (mk_rust_layout (elem_layout.(layout_sz) * Z.to_nat cap) elem_layout.(layout_alignment)) else Err ReserveCapacityOverflow")]
 fn layout_array(cap: usize, elem_layout: Layout) -> Result<Layout, TryReserveError> {
     debug_assert!(elem_layout.size() == elem_layout.pad_to_align().size());
-    // TODO(verification): Spell out map_err as a match to avoid an otherwise
-    // unnecessary closure contract for this fixed error conversion.
-    match elem_layout.repeat_packed(cap) {
-        Ok(layout) => Ok(layout),
-        Err(_) => Err(CapacityOverflow.into()),
-    }
+    elem_layout.repeat_packed(cap).map_err(
+        #[rr::returns("ReserveCapacityOverflow")]
+        |_| CapacityOverflow.into(),
+    )
 }

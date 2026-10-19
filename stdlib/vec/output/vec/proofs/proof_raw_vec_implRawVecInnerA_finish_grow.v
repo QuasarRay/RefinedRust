@@ -56,8 +56,6 @@ Proof.
      end.
   all: rep 1000 liRStep.
   all: rep 1000 liRStep.
-  all: rep 1000 liRStep.
-  all: rep liRStep.
 
   all: print_remaining_goal.
   Unshelve. all: try exact ([] : val).

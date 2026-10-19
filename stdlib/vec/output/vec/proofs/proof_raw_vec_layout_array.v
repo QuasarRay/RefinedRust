@@ -21,6 +21,7 @@ Proof.
   all: print_remaining_goal.
   Unshelve. all: sidecond_solver.
   Unshelve. all: sidecond_hammer.
+  case_bool_decide; simplify_eq; eexists; done.
   Unshelve. all: print_remaining_sidecond.
 Qed.
 End proof.

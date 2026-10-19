@@ -19,6 +19,6 @@ Proof.
   Unshelve.
   1-14: sidecond_solver.
   Unshelve.
-  eexists _, _. repeat split; try reflexivity; assumption.
+  eexists _. repeat split; try reflexivity; assumption.
 Qed.
 End proof.
