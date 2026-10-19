@@ -1,6 +1,8 @@
 #![feature(register_tool)]
 #![register_tool(rr)]
 #![feature(custom_inner_attributes)]
+#![feature(core_intrinsics)]
+#![allow(internal_features)]
 #![allow(unused)]
 
 #![rr::package("refinedrust-stdlib")]
@@ -185,12 +187,10 @@ macro_rules! u_checked_add_impl {
             #[rr::export_as(#method core::num::$t::checked_add)]
             #[rr::returns($spec)]
             pub fn [<$t _checked_add>](x: $t, rhs: $t) -> Option<$t> {
-                // TODO(verification): Replace upstream add_with_overflow/unchecked_add with
-                // an explicit bound check and ordinary addition, avoiding new intrinsics.
-                if x > <$t>::MAX - rhs {
+                if core::intrinsics::add_with_overflow(x, rhs).1 {
                     None
                 } else {
-                    Some(x + rhs)
+                    Some(unsafe { core::intrinsics::unchecked_add(x, rhs) })
                 }
             }
         }
@@ -210,14 +210,11 @@ macro_rules! u_checked_mul_impl {
             #[rr::export_as(#method core::num::$t::checked_mul)]
             #[rr::returns($spec)]
             pub fn [<$t _checked_mul>](x: $t, rhs: $t) -> Option<$t> {
-                // TODO(verification): Replace upstream mul_with_overflow/unchecked_mul with
-                // a division-based bound check and ordinary multiplication.
-                if rhs == 0 {
-                    Some(0)
-                } else if x > <$t>::MAX / rhs {
+                let (value, overflow) = core::intrinsics::mul_with_overflow(x, rhs);
+                if overflow {
                     None
                 } else {
-                    Some(x * rhs)
+                    Some(value)
                 }
             }
 
@@ -225,9 +222,7 @@ macro_rules! u_checked_mul_impl {
             #[rr::requires("Hproduct_in_range": $range)]
             #[rr::returns("(x * rhs)%Z")]
             pub unsafe fn [<$t _unchecked_mul>](x: $t, rhs: $t) -> $t {
-                // TODO(verification): Use ordinary multiplication under the caller's
-                // no-overflow precondition rather than the upstream unchecked intrinsic.
-                x * rhs
+                unsafe { core::intrinsics::unchecked_mul(x, rhs) }
             }
         }
     }
@@ -247,9 +242,7 @@ macro_rules! u_unchecked_add_impl {
             #[rr::requires("Hsum_in_range": $range)]
             #[rr::returns("(x + rhs)%Z")]
             pub unsafe fn [<$t _unchecked_add>](x: $t, rhs: $t) -> $t {
-                // TODO(verification): Use ordinary addition under the caller's
-                // no-overflow precondition rather than the upstream unchecked intrinsic.
-                x + rhs
+                unsafe { core::intrinsics::unchecked_add(x, rhs) }
             }
         }
     }
@@ -268,14 +261,7 @@ macro_rules! u_wrapping_sub_impl {
             #[rr::export_as(#method core::num::$t::wrapping_sub)]
             #[rr::returns($spec)]
             pub fn [<$t _wrapping_sub>](x: $t, rhs: $t) -> $t {
-                // TODO(verification): Replace the upstream wrapping intrinsic with
-                // range-checked arithmetic; the underflow branch adds the modulus
-                // without representing MAX + 1 in the Rust integer type.
-                if x < rhs {
-                    (<$t>::MAX - (rhs - x)) + 1
-                } else {
-                    x - rhs
-                }
+                core::intrinsics::wrapping_sub(x, rhs)
             }
         }
     }

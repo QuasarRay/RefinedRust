@@ -14,11 +14,11 @@ Proof.
   assert (Hmax : MaxInt u8 = 255) by (rewrite MaxInt_eq; reflexivity).
 
   1: rep <-! <3000 liRStep.
-  1: rep <-! <3000 liRStep.
 
   all: print_remaining_goal.
   Unshelve. all: sidecond_solver.
   Unshelve. all: sidecond_hammer.
+  by rewrite /wrap_to_it /wrap_unsigned /int_modulus /= Hmax.
   Unshelve. all: print_remaining_sidecond.
 Qed.
 End proof.
