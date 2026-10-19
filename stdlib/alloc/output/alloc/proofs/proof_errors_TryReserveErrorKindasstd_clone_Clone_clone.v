@@ -11,12 +11,8 @@ Lemma errors_TryReserveErrorKindasstd_clone_Clone_clone_proof (π : thread_id) :
   errors_TryReserveErrorKindasstd_clone_Clone_clone_lemma π.
 Proof.
   errors_TryReserveErrorKindasstd_clone_Clone_clone_prelude.
-
-  1: rep <-! <3000 liRStep.
-
-  all: print_remaining_goal.
-  Unshelve. all: sidecond_solver.
-  Unshelve. all: sidecond_hammer.
-  Unshelve. all: print_remaining_sidecond.
+  rep <-! <3000 liRStep.
+  Unshelve.
+  1-5: sidecond_solver.
 Qed.
 End proof.

@@ -25,17 +25,12 @@ Proof.
   all: print_remaining_goal.
   Unshelve. all: sidecond_solver.
   Unshelve. all: sidecond_hammer.
-  - rewrite /alignment_to_align -(Nat2Z.inj_pow 2) Nat2Z.id.
-    eexists _. reflexivity.
-  - apply Z.divide_mul_l.
+   apply Z.divide_mul_l.
     rename select (layout_wf self) into Hlayout_wf.
     rewrite /layout_wf /ly_align /rust_layout_to_layout
       /layout_alignment_log2_nat /= in Hlayout_wf.
     rewrite /alignment_to_align -(Nat2Z.inj_pow 2).
     exact Hlayout_wf.
-  - rewrite bool_decide_true; last lia.
-    rewrite alignment_from_to.
-    eexists _. split; reflexivity.
   Unshelve. all: print_remaining_sidecond.
 Qed.
 End proof.

@@ -68,24 +68,35 @@ impl Layout {
     #[rr::returns("if bool_decide (Z.of_nat self.(layout_sz) * n ≤ MaxInt ISize) then Ok (mk_rust_layout (self.(layout_sz) * Z.to_nat n) self.(layout_alignment)) else Err ( *[])")]
     pub const fn repeat_packed(&self, n: usize) -> Result<Self, LayoutError> {
         if let Some(size) = self.size.checked_mul(n) {
-            // TODO(verification): Inline the size check from upstream's
-            // from_size_alignment instead of adding that constructor now.
-            // Multiplication preserves the current alignment-divisibility
-            // invariant, so only the isize size limit needs checking here.
-            if size > isize::MAX as usize {
-                Err(LayoutError)
-            } else {
-                // TODO(verification): Use the existing unchecked constructor
-                // rather than upstream's Alignment-valued constructor. The
-                // original layout and the check above establish its premises.
-                Ok(unsafe { Self::from_size_align_unchecked(size, self.align.as_usize()) })
-            }
+            Self::from_size_alignment(size, self.align)
         } else {
             Err(LayoutError)
         }
     }
 
     // TODO: for stronger spec we'd need the weaker invariant on the size...
+    #[rr::requires("Hsize_aligned": "Z.divide (alignment_to_align alignment) size")]
+    #[rr::returns("if bool_decide (size ≤ MaxInt ISize) then Ok (mk_rust_layout (Z.to_nat size) alignment) else Err ( *[])")]
+    pub const fn from_size_alignment(size: usize, alignment: Alignment) -> Result<Self, LayoutError> {
+        // TODO(verification): The modeled Layout domain requires exact size
+        // divisibility. Under that precondition upstream's rounded-size check
+        // reduces to the isize bound; general layouts need a weaker invariant.
+        if size <= isize::MAX as usize {
+            Ok(unsafe { Self::from_size_alignment_unchecked(size, alignment) })
+        } else {
+            Err(LayoutError)
+        }
+    }
+
+    #[rr::requires("Hsize_in_range": "size ∈ isize")]
+    #[rr::requires("Hsize_aligned": "Z.divide (alignment_to_align alignment) size")]
+    #[rr::returns("mk_rust_layout (Z.to_nat size) alignment")]
+    pub const unsafe fn from_size_alignment_unchecked(size: usize, alignment: Alignment) -> Self {
+        // TODO(verification): As for from_size_align_unchecked, the specification
+        // carries the unsafe preconditions rather than upstream's UB-check macro.
+        Self { size, align: alignment }
+    }
+
     #[rr::requires("is_power_of_two (Z.to_nat align)")]
     #[rr::requires("size ∈ isize")]
     #[rr::requires("Z.divide align size")]
