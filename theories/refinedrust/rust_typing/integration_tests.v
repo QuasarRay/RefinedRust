@@ -27,7 +27,25 @@ Definition bla1 `{typeGS Σ} :=
 Definition bla2 `{typeGS Σ} :=
   (fn(∀ ( *[]) : 0 | ( *[]) : [] | x : unit, (λ _, []); () :@: (uninit PtrSynType), () :@: (uninit PtrSynType) ; (λ π, True)) → ∃ y : Z, () @ (uninit PtrSynType) ; (λ π, ⌜ (4 > y)%Z⌝) | False).
 Definition bla3 `{typeGS Σ} T_st T_rt :=
-  (fn(∀ ( *[]) : 0 | ( *[ T_ty]) : [ (T_rt, T_st) ] | (x) : _, (λ _, []); x :@: T_ty, () :@: (uninit PtrSynType) ; (λ π, True)) → ∃ y : Z, () @ (uninit PtrSynType) ; (λ π, ⌜ (4 > y)%Z⌝) | False).
+  (fn(∀ ( *[]) : 0 | ( *[ T_ty]) : [ (T_rt, T_st) ] | (x) : _, (λ ϝ, typarams_elctx ϝ _ -[T_ty] ++ []); x :@: T_ty, () :@: (uninit PtrSynType) ; (λ π, True)) → ∃ y : Z, () @ (uninit PtrSynType) ; (λ π, ⌜ (4 > y)%Z⌝) | False).
+
+(** Generic binding is assumption-free; the frontend owns the lifetime policy.
+    Argument/return well-formedness and outlives conditions remain in [FP_wf]. *)
+Lemma fn_explicit_generic_elctx `{!typeGS Σ} rt st (ty : type rt) E ϝ :
+  let s := (fn(∀ ( *[]) : 0 | ( *[T_ty]) : [(rt, st)] | () : unit,
+      (λ ϝ, typarams_elctx ϝ _ -[T_ty] ++ E ϝ);
+      () :@: unit_t; (λ _, True)) → ∃ () : unit, () @ unit_t; (λ _, True) | False)
+    -[] -[ty] in
+  fp_elctx (fn_p s ()) ϝ =
+    (typarams_elctx ϝ _ -[ty] ++ E ϝ) ++
+      tyl_wf_E [mk_rtype unit_t] ++ tyl_outlives_E [mk_rtype unit_t] ϝ ++
+      ty_wf_E unit_t ++ ty_outlives_E unit_t ϝ.
+Proof. reflexivity. Qed.
+
+Lemma fn_scope_typarams_no_implicit_elctx `{!typeGS Σ} rts
+    (tys : plist type rts) (s : fn_spec) :
+  scope_add_typarams rts tys s = s.
+Proof. reflexivity. Qed.
 
 (** Testing exceptional function exits. *)
 Program Definition always_unwind : function := {|
@@ -107,7 +125,7 @@ Qed.
 
 (* Maybe this should also be specced in terms of value? *)
 Definition type_of_ptr_write `{!typeGS Σ} (T_rt : RT) (T_st : syn_type) :=
-  fn(∀ ( *[]) : 0 | ( *[T_ty]) : [(T_rt, T_st)] | (l, r) : (loc * _), (λ ϝ, []);
+  fn(∀ ( *[]) : 0 | ( *[T_ty]) : [(T_rt, T_st)] | (l, r) : (loc * _), (λ ϝ, typarams_elctx ϝ _ -[T_ty] ++ []);
       l :@: alias_ptr_t, r :@: T_ty; λ π, (l ◁ₗ[π, Owned] .@ (◁ uninit (T_ty.(ty_syn_type) MetaNone))))
     → ∃ () : unit, () @ unit_t; λ π,
         l ◁ₗ[π, Owned] (#$# r) @ ◁ T_ty | False.
@@ -186,7 +204,7 @@ Qed.
 Definition type_of_ptr_read `{!typeGS Σ} (T_rt: RT) (T_st: syn_type) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) |
       (* params....... *) (src, r) : (_ * _),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, typarams_elctx ϝ _ -[T_ty] ++ []);
       (* args......... *) src :@: alias_ptr_t;
       (* precondition. *) (λ π : thread_id, (src ◁ₗ[π, Owned] #($# r) @ ◁ T_ty)
         ∗ (⌜(Copyable T_ty)%Z⌝)) |

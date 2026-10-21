@@ -440,6 +440,13 @@ pub struct TyParamList {
 }
 
 impl TyParamList {
+    /// Explicit generic well-formedness/outlives context for a function call.
+    /// Keep the policy here rather than adding assumptions when Rocq binds types.
+    fn format_function_elctx(&self) -> String {
+        let tys = fmt_list!(&self.params, "; ", LiteralTyParam::type_term);
+        format!("λ ϝ, typarams_elctx ϝ _ -[{tys}]")
+    }
+
     #[must_use]
     const fn empty() -> Self {
         Self { params: vec![] }

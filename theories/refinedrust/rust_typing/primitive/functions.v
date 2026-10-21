@@ -567,7 +567,7 @@ Notation "'fn(∀' κs ':' n '|' tys ':' rts '|' x ':' A ',' E ';' Pa ')' '→' 
   ((fun κs tys =>
     mk_fn_spec (A : Type) (fun x =>
     FP_wf
-    (λ ϝ, typarams_elctx ϝ (fmap (A := RT * syn_type) fst rts) tys ++ E ϝ)
+    E
     (@nil _)
     Pa%I
     (λ π, (* typarams_wf (fmap (A := Type * syn_type) fst rts) (fmap (A := Type * syn_type) snd rts) tys*) True)%I
@@ -580,7 +580,7 @@ Notation "'fn(∀' κs ':' n '|' tys ':' rts '|' x ':' A ',' E ';' Pa ')' '→' 
   ((fun κs tys =>
     mk_fn_spec (A : Type) (fun x =>
     FP_wf
-    (λ ϝ, typarams_elctx ϝ (fmap (A := RT * syn_type) fst rts) tys ++ E ϝ)
+    E
     (@nil _)
     Pa%I
     (λ π, True)%I
@@ -593,7 +593,7 @@ Notation "'fn(∀' κs ':' n '|' tys ':' rts '|' x ':' A ',' E ';' x1 ',' .. ','
   ((fun κs tys =>
     (mk_fn_spec (A : Type) ((fun x =>
     FP_wf
-    (λ ϝ, typarams_elctx ϝ (fmap (A := RT * syn_type) fst rts) tys ++ E ϝ)
+    E
     (@cons (@sigT RT _) x1%F .. (@cons (@sigT RT _) xn%F (@nil (@sigT RT _))) ..)
     Pa%I
     (λ π, (* typarams_wf (fmap (A := Type * syn_type) fst rts) (fmap (A := Type * syn_type) snd rts) tys *) True)%I
@@ -606,7 +606,7 @@ Notation "'fn(∀' κs ':' n '|' tys ':' rts '|' x ':' A ',' E ';' x1 ',' .. ','
   ((fun κs tys =>
     (mk_fn_spec (A : Type) ((fun x =>
     FP_wf
-    (λ ϝ, typarams_elctx ϝ (fmap (A := RT * syn_type) fst rts) tys ++ E ϝ)
+    E
     (@cons (@sigT RT _) x1%F .. (@cons (@sigT RT _) xn%F (@nil (@sigT RT _))) ..)
     Pa%I
     (λ π, True)%I
@@ -620,7 +620,7 @@ Notation "'fn(∀' κs ':' n '|' tys ':' rts '|' x ':' A ',' E ';' Pa '|' Pb ')'
   ((fun κs tys =>
     mk_fn_spec (A : Type) ((fun x =>
     FP_wf
-    (λ ϝ, typarams_elctx ϝ (fmap (A := RT * syn_type) fst rts) tys ++ E ϝ)
+    E
     (@nil _)
     Pa%I
     (λ π, (*typarams_wf (fmap (A := Type * syn_type) fst rts) (fmap (A := Type * syn_type) snd rts) tys ∗ *) Pb%I π)%I
@@ -633,7 +633,7 @@ Notation "'fn(∀' κs ':' n '|' tys ':' rts '|' x ':' A ',' E ';' Pa '|' Pb ')'
   ((fun κs tys =>
     mk_fn_spec (A : Type) ((fun x =>
     FP_wf
-    (λ ϝ, typarams_elctx ϝ (fmap (A := RT * syn_type) fst rts) tys ++ E ϝ)
+    E
     (@nil _)
     Pa%I
     (λ π, Pb%I π)%I
@@ -645,7 +645,7 @@ Notation "'fn(∀' κs ':' n '|' tys ':' rts '|' x ':' A ',' E ';' x1 ',' .. ','
   ((fun κs tys =>
     mk_fn_spec (A : Type) ((fun x =>
     FP_wf
-    (λ ϝ, typarams_elctx ϝ (fmap (A := RT * syn_type) fst rts) tys ++ E ϝ)
+    E
     (@cons (@sigT RT _) x1%F .. (@cons (@sigT RT _) xn%F (@nil (@sigT RT _))) ..)
     Pa%I
     (λ π, (* typarams_wf (fmap (A := Type * syn_type) fst rts) (fmap (A := Type * syn_type) snd rts) tys ∗ *) Pb%I π)%I
@@ -658,7 +658,7 @@ Notation "'fn(∀' κs ':' n '|' tys ':' rts '|' x ':' A ',' E ';' x1 ',' .. ','
   ((fun κs tys =>
     mk_fn_spec (A : Type) ((fun x =>
     FP_wf
-    (λ ϝ, typarams_elctx ϝ (fmap (A := RT * syn_type) fst rts) tys ++ E ϝ)
+    E
     (@cons (@sigT RT _) x1%F .. (@cons (@sigT RT _) xn%F (@nil (@sigT RT _))) ..)
     Pa%I
     (λ π, Pb%I π)%I
@@ -697,11 +697,11 @@ Definition fn_spec_add_typaram_conditions `{!typeGS Σ} {lfts : nat} {rts : list
     F κs tys.
  *)
 
-(** Add the elctx. (We cannot add the typaram conditions, because they require the syntype parameter) *)
+(** Binding type parameters does not add lifetime assumptions. Call contracts
+    explicitly specify their generic lifetime context. *)
 Global Instance fn_spec_scope_bindable `{!typeGS Σ} :
   ScopeBindable fn_spec := {|
-    scope_add_typarams rts tys s :=
-      fn_spec_add_elctx (λ ϝ, typarams_elctx ϝ rts tys) s;
+    scope_add_typarams rts tys s := s;
     scope_add_elctx cstr s :=
       fn_spec_add_elctx cstr s;
 |}.

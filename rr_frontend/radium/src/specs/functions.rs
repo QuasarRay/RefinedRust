@@ -290,7 +290,8 @@ impl<'def> LiteralSpec<'def> {
             push_str_list!(out, &self.extra_elctx, " ++ ");
         }
 
-        out
+        let generics = scope.get_all_ty_params_with_assocs().format_function_elctx();
+        format!("λ ϝ, ({generics}) ϝ ++ ({out}) ϝ")
     }
 
     fn format_args(&self) -> String {
@@ -537,7 +538,24 @@ impl<'def> LiteralSpecBuilder<'def> {
 #[cfg(test)]
 mod tests {
     use super::LiteralSpecBuilder;
-    use crate::coq;
+    use crate::{
+        coq,
+        specs::{GenericScope, LiteralTyParam, traits},
+    };
+
+    #[test]
+    fn function_elctx_explicitly_includes_impl_and_method_parameters() {
+        let mut scope: GenericScope<'_, traits::LiteralSpecUseRef<'_>> = GenericScope::empty();
+        scope.add_ty_param(LiteralTyParam::new("ImplT"));
+        scope.make_direct_params_surrounding();
+        scope.add_ty_param(LiteralTyParam::new("MethodT"));
+        let mut builder = LiteralSpecBuilder::new();
+        builder.add_literal_lifetime_constraint("ty_outlives_E Extra_ty ulft_1".to_owned());
+        let spec = builder.into_function_spec();
+        let context = spec.format_elctx(&scope);
+        assert!(context.contains("typarams_elctx ϝ _ -[ImplT_ty; MethodT_ty]"));
+        assert!(context.contains("ty_outlives_E Extra_ty ulft_1"));
+    }
 
     #[test]
     fn unwind_post_defaults_to_false() {
