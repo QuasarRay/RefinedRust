@@ -2178,10 +2178,8 @@ impl ImplSpec<'_> {
         scope.format(&mut ty_term, false, &[]).unwrap();
         ty_term.push_str(&format!(" {own_spec}) ("));
         scope.format(&mut ty_term, false, &[]).unwrap();
-        let surrounding_tys = fmt_list!(&scope.get_all_ty_params_with_assocs().params, "; ", |x| {
-            Type::LiteralParam(x.to_owned()).to_string()
-        });
-        ty_term.push_str(&format!(" scope_add_typarams _ -[{surrounding_tys}] ({base_spec})))"));
+        let generic_elctx = scope.get_all_ty_params_with_assocs().format_function_elctx();
+        ty_term.push_str(&format!(" scope_add_elctx ({generic_elctx}) ({base_spec})))"));
 
         let body = coq::term::Term::Literal(ty_term);
 
@@ -2375,13 +2373,11 @@ impl<'def> InstantiatedFunctionSpec<'def> {
 
         // Bind the impl's elctx using the same scope as the outer spec! binders.
         // The method scope can give impl lifetimes different names (e.g. for elided lifetimes).
-        let surrounding_tys = scope.get_surrounding_ty_params_with_assocs();
-        let surrounding_tys =
-            fmt_list!(&surrounding_tys.params, "; ", |x| { Type::LiteralParam(x.to_owned()).to_string() });
+        let generic_elctx = scope.get_surrounding_ty_params_with_assocs().format_function_elctx();
         let scope_elctx = self.trait_ref.generics.format_elctx();
         write!(
             f,
-            "(λ a b, scope_add_typarams _ -[{surrounding_tys}] (scope_add_elctx ({scope_elctx}) (({applied_base_spec}).({}) {} {} a b))) <MERGE!>",
+            "(λ a b, scope_add_elctx ({generic_elctx}) (scope_add_elctx ({scope_elctx}) (({applied_base_spec}).({}) {} {} a b))) <MERGE!>",
             //"({applied_base_spec}).({}) {} {} <MERGE!>",
             self.trait_ref.of_trait.make_spec_method_name(&self.trait_method_name),
             fmt_list!(spec_params, " "),
@@ -2486,6 +2482,40 @@ mod tests {
 
         assert_eq!(impl_.spec_realization(), "ordinary_impl_realization");
         assert_eq!(alias.spec_realization(), "ordinary_impl_realization");
+    }
+
+    #[test]
+    fn drop_glue_method_and_inclusion_explicitly_add_impl_elctx() {
+        let trait_spec = literal_drop_glue_spec();
+        let impl_literal = LiteralImpl::new("drop_impl".to_owned(), false, "drop_realization".to_owned());
+        let parameter = LiteralTyParam::new("T");
+        let mut impl_scope = GenericScope::empty();
+        impl_scope.add_ty_param(parameter.clone());
+        let mut trait_inst = GenericScopeInst::empty();
+        trait_inst.add_direct_ty_param(Type::LiteralParam(parameter));
+        let trait_ref = RefInst::new(
+            &trait_spec,
+            &impl_literal,
+            impl_scope.clone(),
+            trait_inst,
+            vec![],
+            SpecAttrsInst::new(BTreeMap::new()),
+        );
+        let impl_spec = ImplSpec::new(
+            trait_ref.clone(),
+            InstanceSpec::new(BTreeMap::new()),
+            coq::binder::BinderList::empty(),
+        );
+        let inclusion = impl_spec.generate_lemma_statement().to_string();
+        assert!(inclusion.contains("scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[T_ty])"));
+        assert!(!inclusion.contains("scope_add_typarams"));
+
+        let method = InstantiatedFunctionSpec::new(trait_ref, "drop_glue".to_owned());
+        impl_scope.make_direct_params_surrounding();
+        let mut rendered = String::new();
+        method.write_spec_term(&mut rendered, &impl_scope).unwrap();
+        assert!(rendered.contains("scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[T_ty])"));
+        assert!(!rendered.contains("scope_add_typarams"));
     }
 
     #[test]

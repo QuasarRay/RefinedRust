@@ -163,7 +163,7 @@ Next Obligation. solve_fn_vars_nodup. Qed.
 Definition trait_incl_of_alloc_array `{RRGS : !refinedrustGS Σ} (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs : DropGlue_spec_attrs T_rt) (DropGlue_T_spec : spec_with 0 [] (DropGlue_spec T_rt)) : spec_with _ _ Prop :=
   spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), (True).
 Definition type_of_alloc_array `{RRGS : !refinedrustGS Σ} (T_rt : RT) (T_st : syn_type) (DropGlue_T_spec_attrs : DropGlue_spec_attrs T_rt) :=
-  fn(∀ ( *[]) : 0 | ( *[T_ty]) : [(T_rt, T_st)] | (size) : (Z), (λ ϝ, []); size :@: int USize; λ π,
+  fn(∀ ( *[]) : 0 | ( *[T_ty]) : [(T_rt, T_st)] | (size) : (Z), (λ ϝ, typarams_elctx ϝ _ -[T_ty] ++ []); size :@: int USize; λ π,
     ⌜Z.of_nat (size_of_array_in_bytes T_st (Z.to_nat size)) ∈ ISize⌝ ∗
     ⌜(size > 0)%Z⌝ ∗
     ⌜(size_of_st T_st > 0)%Z⌝) →
@@ -252,7 +252,7 @@ Definition trait_incl_of_realloc_array `{RRGS : !refinedrustGS Σ} (T_rt: RT) (T
   spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), (True).
 (* Spec is using UntypedSynType (instead of ArraySynType) because this is using untyped copies *)
 Definition type_of_realloc_array `{RRGS : !refinedrustGS Σ} (T_rt : RT) (T_st : syn_type) (DropGlue_T_spec_attrs : DropGlue_spec_attrs T_rt) :=
-  fn(∀ ( *[]) : 0 | ( *[T_ty]) : [(T_rt, T_st)] | (old_size, new_size, l, v) : (Z * Z * loc * val), (λ ϝ, []);
+  fn(∀ ( *[]) : 0 | ( *[T_ty]) : [(T_rt, T_st)] | (old_size, new_size, l, v) : (Z * Z * loc * val), (λ ϝ, typarams_elctx ϝ _ -[T_ty] ++ []);
     old_size :@: int USize, l :@: alias_ptr_t, new_size :@: int USize; λ π,
     freeable_nz l (size_of_array_in_bytes T_st (Z.to_nat old_size)) 1 HeapAlloc ∗
     l ◁ₗ[π, Owned ] #v @ (◁ value_t false (ArraySynType T_st (Z.to_nat old_size))) ∗
@@ -351,7 +351,7 @@ Next Obligation. solve_fn_vars_nodup. Qed.
 Definition trait_incl_of_dealloc_array `{RRGS : !refinedrustGS Σ} (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs : DropGlue_spec_attrs T_rt) (DropGlue_T_spec : spec_with 0 [] (DropGlue_spec T_rt)) : spec_with _ _ Prop :=
   spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), (True).
 Definition type_of_dealloc_array `{RRGS : !refinedrustGS Σ} (T_rt : RT) (T_st : syn_type) (DropGlue_T_spec_attrs : DropGlue_spec_attrs T_rt) :=
-  fn(∀ ( *[]) : 0 | ( *[T_ty]) : [(T_rt, T_st)] | (size, l) : (Z * loc), (λ ϝ, []);
+  fn(∀ ( *[]) : 0 | ( *[T_ty]) : [(T_rt, T_st)] | (size, l) : (Z * loc), (λ ϝ, typarams_elctx ϝ _ -[T_ty] ++ []);
     size :@: int USize, l :@: alias_ptr_t; λ π,
     freeable_nz l (size_of_array_in_bytes T_st (Z.to_nat size)) 1 HeapAlloc ∗
     l ◁ₗ[π, Owned ] .@ (◁ uninit (ArraySynType T_st (Z.to_nat size))) ∗
@@ -430,7 +430,7 @@ Next Obligation. solve_fn_vars_nodup. Qed.
 Definition trait_incl_of_check_array_layoutable `{RRGS : !refinedrustGS Σ} (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs : DropGlue_spec_attrs T_rt) (DropGlue_T_spec : spec_with 0 [] (DropGlue_spec T_rt)) : spec_with _ _ Prop :=
   spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), (True).
 Definition type_of_check_array_layoutable `{RRGS : !refinedrustGS Σ} (T_rt : RT) (T_st : syn_type) (DropGlue_T_spec_attrs : DropGlue_spec_attrs T_rt) :=
-  fn(∀ ( *[]) : 0 | ( *[T_ty]) : [(T_rt, T_st)] | (size) : (Z), (λ ϝ, []); size :@: int USize; λ π, True) →
+  fn(∀ ( *[]) : 0 | ( *[T_ty]) : [(T_rt, T_st)] | (size) : (Z), (λ ϝ, typarams_elctx ϝ _ -[T_ty] ++ []); size :@: int USize; λ π, True) →
   ∃ () : unit, (bool_decide (size_of_array_in_bytes T_st (Z.to_nat size) ≤ MaxInt ISize)%Z) @ bool_t; λ π, True | False.
 
 Lemma check_array_layoutable_typed `{RRGS : !refinedrustGS Σ} π T_rt (T_st : syn_type) (DropGlue_T_spec_attrs : DropGlue_spec_attrs T_rt) (mem_align_log_of_T_loc mem_size_of_T_loc : loc) :
