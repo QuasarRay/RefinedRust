@@ -14,3 +14,11 @@ bb4[0] drop((_1.1: A)) -> [return: bb1, unwind: bb2] -> SplitFrom(bb0[1] drop(_1
 Box deref aliases:
 _6 aliases *_1 (source: none)
 _7 aliases *_1 (source: bb0[0])
+
+Inserted terminator point mappings:
+bb0[4] _3 = <std::boxed::Box<Node<T>, A> as std::ops::Drop>::drop(move _2) -> [return: bb4, unwind: bb3] Start -> bb0[1] drop(_1) -> [return: bb1, unwind: bb2] Start
+bb0[4] _3 = <std::boxed::Box<Node<T>, A> as std::ops::Drop>::drop(move _2) -> [return: bb4, unwind: bb3] Mid -> bb0[1] drop(_1) -> [return: bb1, unwind: bb2] Mid
+bb3[0] drop((_1.1: A)) -> [return: bb2, unwind terminate(cleanup)] Start -> bb0[1] drop(_1) -> [return: bb1, unwind: bb2] Mid
+bb3[0] drop((_1.1: A)) -> [return: bb2, unwind terminate(cleanup)] Mid -> bb0[1] drop(_1) -> [return: bb1, unwind: bb2] Mid
+bb4[0] drop((_1.1: A)) -> [return: bb1, unwind: bb2] Start -> bb0[1] drop(_1) -> [return: bb1, unwind: bb2] Mid
+bb4[0] drop((_1.1: A)) -> [return: bb1, unwind: bb2] Mid -> bb0[1] drop(_1) -> [return: bb1, unwind: bb2] Mid

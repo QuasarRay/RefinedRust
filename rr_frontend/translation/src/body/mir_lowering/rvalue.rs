@@ -578,7 +578,10 @@ pub(crate) trait MirRvalueTranslation<'def, 'tcx: 'def>:
             // fields. Copy for the first read and consume a Move operand only
             // in the overflow check; duplicating Move loses its typed value.
             let read_operand = |expr: &code::Expr| match expr {
-                code::Expr::Move { ot, e } => code::Expr::Copy { ot: ot.clone(), e: e.clone() },
+                code::Expr::Move { ot, e } => code::Expr::Copy {
+                    ot: ot.clone(),
+                    e: e.clone(),
+                },
                 _ => expr.clone(),
             };
 

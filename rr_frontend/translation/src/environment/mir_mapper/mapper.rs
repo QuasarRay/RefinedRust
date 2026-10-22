@@ -735,6 +735,21 @@ impl<'a, 'tcx> Mapper<'a, 'tcx> {
                 return false;
             };
 
+            // A partially moved aggregate can have several field flags. Match the
+            // whole protocol before treating this as a single conditional drop:
+            // its skip branch may itself dispatch on the next field's flag.
+            if let Some(open_drop_match) =
+                self.match_open_drop_target_with_root(bb_t, Some(source_place.clone()))
+            {
+                let mir::TerminatorKind::Drop { target, unwind, .. } = ts.kind else {
+                    unreachable!();
+                };
+                if open_drop_match.unwind_exits.is_empty() || unwind_target(unwind).is_some() {
+                    self.align_open_drop_match(open_drop_match, cur_s, target, unwind_target(unwind));
+                    return true;
+                }
+            }
+
             let Some(drop_bb) = self.find_actual_drop_block(a, b, &source_place) else {
                 let mir::TerminatorKind::Drop { target: next_s, .. } = ts.kind else {
                     return false;
@@ -1082,7 +1097,19 @@ impl<'a, 'tcx> Mapper<'a, 'tcx> {
             return false;
         }
 
-        let src_drop = (source_drop.drop_bb, self.bc.basic_blocks[source_drop.drop_bb].statements.len());
+        self.align_open_drop_match(open_drop_match, source_drop.drop_bb, source_drop.ret, source_drop.unwind);
+        true
+    }
+
+    /// Record a complete drop protocol and align its source continuations.
+    fn align_open_drop_match(
+        &mut self,
+        open_drop_match: OpenDropMatch,
+        source_bb: BasicBlock,
+        continuation: BasicBlock,
+        unwind: Option<BasicBlock>,
+    ) {
+        let src_drop = (source_bb, self.bc.basic_blocks[source_bb].statements.len());
         for block in open_drop_match.blocks {
             if block.mark_statements {
                 self.mark_block_statements_with_phase(
@@ -1101,15 +1128,13 @@ impl<'a, 'tcx> Mapper<'a, 'tcx> {
         }
 
         for exit_t in open_drop_match.normal_exits {
-            self.align_blocks(exit_t, source_drop.ret);
+            self.align_blocks(exit_t, continuation);
         }
         for exit_t in open_drop_match.unwind_exits {
-            if let Some(unwind_s) = source_drop.unwind {
+            if let Some(unwind_s) = unwind {
                 self.align_blocks(exit_t, unwind_s);
             }
         }
-
-        true
     }
 
     /// Try to align a target terminator with a later folded source terminator.
@@ -1159,13 +1184,21 @@ impl<'a, 'tcx> Mapper<'a, 'tcx> {
 
     /// Match the target subgraph implementing an open drop.
     fn match_open_drop_target(&self, entry_bb: BasicBlock) -> Option<OpenDropMatch> {
+        self.match_open_drop_target_with_root(entry_bb, None)
+    }
+
+    fn match_open_drop_target_with_root(
+        &self,
+        entry_bb: BasicBlock,
+        mut root_place: Option<NormalizedPlace>,
+    ) -> Option<OpenDropMatch> {
         // Open-drop matching is intentionally conservative:
         // - interior blocks may only contain administrative statements,
         // - dispatch/drop places must stay anchored under one discovered root place,
         // - exits are only allowed once the subgraph leaves this protocol.
         let mut seen = FxHashSet::default();
         let mut queue = VecDeque::from([(entry_bb, true)]);
-        let mut root_place = None;
+        let source_root_known = root_place.is_some();
         let mut blocks = Vec::new();
         let mut normal_exits = Vec::new();
         let mut unwind_exits = Vec::new();
@@ -1206,7 +1239,17 @@ impl<'a, 'tcx> Mapper<'a, 'tcx> {
                     });
                     for target in targets {
                         if !self.is_open_drop_block(target, root_place.as_ref()) {
-                            return None;
+                            if !source_root_known {
+                                return None;
+                            }
+                            if self.de.basic_blocks[target].is_cleanup
+                                && !self.de.basic_blocks[entry_bb].is_cleanup
+                            {
+                                unwind_exits.push(target);
+                            } else {
+                                normal_exits.push(target);
+                            }
+                            continue;
                         }
                         queue.push_back((target, false));
                     }
@@ -1228,6 +1271,11 @@ impl<'a, 'tcx> Mapper<'a, 'tcx> {
 
                     if self.is_open_drop_block(target, root_place.as_ref()) {
                         queue.push_back((target, false));
+                    } else if source_root_known
+                        && self.de.basic_blocks[target].is_cleanup
+                        && !self.de.basic_blocks[entry_bb].is_cleanup
+                    {
+                        unwind_exits.push(target);
                     } else {
                         normal_exits.push(target);
                     }
@@ -1242,6 +1290,15 @@ impl<'a, 'tcx> Mapper<'a, 'tcx> {
                 },
                 OpenDropNode::Unsupported => return None,
             }
+        }
+
+        // A flag alone does not establish that this is the requested source
+        // drop: it may guard a later drop after the current one was eliminated.
+        if source_root_known
+            && (normal_exits.is_empty()
+                || !blocks.iter().any(|block| matches!(block.terminator_phase, PointPhaseKind::Direct)))
+        {
+            return None;
         }
 
         Some(OpenDropMatch {
