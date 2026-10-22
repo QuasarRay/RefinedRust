@@ -234,6 +234,12 @@
         {
           pname = "stdlib-num";
           src = ./stdlib/num;
+          libDeps = with stdlibPkgs; [
+            stdlib-clone
+            stdlib-option
+            stdlib-closures
+            stdlib-result
+          ];
         }
         {
           pname = "stdlib-cell";
