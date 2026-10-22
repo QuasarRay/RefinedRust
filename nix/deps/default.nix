@@ -45,10 +45,20 @@ let
         # NOTE: Remove `lambda-rust` when available in Nix's `RocqPackages`
         lambda-rust = final.callPackage ./lambda-rust.nix lambda-rust;
 
-        smtcoq = final.lib.overrideRocqDerivation {
-          defaultVersion = smtcoq.version;
-          release.${smtcoq.version}.sha256 = smtcoq.sha256;
-        } prev.smtcoq;
+        smtcoq =
+          (final.lib.overrideRocqDerivation {
+            defaultVersion = smtcoq.version;
+            release.${smtcoq.version}.sha256 = smtcoq.sha256;
+          } prev.smtcoq).overrideAttrs
+            (old: {
+              # We use veriT, so the external zChaff solver is unnecessary.
+              propagatedBuildInputs = builtins.filter (
+                dep: (dep.pname or "") != "zchaff"
+              ) old.propagatedBuildInputs;
+
+              # The upstream test suite invokes the external zChaff solver.
+              doCheck = false;
+            });
 
         sniper = final.lib.overrideRocqDerivation {
           defaultVersion = sniper.version;
