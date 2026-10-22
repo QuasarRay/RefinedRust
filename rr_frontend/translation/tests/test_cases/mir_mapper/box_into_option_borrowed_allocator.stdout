@@ -18,3 +18,7 @@ _8 aliases *_1 (source: bb0[1])
 
 Synthetic drop borrows:
 _3: borrow (bb0, 6), call (bb0, 7), source drop (bb1, 1)
+
+Inserted terminator point mappings:
+bb0[7] _4 = <std::boxed::Box<Node<T>, &A> as std::ops::Drop>::drop(move _3) -> [return: bb1, unwind: bb2] Start -> bb1[1] drop(_1) -> [return: bb2, unwind: bb4] Start
+bb0[7] _4 = <std::boxed::Box<Node<T>, &A> as std::ops::Drop>::drop(move _3) -> [return: bb1, unwind: bb2] Mid -> bb1[1] drop(_1) -> [return: bb2, unwind: bb4] Mid

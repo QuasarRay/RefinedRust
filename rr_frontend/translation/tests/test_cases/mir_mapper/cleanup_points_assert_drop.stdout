@@ -24,3 +24,9 @@ bb3[3] return -> FoldedFrom(bb4[0] return)
 bb4[0] resume -> Source(bb7[0] resume)
 bb5[0] drop(_1) -> [return: bb4, unwind terminate(cleanup)] -> SplitFrom(bb6[0] drop(_1) -> [return: bb7, unwind terminate(cleanup)])
 bb6[0] switchInt(copy _8) -> [0: bb4, otherwise: bb5] -> SplitFrom(bb6[0] drop(_1) -> [return: bb7, unwind terminate(cleanup)])
+
+Inserted terminator point mappings:
+bb5[0] drop(_1) -> [return: bb4, unwind terminate(cleanup)] Start -> bb6[0] drop(_1) -> [return: bb7, unwind terminate(cleanup)] Start
+bb5[0] drop(_1) -> [return: bb4, unwind terminate(cleanup)] Mid -> bb6[0] drop(_1) -> [return: bb7, unwind terminate(cleanup)] Mid
+bb6[0] switchInt(copy _8) -> [0: bb4, otherwise: bb5] Start -> bb6[0] drop(_1) -> [return: bb7, unwind terminate(cleanup)] Start
+bb6[0] switchInt(copy _8) -> [0: bb4, otherwise: bb5] Mid -> bb6[0] drop(_1) -> [return: bb7, unwind terminate(cleanup)] Start

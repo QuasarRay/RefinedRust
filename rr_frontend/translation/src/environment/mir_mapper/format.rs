@@ -64,7 +64,7 @@ pub fn format_mapping<'tcx>(bc: &Body<'tcx>, de: &Body<'tcx>, mapping: &MappingR
     lines.join("\n")
 }
 
-/// Format point mappings for inserted target terminators.
+/// Format point mappings for inserted and split target terminators.
 #[must_use]
 pub fn format_inserted_terminator_point_mappings<'tcx>(
     bc: &Body<'tcx>,
@@ -76,7 +76,9 @@ pub fn format_inserted_terminator_point_mappings<'tcx>(
         .target_to_source
         .iter()
         .filter_map(|(&(bb, idx), &origin)| {
-            (origin == Origin::Inserted && idx == de.basic_blocks[bb].statements.len()).then_some((bb, idx))
+            (matches!(origin, Origin::Inserted | Origin::SplitFrom(_))
+                && idx == de.basic_blocks[bb].statements.len())
+            .then_some((bb, idx))
         })
         .collect();
     locs.sort_by_key(|(bb, idx)| (bb.as_u32(), *idx));

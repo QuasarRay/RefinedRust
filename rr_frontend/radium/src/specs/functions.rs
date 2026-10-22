@@ -538,10 +538,8 @@ impl<'def> LiteralSpecBuilder<'def> {
 #[cfg(test)]
 mod tests {
     use super::LiteralSpecBuilder;
-    use crate::{
-        coq,
-        specs::{GenericScope, LiteralTyParam, traits},
-    };
+    use crate::coq;
+    use crate::specs::{GenericScope, LiteralTyParam, traits};
 
     #[test]
     fn function_elctx_explicitly_includes_impl_and_method_parameters() {
