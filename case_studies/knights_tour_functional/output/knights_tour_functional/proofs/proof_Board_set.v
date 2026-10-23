@@ -25,9 +25,6 @@ Proof.
 
   (* !start proof(knights_tour_functional.set) *)
   - rewrite Hnestedlen; solve_goal.
-  - apply list_subequiv_fmap.
-    apply list_subequiv_insert_in_r; first solve_goal.
-    done.
   - eexists. split; first solve_goal.
     f_equiv.
     rewrite list_lookup_total_insert_eq; last solve_goal.
