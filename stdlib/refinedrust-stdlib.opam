@@ -1,5 +1,5 @@
 opam-version: "2.0"
-name: "refinedrust"
+name: "refinedrust-stdlib"
 synopsis: "RefinedRust verification framework"
 homepage: "https://gitlab.mpi-sws.org/lgaeher/refinedrust-dev"
 bug-reports: "https://gitlab.mpi-sws.org/lgaeher/refinedrust-dev"
@@ -15,7 +15,6 @@ depends: [
 ]
 
 build: [
-  [make "generate_stdlib"]
   ["dune" "subst"] {pinned}
   ["dune" "build" "-p" name "-j" jobs]
 ]
