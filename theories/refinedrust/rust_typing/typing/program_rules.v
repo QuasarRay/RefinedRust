@@ -5836,7 +5836,7 @@ Section subsume.
   Global Existing Instance typed_context_fold_stratify_init_inst.
 
   Lemma type_stratify_context_annot f E L T :
-    typed_pre_context_fold f.1 E L (CtxFoldStratifyAllInit StratRefoldOpened) T
+    typed_pre_context_fold f.1 E L (CtxFoldStratifyAllInit StratNoRefold) T
     ⊢ typed_annot_stmt f 1 (StratifyContextAnnot) E L T.
   Proof.
     iIntros "HT".

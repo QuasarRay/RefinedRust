@@ -64,10 +64,13 @@ Ltac solve_is_xrfn_with_instances :=
   | |- is_xrfn _ => solve [apply is_xrfn_proof]
   end.
 Ltac solve_is_xrfn :=
+  try match goal with
+  | |- is_xrfn (match ?x with | _ => _ end) =>
+    is_var x; destruct x
+  end;
   first
-    [ solve_is_xrfn_with_instances
-    | progress invert_is_xrfn_assumptions; solve_is_xrfn_with_instances
-    ].
+  [ solve_is_xrfn_with_instances
+  | progress invert_is_xrfn_assumptions; solve_is_xrfn_with_instances ].
 
 (** ** Solve [Persistent]/[Timeless] assumptions. *)
 Ltac ex_t_solve_persistent ::=
