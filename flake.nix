@@ -94,6 +94,7 @@
             stdlib-result
             stdlib-clone
             stdlib-mem
+            stdlib-controlflow
             stdlib-closures
           ];
         }
