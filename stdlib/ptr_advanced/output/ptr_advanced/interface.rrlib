@@ -423,6 +423,57 @@
           ]
         }
       },
+      "has_semantic_interp": false,
+      "impl_kind": "rust",
+      "kind": "trait_impl",
+      "method_specs": {
+        "from": {
+          "name": "unique_UniqueTasstd_convert_Fromnonnull_NonNullT_from",
+          "spec": "type_of_unique_UniqueTasstd_convert_Fromnonnull_NonNullT_from",
+          "trait_req_incl": "trait_incl_of_unique_UniqueTasstd_convert_Fromnonnull_NonNullT_from"
+        }
+      },
+      "name": "unique_UniqueTasstd_convert_Fromnonnull_NonNullT",
+      "realization": "unique_UniqueTasstd_convert_Fromnonnull_NonNullT_realization",
+      "trait_path": {
+        "args": [
+          {
+            "Adt": {
+              "args": [
+                {
+                  "Param": 0
+                }
+              ],
+              "path": [
+                "core",
+                "ptr",
+                "NonNull"
+              ]
+            }
+          }
+        ],
+        "path": [
+          "std",
+          "convert",
+          "From"
+        ]
+      }
+    },
+    {
+      "for_type": {
+        "Adt": {
+          "args": [
+            {
+              "Param": 0
+            }
+          ],
+          "path": [
+            "core",
+            "ptr",
+            "Unique"
+          ]
+        }
+      },
       "has_semantic_interp": true,
       "impl_kind": "rust",
       "kind": "trait_impl",

@@ -99,7 +99,7 @@
     {
       "info": {
         "enum_name": null,
-        "needs_trait_attrs": false
+        "needs_trait_attrs": true
       },
       "kind": "adt",
       "path": [
@@ -112,8 +112,8 @@
         "rtype": "(errors_TryReserveErrorKind_AllocError_rt)",
         "semtype": "errors_TryReserveErrorKind_AllocError_ty"
       },
-      "rtype": "(errors_TryReserveErrorKind_AllocError_rt)",
-      "semtype": "errors_TryReserveErrorKind_AllocError_ty",
+      "rtype": "(errors_TryReserveErrorKind_AllocError_inv_t_rt)",
+      "semtype": "errors_TryReserveErrorKind_AllocError_inv_t",
       "syntype": "errors_TryReserveErrorKind_AllocError_sls"
     },
     {
@@ -202,6 +202,30 @@
       ],
       "spec": "type_of_layout_Layout_from_size_align_unchecked",
       "trait_req_incl": "trait_incl_of_layout_Layout_from_size_align_unchecked"
+    },
+    {
+      "kind": "method",
+      "name": "layout_Layout_from_size_alignment",
+      "path": [
+        "alloc",
+        "alloc",
+        "Layout",
+        "from_size_alignment"
+      ],
+      "spec": "type_of_layout_Layout_from_size_alignment",
+      "trait_req_incl": "trait_incl_of_layout_Layout_from_size_alignment"
+    },
+    {
+      "kind": "method",
+      "name": "layout_Layout_from_size_alignment_unchecked",
+      "path": [
+        "alloc",
+        "alloc",
+        "Layout",
+        "from_size_alignment_unchecked"
+      ],
+      "spec": "type_of_layout_Layout_from_size_alignment_unchecked",
+      "trait_req_incl": "trait_incl_of_layout_Layout_from_size_alignment_unchecked"
     },
     {
       "kind": "method",

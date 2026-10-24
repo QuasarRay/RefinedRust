@@ -220,7 +220,7 @@ Definition trait_incl_of_box_new (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_at
 Definition type_of_box_new (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (x) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) x :@: T_ty;
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -235,7 +235,7 @@ Definition trait_incl_of_Box_T_from_raw (T_rt: RT) (T_st: syn_type) (DropGlue_T_
 Definition type_of_Box_T_from_raw (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (b, raw) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) raw :@: alias_ptr_t;
       (* precondition. *) (λ π : thread_id, (raw ◁ₗ[π, Owned] #(($#@{ (T_rt) } b)) @ (◁ T_ty))
         ∗ (freeable_nz raw (ly_size (use_layout_alg' (ty_syn_type T_ty MetaNone))) 1 HeapAlloc)
@@ -254,7 +254,7 @@ Definition trait_incl_of_Box_TA_from_raw_in (T_rt: RT) (A_rt: RT) (T_st: syn_typ
 Definition type_of_Box_TA_from_raw_in (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty; A_ty]) : ([(T_rt, T_st); (A_rt, A_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (b, raw, alloc) : ((_ * _ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty; A_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) raw :@: alias_ptr_t, alloc :@: A_ty;
       (* precondition. *) (λ π : thread_id, (raw ◁ₗ[π, Owned] #(($#@{ (T_rt) } b)) @ (◁ T_ty))
         ∗ (Allocator_A_spec_attrs.(Allocator_FreeablePerm) alloc raw (ly_size (use_layout_alg' (ty_syn_type T_ty MetaNone))))
@@ -271,7 +271,7 @@ Definition trait_incl_of_Box_T_into_non_null (T_rt: RT) (T_st: syn_type) (DropGl
 Definition type_of_Box_T_into_non_null (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (b) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) b :@: (Box_inv_t ((T_rt)) ((((Global_inv_t_rt)))) GlobalasAllocator_spec_attrs -[] -[T_ty; (Global_inv_t  -[] -[])]);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -290,7 +290,7 @@ Definition trait_incl_of_Box_TA_into_non_null_with_allocator (T_rt: RT) (A_rt: R
 Definition type_of_Box_TA_into_non_null_with_allocator (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty; A_ty]) : ([(T_rt, T_st); (A_rt, A_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (b) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty; A_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) b :@: (Box_inv_t ((T_rt)) ((A_rt)) Allocator_A_spec_attrs -[] -[T_ty; A_ty]);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -307,7 +307,7 @@ Definition trait_incl_of_Box_T_new (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_
 Definition type_of_Box_T_new (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (x) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) x :@: T_ty;
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -322,7 +322,7 @@ Definition trait_incl_of_drop_glue_Box (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A
     ∗ (∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π))%I).
 
 Definition type_of_drop_glue_Box (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
-  spec! ( *[]) : 0 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT),(λ a b, scope_add_typarams _ -[T_ty; A_ty] (scope_add_elctx (λ ϝ, []) (((DropGlue_base_spec (((Box_inv_t_rt ((T_rt)) ((A_rt))))) ((Box_st (T_st) (A_st))) ((drop_glue_Box_spec_attrs (T_rt) (A_rt) (Allocator_A_spec_attrs) (DropGlue_T_spec_attrs) (DropGlue_A_spec_attrs))))
+  spec! ( *[]) : 0 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[T_ty; A_ty]) (scope_add_elctx (λ ϝ, []) (((DropGlue_base_spec (((Box_inv_t_rt ((T_rt)) ((A_rt))))) ((Box_st (T_st) (A_st))) ((drop_glue_Box_spec_attrs (T_rt) (A_rt) (Allocator_A_spec_attrs) (DropGlue_T_spec_attrs) (DropGlue_A_spec_attrs))))
     -[] -[(Box_inv_t ((T_rt)) ((A_rt)) Allocator_A_spec_attrs -[] -[T_ty; A_ty])]).(DropGlue_drop_glue_spec)   a b))) <MERGE!>.
 
 
@@ -334,7 +334,7 @@ Definition trait_incl_of_BoxTAasstd_ops_Drop_drop (T_rt: RT) (A_rt: RT) (T_st: s
 Definition type_of_BoxTAasstd_ops_Drop_drop (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
   fn(∀ ( *[ulft_1]) : 1 | ( *[T_ty; A_ty]) : ([(T_rt, T_st); (A_rt, A_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (l, lmem, a) : ((_ * _ * _)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty; A_ty]) ϝ ++ (λ ϝ, [(ϝ, ulft_1)]) ϝ);
       (* args......... *) l :@: alias_ref_t;
       (* precondition. *) (λ π : thread_id, (l ◁ₗ[π, Owned] #(-[#lmem; #($# a)]) @ (◁ Box_ty T_rt A_rt Allocator_A_spec_attrs -[] -[T_ty; A_ty]))
         ∗ (lmem ◁ₗ[π, Owned] #(()) @ (◁ uninit (ty_syn_type T_ty MetaNone)))
@@ -351,7 +351,7 @@ Definition trait_incl_of_Box_T_into_raw (T_rt: RT) (T_st: syn_type) (DropGlue_T_
 Definition type_of_Box_T_into_raw (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (b) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) b :@: (Box_inv_t ((T_rt)) ((((Global_inv_t_rt)))) GlobalasAllocator_spec_attrs -[] -[T_ty; (Global_inv_t  -[] -[])]);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -370,7 +370,7 @@ Definition trait_incl_of_Box_TA_into_raw_with_allocator (T_rt: RT) (A_rt: RT) (T
 Definition type_of_Box_TA_into_raw_with_allocator (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty; A_ty]) : ([(T_rt, T_st); (A_rt, A_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (b) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty; A_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) b :@: (Box_inv_t ((T_rt)) ((A_rt)) Allocator_A_spec_attrs -[] -[T_ty; A_ty]);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -389,7 +389,7 @@ Definition trait_incl_of_Box_TA_new_in (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A
 Definition type_of_Box_TA_new_in (T_rt: RT) (A_rt: RT) (T_st: syn_type) (A_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty; A_ty]) : ([(T_rt, T_st); (A_rt, A_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (x, alloc) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty; A_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) x :@: T_ty, alloc :@: A_ty;
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -427,7 +427,7 @@ Section BoxTAasstd_ops_Drop_spec.
     solve_trait_realization_pers.
   Qed.
   Definition BoxTAasstd_ops_Drop_spec_subsumption  :=
-    ∀ `(T_rt : !RT) `(A_rt : !RT) `(T_st : !syn_type) `(A_st : !syn_type) `(Allocator_A_spec_attrs : !(Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) `(DropGlue_T_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) `(DropGlue_A_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )), trait_incl_marker (lift_trait_incl Drop_spec_incl (spec! ( *[]) : 0 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), (BoxTAasstd_ops_Drop_spec (T_rt) (A_rt) (T_st) (A_st) (Allocator_A_spec_attrs) (DropGlue_T_spec_attrs) (DropGlue_A_spec_attrs))-[] -[T_ty; A_ty]) (spec! ( *[]) : 0 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), scope_add_typarams _ -[T_ty; A_ty] ((Drop_base_spec ((Box_inv_t_rt ((T_rt)) ((A_rt)))) (Box_st (T_st) (A_st)) (drop_glue_Box_spec_attrs ((T_rt)) ((A_rt)) (Allocator_A_spec_attrs) (DropGlue_T_spec_attrs) (DropGlue_A_spec_attrs)) (BoxTAasstd_ops_Drop_spec_attrs (T_rt) (A_rt) (Allocator_A_spec_attrs) (DropGlue_T_spec_attrs) (DropGlue_A_spec_attrs))-[] -[(Box_inv_t ((T_rt)) ((A_rt)) Allocator_A_spec_attrs -[] -[T_ty; A_ty])])))).
+    ∀ `(T_rt : !RT) `(A_rt : !RT) `(T_st : !syn_type) `(A_st : !syn_type) `(Allocator_A_spec_attrs : !(Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) `(DropGlue_T_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) `(DropGlue_A_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )), trait_incl_marker (lift_trait_incl Drop_spec_incl (spec! ( *[]) : 0 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), (BoxTAasstd_ops_Drop_spec (T_rt) (A_rt) (T_st) (A_st) (Allocator_A_spec_attrs) (DropGlue_T_spec_attrs) (DropGlue_A_spec_attrs))-[] -[T_ty; A_ty]) (spec! ( *[]) : 0 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[T_ty; A_ty]) ((Drop_base_spec ((Box_inv_t_rt ((T_rt)) ((A_rt)))) (Box_st (T_st) (A_st)) (drop_glue_Box_spec_attrs ((T_rt)) ((A_rt)) (Allocator_A_spec_attrs) (DropGlue_T_spec_attrs) (DropGlue_A_spec_attrs)) (BoxTAasstd_ops_Drop_spec_attrs (T_rt) (A_rt) (Allocator_A_spec_attrs) (DropGlue_T_spec_attrs) (DropGlue_A_spec_attrs))-[] -[(Box_inv_t ((T_rt)) ((A_rt)) Allocator_A_spec_attrs -[] -[T_ty; A_ty])])))).
 End BoxTAasstd_ops_Drop_spec.
 
 Section drop_glue_Box_spec.
@@ -456,6 +456,6 @@ Section drop_glue_Box_spec.
     solve_trait_realization_pers.
   Qed.
   Definition drop_glue_Box_spec_subsumption  :=
-    ∀ `(T_rt : !RT) `(A_rt : !RT) `(T_st : !syn_type) `(A_st : !syn_type) `(Allocator_A_spec_attrs : !(Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) `(DropGlue_T_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) `(DropGlue_A_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )), trait_incl_marker (lift_trait_incl DropGlue_spec_incl (spec! ( *[]) : 0 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), (drop_glue_Box_spec (T_rt) (A_rt) (T_st) (A_st) (Allocator_A_spec_attrs) (DropGlue_T_spec_attrs) (DropGlue_A_spec_attrs))-[] -[T_ty; A_ty]) (spec! ( *[]) : 0 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), scope_add_typarams _ -[T_ty; A_ty] ((DropGlue_base_spec ((Box_inv_t_rt ((T_rt)) ((A_rt)))) (Box_st (T_st) (A_st)) (drop_glue_Box_spec_attrs (T_rt) (A_rt) (Allocator_A_spec_attrs) (DropGlue_T_spec_attrs) (DropGlue_A_spec_attrs))-[] -[(Box_inv_t ((T_rt)) ((A_rt)) Allocator_A_spec_attrs -[] -[T_ty; A_ty])])))).
+    ∀ `(T_rt : !RT) `(A_rt : !RT) `(T_st : !syn_type) `(A_st : !syn_type) `(Allocator_A_spec_attrs : !(Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) `(DropGlue_T_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) `(DropGlue_A_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )), trait_incl_marker (lift_trait_incl DropGlue_spec_incl (spec! ( *[]) : 0 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), (drop_glue_Box_spec (T_rt) (A_rt) (T_st) (A_st) (Allocator_A_spec_attrs) (DropGlue_T_spec_attrs) (DropGlue_A_spec_attrs))-[] -[T_ty; A_ty]) (spec! ( *[]) : 0 | ( *[T_ty; A_ty]) : ([T_rt; A_rt] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[T_ty; A_ty]) ((DropGlue_base_spec ((Box_inv_t_rt ((T_rt)) ((A_rt)))) (Box_st (T_st) (A_st)) (drop_glue_Box_spec_attrs (T_rt) (A_rt) (Allocator_A_spec_attrs) (DropGlue_T_spec_attrs) (DropGlue_A_spec_attrs))-[] -[(Box_inv_t ((T_rt)) ((A_rt)) Allocator_A_spec_attrs -[] -[T_ty; A_ty])])))).
 End drop_glue_Box_spec.
 

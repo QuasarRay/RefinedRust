@@ -2043,7 +2043,7 @@ Definition scope_bindable_PartialEq_spec `{Self_rt : !RT} `{Rhs_rt : !RT} : (Sco
 Definition PartialEq_eq_base_spec (Self_rt: RT) (Rhs_rt: RT) (Self_st: syn_type) (Rhs_st: syn_type) (DropGlue_Self_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )) (DropGlue_Rhs_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Rhs_rt) )) (PartialEq_Self_Rhs_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (Self_rt) (Rhs_rt) )) :=
   fn(∀ ( *[ulft_1; ulft_2]) : 2 | ( *[Self_ty; Rhs_ty]) : ([(Self_rt, Self_st); (Rhs_rt, Rhs_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (self, other) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1); (ϝ, ulft_2)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[Self_ty; Rhs_ty]) ϝ ++ (λ ϝ, [(ϝ, ulft_1); (ϝ, ulft_2)]) ϝ);
       (* args......... *) self :@: (shr_ref ulft_1 Self_ty), other :@: (shr_ref ulft_2 Rhs_ty);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -2055,7 +2055,7 @@ Definition PartialEq_eq_base_spec (Self_rt: RT) (Rhs_rt: RT) (Self_st: syn_type)
 Definition PartialEq_ne_base_spec (Self_rt: RT) (Rhs_rt: RT) (Self_st: syn_type) (Rhs_st: syn_type) (DropGlue_Self_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )) (DropGlue_Rhs_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Rhs_rt) )) (PartialEq_Self_Rhs_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (Self_rt) (Rhs_rt) )) :=
   fn(∀ ( *[ulft_1; ulft_2]) : 2 | ( *[Self_ty; Rhs_ty]) : ([(Self_rt, Self_st); (Rhs_rt, Rhs_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (self, other) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1); (ϝ, ulft_2)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[Self_ty; Rhs_ty]) ϝ ++ (λ ϝ, [(ϝ, ulft_1); (ϝ, ulft_2)]) ϝ);
       (* args......... *) self :@: (shr_ref ulft_1 Self_ty), other :@: (shr_ref ulft_2 Rhs_ty);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -2110,7 +2110,7 @@ Definition scope_bindable_Eq_spec `{Self_rt : !RT} : (ScopeBindable ((Eq_spec (S
 Definition Eq_assert_fields_are_eq_base_spec (Self_rt: RT) (Self_st: syn_type) (PartialEq_Self_Self_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) )) (DropGlue_Self_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )) (Eq_Self_spec_attrs: (Eq_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs)) :=
   fn(∀ ( *[ulft_1]) : 1 | ( *[Self_ty]) : ([(Self_rt, Self_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (self) : ((_)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[Self_ty]) ϝ ++ (λ ϝ, [(ϝ, ulft_1)]) ϝ);
       (* args......... *) self :@: (shr_ref ulft_1 Self_ty);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -2178,7 +2178,7 @@ Definition scope_bindable_PartialOrd_spec `{Self_rt : !RT} `{Rhs_rt : !RT} : (Sc
 Definition PartialOrd_ge_base_spec (Self_rt: RT) (Rhs_rt: RT) (Self_st: syn_type) (Rhs_st: syn_type) (PartialEq_Self_Rhs_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (Self_rt) (Rhs_rt) )) (DropGlue_Self_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )) (DropGlue_Rhs_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Rhs_rt) )) (PartialOrd_Self_Rhs_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (Self_rt) (Rhs_rt) PartialEq_Self_Rhs_spec_attrs)) :=
   fn(∀ ( *[ulft_1; ulft_2]) : 2 | ( *[Self_ty; Rhs_ty]) : ([(Self_rt, Self_st); (Rhs_rt, Rhs_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (self, other) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1); (ϝ, ulft_2)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[Self_ty; Rhs_ty]) ϝ ++ (λ ϝ, [(ϝ, ulft_1); (ϝ, ulft_2)]) ϝ);
       (* args......... *) self :@: (shr_ref ulft_1 Self_ty), other :@: (shr_ref ulft_2 Rhs_ty);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -2190,7 +2190,7 @@ Definition PartialOrd_ge_base_spec (Self_rt: RT) (Rhs_rt: RT) (Self_st: syn_type
 Definition PartialOrd_gt_base_spec (Self_rt: RT) (Rhs_rt: RT) (Self_st: syn_type) (Rhs_st: syn_type) (PartialEq_Self_Rhs_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (Self_rt) (Rhs_rt) )) (DropGlue_Self_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )) (DropGlue_Rhs_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Rhs_rt) )) (PartialOrd_Self_Rhs_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (Self_rt) (Rhs_rt) PartialEq_Self_Rhs_spec_attrs)) :=
   fn(∀ ( *[ulft_1; ulft_2]) : 2 | ( *[Self_ty; Rhs_ty]) : ([(Self_rt, Self_st); (Rhs_rt, Rhs_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (self, other) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1); (ϝ, ulft_2)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[Self_ty; Rhs_ty]) ϝ ++ (λ ϝ, [(ϝ, ulft_1); (ϝ, ulft_2)]) ϝ);
       (* args......... *) self :@: (shr_ref ulft_1 Self_ty), other :@: (shr_ref ulft_2 Rhs_ty);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -2202,7 +2202,7 @@ Definition PartialOrd_gt_base_spec (Self_rt: RT) (Rhs_rt: RT) (Self_st: syn_type
 Definition PartialOrd_le_base_spec (Self_rt: RT) (Rhs_rt: RT) (Self_st: syn_type) (Rhs_st: syn_type) (PartialEq_Self_Rhs_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (Self_rt) (Rhs_rt) )) (DropGlue_Self_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )) (DropGlue_Rhs_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Rhs_rt) )) (PartialOrd_Self_Rhs_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (Self_rt) (Rhs_rt) PartialEq_Self_Rhs_spec_attrs)) :=
   fn(∀ ( *[ulft_1; ulft_2]) : 2 | ( *[Self_ty; Rhs_ty]) : ([(Self_rt, Self_st); (Rhs_rt, Rhs_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (self, other) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1); (ϝ, ulft_2)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[Self_ty; Rhs_ty]) ϝ ++ (λ ϝ, [(ϝ, ulft_1); (ϝ, ulft_2)]) ϝ);
       (* args......... *) self :@: (shr_ref ulft_1 Self_ty), other :@: (shr_ref ulft_2 Rhs_ty);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -2214,7 +2214,7 @@ Definition PartialOrd_le_base_spec (Self_rt: RT) (Rhs_rt: RT) (Self_st: syn_type
 Definition PartialOrd_lt_base_spec (Self_rt: RT) (Rhs_rt: RT) (Self_st: syn_type) (Rhs_st: syn_type) (PartialEq_Self_Rhs_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (Self_rt) (Rhs_rt) )) (DropGlue_Self_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )) (DropGlue_Rhs_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Rhs_rt) )) (PartialOrd_Self_Rhs_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (Self_rt) (Rhs_rt) PartialEq_Self_Rhs_spec_attrs)) :=
   fn(∀ ( *[ulft_1; ulft_2]) : 2 | ( *[Self_ty; Rhs_ty]) : ([(Self_rt, Self_st); (Rhs_rt, Rhs_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (self, other) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1); (ϝ, ulft_2)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[Self_ty; Rhs_ty]) ϝ ++ (λ ϝ, [(ϝ, ulft_1); (ϝ, ulft_2)]) ϝ);
       (* args......... *) self :@: (shr_ref ulft_1 Self_ty), other :@: (shr_ref ulft_2 Rhs_ty);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -2226,7 +2226,7 @@ Definition PartialOrd_lt_base_spec (Self_rt: RT) (Rhs_rt: RT) (Self_st: syn_type
 Definition PartialOrd_partial_cmp_base_spec (Self_rt: RT) (Rhs_rt: RT) (Self_st: syn_type) (Rhs_st: syn_type) (PartialEq_Self_Rhs_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (Self_rt) (Rhs_rt) )) (DropGlue_Self_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )) (DropGlue_Rhs_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Rhs_rt) )) (PartialOrd_Self_Rhs_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (Self_rt) (Rhs_rt) PartialEq_Self_Rhs_spec_attrs)) :=
   fn(∀ ( *[ulft_1; ulft_2]) : 2 | ( *[Self_ty; Rhs_ty]) : ([(Self_rt, Self_st); (Rhs_rt, Rhs_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (self, other) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1); (ϝ, ulft_2)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[Self_ty; Rhs_ty]) ϝ ++ (λ ϝ, [(ϝ, ulft_1); (ϝ, ulft_2)]) ϝ);
       (* args......... *) self :@: (shr_ref ulft_1 Self_ty), other :@: (shr_ref ulft_2 Rhs_ty);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -2302,7 +2302,7 @@ Definition scope_bindable_Ord_spec `{Self_rt : !RT} : (ScopeBindable ((Ord_spec 
 Definition Ord_clamp_base_spec (Self_rt: RT) (Self_st: syn_type) (PartialEq_Self_Self_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) )) (Eq_Self_spec_attrs: (Eq_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs)) (PartialOrd_Self_Self_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) PartialEq_Self_Self_spec_attrs)) (DropGlue_Self_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )) (Ord_Self_spec_attrs: (Ord_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs Eq_Self_spec_attrs PartialOrd_Self_Self_spec_attrs)) :=
   fn(∀ ( *[]) : 0 | ( *[Self_ty]) : ([(Self_rt, Self_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (self, min, max) : ((_ * _ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[Self_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) self :@: Self_ty, min :@: Self_ty, max :@: Self_ty;
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -2314,7 +2314,7 @@ Definition Ord_clamp_base_spec (Self_rt: RT) (Self_st: syn_type) (PartialEq_Self
 Definition Ord_cmp_base_spec (Self_rt: RT) (Self_st: syn_type) (PartialEq_Self_Self_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) )) (Eq_Self_spec_attrs: (Eq_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs)) (PartialOrd_Self_Self_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) PartialEq_Self_Self_spec_attrs)) (DropGlue_Self_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )) (Ord_Self_spec_attrs: (Ord_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs Eq_Self_spec_attrs PartialOrd_Self_Self_spec_attrs)) :=
   fn(∀ ( *[ulft_1; ulft_2]) : 2 | ( *[Self_ty]) : ([(Self_rt, Self_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (self, other) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1); (ϝ, ulft_2)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[Self_ty]) ϝ ++ (λ ϝ, [(ϝ, ulft_1); (ϝ, ulft_2)]) ϝ);
       (* args......... *) self :@: (shr_ref ulft_1 Self_ty), other :@: (shr_ref ulft_2 Self_ty);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -2326,7 +2326,7 @@ Definition Ord_cmp_base_spec (Self_rt: RT) (Self_st: syn_type) (PartialEq_Self_S
 Definition Ord_max_base_spec (Self_rt: RT) (Self_st: syn_type) (PartialEq_Self_Self_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) )) (Eq_Self_spec_attrs: (Eq_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs)) (PartialOrd_Self_Self_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) PartialEq_Self_Self_spec_attrs)) (DropGlue_Self_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )) (Ord_Self_spec_attrs: (Ord_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs Eq_Self_spec_attrs PartialOrd_Self_Self_spec_attrs)) :=
   fn(∀ ( *[]) : 0 | ( *[Self_ty]) : ([(Self_rt, Self_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (self, other) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[Self_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) self :@: Self_ty, other :@: Self_ty;
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -2338,7 +2338,7 @@ Definition Ord_max_base_spec (Self_rt: RT) (Self_st: syn_type) (PartialEq_Self_S
 Definition Ord_min_base_spec (Self_rt: RT) (Self_st: syn_type) (PartialEq_Self_Self_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) )) (Eq_Self_spec_attrs: (Eq_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs)) (PartialOrd_Self_Self_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) PartialEq_Self_Self_spec_attrs)) (DropGlue_Self_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )) (Ord_Self_spec_attrs: (Ord_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs Eq_Self_spec_attrs PartialOrd_Self_Self_spec_attrs)) :=
   fn(∀ ( *[]) : 0 | ( *[Self_ty]) : ([(Self_rt, Self_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (self, other) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[Self_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) self :@: Self_ty, other :@: Self_ty;
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -2456,7 +2456,7 @@ Definition trait_incl_of_std_option_OptionTasOrd_cmp (T_rt: RT) (T_st: syn_type)
     ∗ (∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π))%I).
 
 Definition type_of_std_option_OptionTasOrd_cmp (T_rt: RT) (T_st: syn_type) (PartialEq_T_T_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (T_rt) (T_rt) )) (Eq_T_spec_attrs: (Eq_spec_attrs (RRGS:=RRGS) (T_rt) PartialEq_T_T_spec_attrs)) (PartialOrd_T_T_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (T_rt) (T_rt) PartialEq_T_T_spec_attrs)) (Ord_T_spec_attrs: (Ord_spec_attrs (RRGS:=RRGS) (T_rt) PartialEq_T_T_spec_attrs Eq_T_spec_attrs PartialOrd_T_T_spec_attrs)) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
-  spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT),(λ a b, scope_add_typarams _ -[T_ty] (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (((((Option_rt)) ((T_rt))))) (((Option_els (T_st)) : syn_type)) ((std_option_OptionTasPartialEq_spec_attrs ((T_rt)) (PartialEq_T_T_spec_attrs) (DropGlue_T_spec_attrs))) ((std_option_OptionTasEq_spec_attrs ((T_rt)) (PartialEq_T_T_spec_attrs) (Eq_T_spec_attrs) (DropGlue_T_spec_attrs))) ((std_option_OptionTasPartialOrd_spec_attrs ((T_rt)) (PartialEq_T_T_spec_attrs) (PartialOrd_T_T_spec_attrs) (DropGlue_T_spec_attrs))) ((drop_glue_Option_spec_attrs ((T_rt)) (DropGlue_T_spec_attrs))) ((std_option_OptionTasOrd_spec_attrs (T_rt) (PartialEq_T_T_spec_attrs) (Eq_T_spec_attrs) (PartialOrd_T_T_spec_attrs) (Ord_T_spec_attrs) (DropGlue_T_spec_attrs))))
+  spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[T_ty]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (((((Option_rt)) ((T_rt))))) (((Option_els (T_st)) : syn_type)) ((std_option_OptionTasPartialEq_spec_attrs ((T_rt)) (PartialEq_T_T_spec_attrs) (DropGlue_T_spec_attrs))) ((std_option_OptionTasEq_spec_attrs ((T_rt)) (PartialEq_T_T_spec_attrs) (Eq_T_spec_attrs) (DropGlue_T_spec_attrs))) ((std_option_OptionTasPartialOrd_spec_attrs ((T_rt)) (PartialEq_T_T_spec_attrs) (PartialOrd_T_T_spec_attrs) (DropGlue_T_spec_attrs))) ((drop_glue_Option_spec_attrs ((T_rt)) (DropGlue_T_spec_attrs))) ((std_option_OptionTasOrd_spec_attrs (T_rt) (PartialEq_T_T_spec_attrs) (Eq_T_spec_attrs) (PartialOrd_T_T_spec_attrs) (Ord_T_spec_attrs) (DropGlue_T_spec_attrs))))
     -[] -[(Option_ty ((T_rt)) -[] -[T_ty])]).(Ord_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_std_option_OptionTasPartialEq_eq (T_rt: RT) (T_st: syn_type) (PartialEq_T_T_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (T_rt) (T_rt) )) (PartialEq_T_T_realization: (trait_spec_realization (spec_with 0 [] (PartialEq_spec (RRGS:=RRGS) (T_rt) (T_rt))))) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
@@ -2464,7 +2464,7 @@ Definition trait_incl_of_std_option_OptionTasPartialEq_eq (T_rt: RT) (T_st: syn_
     ∗ (∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π))%I).
 
 Definition type_of_std_option_OptionTasPartialEq_eq (T_rt: RT) (T_st: syn_type) (PartialEq_T_T_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (T_rt) (T_rt) )) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
-  spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT),(λ a b, scope_add_typarams _ -[T_ty] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (((((Option_rt)) ((T_rt))))) (((((Option_rt)) ((T_rt))))) (((Option_els (T_st)) : syn_type)) (((Option_els (T_st)) : syn_type)) ((drop_glue_Option_spec_attrs ((T_rt)) (DropGlue_T_spec_attrs))) ((drop_glue_Option_spec_attrs ((T_rt)) (DropGlue_T_spec_attrs))) ((std_option_OptionTasPartialEq_spec_attrs (T_rt) (PartialEq_T_T_spec_attrs) (DropGlue_T_spec_attrs))))
+  spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[T_ty]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (((((Option_rt)) ((T_rt))))) (((((Option_rt)) ((T_rt))))) (((Option_els (T_st)) : syn_type)) (((Option_els (T_st)) : syn_type)) ((drop_glue_Option_spec_attrs ((T_rt)) (DropGlue_T_spec_attrs))) ((drop_glue_Option_spec_attrs ((T_rt)) (DropGlue_T_spec_attrs))) ((std_option_OptionTasPartialEq_spec_attrs (T_rt) (PartialEq_T_T_spec_attrs) (DropGlue_T_spec_attrs))))
     -[] -[(Option_ty ((T_rt)) -[] -[T_ty]); (Option_ty ((T_rt)) -[] -[T_ty])]).(PartialEq_eq_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_std_option_OptionTasPartialOrd_partial_cmp (T_rt: RT) (T_st: syn_type) (PartialEq_T_T_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (T_rt) (T_rt) )) (PartialEq_T_T_realization: (trait_spec_realization (spec_with 0 [] (PartialEq_spec (RRGS:=RRGS) (T_rt) (T_rt))))) (PartialOrd_T_T_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (T_rt) (T_rt) PartialEq_T_T_spec_attrs)) (PartialOrd_T_T_realization: (trait_spec_realization (spec_with 0 [] (PartialOrd_spec (RRGS:=RRGS) (T_rt) (T_rt))))) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
@@ -2473,7 +2473,7 @@ Definition trait_incl_of_std_option_OptionTasPartialOrd_partial_cmp (T_rt: RT) (
     ∗ (∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π))%I).
 
 Definition type_of_std_option_OptionTasPartialOrd_partial_cmp (T_rt: RT) (T_st: syn_type) (PartialEq_T_T_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (T_rt) (T_rt) )) (PartialOrd_T_T_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (T_rt) (T_rt) PartialEq_T_T_spec_attrs)) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
-  spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT),(λ a b, scope_add_typarams _ -[T_ty] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (((((Option_rt)) ((T_rt))))) (((((Option_rt)) ((T_rt))))) (((Option_els (T_st)) : syn_type)) (((Option_els (T_st)) : syn_type)) ((std_option_OptionTasPartialEq_spec_attrs ((T_rt)) (PartialEq_T_T_spec_attrs) (DropGlue_T_spec_attrs))) ((drop_glue_Option_spec_attrs ((T_rt)) (DropGlue_T_spec_attrs))) ((drop_glue_Option_spec_attrs ((T_rt)) (DropGlue_T_spec_attrs))) ((std_option_OptionTasPartialOrd_spec_attrs (T_rt) (PartialEq_T_T_spec_attrs) (PartialOrd_T_T_spec_attrs) (DropGlue_T_spec_attrs))))
+  spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[T_ty]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (((((Option_rt)) ((T_rt))))) (((((Option_rt)) ((T_rt))))) (((Option_els (T_st)) : syn_type)) (((Option_els (T_st)) : syn_type)) ((std_option_OptionTasPartialEq_spec_attrs ((T_rt)) (PartialEq_T_T_spec_attrs) (DropGlue_T_spec_attrs))) ((drop_glue_Option_spec_attrs ((T_rt)) (DropGlue_T_spec_attrs))) ((drop_glue_Option_spec_attrs ((T_rt)) (DropGlue_T_spec_attrs))) ((std_option_OptionTasPartialOrd_spec_attrs (T_rt) (PartialEq_T_T_spec_attrs) (PartialOrd_T_T_spec_attrs) (DropGlue_T_spec_attrs))))
     -[] -[(Option_ty ((T_rt)) -[] -[T_ty]); (Option_ty ((T_rt)) -[] -[T_ty])]).(PartialOrd_partial_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_REFAasOrd_cmp (A_rt: RT) (A_st: syn_type) (PartialEq_A_A_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (A_rt) )) (PartialEq_A_A_realization: (trait_spec_realization (spec_with 0 [] (PartialEq_spec (RRGS:=RRGS) (A_rt) (A_rt))))) (Eq_A_spec_attrs: (Eq_spec_attrs (RRGS:=RRGS) (A_rt) PartialEq_A_A_spec_attrs)) (Eq_A_realization: (trait_spec_realization (spec_with 0 [] (Eq_spec (RRGS:=RRGS) (A_rt))))) (PartialOrd_A_A_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (A_rt) (A_rt) PartialEq_A_A_spec_attrs)) (PartialOrd_A_A_realization: (trait_spec_realization (spec_with 0 [] (PartialOrd_spec (RRGS:=RRGS) (A_rt) (A_rt))))) (Ord_A_spec_attrs: (Ord_spec_attrs (RRGS:=RRGS) (A_rt) PartialEq_A_A_spec_attrs Eq_A_spec_attrs PartialOrd_A_A_spec_attrs)) (Ord_A_realization: (trait_spec_realization (spec_with 0 [] (Ord_spec (RRGS:=RRGS) (A_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
@@ -2484,98 +2484,98 @@ Definition trait_incl_of_REFAasOrd_cmp (A_rt: RT) (A_st: syn_type) (PartialEq_A_
     ∗ (∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π))%I).
 
 Definition type_of_REFAasOrd_cmp (A_rt: RT) (A_st: syn_type) (PartialEq_A_A_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (A_rt) )) (Eq_A_spec_attrs: (Eq_spec_attrs (RRGS:=RRGS) (A_rt) PartialEq_A_A_spec_attrs)) (PartialOrd_A_A_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (A_rt) (A_rt) PartialEq_A_A_spec_attrs)) (Ord_A_spec_attrs: (Ord_spec_attrs (RRGS:=RRGS) (A_rt) PartialEq_A_A_spec_attrs Eq_A_spec_attrs PartialOrd_A_A_spec_attrs)) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) :=
-  spec! ( *[ulft_0]) : 1 | ( *[A_ty]) : ([A_rt] : list RT),(λ a b, scope_add_typarams _ -[A_ty] (scope_add_elctx (λ ϝ, [(ϝ, ulft_0)]) (((Ord_base_spec ((place_rfnRT (A_rt))) (RefSynType) ((REFAasPartialEqREFB_spec_attrs ((A_rt)) ((A_rt)) (PartialEq_A_A_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_A_spec_attrs))) ((REFAasEq_spec_attrs ((A_rt)) (PartialEq_A_A_spec_attrs) (Eq_A_spec_attrs) (DropGlue_A_spec_attrs))) ((REFAasPartialOrdREFB_spec_attrs ((A_rt)) ((A_rt)) (PartialEq_A_A_spec_attrs) (PartialOrd_A_A_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_A_spec_attrs))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt))))) ((REFAasOrd_spec_attrs (A_rt) (PartialEq_A_A_spec_attrs) (Eq_A_spec_attrs) (PartialOrd_A_A_spec_attrs) (Ord_A_spec_attrs) (DropGlue_A_spec_attrs))))
+  spec! ( *[ulft_0]) : 1 | ( *[A_ty]) : ([A_rt] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[A_ty]) (scope_add_elctx (λ ϝ, [(ϝ, ulft_0)]) (((Ord_base_spec ((place_rfnRT (A_rt))) (RefSynType) ((REFAasPartialEqREFB_spec_attrs ((A_rt)) ((A_rt)) (PartialEq_A_A_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_A_spec_attrs))) ((REFAasEq_spec_attrs ((A_rt)) (PartialEq_A_A_spec_attrs) (Eq_A_spec_attrs) (DropGlue_A_spec_attrs))) ((REFAasPartialOrdREFB_spec_attrs ((A_rt)) ((A_rt)) (PartialEq_A_A_spec_attrs) (PartialOrd_A_A_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_A_spec_attrs))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt))))) ((REFAasOrd_spec_attrs (A_rt) (PartialEq_A_A_spec_attrs) (Eq_A_spec_attrs) (PartialOrd_A_A_spec_attrs) (Ord_A_spec_attrs) (DropGlue_A_spec_attrs))))
     -[] -[(shr_ref ulft_0 A_ty)]).(Ord_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_unitasOrd_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_unitasOrd_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (unit) (UnitSynType) (unitasPartialEq_spec_attrs) (unitasEq_spec_attrs) (unitasPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (unit))) (unitasOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (unit) (UnitSynType) (unitasPartialEq_spec_attrs) (unitasEq_spec_attrs) (unitasPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (unit))) (unitasOrd_spec_attrs))
     -[] -[unit_t]).(Ord_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i128asOrd_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i128asOrd_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType I128)) (i128asPartialEq_spec_attrs) (i128asEq_spec_attrs) (i128asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (i128asOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType I128)) (i128asPartialEq_spec_attrs) (i128asEq_spec_attrs) (i128asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (i128asOrd_spec_attrs))
     -[] -[(int I128)]).(Ord_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i16asOrd_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i16asOrd_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType I16)) (i16asPartialEq_spec_attrs) (i16asEq_spec_attrs) (i16asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (i16asOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType I16)) (i16asPartialEq_spec_attrs) (i16asEq_spec_attrs) (i16asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (i16asOrd_spec_attrs))
     -[] -[(int I16)]).(Ord_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i32asOrd_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i32asOrd_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType I32)) (i32asPartialEq_spec_attrs) (i32asEq_spec_attrs) (i32asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (i32asOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType I32)) (i32asPartialEq_spec_attrs) (i32asEq_spec_attrs) (i32asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (i32asOrd_spec_attrs))
     -[] -[(int I32)]).(Ord_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i64asOrd_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i64asOrd_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType I64)) (i64asPartialEq_spec_attrs) (i64asEq_spec_attrs) (i64asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (i64asOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType I64)) (i64asPartialEq_spec_attrs) (i64asEq_spec_attrs) (i64asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (i64asOrd_spec_attrs))
     -[] -[(int I64)]).(Ord_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i8asOrd_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i8asOrd_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType I8)) (i8asPartialEq_spec_attrs) (i8asEq_spec_attrs) (i8asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (i8asOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType I8)) (i8asPartialEq_spec_attrs) (i8asEq_spec_attrs) (i8asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (i8asOrd_spec_attrs))
     -[] -[(int I8)]).(Ord_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_isizeasOrd_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_isizeasOrd_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType ISize)) (isizeasPartialEq_spec_attrs) (isizeasEq_spec_attrs) (isizeasPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (isizeasOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType ISize)) (isizeasPartialEq_spec_attrs) (isizeasEq_spec_attrs) (isizeasPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (isizeasOrd_spec_attrs))
     -[] -[(int ISize)]).(Ord_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u128asOrd_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u128asOrd_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType U128)) (u128asPartialEq_spec_attrs) (u128asEq_spec_attrs) (u128asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (u128asOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType U128)) (u128asPartialEq_spec_attrs) (u128asEq_spec_attrs) (u128asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (u128asOrd_spec_attrs))
     -[] -[(int U128)]).(Ord_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u16asOrd_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u16asOrd_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType U16)) (u16asPartialEq_spec_attrs) (u16asEq_spec_attrs) (u16asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (u16asOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType U16)) (u16asPartialEq_spec_attrs) (u16asEq_spec_attrs) (u16asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (u16asOrd_spec_attrs))
     -[] -[(int U16)]).(Ord_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u32asOrd_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u32asOrd_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType U32)) (u32asPartialEq_spec_attrs) (u32asEq_spec_attrs) (u32asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (u32asOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType U32)) (u32asPartialEq_spec_attrs) (u32asEq_spec_attrs) (u32asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (u32asOrd_spec_attrs))
     -[] -[(int U32)]).(Ord_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u64asOrd_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u64asOrd_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType U64)) (u64asPartialEq_spec_attrs) (u64asEq_spec_attrs) (u64asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (u64asOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType U64)) (u64asPartialEq_spec_attrs) (u64asEq_spec_attrs) (u64asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (u64asOrd_spec_attrs))
     -[] -[(int U64)]).(Ord_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u8asOrd_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u8asOrd_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType U8)) (u8asPartialEq_spec_attrs) (u8asEq_spec_attrs) (u8asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (u8asOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType U8)) (u8asPartialEq_spec_attrs) (u8asEq_spec_attrs) (u8asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (u8asOrd_spec_attrs))
     -[] -[(int U8)]).(Ord_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_usizeasOrd_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_usizeasOrd_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType USize)) (usizeasPartialEq_spec_attrs) (usizeasEq_spec_attrs) (usizeasPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (usizeasOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType USize)) (usizeasPartialEq_spec_attrs) (usizeasEq_spec_attrs) (usizeasPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (usizeasOrd_spec_attrs))
     -[] -[(int USize)]).(Ord_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_REFAasPartialEqREFB_eq (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (PartialEq_A_B_realization: (trait_spec_realization (spec_with 0 [] (PartialEq_spec (RRGS:=RRGS) (A_rt) (B_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) (DropGlue_B_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (B_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
@@ -2584,7 +2584,7 @@ Definition trait_incl_of_REFAasPartialEqREFB_eq (A_rt: RT) (B_rt: RT) (A_st: syn
     ∗ (∃ (DropGlue_B_lfts_inst : prod_vec lft DropGlue_B_realization.(trait_ctx_lfts)) (DropGlue_B_tys_inst : plist type DropGlue_B_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_B_realization.(trait_ctx_spec) DropGlue_B_lfts_inst DropGlue_B_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (B_rt) B_st DropGlue_B_spec_attrs-[] -[B_ty]))⌝ ∗ DropGlue_B_realization.(trait_ctx_wf) DropGlue_B_lfts_inst DropGlue_B_tys_inst π))%I).
 
 Definition type_of_REFAasPartialEqREFB_eq (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) :=
-  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_typarams _ -[A_ty; B_ty] (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialEq_base_spec ((place_rfnRT (A_rt))) ((place_rfnRT (B_rt))) (RefSynType) (RefSynType) ((drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt))))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (B_rt))))) ((REFAasPartialEqREFB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
+  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[A_ty; B_ty]) (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialEq_base_spec ((place_rfnRT (A_rt))) ((place_rfnRT (B_rt))) (RefSynType) (RefSynType) ((drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt))))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (B_rt))))) ((REFAasPartialEqREFB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
     -[] -[(shr_ref ulft_1 A_ty); (shr_ref ulft_0 B_ty)]).(PartialEq_eq_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_REFAasPartialEqREFmutB_eq (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (PartialEq_A_B_realization: (trait_spec_realization (spec_with 0 [] (PartialEq_spec (RRGS:=RRGS) (A_rt) (B_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) (DropGlue_B_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (B_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
@@ -2593,7 +2593,7 @@ Definition trait_incl_of_REFAasPartialEqREFmutB_eq (A_rt: RT) (B_rt: RT) (A_st: 
     ∗ (∃ (DropGlue_B_lfts_inst : prod_vec lft DropGlue_B_realization.(trait_ctx_lfts)) (DropGlue_B_tys_inst : plist type DropGlue_B_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_B_realization.(trait_ctx_spec) DropGlue_B_lfts_inst DropGlue_B_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (B_rt) B_st DropGlue_B_spec_attrs-[] -[B_ty]))⌝ ∗ DropGlue_B_realization.(trait_ctx_wf) DropGlue_B_lfts_inst DropGlue_B_tys_inst π))%I).
 
 Definition type_of_REFAasPartialEqREFmutB_eq (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) :=
-  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_typarams _ -[A_ty; B_ty] (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialEq_base_spec ((place_rfnRT (A_rt))) (((place_rfnRT (B_rt)) * gname)%type) (RefSynType) (RefSynType) ((drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt))))) ((drop_glue_trivial_spec_attrs (((place_rfnRT (B_rt)) * gname)%type))) ((REFAasPartialEqREFmutB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
+  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[A_ty; B_ty]) (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialEq_base_spec ((place_rfnRT (A_rt))) (((place_rfnRT (B_rt)) * gname)%type) (RefSynType) (RefSynType) ((drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt))))) ((drop_glue_trivial_spec_attrs (((place_rfnRT (B_rt)) * gname)%type))) ((REFAasPartialEqREFmutB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
     -[] -[(shr_ref ulft_1 A_ty); (mut_ref ulft_0 B_ty)]).(PartialEq_eq_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_REFmutAasPartialEqREFB_eq (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (PartialEq_A_B_realization: (trait_spec_realization (spec_with 0 [] (PartialEq_spec (RRGS:=RRGS) (A_rt) (B_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) (DropGlue_B_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (B_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
@@ -2602,7 +2602,7 @@ Definition trait_incl_of_REFmutAasPartialEqREFB_eq (A_rt: RT) (B_rt: RT) (A_st: 
     ∗ (∃ (DropGlue_B_lfts_inst : prod_vec lft DropGlue_B_realization.(trait_ctx_lfts)) (DropGlue_B_tys_inst : plist type DropGlue_B_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_B_realization.(trait_ctx_spec) DropGlue_B_lfts_inst DropGlue_B_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (B_rt) B_st DropGlue_B_spec_attrs-[] -[B_ty]))⌝ ∗ DropGlue_B_realization.(trait_ctx_wf) DropGlue_B_lfts_inst DropGlue_B_tys_inst π))%I).
 
 Definition type_of_REFmutAasPartialEqREFB_eq (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) :=
-  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_typarams _ -[A_ty; B_ty] (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialEq_base_spec (((place_rfnRT (A_rt)) * gname)%type) ((place_rfnRT (B_rt))) (RefSynType) (RefSynType) ((drop_glue_trivial_spec_attrs (((place_rfnRT (A_rt)) * gname)%type))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (B_rt))))) ((REFmutAasPartialEqREFB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
+  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[A_ty; B_ty]) (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialEq_base_spec (((place_rfnRT (A_rt)) * gname)%type) ((place_rfnRT (B_rt))) (RefSynType) (RefSynType) ((drop_glue_trivial_spec_attrs (((place_rfnRT (A_rt)) * gname)%type))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (B_rt))))) ((REFmutAasPartialEqREFB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
     -[] -[(mut_ref ulft_1 A_ty); (shr_ref ulft_0 B_ty)]).(PartialEq_eq_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_REFmutAasPartialEqREFmutB_eq (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (PartialEq_A_B_realization: (trait_spec_realization (spec_with 0 [] (PartialEq_spec (RRGS:=RRGS) (A_rt) (B_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) (DropGlue_B_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (B_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
@@ -2611,105 +2611,105 @@ Definition trait_incl_of_REFmutAasPartialEqREFmutB_eq (A_rt: RT) (B_rt: RT) (A_s
     ∗ (∃ (DropGlue_B_lfts_inst : prod_vec lft DropGlue_B_realization.(trait_ctx_lfts)) (DropGlue_B_tys_inst : plist type DropGlue_B_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_B_realization.(trait_ctx_spec) DropGlue_B_lfts_inst DropGlue_B_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (B_rt) B_st DropGlue_B_spec_attrs-[] -[B_ty]))⌝ ∗ DropGlue_B_realization.(trait_ctx_wf) DropGlue_B_lfts_inst DropGlue_B_tys_inst π))%I).
 
 Definition type_of_REFmutAasPartialEqREFmutB_eq (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) :=
-  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_typarams _ -[A_ty; B_ty] (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialEq_base_spec (((place_rfnRT (A_rt)) * gname)%type) (((place_rfnRT (B_rt)) * gname)%type) (RefSynType) (RefSynType) ((drop_glue_trivial_spec_attrs (((place_rfnRT (A_rt)) * gname)%type))) ((drop_glue_trivial_spec_attrs (((place_rfnRT (B_rt)) * gname)%type))) ((REFmutAasPartialEqREFmutB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
+  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[A_ty; B_ty]) (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialEq_base_spec (((place_rfnRT (A_rt)) * gname)%type) (((place_rfnRT (B_rt)) * gname)%type) (RefSynType) (RefSynType) ((drop_glue_trivial_spec_attrs (((place_rfnRT (A_rt)) * gname)%type))) ((drop_glue_trivial_spec_attrs (((place_rfnRT (B_rt)) * gname)%type))) ((REFmutAasPartialEqREFmutB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
     -[] -[(mut_ref ulft_1 A_ty); (mut_ref ulft_0 B_ty)]).(PartialEq_eq_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_unitasPartialEq_eq  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_unitasPartialEq_eq  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (unit) (unit) (UnitSynType) (UnitSynType) ((drop_glue_trivial_spec_attrs (unit))) ((drop_glue_trivial_spec_attrs (unit))) (unitasPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (unit) (unit) (UnitSynType) (UnitSynType) ((drop_glue_trivial_spec_attrs (unit))) ((drop_glue_trivial_spec_attrs (unit))) (unitasPartialEq_spec_attrs))
     -[] -[unit_t; unit_t]).(PartialEq_eq_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_boolasPartialEq_eq  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_boolasPartialEq_eq  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (bool) (bool) (BoolSynType) (BoolSynType) ((drop_glue_trivial_spec_attrs (bool))) ((drop_glue_trivial_spec_attrs (bool))) (boolasPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (bool) (bool) (BoolSynType) (BoolSynType) ((drop_glue_trivial_spec_attrs (bool))) ((drop_glue_trivial_spec_attrs (bool))) (boolasPartialEq_spec_attrs))
     -[] -[bool_t; bool_t]).(PartialEq_eq_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i128asPartialEq_eq  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i128asPartialEq_eq  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType I128)) ((IntSynType I128)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i128asPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType I128)) ((IntSynType I128)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i128asPartialEq_spec_attrs))
     -[] -[(int I128); (int I128)]).(PartialEq_eq_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i16asPartialEq_eq  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i16asPartialEq_eq  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType I16)) ((IntSynType I16)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i16asPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType I16)) ((IntSynType I16)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i16asPartialEq_spec_attrs))
     -[] -[(int I16); (int I16)]).(PartialEq_eq_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i32asPartialEq_eq  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i32asPartialEq_eq  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType I32)) ((IntSynType I32)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i32asPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType I32)) ((IntSynType I32)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i32asPartialEq_spec_attrs))
     -[] -[(int I32); (int I32)]).(PartialEq_eq_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i64asPartialEq_eq  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i64asPartialEq_eq  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType I64)) ((IntSynType I64)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i64asPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType I64)) ((IntSynType I64)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i64asPartialEq_spec_attrs))
     -[] -[(int I64); (int I64)]).(PartialEq_eq_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i8asPartialEq_eq  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i8asPartialEq_eq  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType I8)) ((IntSynType I8)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i8asPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType I8)) ((IntSynType I8)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i8asPartialEq_spec_attrs))
     -[] -[(int I8); (int I8)]).(PartialEq_eq_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_isizeasPartialEq_eq  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_isizeasPartialEq_eq  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType ISize)) ((IntSynType ISize)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (isizeasPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType ISize)) ((IntSynType ISize)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (isizeasPartialEq_spec_attrs))
     -[] -[(int ISize); (int ISize)]).(PartialEq_eq_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u128asPartialEq_eq  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u128asPartialEq_eq  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType U128)) ((IntSynType U128)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u128asPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType U128)) ((IntSynType U128)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u128asPartialEq_spec_attrs))
     -[] -[(int U128); (int U128)]).(PartialEq_eq_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u16asPartialEq_eq  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u16asPartialEq_eq  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType U16)) ((IntSynType U16)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u16asPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType U16)) ((IntSynType U16)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u16asPartialEq_spec_attrs))
     -[] -[(int U16); (int U16)]).(PartialEq_eq_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u32asPartialEq_eq  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u32asPartialEq_eq  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType U32)) ((IntSynType U32)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u32asPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType U32)) ((IntSynType U32)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u32asPartialEq_spec_attrs))
     -[] -[(int U32); (int U32)]).(PartialEq_eq_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u64asPartialEq_eq  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u64asPartialEq_eq  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType U64)) ((IntSynType U64)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u64asPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType U64)) ((IntSynType U64)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u64asPartialEq_spec_attrs))
     -[] -[(int U64); (int U64)]).(PartialEq_eq_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u8asPartialEq_eq  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u8asPartialEq_eq  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType U8)) ((IntSynType U8)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u8asPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType U8)) ((IntSynType U8)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u8asPartialEq_spec_attrs))
     -[] -[(int U8); (int U8)]).(PartialEq_eq_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_usizeasPartialEq_eq  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_usizeasPartialEq_eq  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType USize)) ((IntSynType USize)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (usizeasPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType USize)) ((IntSynType USize)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (usizeasPartialEq_spec_attrs))
     -[] -[(int USize); (int USize)]).(PartialEq_eq_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_REFAasPartialOrdREFB_ge (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (PartialEq_A_B_realization: (trait_spec_realization (spec_with 0 [] (PartialEq_spec (RRGS:=RRGS) (A_rt) (B_rt))))) (PartialOrd_A_B_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) PartialEq_A_B_spec_attrs)) (PartialOrd_A_B_realization: (trait_spec_realization (spec_with 0 [] (PartialOrd_spec (RRGS:=RRGS) (A_rt) (B_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) (DropGlue_B_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (B_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
@@ -2719,91 +2719,91 @@ Definition trait_incl_of_REFAasPartialOrdREFB_ge (A_rt: RT) (B_rt: RT) (A_st: sy
     ∗ (∃ (DropGlue_B_lfts_inst : prod_vec lft DropGlue_B_realization.(trait_ctx_lfts)) (DropGlue_B_tys_inst : plist type DropGlue_B_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_B_realization.(trait_ctx_spec) DropGlue_B_lfts_inst DropGlue_B_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (B_rt) B_st DropGlue_B_spec_attrs-[] -[B_ty]))⌝ ∗ DropGlue_B_realization.(trait_ctx_wf) DropGlue_B_lfts_inst DropGlue_B_tys_inst π))%I).
 
 Definition type_of_REFAasPartialOrdREFB_ge (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (PartialOrd_A_B_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) PartialEq_A_B_spec_attrs)) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) :=
-  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_typarams _ -[A_ty; B_ty] (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialOrd_base_spec ((place_rfnRT (A_rt))) ((place_rfnRT (B_rt))) (RefSynType) (RefSynType) ((REFAasPartialEqREFB_spec_attrs ((A_rt)) ((B_rt)) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt))))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (B_rt))))) ((REFAasPartialOrdREFB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (PartialOrd_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
+  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[A_ty; B_ty]) (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialOrd_base_spec ((place_rfnRT (A_rt))) ((place_rfnRT (B_rt))) (RefSynType) (RefSynType) ((REFAasPartialEqREFB_spec_attrs ((A_rt)) ((B_rt)) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt))))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (B_rt))))) ((REFAasPartialOrdREFB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (PartialOrd_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
     -[] -[(shr_ref ulft_1 A_ty); (shr_ref ulft_0 B_ty)]).(PartialOrd_ge_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i128asPartialOrd_ge  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i128asPartialOrd_ge  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I128)) ((IntSynType I128)) (i128asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i128asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I128)) ((IntSynType I128)) (i128asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i128asPartialOrd_spec_attrs))
     -[] -[(int I128); (int I128)]).(PartialOrd_ge_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i16asPartialOrd_ge  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i16asPartialOrd_ge  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I16)) ((IntSynType I16)) (i16asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i16asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I16)) ((IntSynType I16)) (i16asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i16asPartialOrd_spec_attrs))
     -[] -[(int I16); (int I16)]).(PartialOrd_ge_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i32asPartialOrd_ge  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i32asPartialOrd_ge  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I32)) ((IntSynType I32)) (i32asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i32asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I32)) ((IntSynType I32)) (i32asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i32asPartialOrd_spec_attrs))
     -[] -[(int I32); (int I32)]).(PartialOrd_ge_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i64asPartialOrd_ge  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i64asPartialOrd_ge  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I64)) ((IntSynType I64)) (i64asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i64asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I64)) ((IntSynType I64)) (i64asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i64asPartialOrd_spec_attrs))
     -[] -[(int I64); (int I64)]).(PartialOrd_ge_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i8asPartialOrd_ge  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i8asPartialOrd_ge  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I8)) ((IntSynType I8)) (i8asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i8asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I8)) ((IntSynType I8)) (i8asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i8asPartialOrd_spec_attrs))
     -[] -[(int I8); (int I8)]).(PartialOrd_ge_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_isizeasPartialOrd_ge  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_isizeasPartialOrd_ge  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType ISize)) ((IntSynType ISize)) (isizeasPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (isizeasPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType ISize)) ((IntSynType ISize)) (isizeasPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (isizeasPartialOrd_spec_attrs))
     -[] -[(int ISize); (int ISize)]).(PartialOrd_ge_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u128asPartialOrd_ge  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u128asPartialOrd_ge  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U128)) ((IntSynType U128)) (u128asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u128asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U128)) ((IntSynType U128)) (u128asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u128asPartialOrd_spec_attrs))
     -[] -[(int U128); (int U128)]).(PartialOrd_ge_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u16asPartialOrd_ge  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u16asPartialOrd_ge  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U16)) ((IntSynType U16)) (u16asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u16asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U16)) ((IntSynType U16)) (u16asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u16asPartialOrd_spec_attrs))
     -[] -[(int U16); (int U16)]).(PartialOrd_ge_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u32asPartialOrd_ge  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u32asPartialOrd_ge  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U32)) ((IntSynType U32)) (u32asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u32asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U32)) ((IntSynType U32)) (u32asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u32asPartialOrd_spec_attrs))
     -[] -[(int U32); (int U32)]).(PartialOrd_ge_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u64asPartialOrd_ge  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u64asPartialOrd_ge  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U64)) ((IntSynType U64)) (u64asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u64asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U64)) ((IntSynType U64)) (u64asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u64asPartialOrd_spec_attrs))
     -[] -[(int U64); (int U64)]).(PartialOrd_ge_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u8asPartialOrd_ge  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u8asPartialOrd_ge  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U8)) ((IntSynType U8)) (u8asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u8asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U8)) ((IntSynType U8)) (u8asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u8asPartialOrd_spec_attrs))
     -[] -[(int U8); (int U8)]).(PartialOrd_ge_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_usizeasPartialOrd_ge  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_usizeasPartialOrd_ge  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType USize)) ((IntSynType USize)) (usizeasPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (usizeasPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType USize)) ((IntSynType USize)) (usizeasPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (usizeasPartialOrd_spec_attrs))
     -[] -[(int USize); (int USize)]).(PartialOrd_ge_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_REFAasPartialOrdREFB_gt (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (PartialEq_A_B_realization: (trait_spec_realization (spec_with 0 [] (PartialEq_spec (RRGS:=RRGS) (A_rt) (B_rt))))) (PartialOrd_A_B_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) PartialEq_A_B_spec_attrs)) (PartialOrd_A_B_realization: (trait_spec_realization (spec_with 0 [] (PartialOrd_spec (RRGS:=RRGS) (A_rt) (B_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) (DropGlue_B_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (B_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
@@ -2813,91 +2813,91 @@ Definition trait_incl_of_REFAasPartialOrdREFB_gt (A_rt: RT) (B_rt: RT) (A_st: sy
     ∗ (∃ (DropGlue_B_lfts_inst : prod_vec lft DropGlue_B_realization.(trait_ctx_lfts)) (DropGlue_B_tys_inst : plist type DropGlue_B_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_B_realization.(trait_ctx_spec) DropGlue_B_lfts_inst DropGlue_B_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (B_rt) B_st DropGlue_B_spec_attrs-[] -[B_ty]))⌝ ∗ DropGlue_B_realization.(trait_ctx_wf) DropGlue_B_lfts_inst DropGlue_B_tys_inst π))%I).
 
 Definition type_of_REFAasPartialOrdREFB_gt (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (PartialOrd_A_B_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) PartialEq_A_B_spec_attrs)) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) :=
-  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_typarams _ -[A_ty; B_ty] (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialOrd_base_spec ((place_rfnRT (A_rt))) ((place_rfnRT (B_rt))) (RefSynType) (RefSynType) ((REFAasPartialEqREFB_spec_attrs ((A_rt)) ((B_rt)) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt))))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (B_rt))))) ((REFAasPartialOrdREFB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (PartialOrd_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
+  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[A_ty; B_ty]) (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialOrd_base_spec ((place_rfnRT (A_rt))) ((place_rfnRT (B_rt))) (RefSynType) (RefSynType) ((REFAasPartialEqREFB_spec_attrs ((A_rt)) ((B_rt)) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt))))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (B_rt))))) ((REFAasPartialOrdREFB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (PartialOrd_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
     -[] -[(shr_ref ulft_1 A_ty); (shr_ref ulft_0 B_ty)]).(PartialOrd_gt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i128asPartialOrd_gt  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i128asPartialOrd_gt  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I128)) ((IntSynType I128)) (i128asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i128asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I128)) ((IntSynType I128)) (i128asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i128asPartialOrd_spec_attrs))
     -[] -[(int I128); (int I128)]).(PartialOrd_gt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i16asPartialOrd_gt  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i16asPartialOrd_gt  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I16)) ((IntSynType I16)) (i16asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i16asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I16)) ((IntSynType I16)) (i16asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i16asPartialOrd_spec_attrs))
     -[] -[(int I16); (int I16)]).(PartialOrd_gt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i32asPartialOrd_gt  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i32asPartialOrd_gt  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I32)) ((IntSynType I32)) (i32asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i32asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I32)) ((IntSynType I32)) (i32asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i32asPartialOrd_spec_attrs))
     -[] -[(int I32); (int I32)]).(PartialOrd_gt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i64asPartialOrd_gt  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i64asPartialOrd_gt  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I64)) ((IntSynType I64)) (i64asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i64asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I64)) ((IntSynType I64)) (i64asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i64asPartialOrd_spec_attrs))
     -[] -[(int I64); (int I64)]).(PartialOrd_gt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i8asPartialOrd_gt  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i8asPartialOrd_gt  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I8)) ((IntSynType I8)) (i8asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i8asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I8)) ((IntSynType I8)) (i8asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i8asPartialOrd_spec_attrs))
     -[] -[(int I8); (int I8)]).(PartialOrd_gt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_isizeasPartialOrd_gt  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_isizeasPartialOrd_gt  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType ISize)) ((IntSynType ISize)) (isizeasPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (isizeasPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType ISize)) ((IntSynType ISize)) (isizeasPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (isizeasPartialOrd_spec_attrs))
     -[] -[(int ISize); (int ISize)]).(PartialOrd_gt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u128asPartialOrd_gt  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u128asPartialOrd_gt  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U128)) ((IntSynType U128)) (u128asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u128asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U128)) ((IntSynType U128)) (u128asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u128asPartialOrd_spec_attrs))
     -[] -[(int U128); (int U128)]).(PartialOrd_gt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u16asPartialOrd_gt  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u16asPartialOrd_gt  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U16)) ((IntSynType U16)) (u16asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u16asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U16)) ((IntSynType U16)) (u16asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u16asPartialOrd_spec_attrs))
     -[] -[(int U16); (int U16)]).(PartialOrd_gt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u32asPartialOrd_gt  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u32asPartialOrd_gt  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U32)) ((IntSynType U32)) (u32asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u32asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U32)) ((IntSynType U32)) (u32asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u32asPartialOrd_spec_attrs))
     -[] -[(int U32); (int U32)]).(PartialOrd_gt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u64asPartialOrd_gt  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u64asPartialOrd_gt  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U64)) ((IntSynType U64)) (u64asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u64asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U64)) ((IntSynType U64)) (u64asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u64asPartialOrd_spec_attrs))
     -[] -[(int U64); (int U64)]).(PartialOrd_gt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u8asPartialOrd_gt  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u8asPartialOrd_gt  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U8)) ((IntSynType U8)) (u8asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u8asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U8)) ((IntSynType U8)) (u8asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u8asPartialOrd_spec_attrs))
     -[] -[(int U8); (int U8)]).(PartialOrd_gt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_usizeasPartialOrd_gt  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_usizeasPartialOrd_gt  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType USize)) ((IntSynType USize)) (usizeasPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (usizeasPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType USize)) ((IntSynType USize)) (usizeasPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (usizeasPartialOrd_spec_attrs))
     -[] -[(int USize); (int USize)]).(PartialOrd_gt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_REFAasPartialOrdREFB_le (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (PartialEq_A_B_realization: (trait_spec_realization (spec_with 0 [] (PartialEq_spec (RRGS:=RRGS) (A_rt) (B_rt))))) (PartialOrd_A_B_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) PartialEq_A_B_spec_attrs)) (PartialOrd_A_B_realization: (trait_spec_realization (spec_with 0 [] (PartialOrd_spec (RRGS:=RRGS) (A_rt) (B_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) (DropGlue_B_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (B_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
@@ -2907,91 +2907,91 @@ Definition trait_incl_of_REFAasPartialOrdREFB_le (A_rt: RT) (B_rt: RT) (A_st: sy
     ∗ (∃ (DropGlue_B_lfts_inst : prod_vec lft DropGlue_B_realization.(trait_ctx_lfts)) (DropGlue_B_tys_inst : plist type DropGlue_B_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_B_realization.(trait_ctx_spec) DropGlue_B_lfts_inst DropGlue_B_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (B_rt) B_st DropGlue_B_spec_attrs-[] -[B_ty]))⌝ ∗ DropGlue_B_realization.(trait_ctx_wf) DropGlue_B_lfts_inst DropGlue_B_tys_inst π))%I).
 
 Definition type_of_REFAasPartialOrdREFB_le (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (PartialOrd_A_B_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) PartialEq_A_B_spec_attrs)) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) :=
-  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_typarams _ -[A_ty; B_ty] (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialOrd_base_spec ((place_rfnRT (A_rt))) ((place_rfnRT (B_rt))) (RefSynType) (RefSynType) ((REFAasPartialEqREFB_spec_attrs ((A_rt)) ((B_rt)) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt))))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (B_rt))))) ((REFAasPartialOrdREFB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (PartialOrd_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
+  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[A_ty; B_ty]) (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialOrd_base_spec ((place_rfnRT (A_rt))) ((place_rfnRT (B_rt))) (RefSynType) (RefSynType) ((REFAasPartialEqREFB_spec_attrs ((A_rt)) ((B_rt)) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt))))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (B_rt))))) ((REFAasPartialOrdREFB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (PartialOrd_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
     -[] -[(shr_ref ulft_1 A_ty); (shr_ref ulft_0 B_ty)]).(PartialOrd_le_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i128asPartialOrd_le  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i128asPartialOrd_le  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I128)) ((IntSynType I128)) (i128asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i128asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I128)) ((IntSynType I128)) (i128asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i128asPartialOrd_spec_attrs))
     -[] -[(int I128); (int I128)]).(PartialOrd_le_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i16asPartialOrd_le  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i16asPartialOrd_le  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I16)) ((IntSynType I16)) (i16asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i16asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I16)) ((IntSynType I16)) (i16asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i16asPartialOrd_spec_attrs))
     -[] -[(int I16); (int I16)]).(PartialOrd_le_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i32asPartialOrd_le  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i32asPartialOrd_le  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I32)) ((IntSynType I32)) (i32asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i32asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I32)) ((IntSynType I32)) (i32asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i32asPartialOrd_spec_attrs))
     -[] -[(int I32); (int I32)]).(PartialOrd_le_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i64asPartialOrd_le  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i64asPartialOrd_le  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I64)) ((IntSynType I64)) (i64asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i64asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I64)) ((IntSynType I64)) (i64asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i64asPartialOrd_spec_attrs))
     -[] -[(int I64); (int I64)]).(PartialOrd_le_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i8asPartialOrd_le  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i8asPartialOrd_le  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I8)) ((IntSynType I8)) (i8asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i8asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I8)) ((IntSynType I8)) (i8asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i8asPartialOrd_spec_attrs))
     -[] -[(int I8); (int I8)]).(PartialOrd_le_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_isizeasPartialOrd_le  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_isizeasPartialOrd_le  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType ISize)) ((IntSynType ISize)) (isizeasPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (isizeasPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType ISize)) ((IntSynType ISize)) (isizeasPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (isizeasPartialOrd_spec_attrs))
     -[] -[(int ISize); (int ISize)]).(PartialOrd_le_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u128asPartialOrd_le  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u128asPartialOrd_le  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U128)) ((IntSynType U128)) (u128asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u128asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U128)) ((IntSynType U128)) (u128asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u128asPartialOrd_spec_attrs))
     -[] -[(int U128); (int U128)]).(PartialOrd_le_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u16asPartialOrd_le  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u16asPartialOrd_le  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U16)) ((IntSynType U16)) (u16asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u16asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U16)) ((IntSynType U16)) (u16asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u16asPartialOrd_spec_attrs))
     -[] -[(int U16); (int U16)]).(PartialOrd_le_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u32asPartialOrd_le  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u32asPartialOrd_le  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U32)) ((IntSynType U32)) (u32asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u32asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U32)) ((IntSynType U32)) (u32asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u32asPartialOrd_spec_attrs))
     -[] -[(int U32); (int U32)]).(PartialOrd_le_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u64asPartialOrd_le  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u64asPartialOrd_le  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U64)) ((IntSynType U64)) (u64asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u64asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U64)) ((IntSynType U64)) (u64asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u64asPartialOrd_spec_attrs))
     -[] -[(int U64); (int U64)]).(PartialOrd_le_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u8asPartialOrd_le  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u8asPartialOrd_le  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U8)) ((IntSynType U8)) (u8asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u8asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U8)) ((IntSynType U8)) (u8asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u8asPartialOrd_spec_attrs))
     -[] -[(int U8); (int U8)]).(PartialOrd_le_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_usizeasPartialOrd_le  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_usizeasPartialOrd_le  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType USize)) ((IntSynType USize)) (usizeasPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (usizeasPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType USize)) ((IntSynType USize)) (usizeasPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (usizeasPartialOrd_spec_attrs))
     -[] -[(int USize); (int USize)]).(PartialOrd_le_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_REFAasPartialOrdREFB_lt (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (PartialEq_A_B_realization: (trait_spec_realization (spec_with 0 [] (PartialEq_spec (RRGS:=RRGS) (A_rt) (B_rt))))) (PartialOrd_A_B_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) PartialEq_A_B_spec_attrs)) (PartialOrd_A_B_realization: (trait_spec_realization (spec_with 0 [] (PartialOrd_spec (RRGS:=RRGS) (A_rt) (B_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) (DropGlue_B_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (B_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
@@ -3001,91 +3001,91 @@ Definition trait_incl_of_REFAasPartialOrdREFB_lt (A_rt: RT) (B_rt: RT) (A_st: sy
     ∗ (∃ (DropGlue_B_lfts_inst : prod_vec lft DropGlue_B_realization.(trait_ctx_lfts)) (DropGlue_B_tys_inst : plist type DropGlue_B_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_B_realization.(trait_ctx_spec) DropGlue_B_lfts_inst DropGlue_B_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (B_rt) B_st DropGlue_B_spec_attrs-[] -[B_ty]))⌝ ∗ DropGlue_B_realization.(trait_ctx_wf) DropGlue_B_lfts_inst DropGlue_B_tys_inst π))%I).
 
 Definition type_of_REFAasPartialOrdREFB_lt (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (PartialOrd_A_B_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) PartialEq_A_B_spec_attrs)) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) :=
-  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_typarams _ -[A_ty; B_ty] (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialOrd_base_spec ((place_rfnRT (A_rt))) ((place_rfnRT (B_rt))) (RefSynType) (RefSynType) ((REFAasPartialEqREFB_spec_attrs ((A_rt)) ((B_rt)) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt))))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (B_rt))))) ((REFAasPartialOrdREFB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (PartialOrd_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
+  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[A_ty; B_ty]) (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialOrd_base_spec ((place_rfnRT (A_rt))) ((place_rfnRT (B_rt))) (RefSynType) (RefSynType) ((REFAasPartialEqREFB_spec_attrs ((A_rt)) ((B_rt)) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt))))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (B_rt))))) ((REFAasPartialOrdREFB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (PartialOrd_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
     -[] -[(shr_ref ulft_1 A_ty); (shr_ref ulft_0 B_ty)]).(PartialOrd_lt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i128asPartialOrd_lt  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i128asPartialOrd_lt  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I128)) ((IntSynType I128)) (i128asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i128asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I128)) ((IntSynType I128)) (i128asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i128asPartialOrd_spec_attrs))
     -[] -[(int I128); (int I128)]).(PartialOrd_lt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i16asPartialOrd_lt  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i16asPartialOrd_lt  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I16)) ((IntSynType I16)) (i16asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i16asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I16)) ((IntSynType I16)) (i16asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i16asPartialOrd_spec_attrs))
     -[] -[(int I16); (int I16)]).(PartialOrd_lt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i32asPartialOrd_lt  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i32asPartialOrd_lt  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I32)) ((IntSynType I32)) (i32asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i32asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I32)) ((IntSynType I32)) (i32asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i32asPartialOrd_spec_attrs))
     -[] -[(int I32); (int I32)]).(PartialOrd_lt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i64asPartialOrd_lt  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i64asPartialOrd_lt  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I64)) ((IntSynType I64)) (i64asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i64asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I64)) ((IntSynType I64)) (i64asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i64asPartialOrd_spec_attrs))
     -[] -[(int I64); (int I64)]).(PartialOrd_lt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i8asPartialOrd_lt  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i8asPartialOrd_lt  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I8)) ((IntSynType I8)) (i8asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i8asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I8)) ((IntSynType I8)) (i8asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i8asPartialOrd_spec_attrs))
     -[] -[(int I8); (int I8)]).(PartialOrd_lt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_isizeasPartialOrd_lt  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_isizeasPartialOrd_lt  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType ISize)) ((IntSynType ISize)) (isizeasPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (isizeasPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType ISize)) ((IntSynType ISize)) (isizeasPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (isizeasPartialOrd_spec_attrs))
     -[] -[(int ISize); (int ISize)]).(PartialOrd_lt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u128asPartialOrd_lt  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u128asPartialOrd_lt  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U128)) ((IntSynType U128)) (u128asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u128asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U128)) ((IntSynType U128)) (u128asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u128asPartialOrd_spec_attrs))
     -[] -[(int U128); (int U128)]).(PartialOrd_lt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u16asPartialOrd_lt  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u16asPartialOrd_lt  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U16)) ((IntSynType U16)) (u16asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u16asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U16)) ((IntSynType U16)) (u16asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u16asPartialOrd_spec_attrs))
     -[] -[(int U16); (int U16)]).(PartialOrd_lt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u32asPartialOrd_lt  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u32asPartialOrd_lt  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U32)) ((IntSynType U32)) (u32asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u32asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U32)) ((IntSynType U32)) (u32asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u32asPartialOrd_spec_attrs))
     -[] -[(int U32); (int U32)]).(PartialOrd_lt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u64asPartialOrd_lt  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u64asPartialOrd_lt  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U64)) ((IntSynType U64)) (u64asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u64asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U64)) ((IntSynType U64)) (u64asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u64asPartialOrd_spec_attrs))
     -[] -[(int U64); (int U64)]).(PartialOrd_lt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u8asPartialOrd_lt  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u8asPartialOrd_lt  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U8)) ((IntSynType U8)) (u8asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u8asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U8)) ((IntSynType U8)) (u8asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u8asPartialOrd_spec_attrs))
     -[] -[(int U8); (int U8)]).(PartialOrd_lt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_usizeasPartialOrd_lt  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_usizeasPartialOrd_lt  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType USize)) ((IntSynType USize)) (usizeasPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (usizeasPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType USize)) ((IntSynType USize)) (usizeasPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (usizeasPartialOrd_spec_attrs))
     -[] -[(int USize); (int USize)]).(PartialOrd_lt_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_REFAasPartialEqREFB_ne (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (PartialEq_A_B_realization: (trait_spec_realization (spec_with 0 [] (PartialEq_spec (RRGS:=RRGS) (A_rt) (B_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) (DropGlue_B_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (B_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
@@ -3094,7 +3094,7 @@ Definition trait_incl_of_REFAasPartialEqREFB_ne (A_rt: RT) (B_rt: RT) (A_st: syn
     ∗ (∃ (DropGlue_B_lfts_inst : prod_vec lft DropGlue_B_realization.(trait_ctx_lfts)) (DropGlue_B_tys_inst : plist type DropGlue_B_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_B_realization.(trait_ctx_spec) DropGlue_B_lfts_inst DropGlue_B_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (B_rt) B_st DropGlue_B_spec_attrs-[] -[B_ty]))⌝ ∗ DropGlue_B_realization.(trait_ctx_wf) DropGlue_B_lfts_inst DropGlue_B_tys_inst π))%I).
 
 Definition type_of_REFAasPartialEqREFB_ne (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) :=
-  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_typarams _ -[A_ty; B_ty] (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialEq_base_spec ((place_rfnRT (A_rt))) ((place_rfnRT (B_rt))) (RefSynType) (RefSynType) ((drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt))))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (B_rt))))) ((REFAasPartialEqREFB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
+  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[A_ty; B_ty]) (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialEq_base_spec ((place_rfnRT (A_rt))) ((place_rfnRT (B_rt))) (RefSynType) (RefSynType) ((drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt))))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (B_rt))))) ((REFAasPartialEqREFB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
     -[] -[(shr_ref ulft_1 A_ty); (shr_ref ulft_0 B_ty)]).(PartialEq_ne_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_REFAasPartialEqREFmutB_ne (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (PartialEq_A_B_realization: (trait_spec_realization (spec_with 0 [] (PartialEq_spec (RRGS:=RRGS) (A_rt) (B_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) (DropGlue_B_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (B_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
@@ -3103,7 +3103,7 @@ Definition trait_incl_of_REFAasPartialEqREFmutB_ne (A_rt: RT) (B_rt: RT) (A_st: 
     ∗ (∃ (DropGlue_B_lfts_inst : prod_vec lft DropGlue_B_realization.(trait_ctx_lfts)) (DropGlue_B_tys_inst : plist type DropGlue_B_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_B_realization.(trait_ctx_spec) DropGlue_B_lfts_inst DropGlue_B_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (B_rt) B_st DropGlue_B_spec_attrs-[] -[B_ty]))⌝ ∗ DropGlue_B_realization.(trait_ctx_wf) DropGlue_B_lfts_inst DropGlue_B_tys_inst π))%I).
 
 Definition type_of_REFAasPartialEqREFmutB_ne (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) :=
-  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_typarams _ -[A_ty; B_ty] (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialEq_base_spec ((place_rfnRT (A_rt))) (((place_rfnRT (B_rt)) * gname)%type) (RefSynType) (RefSynType) ((drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt))))) ((drop_glue_trivial_spec_attrs (((place_rfnRT (B_rt)) * gname)%type))) ((REFAasPartialEqREFmutB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
+  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[A_ty; B_ty]) (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialEq_base_spec ((place_rfnRT (A_rt))) (((place_rfnRT (B_rt)) * gname)%type) (RefSynType) (RefSynType) ((drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt))))) ((drop_glue_trivial_spec_attrs (((place_rfnRT (B_rt)) * gname)%type))) ((REFAasPartialEqREFmutB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
     -[] -[(shr_ref ulft_1 A_ty); (mut_ref ulft_0 B_ty)]).(PartialEq_ne_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_REFmutAasPartialEqREFB_ne (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (PartialEq_A_B_realization: (trait_spec_realization (spec_with 0 [] (PartialEq_spec (RRGS:=RRGS) (A_rt) (B_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) (DropGlue_B_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (B_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
@@ -3112,7 +3112,7 @@ Definition trait_incl_of_REFmutAasPartialEqREFB_ne (A_rt: RT) (B_rt: RT) (A_st: 
     ∗ (∃ (DropGlue_B_lfts_inst : prod_vec lft DropGlue_B_realization.(trait_ctx_lfts)) (DropGlue_B_tys_inst : plist type DropGlue_B_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_B_realization.(trait_ctx_spec) DropGlue_B_lfts_inst DropGlue_B_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (B_rt) B_st DropGlue_B_spec_attrs-[] -[B_ty]))⌝ ∗ DropGlue_B_realization.(trait_ctx_wf) DropGlue_B_lfts_inst DropGlue_B_tys_inst π))%I).
 
 Definition type_of_REFmutAasPartialEqREFB_ne (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) :=
-  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_typarams _ -[A_ty; B_ty] (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialEq_base_spec (((place_rfnRT (A_rt)) * gname)%type) ((place_rfnRT (B_rt))) (RefSynType) (RefSynType) ((drop_glue_trivial_spec_attrs (((place_rfnRT (A_rt)) * gname)%type))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (B_rt))))) ((REFmutAasPartialEqREFB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
+  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[A_ty; B_ty]) (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialEq_base_spec (((place_rfnRT (A_rt)) * gname)%type) ((place_rfnRT (B_rt))) (RefSynType) (RefSynType) ((drop_glue_trivial_spec_attrs (((place_rfnRT (A_rt)) * gname)%type))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (B_rt))))) ((REFmutAasPartialEqREFB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
     -[] -[(mut_ref ulft_1 A_ty); (shr_ref ulft_0 B_ty)]).(PartialEq_ne_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_REFmutAasPartialEqREFmutB_ne (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (PartialEq_A_B_realization: (trait_spec_realization (spec_with 0 [] (PartialEq_spec (RRGS:=RRGS) (A_rt) (B_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) (DropGlue_B_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (B_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
@@ -3121,105 +3121,105 @@ Definition trait_incl_of_REFmutAasPartialEqREFmutB_ne (A_rt: RT) (B_rt: RT) (A_s
     ∗ (∃ (DropGlue_B_lfts_inst : prod_vec lft DropGlue_B_realization.(trait_ctx_lfts)) (DropGlue_B_tys_inst : plist type DropGlue_B_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_B_realization.(trait_ctx_spec) DropGlue_B_lfts_inst DropGlue_B_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (B_rt) B_st DropGlue_B_spec_attrs-[] -[B_ty]))⌝ ∗ DropGlue_B_realization.(trait_ctx_wf) DropGlue_B_lfts_inst DropGlue_B_tys_inst π))%I).
 
 Definition type_of_REFmutAasPartialEqREFmutB_ne (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) :=
-  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_typarams _ -[A_ty; B_ty] (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialEq_base_spec (((place_rfnRT (A_rt)) * gname)%type) (((place_rfnRT (B_rt)) * gname)%type) (RefSynType) (RefSynType) ((drop_glue_trivial_spec_attrs (((place_rfnRT (A_rt)) * gname)%type))) ((drop_glue_trivial_spec_attrs (((place_rfnRT (B_rt)) * gname)%type))) ((REFmutAasPartialEqREFmutB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
+  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[A_ty; B_ty]) (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialEq_base_spec (((place_rfnRT (A_rt)) * gname)%type) (((place_rfnRT (B_rt)) * gname)%type) (RefSynType) (RefSynType) ((drop_glue_trivial_spec_attrs (((place_rfnRT (A_rt)) * gname)%type))) ((drop_glue_trivial_spec_attrs (((place_rfnRT (B_rt)) * gname)%type))) ((REFmutAasPartialEqREFmutB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
     -[] -[(mut_ref ulft_1 A_ty); (mut_ref ulft_0 B_ty)]).(PartialEq_ne_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_unitasPartialEq_ne  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_unitasPartialEq_ne  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (unit) (unit) (UnitSynType) (UnitSynType) ((drop_glue_trivial_spec_attrs (unit))) ((drop_glue_trivial_spec_attrs (unit))) (unitasPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (unit) (unit) (UnitSynType) (UnitSynType) ((drop_glue_trivial_spec_attrs (unit))) ((drop_glue_trivial_spec_attrs (unit))) (unitasPartialEq_spec_attrs))
     -[] -[unit_t; unit_t]).(PartialEq_ne_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_boolasPartialEq_ne  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_boolasPartialEq_ne  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (bool) (bool) (BoolSynType) (BoolSynType) ((drop_glue_trivial_spec_attrs (bool))) ((drop_glue_trivial_spec_attrs (bool))) (boolasPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (bool) (bool) (BoolSynType) (BoolSynType) ((drop_glue_trivial_spec_attrs (bool))) ((drop_glue_trivial_spec_attrs (bool))) (boolasPartialEq_spec_attrs))
     -[] -[bool_t; bool_t]).(PartialEq_ne_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i128asPartialEq_ne  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i128asPartialEq_ne  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType I128)) ((IntSynType I128)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i128asPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType I128)) ((IntSynType I128)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i128asPartialEq_spec_attrs))
     -[] -[(int I128); (int I128)]).(PartialEq_ne_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i16asPartialEq_ne  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i16asPartialEq_ne  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType I16)) ((IntSynType I16)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i16asPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType I16)) ((IntSynType I16)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i16asPartialEq_spec_attrs))
     -[] -[(int I16); (int I16)]).(PartialEq_ne_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i32asPartialEq_ne  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i32asPartialEq_ne  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType I32)) ((IntSynType I32)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i32asPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType I32)) ((IntSynType I32)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i32asPartialEq_spec_attrs))
     -[] -[(int I32); (int I32)]).(PartialEq_ne_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i64asPartialEq_ne  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i64asPartialEq_ne  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType I64)) ((IntSynType I64)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i64asPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType I64)) ((IntSynType I64)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i64asPartialEq_spec_attrs))
     -[] -[(int I64); (int I64)]).(PartialEq_ne_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i8asPartialEq_ne  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i8asPartialEq_ne  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType I8)) ((IntSynType I8)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i8asPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType I8)) ((IntSynType I8)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i8asPartialEq_spec_attrs))
     -[] -[(int I8); (int I8)]).(PartialEq_ne_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_isizeasPartialEq_ne  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_isizeasPartialEq_ne  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType ISize)) ((IntSynType ISize)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (isizeasPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType ISize)) ((IntSynType ISize)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (isizeasPartialEq_spec_attrs))
     -[] -[(int ISize); (int ISize)]).(PartialEq_ne_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u128asPartialEq_ne  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u128asPartialEq_ne  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType U128)) ((IntSynType U128)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u128asPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType U128)) ((IntSynType U128)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u128asPartialEq_spec_attrs))
     -[] -[(int U128); (int U128)]).(PartialEq_ne_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u16asPartialEq_ne  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u16asPartialEq_ne  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType U16)) ((IntSynType U16)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u16asPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType U16)) ((IntSynType U16)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u16asPartialEq_spec_attrs))
     -[] -[(int U16); (int U16)]).(PartialEq_ne_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u32asPartialEq_ne  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u32asPartialEq_ne  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType U32)) ((IntSynType U32)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u32asPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType U32)) ((IntSynType U32)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u32asPartialEq_spec_attrs))
     -[] -[(int U32); (int U32)]).(PartialEq_ne_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u64asPartialEq_ne  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u64asPartialEq_ne  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType U64)) ((IntSynType U64)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u64asPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType U64)) ((IntSynType U64)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u64asPartialEq_spec_attrs))
     -[] -[(int U64); (int U64)]).(PartialEq_ne_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u8asPartialEq_ne  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u8asPartialEq_ne  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType U8)) ((IntSynType U8)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u8asPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType U8)) ((IntSynType U8)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u8asPartialEq_spec_attrs))
     -[] -[(int U8); (int U8)]).(PartialEq_ne_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_usizeasPartialEq_ne  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_usizeasPartialEq_ne  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType USize)) ((IntSynType USize)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (usizeasPartialEq_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialEq_base_spec (Z) (Z) ((IntSynType USize)) ((IntSynType USize)) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (usizeasPartialEq_spec_attrs))
     -[] -[(int USize); (int USize)]).(PartialEq_ne_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_REFAasPartialOrdREFB_partial_cmp (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (PartialEq_A_B_realization: (trait_spec_realization (spec_with 0 [] (PartialEq_spec (RRGS:=RRGS) (A_rt) (B_rt))))) (PartialOrd_A_B_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) PartialEq_A_B_spec_attrs)) (PartialOrd_A_B_realization: (trait_spec_realization (spec_with 0 [] (PartialOrd_spec (RRGS:=RRGS) (A_rt) (B_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) (DropGlue_B_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (B_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
@@ -3229,98 +3229,98 @@ Definition trait_incl_of_REFAasPartialOrdREFB_partial_cmp (A_rt: RT) (B_rt: RT) 
     ∗ (∃ (DropGlue_B_lfts_inst : prod_vec lft DropGlue_B_realization.(trait_ctx_lfts)) (DropGlue_B_tys_inst : plist type DropGlue_B_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_B_realization.(trait_ctx_spec) DropGlue_B_lfts_inst DropGlue_B_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (B_rt) B_st DropGlue_B_spec_attrs-[] -[B_ty]))⌝ ∗ DropGlue_B_realization.(trait_ctx_wf) DropGlue_B_lfts_inst DropGlue_B_tys_inst π))%I).
 
 Definition type_of_REFAasPartialOrdREFB_partial_cmp (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (PartialOrd_A_B_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) PartialEq_A_B_spec_attrs)) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) :=
-  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_typarams _ -[A_ty; B_ty] (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialOrd_base_spec ((place_rfnRT (A_rt))) ((place_rfnRT (B_rt))) (RefSynType) (RefSynType) ((REFAasPartialEqREFB_spec_attrs ((A_rt)) ((B_rt)) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt))))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (B_rt))))) ((REFAasPartialOrdREFB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (PartialOrd_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
+  spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[A_ty; B_ty]) (scope_add_elctx (λ ϝ, [(ϝ, ulft_0); (ϝ, ulft_1)]) (((PartialOrd_base_spec ((place_rfnRT (A_rt))) ((place_rfnRT (B_rt))) (RefSynType) (RefSynType) ((REFAasPartialEqREFB_spec_attrs ((A_rt)) ((B_rt)) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt))))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (B_rt))))) ((REFAasPartialOrdREFB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (PartialOrd_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))))
     -[] -[(shr_ref ulft_1 A_ty); (shr_ref ulft_0 B_ty)]).(PartialOrd_partial_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_unitasPartialOrd_partial_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_unitasPartialOrd_partial_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (unit) (unit) (UnitSynType) (UnitSynType) (unitasPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (unit))) ((drop_glue_trivial_spec_attrs (unit))) (unitasPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (unit) (unit) (UnitSynType) (UnitSynType) (unitasPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (unit))) ((drop_glue_trivial_spec_attrs (unit))) (unitasPartialOrd_spec_attrs))
     -[] -[unit_t; unit_t]).(PartialOrd_partial_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i128asPartialOrd_partial_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i128asPartialOrd_partial_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I128)) ((IntSynType I128)) (i128asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i128asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I128)) ((IntSynType I128)) (i128asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i128asPartialOrd_spec_attrs))
     -[] -[(int I128); (int I128)]).(PartialOrd_partial_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i16asPartialOrd_partial_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i16asPartialOrd_partial_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I16)) ((IntSynType I16)) (i16asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i16asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I16)) ((IntSynType I16)) (i16asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i16asPartialOrd_spec_attrs))
     -[] -[(int I16); (int I16)]).(PartialOrd_partial_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i32asPartialOrd_partial_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i32asPartialOrd_partial_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I32)) ((IntSynType I32)) (i32asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i32asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I32)) ((IntSynType I32)) (i32asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i32asPartialOrd_spec_attrs))
     -[] -[(int I32); (int I32)]).(PartialOrd_partial_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i64asPartialOrd_partial_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i64asPartialOrd_partial_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I64)) ((IntSynType I64)) (i64asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i64asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I64)) ((IntSynType I64)) (i64asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i64asPartialOrd_spec_attrs))
     -[] -[(int I64); (int I64)]).(PartialOrd_partial_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_i8asPartialOrd_partial_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_i8asPartialOrd_partial_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I8)) ((IntSynType I8)) (i8asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i8asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType I8)) ((IntSynType I8)) (i8asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (i8asPartialOrd_spec_attrs))
     -[] -[(int I8); (int I8)]).(PartialOrd_partial_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_isizeasPartialOrd_partial_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_isizeasPartialOrd_partial_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType ISize)) ((IntSynType ISize)) (isizeasPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (isizeasPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType ISize)) ((IntSynType ISize)) (isizeasPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (isizeasPartialOrd_spec_attrs))
     -[] -[(int ISize); (int ISize)]).(PartialOrd_partial_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u128asPartialOrd_partial_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u128asPartialOrd_partial_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U128)) ((IntSynType U128)) (u128asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u128asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U128)) ((IntSynType U128)) (u128asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u128asPartialOrd_spec_attrs))
     -[] -[(int U128); (int U128)]).(PartialOrd_partial_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u16asPartialOrd_partial_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u16asPartialOrd_partial_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U16)) ((IntSynType U16)) (u16asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u16asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U16)) ((IntSynType U16)) (u16asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u16asPartialOrd_spec_attrs))
     -[] -[(int U16); (int U16)]).(PartialOrd_partial_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u32asPartialOrd_partial_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u32asPartialOrd_partial_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U32)) ((IntSynType U32)) (u32asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u32asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U32)) ((IntSynType U32)) (u32asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u32asPartialOrd_spec_attrs))
     -[] -[(int U32); (int U32)]).(PartialOrd_partial_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u64asPartialOrd_partial_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u64asPartialOrd_partial_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U64)) ((IntSynType U64)) (u64asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u64asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U64)) ((IntSynType U64)) (u64asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u64asPartialOrd_spec_attrs))
     -[] -[(int U64); (int U64)]).(PartialOrd_partial_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_u8asPartialOrd_partial_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_u8asPartialOrd_partial_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U8)) ((IntSynType U8)) (u8asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u8asPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType U8)) ((IntSynType U8)) (u8asPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (u8asPartialOrd_spec_attrs))
     -[] -[(int U8); (int U8)]).(PartialOrd_partial_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_usizeasPartialOrd_partial_cmp  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2]) : 2 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_usizeasPartialOrd_partial_cmp  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType USize)) ((IntSynType USize)) (usizeasPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (usizeasPartialOrd_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType USize)) ((IntSynType USize)) (usizeasPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (usizeasPartialOrd_spec_attrs))
     -[] -[(int USize); (int USize)]).(PartialOrd_partial_cmp_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_Ordering_as_raw  : (spec_with _ _ (thread_id → iProp Σ)) :=
@@ -3329,7 +3329,7 @@ Definition trait_incl_of_Ordering_as_raw  : (spec_with _ _ (thread_id → iProp 
 Definition type_of_Ordering_as_raw  :=
   fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
       (* params....... *) (self) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) self :@: (Ordering_ty  -[] -[]);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -3344,7 +3344,7 @@ Definition trait_incl_of_Ordering_is_eq  : (spec_with _ _ (thread_id → iProp �
 Definition type_of_Ordering_is_eq  :=
   fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
       (* params....... *) (self) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) self :@: (Ordering_ty  -[] -[]);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -3359,7 +3359,7 @@ Definition trait_incl_of_Ordering_is_ge  : (spec_with _ _ (thread_id → iProp �
 Definition type_of_Ordering_is_ge  :=
   fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
       (* params....... *) (self) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) self :@: (Ordering_ty  -[] -[]);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -3374,7 +3374,7 @@ Definition trait_incl_of_Ordering_is_gt  : (spec_with _ _ (thread_id → iProp �
 Definition type_of_Ordering_is_gt  :=
   fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
       (* params....... *) (self) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) self :@: (Ordering_ty  -[] -[]);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -3389,7 +3389,7 @@ Definition trait_incl_of_Ordering_is_le  : (spec_with _ _ (thread_id → iProp �
 Definition type_of_Ordering_is_le  :=
   fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
       (* params....... *) (self) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) self :@: (Ordering_ty  -[] -[]);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -3404,7 +3404,7 @@ Definition trait_incl_of_Ordering_is_lt  : (spec_with _ _ (thread_id → iProp �
 Definition type_of_Ordering_is_lt  :=
   fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
       (* params....... *) (self) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) self :@: (Ordering_ty  -[] -[]);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -3419,7 +3419,7 @@ Definition trait_incl_of_Ordering_is_ne  : (spec_with _ _ (thread_id → iProp �
 Definition type_of_Ordering_is_ne  :=
   fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
       (* params....... *) (self) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) self :@: (Ordering_ty  -[] -[]);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -3438,7 +3438,7 @@ Definition trait_incl_of_max (T_rt: RT) (T_st: syn_type) (PartialEq_T_T_spec_att
 Definition type_of_max (T_rt: RT) (T_st: syn_type) (PartialEq_T_T_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (T_rt) (T_rt) )) (Eq_T_spec_attrs: (Eq_spec_attrs (RRGS:=RRGS) (T_rt) PartialEq_T_T_spec_attrs)) (PartialOrd_T_T_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (T_rt) (T_rt) PartialEq_T_T_spec_attrs)) (Ord_T_spec_attrs: (Ord_spec_attrs (RRGS:=RRGS) (T_rt) PartialEq_T_T_spec_attrs Eq_T_spec_attrs PartialOrd_T_T_spec_attrs)) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (v1, v2) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) v1 :@: T_ty, v2 :@: T_ty;
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -3455,7 +3455,7 @@ Definition trait_incl_of_max_by (T_rt: RT) (F_rt: RT) (T_st: syn_type) (F_st: sy
 Definition type_of_max_by (T_rt: RT) (F_rt: RT) (T_st: syn_type) (F_st: syn_type) (FnOnce_F_REFTREFT_spec_attrs: (FnOnce_spec_attrs (RRGS:=RRGS) (F_rt) (((tuple2_rt) ((place_rfnRT (T_rt))) ((place_rfnRT (T_rt))))) (Ordering_rt) )) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_F_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (F_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty; F_ty]) : ([(T_rt, T_st); (F_rt, F_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (p, v1, v2, compare) : ((_ * _ * _ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty; F_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) v1 :@: T_ty, v2 :@: T_ty, compare :@: F_ty;
       (* precondition. *) (λ π : thread_id, (FnOnce_F_REFTREFT_spec_attrs.(FnOnce_Pre) π p compare *[v2; v1])) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -3475,7 +3475,7 @@ Definition trait_incl_of_min (T_rt: RT) (T_st: syn_type) (PartialEq_T_T_spec_att
 Definition type_of_min (T_rt: RT) (T_st: syn_type) (PartialEq_T_T_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (T_rt) (T_rt) )) (Eq_T_spec_attrs: (Eq_spec_attrs (RRGS:=RRGS) (T_rt) PartialEq_T_T_spec_attrs)) (PartialOrd_T_T_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (T_rt) (T_rt) PartialEq_T_T_spec_attrs)) (Ord_T_spec_attrs: (Ord_spec_attrs (RRGS:=RRGS) (T_rt) PartialEq_T_T_spec_attrs Eq_T_spec_attrs PartialOrd_T_T_spec_attrs)) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (v1, v2) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) v1 :@: T_ty, v2 :@: T_ty;
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -3492,7 +3492,7 @@ Definition trait_incl_of_min_by (T_rt: RT) (F_rt: RT) (T_st: syn_type) (F_st: sy
 Definition type_of_min_by (T_rt: RT) (F_rt: RT) (T_st: syn_type) (F_st: syn_type) (FnOnce_F_REFTREFT_spec_attrs: (FnOnce_spec_attrs (RRGS:=RRGS) (F_rt) (((tuple2_rt) ((place_rfnRT (T_rt))) ((place_rfnRT (T_rt))))) (Ordering_rt) )) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_F_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (F_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty; F_ty]) : ([(T_rt, T_st); (F_rt, F_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (p, v1, v2, compare) : ((_ * _ * _ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty; F_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) v1 :@: T_ty, v2 :@: T_ty, compare :@: F_ty;
       (* precondition. *) (λ π : thread_id, (FnOnce_F_REFTREFT_spec_attrs.(FnOnce_Pre) π p compare *[v2; v1])) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -3512,7 +3512,7 @@ Definition trait_incl_of_Ord_max_closure0 (Self_rt: RT) (Self_st: syn_type) (Par
 Definition type_of_Ord_max_closure0 (Self_rt: RT) (Self_st: syn_type) (PartialEq_Self_Self_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) )) (Eq_Self_spec_attrs: (Eq_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs)) (PartialOrd_Self_Self_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) PartialEq_Self_Self_spec_attrs)) (Ord_Self_spec_attrs: (Ord_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs Eq_Self_spec_attrs PartialOrd_Self_Self_spec_attrs)) (DropGlue_Self_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )) :=
   fn(∀ ( *[ulft_2; ulft_3]) : 2 | ( *[Self_ty]) : ([(Self_rt, Self_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (a, b) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_2); (ϝ, ulft_3)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[Self_ty]) ϝ ++ (λ ϝ, [(ϝ, ulft_2); (ϝ, ulft_3)]) ϝ);
       (* args......... *) () :@: unit_t, a :@: (shr_ref ulft_2 Self_ty), b :@: (shr_ref ulft_3 Self_ty);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -3531,7 +3531,7 @@ Definition trait_incl_of_Ord_min_closure0 (Self_rt: RT) (Self_st: syn_type) (Par
 Definition type_of_Ord_min_closure0 (Self_rt: RT) (Self_st: syn_type) (PartialEq_Self_Self_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) )) (Eq_Self_spec_attrs: (Eq_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs)) (PartialOrd_Self_Self_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) PartialEq_Self_Self_spec_attrs)) (Ord_Self_spec_attrs: (Ord_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs Eq_Self_spec_attrs PartialOrd_Self_Self_spec_attrs)) (DropGlue_Self_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )) :=
   fn(∀ ( *[ulft_2; ulft_3]) : 2 | ( *[Self_ty]) : ([(Self_rt, Self_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (a, b) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_2); (ϝ, ulft_3)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[Self_ty]) ϝ ++ (λ ϝ, [(ϝ, ulft_2); (ϝ, ulft_3)]) ϝ);
       (* args......... *) () :@: unit_t, a :@: (shr_ref ulft_2 Self_ty), b :@: (shr_ref ulft_3 Self_ty);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -3549,7 +3549,7 @@ Definition Ord_max_closure0_call_once_trait_req_incl (Self_rt: RT) (Self_st: syn
     ∗ (∃ (DropGlue_Self_lfts_inst : prod_vec lft DropGlue_Self_realization.(trait_ctx_lfts)) (DropGlue_Self_tys_inst : plist type DropGlue_Self_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_Self_realization.(trait_ctx_spec) DropGlue_Self_lfts_inst DropGlue_Self_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (Self_rt) Self_st DropGlue_Self_spec_attrs-[] -[Self_ty]))⌝ ∗ DropGlue_Self_realization.(trait_ctx_wf) DropGlue_Self_lfts_inst DropGlue_Self_tys_inst π))%I).
 
 Definition Ord_max_closure0_call_once_spec (Self_rt: RT) (Self_st: syn_type) (PartialEq_Self_Self_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) )) (Eq_Self_spec_attrs: (Eq_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs)) (PartialOrd_Self_Self_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) PartialEq_Self_Self_spec_attrs)) (Ord_Self_spec_attrs: (Ord_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs Eq_Self_spec_attrs PartialOrd_Self_Self_spec_attrs)) (DropGlue_Self_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )) :=
-  spec! ( *[ulft_2; ulft_3]) : 2 | ( *[Self_ty]) : ([Self_rt] : list RT),(λ a b, scope_add_typarams _ -[Self_ty] (scope_add_elctx (λ ϝ, [(ϝ, ulft_2); (ϝ, ulft_3)]) (((FnOnce_base_spec (unit) ((((tuple2_rt) ((place_rfnRT (Self_rt))) ((place_rfnRT (Self_rt)))))) ((Ordering_rt)) (UnitSynType) (((tuple2_sls (RefSynType) (RefSynType)) : syn_type)) (Ordering_st) ((drop_glue_trivial_spec_attrs (unit))) ((drop_glue_tuple2_spec_attrs ((place_rfnRT (Self_rt))) ((place_rfnRT (Self_rt))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (Self_rt))))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (Self_rt))))))) ((drop_glue_trivial_spec_attrs ((Ordering_rt)))) ((Ord_max_closure0_FnOnce_spec_attrs (Self_rt) (PartialEq_Self_Self_spec_attrs) (Eq_Self_spec_attrs) (PartialOrd_Self_Self_spec_attrs) (Ord_Self_spec_attrs) (DropGlue_Self_spec_attrs))))
+  spec! ( *[ulft_2; ulft_3]) : 2 | ( *[Self_ty]) : ([Self_rt] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[Self_ty]) (scope_add_elctx (λ ϝ, [(ϝ, ulft_2); (ϝ, ulft_3)]) (((FnOnce_base_spec (unit) ((((tuple2_rt) ((place_rfnRT (Self_rt))) ((place_rfnRT (Self_rt)))))) ((Ordering_rt)) (UnitSynType) (((tuple2_sls (RefSynType) (RefSynType)) : syn_type)) (Ordering_st) ((drop_glue_trivial_spec_attrs (unit))) ((drop_glue_tuple2_spec_attrs ((place_rfnRT (Self_rt))) ((place_rfnRT (Self_rt))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (Self_rt))))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (Self_rt))))))) ((drop_glue_trivial_spec_attrs ((Ordering_rt)))) ((Ord_max_closure0_FnOnce_spec_attrs (Self_rt) (PartialEq_Self_Self_spec_attrs) (Eq_Self_spec_attrs) (PartialOrd_Self_Self_spec_attrs) (Ord_Self_spec_attrs) (DropGlue_Self_spec_attrs))))
     -[] -[unit_t; (tuple2_ty ((place_rfnRT (Self_rt))) ((place_rfnRT (Self_rt))) -[] -[(shr_ref ulft_2 Self_ty); (shr_ref ulft_3 Self_ty)]); (Ordering_ty  -[] -[])]).(FnOnce_call_once_spec)   a b))) <MERGE!>.
 
 Definition Ord_min_closure0_call_once_trait_req_incl (Self_rt: RT) (Self_st: syn_type) (PartialEq_Self_Self_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) )) (PartialEq_Self_Self_realization: (trait_spec_realization (spec_with 0 [] (PartialEq_spec (RRGS:=RRGS) (Self_rt) (Self_rt))))) (Eq_Self_spec_attrs: (Eq_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs)) (Eq_Self_realization: (trait_spec_realization (spec_with 0 [] (Eq_spec (RRGS:=RRGS) (Self_rt))))) (PartialOrd_Self_Self_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) PartialEq_Self_Self_spec_attrs)) (PartialOrd_Self_Self_realization: (trait_spec_realization (spec_with 0 [] (PartialOrd_spec (RRGS:=RRGS) (Self_rt) (Self_rt))))) (Ord_Self_spec_attrs: (Ord_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs Eq_Self_spec_attrs PartialOrd_Self_Self_spec_attrs)) (Ord_Self_realization: (trait_spec_realization (spec_with 0 [] (Ord_spec (RRGS:=RRGS) (Self_rt))))) (DropGlue_Self_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )) (DropGlue_Self_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (Self_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
@@ -3560,7 +3560,7 @@ Definition Ord_min_closure0_call_once_trait_req_incl (Self_rt: RT) (Self_st: syn
     ∗ (∃ (DropGlue_Self_lfts_inst : prod_vec lft DropGlue_Self_realization.(trait_ctx_lfts)) (DropGlue_Self_tys_inst : plist type DropGlue_Self_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_Self_realization.(trait_ctx_spec) DropGlue_Self_lfts_inst DropGlue_Self_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (Self_rt) Self_st DropGlue_Self_spec_attrs-[] -[Self_ty]))⌝ ∗ DropGlue_Self_realization.(trait_ctx_wf) DropGlue_Self_lfts_inst DropGlue_Self_tys_inst π))%I).
 
 Definition Ord_min_closure0_call_once_spec (Self_rt: RT) (Self_st: syn_type) (PartialEq_Self_Self_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) )) (Eq_Self_spec_attrs: (Eq_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs)) (PartialOrd_Self_Self_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) PartialEq_Self_Self_spec_attrs)) (Ord_Self_spec_attrs: (Ord_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs Eq_Self_spec_attrs PartialOrd_Self_Self_spec_attrs)) (DropGlue_Self_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )) :=
-  spec! ( *[ulft_2; ulft_3]) : 2 | ( *[Self_ty]) : ([Self_rt] : list RT),(λ a b, scope_add_typarams _ -[Self_ty] (scope_add_elctx (λ ϝ, [(ϝ, ulft_2); (ϝ, ulft_3)]) (((FnOnce_base_spec (unit) ((((tuple2_rt) ((place_rfnRT (Self_rt))) ((place_rfnRT (Self_rt)))))) ((Ordering_rt)) (UnitSynType) (((tuple2_sls (RefSynType) (RefSynType)) : syn_type)) (Ordering_st) ((drop_glue_trivial_spec_attrs (unit))) ((drop_glue_tuple2_spec_attrs ((place_rfnRT (Self_rt))) ((place_rfnRT (Self_rt))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (Self_rt))))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (Self_rt))))))) ((drop_glue_trivial_spec_attrs ((Ordering_rt)))) ((Ord_min_closure0_FnOnce_spec_attrs (Self_rt) (PartialEq_Self_Self_spec_attrs) (Eq_Self_spec_attrs) (PartialOrd_Self_Self_spec_attrs) (Ord_Self_spec_attrs) (DropGlue_Self_spec_attrs))))
+  spec! ( *[ulft_2; ulft_3]) : 2 | ( *[Self_ty]) : ([Self_rt] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[Self_ty]) (scope_add_elctx (λ ϝ, [(ϝ, ulft_2); (ϝ, ulft_3)]) (((FnOnce_base_spec (unit) ((((tuple2_rt) ((place_rfnRT (Self_rt))) ((place_rfnRT (Self_rt)))))) ((Ordering_rt)) (UnitSynType) (((tuple2_sls (RefSynType) (RefSynType)) : syn_type)) (Ordering_st) ((drop_glue_trivial_spec_attrs (unit))) ((drop_glue_tuple2_spec_attrs ((place_rfnRT (Self_rt))) ((place_rfnRT (Self_rt))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (Self_rt))))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (Self_rt))))))) ((drop_glue_trivial_spec_attrs ((Ordering_rt)))) ((Ord_min_closure0_FnOnce_spec_attrs (Self_rt) (PartialEq_Self_Self_spec_attrs) (Eq_Self_spec_attrs) (PartialOrd_Self_Self_spec_attrs) (Ord_Self_spec_attrs) (DropGlue_Self_spec_attrs))))
     -[] -[unit_t; (tuple2_ty ((place_rfnRT (Self_rt))) ((place_rfnRT (Self_rt))) -[] -[(shr_ref ulft_2 Self_ty); (shr_ref ulft_3 Self_ty)]); (Ordering_ty  -[] -[])]).(FnOnce_call_once_spec)   a b))) <MERGE!>.
 
 
@@ -3590,7 +3590,7 @@ Section REFAasEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition REFAasEq_spec_subsumption  :=
-    ∀ `(A_rt : !RT) `(A_st : !syn_type) `(PartialEq_A_A_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (A_rt) )) `(Eq_A_spec_attrs : !(Eq_spec_attrs (RRGS:=RRGS) (A_rt) PartialEq_A_A_spec_attrs)) `(DropGlue_A_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )), trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[ulft_0]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (REFAasEq_spec (A_rt) (A_st) (PartialEq_A_A_spec_attrs) (Eq_A_spec_attrs) (DropGlue_A_spec_attrs))-[ulft_0] -[A_ty]) (spec! ( *[ulft_0]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), scope_add_typarams _ -[A_ty] ((Eq_base_spec (place_rfnRT (A_rt)) RefSynType (REFAasPartialEqREFB_spec_attrs ((A_rt)) ((A_rt)) (PartialEq_A_A_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_A_spec_attrs)) (drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt)))) (REFAasEq_spec_attrs (A_rt) (PartialEq_A_A_spec_attrs) (Eq_A_spec_attrs) (DropGlue_A_spec_attrs))-[] -[(shr_ref ulft_0 A_ty)])))).
+    ∀ `(A_rt : !RT) `(A_st : !syn_type) `(PartialEq_A_A_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (A_rt) )) `(Eq_A_spec_attrs : !(Eq_spec_attrs (RRGS:=RRGS) (A_rt) PartialEq_A_A_spec_attrs)) `(DropGlue_A_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )), trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[ulft_0]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (REFAasEq_spec (A_rt) (A_st) (PartialEq_A_A_spec_attrs) (Eq_A_spec_attrs) (DropGlue_A_spec_attrs))-[ulft_0] -[A_ty]) (spec! ( *[ulft_0]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[A_ty]) ((Eq_base_spec (place_rfnRT (A_rt)) RefSynType (REFAasPartialEqREFB_spec_attrs ((A_rt)) ((A_rt)) (PartialEq_A_A_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_A_spec_attrs)) (drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt)))) (REFAasEq_spec_attrs (A_rt) (PartialEq_A_A_spec_attrs) (Eq_A_spec_attrs) (DropGlue_A_spec_attrs))-[] -[(shr_ref ulft_0 A_ty)])))).
 End REFAasEq_spec.
 
 Section REFAasOrd_spec.
@@ -3629,7 +3629,7 @@ Section REFAasOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition REFAasOrd_spec_subsumption  :=
-    ∀ `(A_rt : !RT) `(A_st : !syn_type) `(PartialEq_A_A_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (A_rt) )) `(Eq_A_spec_attrs : !(Eq_spec_attrs (RRGS:=RRGS) (A_rt) PartialEq_A_A_spec_attrs)) `(PartialOrd_A_A_spec_attrs : !(PartialOrd_spec_attrs (RRGS:=RRGS) (A_rt) (A_rt) PartialEq_A_A_spec_attrs)) `(Ord_A_spec_attrs : !(Ord_spec_attrs (RRGS:=RRGS) (A_rt) PartialEq_A_A_spec_attrs Eq_A_spec_attrs PartialOrd_A_A_spec_attrs)) `(DropGlue_A_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )), trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[ulft_0]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (REFAasOrd_spec (A_rt) (A_st) (PartialEq_A_A_spec_attrs) (Eq_A_spec_attrs) (PartialOrd_A_A_spec_attrs) (Ord_A_spec_attrs) (DropGlue_A_spec_attrs))-[ulft_0] -[A_ty]) (spec! ( *[ulft_0]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), scope_add_typarams _ -[A_ty] ((Ord_base_spec (place_rfnRT (A_rt)) RefSynType (REFAasPartialEqREFB_spec_attrs ((A_rt)) ((A_rt)) (PartialEq_A_A_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_A_spec_attrs)) (REFAasEq_spec_attrs ((A_rt)) (PartialEq_A_A_spec_attrs) (Eq_A_spec_attrs) (DropGlue_A_spec_attrs)) (REFAasPartialOrdREFB_spec_attrs ((A_rt)) ((A_rt)) (PartialEq_A_A_spec_attrs) (PartialOrd_A_A_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_A_spec_attrs)) (drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt)))) (REFAasOrd_spec_attrs (A_rt) (PartialEq_A_A_spec_attrs) (Eq_A_spec_attrs) (PartialOrd_A_A_spec_attrs) (Ord_A_spec_attrs) (DropGlue_A_spec_attrs))-[] -[(shr_ref ulft_0 A_ty)])))).
+    ∀ `(A_rt : !RT) `(A_st : !syn_type) `(PartialEq_A_A_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (A_rt) )) `(Eq_A_spec_attrs : !(Eq_spec_attrs (RRGS:=RRGS) (A_rt) PartialEq_A_A_spec_attrs)) `(PartialOrd_A_A_spec_attrs : !(PartialOrd_spec_attrs (RRGS:=RRGS) (A_rt) (A_rt) PartialEq_A_A_spec_attrs)) `(Ord_A_spec_attrs : !(Ord_spec_attrs (RRGS:=RRGS) (A_rt) PartialEq_A_A_spec_attrs Eq_A_spec_attrs PartialOrd_A_A_spec_attrs)) `(DropGlue_A_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )), trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[ulft_0]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (REFAasOrd_spec (A_rt) (A_st) (PartialEq_A_A_spec_attrs) (Eq_A_spec_attrs) (PartialOrd_A_A_spec_attrs) (Ord_A_spec_attrs) (DropGlue_A_spec_attrs))-[ulft_0] -[A_ty]) (spec! ( *[ulft_0]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[A_ty]) ((Ord_base_spec (place_rfnRT (A_rt)) RefSynType (REFAasPartialEqREFB_spec_attrs ((A_rt)) ((A_rt)) (PartialEq_A_A_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_A_spec_attrs)) (REFAasEq_spec_attrs ((A_rt)) (PartialEq_A_A_spec_attrs) (Eq_A_spec_attrs) (DropGlue_A_spec_attrs)) (REFAasPartialOrdREFB_spec_attrs ((A_rt)) ((A_rt)) (PartialEq_A_A_spec_attrs) (PartialOrd_A_A_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_A_spec_attrs)) (drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt)))) (REFAasOrd_spec_attrs (A_rt) (PartialEq_A_A_spec_attrs) (Eq_A_spec_attrs) (PartialOrd_A_A_spec_attrs) (Ord_A_spec_attrs) (DropGlue_A_spec_attrs))-[] -[(shr_ref ulft_0 A_ty)])))).
 End REFAasOrd_spec.
 
 Section REFAasPartialEqREFB_spec.
@@ -3661,7 +3661,7 @@ Section REFAasPartialEqREFB_spec.
     solve_trait_realization_pers.
   Qed.
   Definition REFAasPartialEqREFB_spec_subsumption  :=
-    ∀ `(A_rt : !RT) `(B_rt : !RT) `(A_st : !syn_type) `(B_st : !syn_type) `(PartialEq_A_B_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) `(DropGlue_A_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) `(DropGlue_B_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )), trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT), (REFAasPartialEqREFB_spec (A_rt) (B_rt) (A_st) (B_st) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))-[ulft_0; ulft_1] -[A_ty; B_ty]) (spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT), scope_add_typarams _ -[A_ty; B_ty] ((PartialEq_base_spec (place_rfnRT (A_rt)) (place_rfnRT (B_rt)) RefSynType RefSynType (drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt)))) (drop_glue_trivial_spec_attrs ((place_rfnRT (B_rt)))) (REFAasPartialEqREFB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))-[] -[(shr_ref ulft_1 A_ty); (shr_ref ulft_0 B_ty)])))).
+    ∀ `(A_rt : !RT) `(B_rt : !RT) `(A_st : !syn_type) `(B_st : !syn_type) `(PartialEq_A_B_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) `(DropGlue_A_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) `(DropGlue_B_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )), trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT), (REFAasPartialEqREFB_spec (A_rt) (B_rt) (A_st) (B_st) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))-[ulft_0; ulft_1] -[A_ty; B_ty]) (spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[A_ty; B_ty]) ((PartialEq_base_spec (place_rfnRT (A_rt)) (place_rfnRT (B_rt)) RefSynType RefSynType (drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt)))) (drop_glue_trivial_spec_attrs ((place_rfnRT (B_rt)))) (REFAasPartialEqREFB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))-[] -[(shr_ref ulft_1 A_ty); (shr_ref ulft_0 B_ty)])))).
 End REFAasPartialEqREFB_spec.
 
 Section REFAasPartialEqREFmutB_spec.
@@ -3693,7 +3693,7 @@ Section REFAasPartialEqREFmutB_spec.
     solve_trait_realization_pers.
   Qed.
   Definition REFAasPartialEqREFmutB_spec_subsumption  :=
-    ∀ `(A_rt : !RT) `(B_rt : !RT) `(A_st : !syn_type) `(B_st : !syn_type) `(PartialEq_A_B_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) `(DropGlue_A_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) `(DropGlue_B_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )), trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT), (REFAasPartialEqREFmutB_spec (A_rt) (B_rt) (A_st) (B_st) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))-[ulft_0; ulft_1] -[A_ty; B_ty]) (spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT), scope_add_typarams _ -[A_ty; B_ty] ((PartialEq_base_spec (place_rfnRT (A_rt)) ((place_rfnRT (B_rt)) * gname)%type RefSynType RefSynType (drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt)))) (drop_glue_trivial_spec_attrs (((place_rfnRT (B_rt)) * gname)%type)) (REFAasPartialEqREFmutB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))-[] -[(shr_ref ulft_1 A_ty); (mut_ref ulft_0 B_ty)])))).
+    ∀ `(A_rt : !RT) `(B_rt : !RT) `(A_st : !syn_type) `(B_st : !syn_type) `(PartialEq_A_B_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) `(DropGlue_A_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) `(DropGlue_B_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )), trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT), (REFAasPartialEqREFmutB_spec (A_rt) (B_rt) (A_st) (B_st) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))-[ulft_0; ulft_1] -[A_ty; B_ty]) (spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[A_ty; B_ty]) ((PartialEq_base_spec (place_rfnRT (A_rt)) ((place_rfnRT (B_rt)) * gname)%type RefSynType RefSynType (drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt)))) (drop_glue_trivial_spec_attrs (((place_rfnRT (B_rt)) * gname)%type)) (REFAasPartialEqREFmutB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))-[] -[(shr_ref ulft_1 A_ty); (mut_ref ulft_0 B_ty)])))).
 End REFAasPartialEqREFmutB_spec.
 
 Section REFAasPartialOrdREFB_spec.
@@ -3735,7 +3735,7 @@ Section REFAasPartialOrdREFB_spec.
     solve_trait_realization_pers.
   Qed.
   Definition REFAasPartialOrdREFB_spec_subsumption  :=
-    ∀ `(A_rt : !RT) `(B_rt : !RT) `(A_st : !syn_type) `(B_st : !syn_type) `(PartialEq_A_B_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) `(PartialOrd_A_B_spec_attrs : !(PartialOrd_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) PartialEq_A_B_spec_attrs)) `(DropGlue_A_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) `(DropGlue_B_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )), trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT), (REFAasPartialOrdREFB_spec (A_rt) (B_rt) (A_st) (B_st) (PartialEq_A_B_spec_attrs) (PartialOrd_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))-[ulft_0; ulft_1] -[A_ty; B_ty]) (spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT), scope_add_typarams _ -[A_ty; B_ty] ((PartialOrd_base_spec (place_rfnRT (A_rt)) (place_rfnRT (B_rt)) RefSynType RefSynType (REFAasPartialEqREFB_spec_attrs ((A_rt)) ((B_rt)) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs)) (drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt)))) (drop_glue_trivial_spec_attrs ((place_rfnRT (B_rt)))) (REFAasPartialOrdREFB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (PartialOrd_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))-[] -[(shr_ref ulft_1 A_ty); (shr_ref ulft_0 B_ty)])))).
+    ∀ `(A_rt : !RT) `(B_rt : !RT) `(A_st : !syn_type) `(B_st : !syn_type) `(PartialEq_A_B_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) `(PartialOrd_A_B_spec_attrs : !(PartialOrd_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) PartialEq_A_B_spec_attrs)) `(DropGlue_A_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) `(DropGlue_B_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )), trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT), (REFAasPartialOrdREFB_spec (A_rt) (B_rt) (A_st) (B_st) (PartialEq_A_B_spec_attrs) (PartialOrd_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))-[ulft_0; ulft_1] -[A_ty; B_ty]) (spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[A_ty; B_ty]) ((PartialOrd_base_spec (place_rfnRT (A_rt)) (place_rfnRT (B_rt)) RefSynType RefSynType (REFAasPartialEqREFB_spec_attrs ((A_rt)) ((B_rt)) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs)) (drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt)))) (drop_glue_trivial_spec_attrs ((place_rfnRT (B_rt)))) (REFAasPartialOrdREFB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (PartialOrd_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))-[] -[(shr_ref ulft_1 A_ty); (shr_ref ulft_0 B_ty)])))).
 End REFAasPartialOrdREFB_spec.
 
 Section REFmutAasPartialEqREFB_spec.
@@ -3767,7 +3767,7 @@ Section REFmutAasPartialEqREFB_spec.
     solve_trait_realization_pers.
   Qed.
   Definition REFmutAasPartialEqREFB_spec_subsumption  :=
-    ∀ `(A_rt : !RT) `(B_rt : !RT) `(A_st : !syn_type) `(B_st : !syn_type) `(PartialEq_A_B_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) `(DropGlue_A_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) `(DropGlue_B_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )), trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT), (REFmutAasPartialEqREFB_spec (A_rt) (B_rt) (A_st) (B_st) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))-[ulft_0; ulft_1] -[A_ty; B_ty]) (spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT), scope_add_typarams _ -[A_ty; B_ty] ((PartialEq_base_spec ((place_rfnRT (A_rt)) * gname)%type (place_rfnRT (B_rt)) RefSynType RefSynType (drop_glue_trivial_spec_attrs (((place_rfnRT (A_rt)) * gname)%type)) (drop_glue_trivial_spec_attrs ((place_rfnRT (B_rt)))) (REFmutAasPartialEqREFB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))-[] -[(mut_ref ulft_1 A_ty); (shr_ref ulft_0 B_ty)])))).
+    ∀ `(A_rt : !RT) `(B_rt : !RT) `(A_st : !syn_type) `(B_st : !syn_type) `(PartialEq_A_B_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) `(DropGlue_A_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) `(DropGlue_B_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )), trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT), (REFmutAasPartialEqREFB_spec (A_rt) (B_rt) (A_st) (B_st) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))-[ulft_0; ulft_1] -[A_ty; B_ty]) (spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[A_ty; B_ty]) ((PartialEq_base_spec ((place_rfnRT (A_rt)) * gname)%type (place_rfnRT (B_rt)) RefSynType RefSynType (drop_glue_trivial_spec_attrs (((place_rfnRT (A_rt)) * gname)%type)) (drop_glue_trivial_spec_attrs ((place_rfnRT (B_rt)))) (REFmutAasPartialEqREFB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))-[] -[(mut_ref ulft_1 A_ty); (shr_ref ulft_0 B_ty)])))).
 End REFmutAasPartialEqREFB_spec.
 
 Section REFmutAasPartialEqREFmutB_spec.
@@ -3799,7 +3799,7 @@ Section REFmutAasPartialEqREFmutB_spec.
     solve_trait_realization_pers.
   Qed.
   Definition REFmutAasPartialEqREFmutB_spec_subsumption  :=
-    ∀ `(A_rt : !RT) `(B_rt : !RT) `(A_st : !syn_type) `(B_st : !syn_type) `(PartialEq_A_B_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) `(DropGlue_A_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) `(DropGlue_B_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )), trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT), (REFmutAasPartialEqREFmutB_spec (A_rt) (B_rt) (A_st) (B_st) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))-[ulft_0; ulft_1] -[A_ty; B_ty]) (spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT), scope_add_typarams _ -[A_ty; B_ty] ((PartialEq_base_spec ((place_rfnRT (A_rt)) * gname)%type ((place_rfnRT (B_rt)) * gname)%type RefSynType RefSynType (drop_glue_trivial_spec_attrs (((place_rfnRT (A_rt)) * gname)%type)) (drop_glue_trivial_spec_attrs (((place_rfnRT (B_rt)) * gname)%type)) (REFmutAasPartialEqREFmutB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))-[] -[(mut_ref ulft_1 A_ty); (mut_ref ulft_0 B_ty)])))).
+    ∀ `(A_rt : !RT) `(B_rt : !RT) `(A_st : !syn_type) `(B_st : !syn_type) `(PartialEq_A_B_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) `(DropGlue_A_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) `(DropGlue_B_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )), trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT), (REFmutAasPartialEqREFmutB_spec (A_rt) (B_rt) (A_st) (B_st) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))-[ulft_0; ulft_1] -[A_ty; B_ty]) (spec! ( *[ulft_0; ulft_1]) : 2 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[A_ty; B_ty]) ((PartialEq_base_spec ((place_rfnRT (A_rt)) * gname)%type ((place_rfnRT (B_rt)) * gname)%type RefSynType RefSynType (drop_glue_trivial_spec_attrs (((place_rfnRT (A_rt)) * gname)%type)) (drop_glue_trivial_spec_attrs (((place_rfnRT (B_rt)) * gname)%type)) (REFmutAasPartialEqREFmutB_spec_attrs (A_rt) (B_rt) (PartialEq_A_B_spec_attrs) (DropGlue_A_spec_attrs) (DropGlue_B_spec_attrs))-[] -[(mut_ref ulft_1 A_ty); (mut_ref ulft_0 B_ty)])))).
 End REFmutAasPartialEqREFmutB_spec.
 
 Section unitasEq_spec.
@@ -3824,7 +3824,7 @@ Section unitasEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition unitasEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), unitasEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Eq_base_spec unit UnitSynType unitasPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (unit)) unitasEq_spec_attrs-[] -[unit_t])))).
+    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), unitasEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Eq_base_spec unit UnitSynType unitasPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (unit)) unitasEq_spec_attrs-[] -[unit_t])))).
 End unitasEq_spec.
 
 Section unitasOrd_spec.
@@ -3858,7 +3858,7 @@ Section unitasOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition unitasOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), unitasOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Ord_base_spec unit UnitSynType unitasPartialEq_spec_attrs unitasEq_spec_attrs unitasPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (unit)) unitasOrd_spec_attrs-[] -[unit_t])))).
+    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), unitasOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Ord_base_spec unit UnitSynType unitasPartialEq_spec_attrs unitasEq_spec_attrs unitasPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (unit)) unitasOrd_spec_attrs-[] -[unit_t])))).
 End unitasOrd_spec.
 
 Section unitasPartialEq_spec.
@@ -3886,7 +3886,7 @@ Section unitasPartialEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition unitasPartialEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), unitasPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialEq_base_spec unit unit UnitSynType UnitSynType (drop_glue_trivial_spec_attrs (unit)) (drop_glue_trivial_spec_attrs (unit)) unitasPartialEq_spec_attrs-[] -[unit_t; unit_t])))).
+    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), unitasPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialEq_base_spec unit unit UnitSynType UnitSynType (drop_glue_trivial_spec_attrs (unit)) (drop_glue_trivial_spec_attrs (unit)) unitasPartialEq_spec_attrs-[] -[unit_t; unit_t])))).
 End unitasPartialEq_spec.
 
 Section unitasPartialOrd_spec.
@@ -3923,7 +3923,7 @@ Section unitasPartialOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition unitasPartialOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), unitasPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialOrd_base_spec unit unit UnitSynType UnitSynType unitasPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (unit)) (drop_glue_trivial_spec_attrs (unit)) unitasPartialOrd_spec_attrs-[] -[unit_t; unit_t])))).
+    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), unitasPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialOrd_base_spec unit unit UnitSynType UnitSynType unitasPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (unit)) (drop_glue_trivial_spec_attrs (unit)) unitasPartialOrd_spec_attrs-[] -[unit_t; unit_t])))).
 End unitasPartialOrd_spec.
 
 Section boolasEq_spec.
@@ -3948,7 +3948,7 @@ Section boolasEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition boolasEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), boolasEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Eq_base_spec bool BoolSynType boolasPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (bool)) boolasEq_spec_attrs-[] -[bool_t])))).
+    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), boolasEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Eq_base_spec bool BoolSynType boolasPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (bool)) boolasEq_spec_attrs-[] -[bool_t])))).
 End boolasEq_spec.
 
 Section boolasPartialEq_spec.
@@ -3976,7 +3976,7 @@ Section boolasPartialEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition boolasPartialEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), boolasPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialEq_base_spec bool bool BoolSynType BoolSynType (drop_glue_trivial_spec_attrs (bool)) (drop_glue_trivial_spec_attrs (bool)) boolasPartialEq_spec_attrs-[] -[bool_t; bool_t])))).
+    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), boolasPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialEq_base_spec bool bool BoolSynType BoolSynType (drop_glue_trivial_spec_attrs (bool)) (drop_glue_trivial_spec_attrs (bool)) boolasPartialEq_spec_attrs-[] -[bool_t; bool_t])))).
 End boolasPartialEq_spec.
 
 Section i128asEq_spec.
@@ -4001,7 +4001,7 @@ Section i128asEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition i128asEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i128asEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Eq_base_spec Z (IntSynType I128) i128asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i128asEq_spec_attrs-[] -[(int I128)])))).
+    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i128asEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Eq_base_spec Z (IntSynType I128) i128asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i128asEq_spec_attrs-[] -[(int I128)])))).
 End i128asEq_spec.
 
 Section i128asOrd_spec.
@@ -4035,7 +4035,7 @@ Section i128asOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition i128asOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i128asOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Ord_base_spec Z (IntSynType I128) i128asPartialEq_spec_attrs i128asEq_spec_attrs i128asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i128asOrd_spec_attrs-[] -[(int I128)])))).
+    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i128asOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Ord_base_spec Z (IntSynType I128) i128asPartialEq_spec_attrs i128asEq_spec_attrs i128asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i128asOrd_spec_attrs-[] -[(int I128)])))).
 End i128asOrd_spec.
 
 Section i128asPartialEq_spec.
@@ -4063,7 +4063,7 @@ Section i128asPartialEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition i128asPartialEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i128asPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialEq_base_spec Z Z (IntSynType I128) (IntSynType I128) (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) i128asPartialEq_spec_attrs-[] -[(int I128); (int I128)])))).
+    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i128asPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialEq_base_spec Z Z (IntSynType I128) (IntSynType I128) (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) i128asPartialEq_spec_attrs-[] -[(int I128); (int I128)])))).
 End i128asPartialEq_spec.
 
 Section i128asPartialOrd_spec.
@@ -4100,7 +4100,7 @@ Section i128asPartialOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition i128asPartialOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i128asPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialOrd_base_spec Z Z (IntSynType I128) (IntSynType I128) i128asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) i128asPartialOrd_spec_attrs-[] -[(int I128); (int I128)])))).
+    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i128asPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialOrd_base_spec Z Z (IntSynType I128) (IntSynType I128) i128asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) i128asPartialOrd_spec_attrs-[] -[(int I128); (int I128)])))).
 End i128asPartialOrd_spec.
 
 Section i16asEq_spec.
@@ -4125,7 +4125,7 @@ Section i16asEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition i16asEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i16asEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Eq_base_spec Z (IntSynType I16) i16asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i16asEq_spec_attrs-[] -[(int I16)])))).
+    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i16asEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Eq_base_spec Z (IntSynType I16) i16asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i16asEq_spec_attrs-[] -[(int I16)])))).
 End i16asEq_spec.
 
 Section i16asOrd_spec.
@@ -4159,7 +4159,7 @@ Section i16asOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition i16asOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i16asOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Ord_base_spec Z (IntSynType I16) i16asPartialEq_spec_attrs i16asEq_spec_attrs i16asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i16asOrd_spec_attrs-[] -[(int I16)])))).
+    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i16asOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Ord_base_spec Z (IntSynType I16) i16asPartialEq_spec_attrs i16asEq_spec_attrs i16asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i16asOrd_spec_attrs-[] -[(int I16)])))).
 End i16asOrd_spec.
 
 Section i16asPartialEq_spec.
@@ -4187,7 +4187,7 @@ Section i16asPartialEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition i16asPartialEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i16asPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialEq_base_spec Z Z (IntSynType I16) (IntSynType I16) (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) i16asPartialEq_spec_attrs-[] -[(int I16); (int I16)])))).
+    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i16asPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialEq_base_spec Z Z (IntSynType I16) (IntSynType I16) (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) i16asPartialEq_spec_attrs-[] -[(int I16); (int I16)])))).
 End i16asPartialEq_spec.
 
 Section i16asPartialOrd_spec.
@@ -4224,7 +4224,7 @@ Section i16asPartialOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition i16asPartialOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i16asPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialOrd_base_spec Z Z (IntSynType I16) (IntSynType I16) i16asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) i16asPartialOrd_spec_attrs-[] -[(int I16); (int I16)])))).
+    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i16asPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialOrd_base_spec Z Z (IntSynType I16) (IntSynType I16) i16asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) i16asPartialOrd_spec_attrs-[] -[(int I16); (int I16)])))).
 End i16asPartialOrd_spec.
 
 Section i32asEq_spec.
@@ -4249,7 +4249,7 @@ Section i32asEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition i32asEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i32asEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Eq_base_spec Z (IntSynType I32) i32asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i32asEq_spec_attrs-[] -[(int I32)])))).
+    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i32asEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Eq_base_spec Z (IntSynType I32) i32asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i32asEq_spec_attrs-[] -[(int I32)])))).
 End i32asEq_spec.
 
 Section i32asOrd_spec.
@@ -4283,7 +4283,7 @@ Section i32asOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition i32asOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i32asOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Ord_base_spec Z (IntSynType I32) i32asPartialEq_spec_attrs i32asEq_spec_attrs i32asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i32asOrd_spec_attrs-[] -[(int I32)])))).
+    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i32asOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Ord_base_spec Z (IntSynType I32) i32asPartialEq_spec_attrs i32asEq_spec_attrs i32asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i32asOrd_spec_attrs-[] -[(int I32)])))).
 End i32asOrd_spec.
 
 Section i32asPartialEq_spec.
@@ -4311,7 +4311,7 @@ Section i32asPartialEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition i32asPartialEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i32asPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialEq_base_spec Z Z (IntSynType I32) (IntSynType I32) (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) i32asPartialEq_spec_attrs-[] -[(int I32); (int I32)])))).
+    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i32asPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialEq_base_spec Z Z (IntSynType I32) (IntSynType I32) (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) i32asPartialEq_spec_attrs-[] -[(int I32); (int I32)])))).
 End i32asPartialEq_spec.
 
 Section i32asPartialOrd_spec.
@@ -4348,7 +4348,7 @@ Section i32asPartialOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition i32asPartialOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i32asPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialOrd_base_spec Z Z (IntSynType I32) (IntSynType I32) i32asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) i32asPartialOrd_spec_attrs-[] -[(int I32); (int I32)])))).
+    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i32asPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialOrd_base_spec Z Z (IntSynType I32) (IntSynType I32) i32asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) i32asPartialOrd_spec_attrs-[] -[(int I32); (int I32)])))).
 End i32asPartialOrd_spec.
 
 Section i64asEq_spec.
@@ -4373,7 +4373,7 @@ Section i64asEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition i64asEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i64asEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Eq_base_spec Z (IntSynType I64) i64asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i64asEq_spec_attrs-[] -[(int I64)])))).
+    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i64asEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Eq_base_spec Z (IntSynType I64) i64asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i64asEq_spec_attrs-[] -[(int I64)])))).
 End i64asEq_spec.
 
 Section i64asOrd_spec.
@@ -4407,7 +4407,7 @@ Section i64asOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition i64asOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i64asOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Ord_base_spec Z (IntSynType I64) i64asPartialEq_spec_attrs i64asEq_spec_attrs i64asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i64asOrd_spec_attrs-[] -[(int I64)])))).
+    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i64asOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Ord_base_spec Z (IntSynType I64) i64asPartialEq_spec_attrs i64asEq_spec_attrs i64asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i64asOrd_spec_attrs-[] -[(int I64)])))).
 End i64asOrd_spec.
 
 Section i64asPartialEq_spec.
@@ -4435,7 +4435,7 @@ Section i64asPartialEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition i64asPartialEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i64asPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialEq_base_spec Z Z (IntSynType I64) (IntSynType I64) (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) i64asPartialEq_spec_attrs-[] -[(int I64); (int I64)])))).
+    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i64asPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialEq_base_spec Z Z (IntSynType I64) (IntSynType I64) (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) i64asPartialEq_spec_attrs-[] -[(int I64); (int I64)])))).
 End i64asPartialEq_spec.
 
 Section i64asPartialOrd_spec.
@@ -4472,7 +4472,7 @@ Section i64asPartialOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition i64asPartialOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i64asPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialOrd_base_spec Z Z (IntSynType I64) (IntSynType I64) i64asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) i64asPartialOrd_spec_attrs-[] -[(int I64); (int I64)])))).
+    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i64asPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialOrd_base_spec Z Z (IntSynType I64) (IntSynType I64) i64asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) i64asPartialOrd_spec_attrs-[] -[(int I64); (int I64)])))).
 End i64asPartialOrd_spec.
 
 Section i8asEq_spec.
@@ -4497,7 +4497,7 @@ Section i8asEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition i8asEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i8asEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Eq_base_spec Z (IntSynType I8) i8asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i8asEq_spec_attrs-[] -[(int I8)])))).
+    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i8asEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Eq_base_spec Z (IntSynType I8) i8asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i8asEq_spec_attrs-[] -[(int I8)])))).
 End i8asEq_spec.
 
 Section i8asOrd_spec.
@@ -4531,7 +4531,7 @@ Section i8asOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition i8asOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i8asOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Ord_base_spec Z (IntSynType I8) i8asPartialEq_spec_attrs i8asEq_spec_attrs i8asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i8asOrd_spec_attrs-[] -[(int I8)])))).
+    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i8asOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Ord_base_spec Z (IntSynType I8) i8asPartialEq_spec_attrs i8asEq_spec_attrs i8asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i8asOrd_spec_attrs-[] -[(int I8)])))).
 End i8asOrd_spec.
 
 Section i8asPartialEq_spec.
@@ -4559,7 +4559,7 @@ Section i8asPartialEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition i8asPartialEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i8asPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialEq_base_spec Z Z (IntSynType I8) (IntSynType I8) (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) i8asPartialEq_spec_attrs-[] -[(int I8); (int I8)])))).
+    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i8asPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialEq_base_spec Z Z (IntSynType I8) (IntSynType I8) (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) i8asPartialEq_spec_attrs-[] -[(int I8); (int I8)])))).
 End i8asPartialEq_spec.
 
 Section i8asPartialOrd_spec.
@@ -4596,7 +4596,7 @@ Section i8asPartialOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition i8asPartialOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i8asPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialOrd_base_spec Z Z (IntSynType I8) (IntSynType I8) i8asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) i8asPartialOrd_spec_attrs-[] -[(int I8); (int I8)])))).
+    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), i8asPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialOrd_base_spec Z Z (IntSynType I8) (IntSynType I8) i8asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) i8asPartialOrd_spec_attrs-[] -[(int I8); (int I8)])))).
 End i8asPartialOrd_spec.
 
 Section isizeasEq_spec.
@@ -4621,7 +4621,7 @@ Section isizeasEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition isizeasEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), isizeasEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Eq_base_spec Z (IntSynType ISize) isizeasPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) isizeasEq_spec_attrs-[] -[(int ISize)])))).
+    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), isizeasEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Eq_base_spec Z (IntSynType ISize) isizeasPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) isizeasEq_spec_attrs-[] -[(int ISize)])))).
 End isizeasEq_spec.
 
 Section isizeasOrd_spec.
@@ -4655,7 +4655,7 @@ Section isizeasOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition isizeasOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), isizeasOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Ord_base_spec Z (IntSynType ISize) isizeasPartialEq_spec_attrs isizeasEq_spec_attrs isizeasPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) isizeasOrd_spec_attrs-[] -[(int ISize)])))).
+    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), isizeasOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Ord_base_spec Z (IntSynType ISize) isizeasPartialEq_spec_attrs isizeasEq_spec_attrs isizeasPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) isizeasOrd_spec_attrs-[] -[(int ISize)])))).
 End isizeasOrd_spec.
 
 Section isizeasPartialEq_spec.
@@ -4683,7 +4683,7 @@ Section isizeasPartialEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition isizeasPartialEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), isizeasPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialEq_base_spec Z Z (IntSynType ISize) (IntSynType ISize) (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) isizeasPartialEq_spec_attrs-[] -[(int ISize); (int ISize)])))).
+    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), isizeasPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialEq_base_spec Z Z (IntSynType ISize) (IntSynType ISize) (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) isizeasPartialEq_spec_attrs-[] -[(int ISize); (int ISize)])))).
 End isizeasPartialEq_spec.
 
 Section isizeasPartialOrd_spec.
@@ -4720,7 +4720,7 @@ Section isizeasPartialOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition isizeasPartialOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), isizeasPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialOrd_base_spec Z Z (IntSynType ISize) (IntSynType ISize) isizeasPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) isizeasPartialOrd_spec_attrs-[] -[(int ISize); (int ISize)])))).
+    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), isizeasPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialOrd_base_spec Z Z (IntSynType ISize) (IntSynType ISize) isizeasPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) isizeasPartialOrd_spec_attrs-[] -[(int ISize); (int ISize)])))).
 End isizeasPartialOrd_spec.
 
 Section u128asEq_spec.
@@ -4745,7 +4745,7 @@ Section u128asEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition u128asEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u128asEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Eq_base_spec Z (IntSynType U128) u128asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u128asEq_spec_attrs-[] -[(int U128)])))).
+    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u128asEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Eq_base_spec Z (IntSynType U128) u128asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u128asEq_spec_attrs-[] -[(int U128)])))).
 End u128asEq_spec.
 
 Section u128asOrd_spec.
@@ -4779,7 +4779,7 @@ Section u128asOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition u128asOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u128asOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Ord_base_spec Z (IntSynType U128) u128asPartialEq_spec_attrs u128asEq_spec_attrs u128asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u128asOrd_spec_attrs-[] -[(int U128)])))).
+    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u128asOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Ord_base_spec Z (IntSynType U128) u128asPartialEq_spec_attrs u128asEq_spec_attrs u128asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u128asOrd_spec_attrs-[] -[(int U128)])))).
 End u128asOrd_spec.
 
 Section u128asPartialEq_spec.
@@ -4807,7 +4807,7 @@ Section u128asPartialEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition u128asPartialEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u128asPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialEq_base_spec Z Z (IntSynType U128) (IntSynType U128) (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) u128asPartialEq_spec_attrs-[] -[(int U128); (int U128)])))).
+    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u128asPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialEq_base_spec Z Z (IntSynType U128) (IntSynType U128) (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) u128asPartialEq_spec_attrs-[] -[(int U128); (int U128)])))).
 End u128asPartialEq_spec.
 
 Section u128asPartialOrd_spec.
@@ -4844,7 +4844,7 @@ Section u128asPartialOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition u128asPartialOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u128asPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialOrd_base_spec Z Z (IntSynType U128) (IntSynType U128) u128asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) u128asPartialOrd_spec_attrs-[] -[(int U128); (int U128)])))).
+    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u128asPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialOrd_base_spec Z Z (IntSynType U128) (IntSynType U128) u128asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) u128asPartialOrd_spec_attrs-[] -[(int U128); (int U128)])))).
 End u128asPartialOrd_spec.
 
 Section u16asEq_spec.
@@ -4869,7 +4869,7 @@ Section u16asEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition u16asEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u16asEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Eq_base_spec Z (IntSynType U16) u16asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u16asEq_spec_attrs-[] -[(int U16)])))).
+    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u16asEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Eq_base_spec Z (IntSynType U16) u16asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u16asEq_spec_attrs-[] -[(int U16)])))).
 End u16asEq_spec.
 
 Section u16asOrd_spec.
@@ -4903,7 +4903,7 @@ Section u16asOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition u16asOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u16asOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Ord_base_spec Z (IntSynType U16) u16asPartialEq_spec_attrs u16asEq_spec_attrs u16asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u16asOrd_spec_attrs-[] -[(int U16)])))).
+    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u16asOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Ord_base_spec Z (IntSynType U16) u16asPartialEq_spec_attrs u16asEq_spec_attrs u16asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u16asOrd_spec_attrs-[] -[(int U16)])))).
 End u16asOrd_spec.
 
 Section u16asPartialEq_spec.
@@ -4931,7 +4931,7 @@ Section u16asPartialEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition u16asPartialEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u16asPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialEq_base_spec Z Z (IntSynType U16) (IntSynType U16) (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) u16asPartialEq_spec_attrs-[] -[(int U16); (int U16)])))).
+    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u16asPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialEq_base_spec Z Z (IntSynType U16) (IntSynType U16) (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) u16asPartialEq_spec_attrs-[] -[(int U16); (int U16)])))).
 End u16asPartialEq_spec.
 
 Section u16asPartialOrd_spec.
@@ -4968,7 +4968,7 @@ Section u16asPartialOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition u16asPartialOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u16asPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialOrd_base_spec Z Z (IntSynType U16) (IntSynType U16) u16asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) u16asPartialOrd_spec_attrs-[] -[(int U16); (int U16)])))).
+    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u16asPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialOrd_base_spec Z Z (IntSynType U16) (IntSynType U16) u16asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) u16asPartialOrd_spec_attrs-[] -[(int U16); (int U16)])))).
 End u16asPartialOrd_spec.
 
 Section u32asEq_spec.
@@ -4993,7 +4993,7 @@ Section u32asEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition u32asEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u32asEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Eq_base_spec Z (IntSynType U32) u32asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u32asEq_spec_attrs-[] -[(int U32)])))).
+    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u32asEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Eq_base_spec Z (IntSynType U32) u32asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u32asEq_spec_attrs-[] -[(int U32)])))).
 End u32asEq_spec.
 
 Section u32asOrd_spec.
@@ -5027,7 +5027,7 @@ Section u32asOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition u32asOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u32asOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Ord_base_spec Z (IntSynType U32) u32asPartialEq_spec_attrs u32asEq_spec_attrs u32asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u32asOrd_spec_attrs-[] -[(int U32)])))).
+    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u32asOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Ord_base_spec Z (IntSynType U32) u32asPartialEq_spec_attrs u32asEq_spec_attrs u32asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u32asOrd_spec_attrs-[] -[(int U32)])))).
 End u32asOrd_spec.
 
 Section u32asPartialEq_spec.
@@ -5055,7 +5055,7 @@ Section u32asPartialEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition u32asPartialEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u32asPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialEq_base_spec Z Z (IntSynType U32) (IntSynType U32) (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) u32asPartialEq_spec_attrs-[] -[(int U32); (int U32)])))).
+    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u32asPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialEq_base_spec Z Z (IntSynType U32) (IntSynType U32) (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) u32asPartialEq_spec_attrs-[] -[(int U32); (int U32)])))).
 End u32asPartialEq_spec.
 
 Section u32asPartialOrd_spec.
@@ -5092,7 +5092,7 @@ Section u32asPartialOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition u32asPartialOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u32asPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialOrd_base_spec Z Z (IntSynType U32) (IntSynType U32) u32asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) u32asPartialOrd_spec_attrs-[] -[(int U32); (int U32)])))).
+    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u32asPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialOrd_base_spec Z Z (IntSynType U32) (IntSynType U32) u32asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) u32asPartialOrd_spec_attrs-[] -[(int U32); (int U32)])))).
 End u32asPartialOrd_spec.
 
 Section u64asEq_spec.
@@ -5117,7 +5117,7 @@ Section u64asEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition u64asEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u64asEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Eq_base_spec Z (IntSynType U64) u64asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u64asEq_spec_attrs-[] -[(int U64)])))).
+    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u64asEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Eq_base_spec Z (IntSynType U64) u64asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u64asEq_spec_attrs-[] -[(int U64)])))).
 End u64asEq_spec.
 
 Section u64asOrd_spec.
@@ -5151,7 +5151,7 @@ Section u64asOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition u64asOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u64asOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Ord_base_spec Z (IntSynType U64) u64asPartialEq_spec_attrs u64asEq_spec_attrs u64asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u64asOrd_spec_attrs-[] -[(int U64)])))).
+    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u64asOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Ord_base_spec Z (IntSynType U64) u64asPartialEq_spec_attrs u64asEq_spec_attrs u64asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u64asOrd_spec_attrs-[] -[(int U64)])))).
 End u64asOrd_spec.
 
 Section u64asPartialEq_spec.
@@ -5179,7 +5179,7 @@ Section u64asPartialEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition u64asPartialEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u64asPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialEq_base_spec Z Z (IntSynType U64) (IntSynType U64) (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) u64asPartialEq_spec_attrs-[] -[(int U64); (int U64)])))).
+    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u64asPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialEq_base_spec Z Z (IntSynType U64) (IntSynType U64) (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) u64asPartialEq_spec_attrs-[] -[(int U64); (int U64)])))).
 End u64asPartialEq_spec.
 
 Section u64asPartialOrd_spec.
@@ -5216,7 +5216,7 @@ Section u64asPartialOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition u64asPartialOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u64asPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialOrd_base_spec Z Z (IntSynType U64) (IntSynType U64) u64asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) u64asPartialOrd_spec_attrs-[] -[(int U64); (int U64)])))).
+    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u64asPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialOrd_base_spec Z Z (IntSynType U64) (IntSynType U64) u64asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) u64asPartialOrd_spec_attrs-[] -[(int U64); (int U64)])))).
 End u64asPartialOrd_spec.
 
 Section u8asEq_spec.
@@ -5241,7 +5241,7 @@ Section u8asEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition u8asEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u8asEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Eq_base_spec Z (IntSynType U8) u8asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u8asEq_spec_attrs-[] -[(int U8)])))).
+    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u8asEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Eq_base_spec Z (IntSynType U8) u8asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u8asEq_spec_attrs-[] -[(int U8)])))).
 End u8asEq_spec.
 
 Section u8asOrd_spec.
@@ -5275,7 +5275,7 @@ Section u8asOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition u8asOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u8asOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Ord_base_spec Z (IntSynType U8) u8asPartialEq_spec_attrs u8asEq_spec_attrs u8asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u8asOrd_spec_attrs-[] -[(int U8)])))).
+    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u8asOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Ord_base_spec Z (IntSynType U8) u8asPartialEq_spec_attrs u8asEq_spec_attrs u8asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u8asOrd_spec_attrs-[] -[(int U8)])))).
 End u8asOrd_spec.
 
 Section u8asPartialEq_spec.
@@ -5303,7 +5303,7 @@ Section u8asPartialEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition u8asPartialEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u8asPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialEq_base_spec Z Z (IntSynType U8) (IntSynType U8) (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) u8asPartialEq_spec_attrs-[] -[(int U8); (int U8)])))).
+    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u8asPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialEq_base_spec Z Z (IntSynType U8) (IntSynType U8) (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) u8asPartialEq_spec_attrs-[] -[(int U8); (int U8)])))).
 End u8asPartialEq_spec.
 
 Section u8asPartialOrd_spec.
@@ -5340,7 +5340,7 @@ Section u8asPartialOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition u8asPartialOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u8asPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialOrd_base_spec Z Z (IntSynType U8) (IntSynType U8) u8asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) u8asPartialOrd_spec_attrs-[] -[(int U8); (int U8)])))).
+    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), u8asPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialOrd_base_spec Z Z (IntSynType U8) (IntSynType U8) u8asPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) u8asPartialOrd_spec_attrs-[] -[(int U8); (int U8)])))).
 End u8asPartialOrd_spec.
 
 Section usizeasEq_spec.
@@ -5365,7 +5365,7 @@ Section usizeasEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition usizeasEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), usizeasEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Eq_base_spec Z (IntSynType USize) usizeasPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) usizeasEq_spec_attrs-[] -[(int USize)])))).
+    trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), usizeasEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Eq_base_spec Z (IntSynType USize) usizeasPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) usizeasEq_spec_attrs-[] -[(int USize)])))).
 End usizeasEq_spec.
 
 Section usizeasOrd_spec.
@@ -5399,7 +5399,7 @@ Section usizeasOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition usizeasOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), usizeasOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Ord_base_spec Z (IntSynType USize) usizeasPartialEq_spec_attrs usizeasEq_spec_attrs usizeasPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) usizeasOrd_spec_attrs-[] -[(int USize)])))).
+    trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), usizeasOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Ord_base_spec Z (IntSynType USize) usizeasPartialEq_spec_attrs usizeasEq_spec_attrs usizeasPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) usizeasOrd_spec_attrs-[] -[(int USize)])))).
 End usizeasOrd_spec.
 
 Section usizeasPartialEq_spec.
@@ -5427,7 +5427,7 @@ Section usizeasPartialEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition usizeasPartialEq_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), usizeasPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialEq_base_spec Z Z (IntSynType USize) (IntSynType USize) (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) usizeasPartialEq_spec_attrs-[] -[(int USize); (int USize)])))).
+    trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), usizeasPartialEq_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialEq_base_spec Z Z (IntSynType USize) (IntSynType USize) (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) usizeasPartialEq_spec_attrs-[] -[(int USize); (int USize)])))).
 End usizeasPartialEq_spec.
 
 Section usizeasPartialOrd_spec.
@@ -5464,7 +5464,7 @@ Section usizeasPartialOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition usizeasPartialOrd_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), usizeasPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((PartialOrd_base_spec Z Z (IntSynType USize) (IntSynType USize) usizeasPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) usizeasPartialOrd_spec_attrs-[] -[(int USize); (int USize)])))).
+    trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), usizeasPartialOrd_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((PartialOrd_base_spec Z Z (IntSynType USize) (IntSynType USize) usizeasPartialEq_spec_attrs (drop_glue_trivial_spec_attrs (Z)) (drop_glue_trivial_spec_attrs (Z)) usizeasPartialOrd_spec_attrs-[] -[(int USize); (int USize)])))).
 End usizeasPartialOrd_spec.
 
 Section std_option_OptionTasEq_spec.
@@ -5492,7 +5492,7 @@ Section std_option_OptionTasEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition std_option_OptionTasEq_spec_subsumption  :=
-    ∀ `(T_rt : !RT) `(T_st : !syn_type) `(PartialEq_T_T_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (T_rt) (T_rt) )) `(Eq_T_spec_attrs : !(Eq_spec_attrs (RRGS:=RRGS) (T_rt) PartialEq_T_T_spec_attrs)) `(DropGlue_T_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )), trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), (std_option_OptionTasEq_spec (T_rt) (T_st) (PartialEq_T_T_spec_attrs) (Eq_T_spec_attrs) (DropGlue_T_spec_attrs))-[] -[T_ty]) (spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), scope_add_typarams _ -[T_ty] ((Eq_base_spec ((((Option_rt)) ((T_rt)))) ((Option_els (T_st)) : syn_type) (std_option_OptionTasPartialEq_spec_attrs ((T_rt)) (PartialEq_T_T_spec_attrs) (DropGlue_T_spec_attrs)) (drop_glue_Option_spec_attrs ((T_rt)) (DropGlue_T_spec_attrs)) (std_option_OptionTasEq_spec_attrs (T_rt) (PartialEq_T_T_spec_attrs) (Eq_T_spec_attrs) (DropGlue_T_spec_attrs))-[] -[(Option_ty ((T_rt)) -[] -[T_ty])])))).
+    ∀ `(T_rt : !RT) `(T_st : !syn_type) `(PartialEq_T_T_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (T_rt) (T_rt) )) `(Eq_T_spec_attrs : !(Eq_spec_attrs (RRGS:=RRGS) (T_rt) PartialEq_T_T_spec_attrs)) `(DropGlue_T_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )), trait_incl_marker (lift_trait_incl Eq_spec_incl (spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), (std_option_OptionTasEq_spec (T_rt) (T_st) (PartialEq_T_T_spec_attrs) (Eq_T_spec_attrs) (DropGlue_T_spec_attrs))-[] -[T_ty]) (spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ((Eq_base_spec ((((Option_rt)) ((T_rt)))) ((Option_els (T_st)) : syn_type) (std_option_OptionTasPartialEq_spec_attrs ((T_rt)) (PartialEq_T_T_spec_attrs) (DropGlue_T_spec_attrs)) (drop_glue_Option_spec_attrs ((T_rt)) (DropGlue_T_spec_attrs)) (std_option_OptionTasEq_spec_attrs (T_rt) (PartialEq_T_T_spec_attrs) (Eq_T_spec_attrs) (DropGlue_T_spec_attrs))-[] -[(Option_ty ((T_rt)) -[] -[T_ty])])))).
 End std_option_OptionTasEq_spec.
 
 Section std_option_OptionTasOrd_spec.
@@ -5531,7 +5531,7 @@ Section std_option_OptionTasOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition std_option_OptionTasOrd_spec_subsumption  :=
-    ∀ `(T_rt : !RT) `(T_st : !syn_type) `(PartialEq_T_T_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (T_rt) (T_rt) )) `(Eq_T_spec_attrs : !(Eq_spec_attrs (RRGS:=RRGS) (T_rt) PartialEq_T_T_spec_attrs)) `(PartialOrd_T_T_spec_attrs : !(PartialOrd_spec_attrs (RRGS:=RRGS) (T_rt) (T_rt) PartialEq_T_T_spec_attrs)) `(Ord_T_spec_attrs : !(Ord_spec_attrs (RRGS:=RRGS) (T_rt) PartialEq_T_T_spec_attrs Eq_T_spec_attrs PartialOrd_T_T_spec_attrs)) `(DropGlue_T_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )), trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), (std_option_OptionTasOrd_spec (T_rt) (T_st) (PartialEq_T_T_spec_attrs) (Eq_T_spec_attrs) (PartialOrd_T_T_spec_attrs) (Ord_T_spec_attrs) (DropGlue_T_spec_attrs))-[] -[T_ty]) (spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), scope_add_typarams _ -[T_ty] ((Ord_base_spec ((((Option_rt)) ((T_rt)))) ((Option_els (T_st)) : syn_type) (std_option_OptionTasPartialEq_spec_attrs ((T_rt)) (PartialEq_T_T_spec_attrs) (DropGlue_T_spec_attrs)) (std_option_OptionTasEq_spec_attrs ((T_rt)) (PartialEq_T_T_spec_attrs) (Eq_T_spec_attrs) (DropGlue_T_spec_attrs)) (std_option_OptionTasPartialOrd_spec_attrs ((T_rt)) (PartialEq_T_T_spec_attrs) (PartialOrd_T_T_spec_attrs) (DropGlue_T_spec_attrs)) (drop_glue_Option_spec_attrs ((T_rt)) (DropGlue_T_spec_attrs)) (std_option_OptionTasOrd_spec_attrs (T_rt) (PartialEq_T_T_spec_attrs) (Eq_T_spec_attrs) (PartialOrd_T_T_spec_attrs) (Ord_T_spec_attrs) (DropGlue_T_spec_attrs))-[] -[(Option_ty ((T_rt)) -[] -[T_ty])])))).
+    ∀ `(T_rt : !RT) `(T_st : !syn_type) `(PartialEq_T_T_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (T_rt) (T_rt) )) `(Eq_T_spec_attrs : !(Eq_spec_attrs (RRGS:=RRGS) (T_rt) PartialEq_T_T_spec_attrs)) `(PartialOrd_T_T_spec_attrs : !(PartialOrd_spec_attrs (RRGS:=RRGS) (T_rt) (T_rt) PartialEq_T_T_spec_attrs)) `(Ord_T_spec_attrs : !(Ord_spec_attrs (RRGS:=RRGS) (T_rt) PartialEq_T_T_spec_attrs Eq_T_spec_attrs PartialOrd_T_T_spec_attrs)) `(DropGlue_T_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )), trait_incl_marker (lift_trait_incl Ord_spec_incl (spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), (std_option_OptionTasOrd_spec (T_rt) (T_st) (PartialEq_T_T_spec_attrs) (Eq_T_spec_attrs) (PartialOrd_T_T_spec_attrs) (Ord_T_spec_attrs) (DropGlue_T_spec_attrs))-[] -[T_ty]) (spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ((Ord_base_spec ((((Option_rt)) ((T_rt)))) ((Option_els (T_st)) : syn_type) (std_option_OptionTasPartialEq_spec_attrs ((T_rt)) (PartialEq_T_T_spec_attrs) (DropGlue_T_spec_attrs)) (std_option_OptionTasEq_spec_attrs ((T_rt)) (PartialEq_T_T_spec_attrs) (Eq_T_spec_attrs) (DropGlue_T_spec_attrs)) (std_option_OptionTasPartialOrd_spec_attrs ((T_rt)) (PartialEq_T_T_spec_attrs) (PartialOrd_T_T_spec_attrs) (DropGlue_T_spec_attrs)) (drop_glue_Option_spec_attrs ((T_rt)) (DropGlue_T_spec_attrs)) (std_option_OptionTasOrd_spec_attrs (T_rt) (PartialEq_T_T_spec_attrs) (Eq_T_spec_attrs) (PartialOrd_T_T_spec_attrs) (Ord_T_spec_attrs) (DropGlue_T_spec_attrs))-[] -[(Option_ty ((T_rt)) -[] -[T_ty])])))).
 End std_option_OptionTasOrd_spec.
 
 Section std_option_OptionTasPartialEq_spec.
@@ -5561,7 +5561,7 @@ Section std_option_OptionTasPartialEq_spec.
     solve_trait_realization_pers.
   Qed.
   Definition std_option_OptionTasPartialEq_spec_subsumption  :=
-    ∀ `(T_rt : !RT) `(T_st : !syn_type) `(PartialEq_T_T_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (T_rt) (T_rt) )) `(DropGlue_T_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )), trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), (std_option_OptionTasPartialEq_spec (T_rt) (T_st) (PartialEq_T_T_spec_attrs) (DropGlue_T_spec_attrs))-[] -[T_ty]) (spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), scope_add_typarams _ -[T_ty] ((PartialEq_base_spec ((((Option_rt)) ((T_rt)))) ((((Option_rt)) ((T_rt)))) ((Option_els (T_st)) : syn_type) ((Option_els (T_st)) : syn_type) (drop_glue_Option_spec_attrs ((T_rt)) (DropGlue_T_spec_attrs)) (drop_glue_Option_spec_attrs ((T_rt)) (DropGlue_T_spec_attrs)) (std_option_OptionTasPartialEq_spec_attrs (T_rt) (PartialEq_T_T_spec_attrs) (DropGlue_T_spec_attrs))-[] -[(Option_ty ((T_rt)) -[] -[T_ty]); (Option_ty ((T_rt)) -[] -[T_ty])])))).
+    ∀ `(T_rt : !RT) `(T_st : !syn_type) `(PartialEq_T_T_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (T_rt) (T_rt) )) `(DropGlue_T_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )), trait_incl_marker (lift_trait_incl PartialEq_spec_incl (spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), (std_option_OptionTasPartialEq_spec (T_rt) (T_st) (PartialEq_T_T_spec_attrs) (DropGlue_T_spec_attrs))-[] -[T_ty]) (spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ((PartialEq_base_spec ((((Option_rt)) ((T_rt)))) ((((Option_rt)) ((T_rt)))) ((Option_els (T_st)) : syn_type) ((Option_els (T_st)) : syn_type) (drop_glue_Option_spec_attrs ((T_rt)) (DropGlue_T_spec_attrs)) (drop_glue_Option_spec_attrs ((T_rt)) (DropGlue_T_spec_attrs)) (std_option_OptionTasPartialEq_spec_attrs (T_rt) (PartialEq_T_T_spec_attrs) (DropGlue_T_spec_attrs))-[] -[(Option_ty ((T_rt)) -[] -[T_ty]); (Option_ty ((T_rt)) -[] -[T_ty])])))).
 End std_option_OptionTasPartialEq_spec.
 
 Section std_option_OptionTasPartialOrd_spec.
@@ -5601,7 +5601,7 @@ Section std_option_OptionTasPartialOrd_spec.
     solve_trait_realization_pers.
   Qed.
   Definition std_option_OptionTasPartialOrd_spec_subsumption  :=
-    ∀ `(T_rt : !RT) `(T_st : !syn_type) `(PartialEq_T_T_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (T_rt) (T_rt) )) `(PartialOrd_T_T_spec_attrs : !(PartialOrd_spec_attrs (RRGS:=RRGS) (T_rt) (T_rt) PartialEq_T_T_spec_attrs)) `(DropGlue_T_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )), trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), (std_option_OptionTasPartialOrd_spec (T_rt) (T_st) (PartialEq_T_T_spec_attrs) (PartialOrd_T_T_spec_attrs) (DropGlue_T_spec_attrs))-[] -[T_ty]) (spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), scope_add_typarams _ -[T_ty] ((PartialOrd_base_spec ((((Option_rt)) ((T_rt)))) ((((Option_rt)) ((T_rt)))) ((Option_els (T_st)) : syn_type) ((Option_els (T_st)) : syn_type) (std_option_OptionTasPartialEq_spec_attrs ((T_rt)) (PartialEq_T_T_spec_attrs) (DropGlue_T_spec_attrs)) (drop_glue_Option_spec_attrs ((T_rt)) (DropGlue_T_spec_attrs)) (drop_glue_Option_spec_attrs ((T_rt)) (DropGlue_T_spec_attrs)) (std_option_OptionTasPartialOrd_spec_attrs (T_rt) (PartialEq_T_T_spec_attrs) (PartialOrd_T_T_spec_attrs) (DropGlue_T_spec_attrs))-[] -[(Option_ty ((T_rt)) -[] -[T_ty]); (Option_ty ((T_rt)) -[] -[T_ty])])))).
+    ∀ `(T_rt : !RT) `(T_st : !syn_type) `(PartialEq_T_T_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (T_rt) (T_rt) )) `(PartialOrd_T_T_spec_attrs : !(PartialOrd_spec_attrs (RRGS:=RRGS) (T_rt) (T_rt) PartialEq_T_T_spec_attrs)) `(DropGlue_T_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )), trait_incl_marker (lift_trait_incl PartialOrd_spec_incl (spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), (std_option_OptionTasPartialOrd_spec (T_rt) (T_st) (PartialEq_T_T_spec_attrs) (PartialOrd_T_T_spec_attrs) (DropGlue_T_spec_attrs))-[] -[T_ty]) (spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ((PartialOrd_base_spec ((((Option_rt)) ((T_rt)))) ((((Option_rt)) ((T_rt)))) ((Option_els (T_st)) : syn_type) ((Option_els (T_st)) : syn_type) (std_option_OptionTasPartialEq_spec_attrs ((T_rt)) (PartialEq_T_T_spec_attrs) (DropGlue_T_spec_attrs)) (drop_glue_Option_spec_attrs ((T_rt)) (DropGlue_T_spec_attrs)) (drop_glue_Option_spec_attrs ((T_rt)) (DropGlue_T_spec_attrs)) (std_option_OptionTasPartialOrd_spec_attrs (T_rt) (PartialEq_T_T_spec_attrs) (PartialOrd_T_T_spec_attrs) (DropGlue_T_spec_attrs))-[] -[(Option_ty ((T_rt)) -[] -[T_ty]); (Option_ty ((T_rt)) -[] -[T_ty])])))).
 End std_option_OptionTasPartialOrd_spec.
 
 Section Ord_max_closure0_FnOnce_spec.
@@ -5631,7 +5631,7 @@ Section Ord_max_closure0_FnOnce_spec.
     solve_trait_realization_pers.
   Qed.
   Definition Ord_max_closure0_FnOnce_spec_subsumption  :=
-    ∀ `(Self_rt : !RT) `(Self_st : !syn_type) `(PartialEq_Self_Self_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) )) `(Eq_Self_spec_attrs : !(Eq_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs)) `(PartialOrd_Self_Self_spec_attrs : !(PartialOrd_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) PartialEq_Self_Self_spec_attrs)) `(Ord_Self_spec_attrs : !(Ord_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs Eq_Self_spec_attrs PartialOrd_Self_Self_spec_attrs)) `(DropGlue_Self_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )), trait_incl_marker (lift_trait_incl FnOnce_spec_incl (spec! ( *[ulft_2; ulft_3]) : 2 | ( *[Self_ty]) : ([Self_rt] : list RT), (Ord_max_closure0_FnOnce_spec (Self_rt) (Self_st) (PartialEq_Self_Self_spec_attrs) (Eq_Self_spec_attrs) (PartialOrd_Self_Self_spec_attrs) (Ord_Self_spec_attrs) (DropGlue_Self_spec_attrs))-[ulft_2; ulft_3] -[Self_ty]) (spec! ( *[ulft_2; ulft_3]) : 2 | ( *[Self_ty]) : ([Self_rt] : list RT), scope_add_typarams _ -[Self_ty] ((FnOnce_base_spec unit (((tuple2_rt) ((place_rfnRT (Self_rt))) ((place_rfnRT (Self_rt))))) (Ordering_rt) UnitSynType ((tuple2_sls (RefSynType) (RefSynType)) : syn_type) Ordering_st (drop_glue_trivial_spec_attrs (unit)) (drop_glue_tuple2_spec_attrs ((place_rfnRT (Self_rt))) ((place_rfnRT (Self_rt))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (Self_rt))))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (Self_rt)))))) (drop_glue_trivial_spec_attrs ((Ordering_rt))) (Ord_max_closure0_FnOnce_spec_attrs (Self_rt) (PartialEq_Self_Self_spec_attrs) (Eq_Self_spec_attrs) (PartialOrd_Self_Self_spec_attrs) (Ord_Self_spec_attrs) (DropGlue_Self_spec_attrs))-[] -[unit_t; (tuple2_ty ((place_rfnRT (Self_rt))) ((place_rfnRT (Self_rt))) -[] -[(shr_ref ulft_2 Self_ty); (shr_ref ulft_3 Self_ty)]); (Ordering_ty  -[] -[])])))).
+    ∀ `(Self_rt : !RT) `(Self_st : !syn_type) `(PartialEq_Self_Self_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) )) `(Eq_Self_spec_attrs : !(Eq_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs)) `(PartialOrd_Self_Self_spec_attrs : !(PartialOrd_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) PartialEq_Self_Self_spec_attrs)) `(Ord_Self_spec_attrs : !(Ord_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs Eq_Self_spec_attrs PartialOrd_Self_Self_spec_attrs)) `(DropGlue_Self_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )), trait_incl_marker (lift_trait_incl FnOnce_spec_incl (spec! ( *[ulft_2; ulft_3]) : 2 | ( *[Self_ty]) : ([Self_rt] : list RT), (Ord_max_closure0_FnOnce_spec (Self_rt) (Self_st) (PartialEq_Self_Self_spec_attrs) (Eq_Self_spec_attrs) (PartialOrd_Self_Self_spec_attrs) (Ord_Self_spec_attrs) (DropGlue_Self_spec_attrs))-[ulft_2; ulft_3] -[Self_ty]) (spec! ( *[ulft_2; ulft_3]) : 2 | ( *[Self_ty]) : ([Self_rt] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[Self_ty]) ((FnOnce_base_spec unit (((tuple2_rt) ((place_rfnRT (Self_rt))) ((place_rfnRT (Self_rt))))) (Ordering_rt) UnitSynType ((tuple2_sls (RefSynType) (RefSynType)) : syn_type) Ordering_st (drop_glue_trivial_spec_attrs (unit)) (drop_glue_tuple2_spec_attrs ((place_rfnRT (Self_rt))) ((place_rfnRT (Self_rt))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (Self_rt))))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (Self_rt)))))) (drop_glue_trivial_spec_attrs ((Ordering_rt))) (Ord_max_closure0_FnOnce_spec_attrs (Self_rt) (PartialEq_Self_Self_spec_attrs) (Eq_Self_spec_attrs) (PartialOrd_Self_Self_spec_attrs) (Ord_Self_spec_attrs) (DropGlue_Self_spec_attrs))-[] -[unit_t; (tuple2_ty ((place_rfnRT (Self_rt))) ((place_rfnRT (Self_rt))) -[] -[(shr_ref ulft_2 Self_ty); (shr_ref ulft_3 Self_ty)]); (Ordering_ty  -[] -[])])))).
 End Ord_max_closure0_FnOnce_spec.
 
 Section Ord_min_closure0_FnOnce_spec.
@@ -5661,6 +5661,6 @@ Section Ord_min_closure0_FnOnce_spec.
     solve_trait_realization_pers.
   Qed.
   Definition Ord_min_closure0_FnOnce_spec_subsumption  :=
-    ∀ `(Self_rt : !RT) `(Self_st : !syn_type) `(PartialEq_Self_Self_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) )) `(Eq_Self_spec_attrs : !(Eq_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs)) `(PartialOrd_Self_Self_spec_attrs : !(PartialOrd_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) PartialEq_Self_Self_spec_attrs)) `(Ord_Self_spec_attrs : !(Ord_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs Eq_Self_spec_attrs PartialOrd_Self_Self_spec_attrs)) `(DropGlue_Self_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )), trait_incl_marker (lift_trait_incl FnOnce_spec_incl (spec! ( *[ulft_2; ulft_3]) : 2 | ( *[Self_ty]) : ([Self_rt] : list RT), (Ord_min_closure0_FnOnce_spec (Self_rt) (Self_st) (PartialEq_Self_Self_spec_attrs) (Eq_Self_spec_attrs) (PartialOrd_Self_Self_spec_attrs) (Ord_Self_spec_attrs) (DropGlue_Self_spec_attrs))-[ulft_2; ulft_3] -[Self_ty]) (spec! ( *[ulft_2; ulft_3]) : 2 | ( *[Self_ty]) : ([Self_rt] : list RT), scope_add_typarams _ -[Self_ty] ((FnOnce_base_spec unit (((tuple2_rt) ((place_rfnRT (Self_rt))) ((place_rfnRT (Self_rt))))) (Ordering_rt) UnitSynType ((tuple2_sls (RefSynType) (RefSynType)) : syn_type) Ordering_st (drop_glue_trivial_spec_attrs (unit)) (drop_glue_tuple2_spec_attrs ((place_rfnRT (Self_rt))) ((place_rfnRT (Self_rt))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (Self_rt))))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (Self_rt)))))) (drop_glue_trivial_spec_attrs ((Ordering_rt))) (Ord_min_closure0_FnOnce_spec_attrs (Self_rt) (PartialEq_Self_Self_spec_attrs) (Eq_Self_spec_attrs) (PartialOrd_Self_Self_spec_attrs) (Ord_Self_spec_attrs) (DropGlue_Self_spec_attrs))-[] -[unit_t; (tuple2_ty ((place_rfnRT (Self_rt))) ((place_rfnRT (Self_rt))) -[] -[(shr_ref ulft_2 Self_ty); (shr_ref ulft_3 Self_ty)]); (Ordering_ty  -[] -[])])))).
+    ∀ `(Self_rt : !RT) `(Self_st : !syn_type) `(PartialEq_Self_Self_spec_attrs : !(PartialEq_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) )) `(Eq_Self_spec_attrs : !(Eq_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs)) `(PartialOrd_Self_Self_spec_attrs : !(PartialOrd_spec_attrs (RRGS:=RRGS) (Self_rt) (Self_rt) PartialEq_Self_Self_spec_attrs)) `(Ord_Self_spec_attrs : !(Ord_spec_attrs (RRGS:=RRGS) (Self_rt) PartialEq_Self_Self_spec_attrs Eq_Self_spec_attrs PartialOrd_Self_Self_spec_attrs)) `(DropGlue_Self_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )), trait_incl_marker (lift_trait_incl FnOnce_spec_incl (spec! ( *[ulft_2; ulft_3]) : 2 | ( *[Self_ty]) : ([Self_rt] : list RT), (Ord_min_closure0_FnOnce_spec (Self_rt) (Self_st) (PartialEq_Self_Self_spec_attrs) (Eq_Self_spec_attrs) (PartialOrd_Self_Self_spec_attrs) (Ord_Self_spec_attrs) (DropGlue_Self_spec_attrs))-[ulft_2; ulft_3] -[Self_ty]) (spec! ( *[ulft_2; ulft_3]) : 2 | ( *[Self_ty]) : ([Self_rt] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[Self_ty]) ((FnOnce_base_spec unit (((tuple2_rt) ((place_rfnRT (Self_rt))) ((place_rfnRT (Self_rt))))) (Ordering_rt) UnitSynType ((tuple2_sls (RefSynType) (RefSynType)) : syn_type) Ordering_st (drop_glue_trivial_spec_attrs (unit)) (drop_glue_tuple2_spec_attrs ((place_rfnRT (Self_rt))) ((place_rfnRT (Self_rt))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (Self_rt))))) ((drop_glue_trivial_spec_attrs ((place_rfnRT (Self_rt)))))) (drop_glue_trivial_spec_attrs ((Ordering_rt))) (Ord_min_closure0_FnOnce_spec_attrs (Self_rt) (PartialEq_Self_Self_spec_attrs) (Eq_Self_spec_attrs) (PartialOrd_Self_Self_spec_attrs) (Ord_Self_spec_attrs) (DropGlue_Self_spec_attrs))-[] -[unit_t; (tuple2_ty ((place_rfnRT (Self_rt))) ((place_rfnRT (Self_rt))) -[] -[(shr_ref ulft_2 Self_ty); (shr_ref ulft_3 Self_ty)]); (Ordering_ty  -[] -[])])))).
 End Ord_min_closure0_FnOnce_spec.
 

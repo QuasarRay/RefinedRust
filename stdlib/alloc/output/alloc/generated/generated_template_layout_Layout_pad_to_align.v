@@ -15,10 +15,17 @@ Set Default Proof Using "Type".
 Section proof.
 Context `{RRGS : !refinedrustGS Σ}.
 Definition layout_Layout_pad_to_align_lemma (π : thread_id) : Prop :=
+  ∀ (layout_Layout_alignment_loc : loc) (layout_Layout_from_size_alignment_unchecked_loc : loc) (layout_Layout_size_rounded_up_to_custom_alignment_loc : loc) (layout_Layout_alignment_loc_linking : spec_with 1 [] (thread_id → iProp Σ)) (layout_Layout_from_size_alignment_unchecked_loc_linking : spec_with 0 [] (thread_id → iProp Σ)) (layout_Layout_size_rounded_up_to_custom_alignment_loc_linking : spec_with 1 [] (thread_id → iProp Σ)) , 
   syn_type_is_layoutable ((layout_Layout_sls : syn_type)) →
   syn_type_is_layoutable ((alignment_Alignment_sls : syn_type)) →
-  ⊢ typed_function π (layout_Layout_pad_to_align_def ) (<tag_type> spec! ( *[ulft_1]) : 1 | ( *[]) : ([] : list RT), fn_spec_add_late_pre (type_of_layout_Layout_pad_to_align -[ulft_1] -[]) (λ π, (True)
-  ∗ ((trait_incl_of_layout_Layout_pad_to_align-[ulft_1] -[]) π))).
+  layout_Layout_alignment_loc ◁ᵥ{π, MetaNone} layout_Layout_alignment_loc @ function_ptr [RefSynType] (<tag_type> spec! ( *[late_lft_0]) : 1 | ( *[]) : ([] : list RT), fn_spec_add_late_pre (type_of_layout_Layout_alignment (RRGS:=RRGS)  -[late_lft_0] -[]) (λ π, (from_assumption_hint (layout_Layout_alignment_loc_linking -[late_lft_0] -[] π)))%I) -∗
+  layout_Layout_from_size_alignment_unchecked_loc ◁ᵥ{π, MetaNone} layout_Layout_from_size_alignment_unchecked_loc @ function_ptr [(IntSynType USize); (alignment_Alignment_sls : syn_type)] (<tag_type> spec! ( *[]) : 0 | ( *[]) : ([] : list RT), fn_spec_add_late_pre (type_of_layout_Layout_from_size_alignment_unchecked (RRGS:=RRGS)  -[] -[]) (λ π, (from_assumption_hint (layout_Layout_from_size_alignment_unchecked_loc_linking -[] -[] π)))%I) -∗
+  layout_Layout_size_rounded_up_to_custom_alignment_loc ◁ᵥ{π, MetaNone} layout_Layout_size_rounded_up_to_custom_alignment_loc @ function_ptr [RefSynType; (alignment_Alignment_sls : syn_type)] (<tag_type> spec! ( *[late_lft_0]) : 1 | ( *[]) : ([] : list RT), fn_spec_add_late_pre (type_of_layout_Layout_size_rounded_up_to_custom_alignment (RRGS:=RRGS)  -[late_lft_0] -[]) (λ π, (from_assumption_hint (layout_Layout_size_rounded_up_to_custom_alignment_loc_linking -[late_lft_0] -[] π)))%I) -∗
+  typed_function π (layout_Layout_pad_to_align_def layout_Layout_alignment_loc  layout_Layout_from_size_alignment_unchecked_loc  layout_Layout_size_rounded_up_to_custom_alignment_loc  ) (<tag_type> spec! ( *[ulft_1]) : 1 | ( *[]) : ([] : list RT), fn_spec_add_late_pre (type_of_layout_Layout_pad_to_align -[ulft_1] -[]) (λ π, (True)
+  ∗ ((trait_incl_of_layout_Layout_pad_to_align-[ulft_1] -[]) π)
+  ∗ (□ (∀ (late_lft_0 : lft), layout_Layout_alignment_loc_linking -[late_lft_0] -[] π))
+  ∗ (□ (layout_Layout_from_size_alignment_unchecked_loc_linking -[] -[] π))
+  ∗ (□ (∀ (late_lft_0 : lft), layout_Layout_size_rounded_up_to_custom_alignment_loc_linking -[late_lft_0] -[] π)))).
 End proof.
 
 Ltac layout_Layout_pad_to_align_prelude :=

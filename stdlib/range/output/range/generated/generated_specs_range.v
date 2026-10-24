@@ -111,7 +111,7 @@ Definition trait_incl_of_Range_Idx_is_empty (Idx_rt: RT) (Idx_st: syn_type) (Dro
 Definition type_of_Range_Idx_is_empty (Idx_rt: RT) (Idx_st: syn_type) (DropGlue_Idx_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Idx_rt) )) (PartialEq_Idx_Idx_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (Idx_rt) (Idx_rt) )) (PartialOrd_Idx_Idx_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (Idx_rt) (Idx_rt) PartialEq_Idx_Idx_spec_attrs)) :=
   fn(∀ ( *[ulft_1]) : 1 | ( *[Idx_ty]) : ([(Idx_rt, Idx_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (self) : ((_)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[Idx_ty]) ϝ ++ (λ ϝ, [(ϝ, ulft_1)]) ϝ);
       (* args......... *) self :@: (shr_ref ulft_1 (Range_inv_t ((Idx_rt))  -[] -[Idx_ty]));
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -124,7 +124,7 @@ Definition trait_incl_of_drop_glue_Range (Idx_rt: RT) (Idx_st: syn_type) (DropGl
   spec! ( *[]) : 0 | ( *[Idx_ty]) : ([Idx_rt] : list RT), (λ π, ((∃ (DropGlue_Idx_lfts_inst : prod_vec lft DropGlue_Idx_realization.(trait_ctx_lfts)) (DropGlue_Idx_tys_inst : plist type DropGlue_Idx_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_Idx_realization.(trait_ctx_spec) DropGlue_Idx_lfts_inst DropGlue_Idx_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (Idx_rt) Idx_st DropGlue_Idx_spec_attrs-[] -[Idx_ty]))⌝ ∗ DropGlue_Idx_realization.(trait_ctx_wf) DropGlue_Idx_lfts_inst DropGlue_Idx_tys_inst π))%I).
 
 Definition type_of_drop_glue_Range (Idx_rt: RT) (Idx_st: syn_type) (DropGlue_Idx_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Idx_rt) )) :=
-  spec! ( *[]) : 0 | ( *[Idx_ty]) : ([Idx_rt] : list RT),(λ a b, scope_add_typarams _ -[Idx_ty] (scope_add_elctx (λ ϝ, []) (((DropGlue_base_spec (((Range_inv_t_rt ((Idx_rt))))) ((Range_st (Idx_st))) ((drop_glue_Range_spec_attrs (Idx_rt) (DropGlue_Idx_spec_attrs))))
+  spec! ( *[]) : 0 | ( *[Idx_ty]) : ([Idx_rt] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[Idx_ty]) (scope_add_elctx (λ ϝ, []) (((DropGlue_base_spec (((Range_inv_t_rt ((Idx_rt))))) ((Range_st (Idx_st))) ((drop_glue_Range_spec_attrs (Idx_rt) (DropGlue_Idx_spec_attrs))))
     -[] -[(Range_inv_t ((Idx_rt))  -[] -[Idx_ty])]).(DropGlue_drop_glue_spec)   a b))) <MERGE!>.
 
 
@@ -154,6 +154,6 @@ Section drop_glue_Range_spec.
     solve_trait_realization_pers.
   Qed.
   Definition drop_glue_Range_spec_subsumption  :=
-    ∀ `(Idx_rt : !RT) `(Idx_st : !syn_type) `(DropGlue_Idx_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (Idx_rt) )), trait_incl_marker (lift_trait_incl DropGlue_spec_incl (spec! ( *[]) : 0 | ( *[Idx_ty]) : ([Idx_rt] : list RT), (drop_glue_Range_spec (Idx_rt) (Idx_st) (DropGlue_Idx_spec_attrs))-[] -[Idx_ty]) (spec! ( *[]) : 0 | ( *[Idx_ty]) : ([Idx_rt] : list RT), scope_add_typarams _ -[Idx_ty] ((DropGlue_base_spec ((Range_inv_t_rt ((Idx_rt)))) (Range_st (Idx_st)) (drop_glue_Range_spec_attrs (Idx_rt) (DropGlue_Idx_spec_attrs))-[] -[(Range_inv_t ((Idx_rt))  -[] -[Idx_ty])])))).
+    ∀ `(Idx_rt : !RT) `(Idx_st : !syn_type) `(DropGlue_Idx_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (Idx_rt) )), trait_incl_marker (lift_trait_incl DropGlue_spec_incl (spec! ( *[]) : 0 | ( *[Idx_ty]) : ([Idx_rt] : list RT), (drop_glue_Range_spec (Idx_rt) (Idx_st) (DropGlue_Idx_spec_attrs))-[] -[Idx_ty]) (spec! ( *[]) : 0 | ( *[Idx_ty]) : ([Idx_rt] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[Idx_ty]) ((DropGlue_base_spec ((Range_inv_t_rt ((Idx_rt)))) (Range_st (Idx_st)) (drop_glue_Range_spec_attrs (Idx_rt) (DropGlue_Idx_spec_attrs))-[] -[(Range_inv_t ((Idx_rt))  -[] -[Idx_ty])])))).
 End drop_glue_Range_spec.
 

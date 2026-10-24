@@ -82,7 +82,7 @@ Definition scope_bindable_Index_spec `{Self_rt : !RT} `{Idx_rt : !RT} `{Output_r
 Definition Index_index_base_spec (Self_rt: RT) (Idx_rt: RT) (Output_rt: RT) (Self_st: syn_type) (Idx_st: syn_type) (Output_st: syn_type) (DropGlue_Self_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )) (DropGlue_Idx_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Idx_rt) )) (DropGlue_SelfasIndexIdx_Output_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Output_rt) )) (Index_Self_Idx_spec_attrs: (Index_spec_attrs (RRGS:=RRGS) (Self_rt) (Idx_rt) (Output_rt) )) :=
   fn(∀ ( *[ulft_1]) : 1 | ( *[Self_ty; Idx_ty; Output_ty]) : ([(Self_rt, Self_st); (Idx_rt, Idx_st); (Output_rt, Output_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (self, index) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[Self_ty; Idx_ty; Output_ty]) ϝ ++ (λ ϝ, [(ϝ, ulft_1)]) ϝ);
       (* args......... *) self :@: (shr_ref ulft_1 Self_ty), index :@: Idx_ty;
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -134,7 +134,7 @@ Definition scope_bindable_IndexMut_spec `{Self_rt : !RT} `{Idx_rt : !RT} `{Index
 Definition IndexMut_index_mut_base_spec (Self_rt: RT) (Idx_rt: RT) (Index_Self_Idx_Output_rt: RT) (Self_st: syn_type) (Idx_st: syn_type) (Index_Self_Idx_Output_st: syn_type) (Index_Self_Idx_spec_attrs: (Index_spec_attrs (RRGS:=RRGS) (Self_rt) (Idx_rt) (Index_Self_Idx_Output_rt) )) (DropGlue_Self_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )) (DropGlue_Idx_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Idx_rt) )) (DropGlue_SelfasIndexIdx_Output_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Index_Self_Idx_Output_rt) )) (IndexMut_Self_Idx_spec_attrs: (IndexMut_spec_attrs (RRGS:=RRGS) (Self_rt) (Idx_rt) (Index_Self_Idx_Output_rt) Index_Self_Idx_spec_attrs)) :=
   fn(∀ ( *[ulft_1]) : 1 | ( *[Self_ty; Idx_ty; Index_Self_Idx_Output_ty]) : ([(Self_rt, Self_st); (Idx_rt, Idx_st); (Index_Self_Idx_Output_rt, Index_Self_Idx_Output_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (self, index) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[Self_ty; Idx_ty; Index_Self_Idx_Output_ty]) ϝ ++ (λ ϝ, [(ϝ, ulft_1)]) ϝ);
       (* args......... *) self :@: (mut_ref ulft_1 Self_ty), index :@: Idx_ty;
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
