@@ -112,7 +112,7 @@ Definition scope_bindable_Drop_spec `{Self_rt : !RT} : (ScopeBindable ((Drop_spe
 Definition Drop_drop_base_spec (Self_rt: RT) (Self_st: syn_type) (DropGlue_Self_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )) (Drop_Self_spec_attrs: (Drop_spec_attrs (RRGS:=RRGS) (Self_rt) )) :=
   fn(∀ ( *[ulft_1]) : 1 | ( *[Self_ty]) : ([(Self_rt, Self_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (self) : ((_)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[Self_ty]) ϝ ++ (λ ϝ, [(ϝ, ulft_1)]) ϝ);
       (* args......... *) self :@: (mut_ref ulft_1 Self_ty);
       (* precondition. *) (λ π : thread_id, (⌜(False)%Z⌝)) |
       (* trait reqs... *) (λ π : thread_id, True)) →

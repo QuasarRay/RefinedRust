@@ -20,7 +20,7 @@ Definition trait_incl_of_mem_align_log_of (T_rt: RT) (T_st: syn_type) (DropGlue_
 Definition type_of_mem_align_log_of (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) _ : unit,
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ _ : unit, ly_align_log (use_layout_alg' (ty_syn_type T_ty MetaNone)) @ (int USize);
@@ -34,7 +34,7 @@ Definition trait_incl_of_mem_align_of (T_rt: RT) (T_st: syn_type) (DropGlue_T_sp
 Definition type_of_mem_align_of (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) _ : unit,
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ _ : unit, ly_align (use_layout_alg' (ty_syn_type T_ty MetaNone)) @ (int USize);
@@ -48,7 +48,7 @@ Definition trait_incl_of_drop (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs
 Definition type_of_drop (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (x) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) x :@: T_ty;
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -63,7 +63,7 @@ Definition trait_incl_of_mem_size_of (T_rt: RT) (T_st: syn_type) (DropGlue_T_spe
 Definition type_of_mem_size_of (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) _ : unit,
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ _ : unit, ly_size (use_layout_alg' (ty_syn_type T_ty MetaNone)) @ (int USize);
@@ -78,7 +78,7 @@ Definition trait_incl_of_forget (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_att
 Definition type_of_forget (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (v, r) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) v :@: value_t true (ty_syn_type T_ty MetaNone);
       (* precondition. *) (λ π : thread_id, (v ◁ᵥ{π, MetaNone} r @ T_ty)) |
       (* trait reqs... *) (λ π : thread_id, True)) →

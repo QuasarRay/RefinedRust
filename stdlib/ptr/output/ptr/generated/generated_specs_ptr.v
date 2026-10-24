@@ -1057,7 +1057,7 @@ Definition scope_bindable_Default_spec `{Self_rt : !RT} : (ScopeBindable ((Defau
 Definition Default_default_base_spec (Self_rt: RT) (Self_st: syn_type) (DropGlue_Self_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (Self_rt) )) (Default_Self_spec_attrs: (Default_spec_attrs (RRGS:=RRGS) (Self_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[Self_ty]) : ([(Self_rt, Self_st)] : list (RT * syn_type)%type) | 
       (* params....... *) _ : unit,
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[Self_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ _ : unit, Default_Self_spec_attrs.(Default_DefaultValue) @ Self_ty;
@@ -1091,21 +1091,21 @@ Definition trait_incl_of_alignment_Alignmentasstd_clone_Clone_clone  : (spec_wit
   spec! ( *[ulft_1]) : 1 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_alignment_Alignmentasstd_clone_Clone_clone  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Clone_base_spec ((alignment_Alignment_inv_t_rt)) (alignment_Alignment_st) ((drop_glue_trivial_spec_attrs ((alignment_Alignment_inv_t_rt)))) (alignment_Alignmentasstd_clone_Clone_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Clone_base_spec ((alignment_Alignment_inv_t_rt)) (alignment_Alignment_st) ((drop_glue_trivial_spec_attrs ((alignment_Alignment_inv_t_rt)))) (alignment_Alignmentasstd_clone_Clone_spec_attrs))
     -[] -[(alignment_Alignment_inv_t   -[] -[])]).(Clone_clone_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_alignment_AlignmentEnumasstd_clone_Clone_clone  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1]) : 1 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_alignment_AlignmentEnumasstd_clone_Clone_clone  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Clone_base_spec ((alignment_AlignmentEnum_rt)) (alignment_AlignmentEnum_st) ((drop_glue_trivial_spec_attrs ((alignment_AlignmentEnum_rt)))) (alignment_AlignmentEnumasstd_clone_Clone_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Clone_base_spec ((alignment_AlignmentEnum_rt)) (alignment_AlignmentEnum_st) ((drop_glue_trivial_spec_attrs ((alignment_AlignmentEnum_rt)))) (alignment_AlignmentEnumasstd_clone_Clone_spec_attrs))
     -[] -[(alignment_AlignmentEnum_ty  -[] -[])]).(Clone_clone_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_usizeasDefault_default  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_usizeasDefault_default  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Default_base_spec (Z) ((IntSynType USize)) ((drop_glue_trivial_spec_attrs (Z))) (usizeasDefault_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Default_base_spec (Z) ((IntSynType USize)) ((drop_glue_trivial_spec_attrs (Z))) (usizeasDefault_spec_attrs))
     -[] -[(int USize)]).(Default_default_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_alignment_Alignment_as_usize  : (spec_with _ _ (thread_id → iProp Σ)) :=
@@ -1114,7 +1114,7 @@ Definition trait_incl_of_alignment_Alignment_as_usize  : (spec_with _ _ (thread_
 Definition type_of_alignment_Alignment_as_usize  :=
   fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
       (* params....... *) (self) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) self :@: (alignment_Alignment_inv_t   -[] -[]);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1129,7 +1129,7 @@ Definition trait_incl_of_alignment_Alignment_new  : (spec_with _ _ (thread_id �
 Definition type_of_alignment_Alignment_new  :=
   fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
       (* params....... *) (align) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) align :@: (int USize);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1145,7 +1145,7 @@ Definition trait_incl_of_alignment_Alignment_of (T_rt: RT) (T_st: syn_type) (Dro
 Definition type_of_alignment_Alignment_of (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) _ : unit,
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ _ : unit, alignment_of_align (ly_align (use_layout_alg' (ty_syn_type T_ty MetaNone))) @ (alignment_Alignment_inv_t   -[] -[]);
@@ -1159,7 +1159,7 @@ Definition trait_incl_of_const_ptr_add (T_rt: RT) (T_st: syn_type) (DropGlue_T_s
 Definition type_of_const_ptr_add (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (l, count) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) l :@: alias_ptr_t, count :@: (int USize);
       (* precondition. *) (λ π : thread_id, (⌜(l `has_layout_loc` (use_layout_alg' (ty_syn_type T_ty MetaNone)))%Z⌝)
         ∗ (⌜((count * size_of_st (ty_syn_type T_ty MetaNone))%Z ∈ ISize)%Z⌝)
@@ -1176,7 +1176,7 @@ Definition trait_incl_of_const_ptr_addr (T_rt: RT) (T_st: syn_type) (DropGlue_T_
 Definition type_of_const_ptr_addr (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (x) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) x :@: alias_ptr_t;
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1192,7 +1192,7 @@ Definition trait_incl_of_const_ptr_cast (T_rt: RT) (U_rt: RT) (T_st: syn_type) (
 Definition type_of_const_ptr_cast (T_rt: RT) (U_rt: RT) (T_st: syn_type) (U_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_U_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (U_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty; U_ty]) : ([(T_rt, T_st); (U_rt, U_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (x) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty; U_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) x :@: alias_ptr_t;
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1207,7 +1207,7 @@ Definition trait_incl_of_const_ptr_cast_mut (T_rt: RT) (T_st: syn_type) (DropGlu
 Definition type_of_const_ptr_cast_mut (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (x) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) x :@: alias_ptr_t;
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1222,7 +1222,7 @@ Definition trait_incl_of_const_ptr_is_null (T_rt: RT) (T_st: syn_type) (DropGlue
 Definition type_of_const_ptr_is_null (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (x) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) x :@: alias_ptr_t;
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1237,7 +1237,7 @@ Definition trait_incl_of_const_ptr_offset (T_rt: RT) (T_st: syn_type) (DropGlue_
 Definition type_of_const_ptr_offset (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (l, count) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) l :@: alias_ptr_t, count :@: (int ISize);
       (* precondition. *) (λ π : thread_id, (⌜(l `has_layout_loc` (use_layout_alg' (ty_syn_type T_ty MetaNone)))%Z⌝)
         ∗ (⌜((count * size_of_st (ty_syn_type T_ty MetaNone))%Z ∈ ISize)%Z⌝)
@@ -1256,7 +1256,7 @@ Definition trait_incl_of_const_ptr_read (T_rt: RT) (T_st: syn_type) (DropGlue_T_
 Definition type_of_const_ptr_read (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (k, ty, src) : ((_ * (xtype) * _)),
-      (* elctx........ *) (λ ϝ, [] ++ bor_kind_outlives_elctx k ϝ);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, [] ++ bor_kind_outlives_elctx k ϝ) ϝ);
       (* args......... *) src :@: alias_ptr_t;
       (* precondition. *) (λ π : thread_id, (src ◁ₗ[π, k] # ($# ty.(xtype_rfn)) @ ◁ ty.(xtype_ty))
         ∗ (⌜(ty_allows_ops ty.(xtype_ty))%Z⌝)
@@ -1274,7 +1274,7 @@ Definition trait_incl_of_const_ptr_read_volatile (T_rt: RT) (T_st: syn_type) (Dr
 Definition type_of_const_ptr_read_volatile (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (k, ty, src) : ((_ * (xtype) * _)),
-      (* elctx........ *) (λ ϝ, [] ++ bor_kind_outlives_elctx k ϝ);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, [] ++ bor_kind_outlives_elctx k ϝ) ϝ);
       (* args......... *) src :@: alias_ptr_t;
       (* precondition. *) (λ π : thread_id, (src ◁ₗ[π, k] # ($# ty.(xtype_rfn)) @ ◁ ty.(xtype_ty))
         ∗ (⌜(ty_allows_ops ty.(xtype_ty))%Z⌝)
@@ -1292,7 +1292,7 @@ Definition trait_incl_of_const_ptr_sub (T_rt: RT) (T_st: syn_type) (DropGlue_T_s
 Definition type_of_const_ptr_sub (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (l, count) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) l :@: alias_ptr_t, count :@: (int USize);
       (* precondition. *) (λ π : thread_id, (⌜(l `has_layout_loc` (use_layout_alg' (ty_syn_type T_ty MetaNone)))%Z⌝)
         ∗ (⌜((count * size_of_st (ty_syn_type T_ty MetaNone))%Z ∈ ISize)%Z⌝)
@@ -1309,7 +1309,7 @@ Definition trait_incl_of_const_ptr_with_addr (T_rt: RT) (T_st: syn_type) (DropGl
 Definition type_of_const_ptr_with_addr (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (x, addr) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) x :@: alias_ptr_t, addr :@: (int USize);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1324,7 +1324,7 @@ Definition trait_incl_of_const_ptr_wrapping_add (T_rt: RT) (T_st: syn_type) (Dro
 Definition type_of_const_ptr_wrapping_add (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (l, count) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) l :@: alias_ptr_t, count :@: (int USize);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1339,7 +1339,7 @@ Definition trait_incl_of_const_ptr_wrapping_byte_add (T_rt: RT) (T_st: syn_type)
 Definition type_of_const_ptr_wrapping_byte_add (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (l, count) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) l :@: alias_ptr_t, count :@: (int USize);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1354,7 +1354,7 @@ Definition trait_incl_of_const_ptr_wrapping_byte_offset (T_rt: RT) (T_st: syn_ty
 Definition type_of_const_ptr_wrapping_byte_offset (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (l, count) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) l :@: alias_ptr_t, count :@: (int ISize);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1369,7 +1369,7 @@ Definition trait_incl_of_const_ptr_wrapping_byte_sub (T_rt: RT) (T_st: syn_type)
 Definition type_of_const_ptr_wrapping_byte_sub (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (l, count) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) l :@: alias_ptr_t, count :@: (int USize);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1384,7 +1384,7 @@ Definition trait_incl_of_const_ptr_wrapping_offset (T_rt: RT) (T_st: syn_type) (
 Definition type_of_const_ptr_wrapping_offset (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (l, count) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) l :@: alias_ptr_t, count :@: (int ISize);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1399,7 +1399,7 @@ Definition trait_incl_of_const_ptr_wrapping_sub (T_rt: RT) (T_st: syn_type) (Dro
 Definition type_of_const_ptr_wrapping_sub (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (l, count) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) l :@: alias_ptr_t, count :@: (int USize);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1414,7 +1414,7 @@ Definition trait_incl_of_copy_nonoverlapping (T_rt: RT) (T_st: syn_type) (DropGl
 Definition type_of_copy_nonoverlapping (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (vs, src, dst, size) : ((_ * _ * _ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) src :@: alias_ptr_t, dst :@: alias_ptr_t, size :@: (int USize);
       (* precondition. *) (λ π : thread_id, (src ◁ₗ[π, Owned] #(vs) @ (◁ value_t false (ArraySynType (ty_syn_type T_ty MetaNone) (Z.to_nat size))))
         ∗ (dst ◁ₗ[π, Owned] #(()) @ (◁ uninit (ArraySynType (ty_syn_type T_ty MetaNone) (Z.to_nat size))))) |
@@ -1431,7 +1431,7 @@ Definition trait_incl_of_dangling (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_a
 Definition type_of_dangling (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) _ : unit,
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ (l) : ((_)), l @ alias_ptr_t;
@@ -1448,7 +1448,7 @@ Definition trait_incl_of_dangling_mut (T_rt: RT) (T_st: syn_type) (DropGlue_T_sp
 Definition type_of_dangling_mut (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) _ : unit,
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ (l) : ((_)), l @ alias_ptr_t;
@@ -1465,7 +1465,7 @@ Definition trait_incl_of_mut_ptr_add (T_rt: RT) (T_st: syn_type) (DropGlue_T_spe
 Definition type_of_mut_ptr_add (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (l, count) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) l :@: alias_ptr_t, count :@: (int USize);
       (* precondition. *) (λ π : thread_id, (⌜(l `has_layout_loc` (use_layout_alg' (ty_syn_type T_ty MetaNone)))%Z⌝)
         ∗ (⌜((count * size_of_st (ty_syn_type T_ty MetaNone))%Z ∈ ISize)%Z⌝)
@@ -1482,7 +1482,7 @@ Definition trait_incl_of_mut_ptr_addr (T_rt: RT) (T_st: syn_type) (DropGlue_T_sp
 Definition type_of_mut_ptr_addr (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (x) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) x :@: alias_ptr_t;
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1498,7 +1498,7 @@ Definition trait_incl_of_mut_ptr_cast (T_rt: RT) (U_rt: RT) (T_st: syn_type) (U_
 Definition type_of_mut_ptr_cast (T_rt: RT) (U_rt: RT) (T_st: syn_type) (U_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_U_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (U_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty; U_ty]) : ([(T_rt, T_st); (U_rt, U_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (x) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty; U_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) x :@: alias_ptr_t;
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1513,7 +1513,7 @@ Definition trait_incl_of_mut_ptr_cast_const (T_rt: RT) (T_st: syn_type) (DropGlu
 Definition type_of_mut_ptr_cast_const (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (x) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) x :@: alias_ptr_t;
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1528,7 +1528,7 @@ Definition trait_incl_of_mut_ptr_is_null (T_rt: RT) (T_st: syn_type) (DropGlue_T
 Definition type_of_mut_ptr_is_null (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (x) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) x :@: alias_ptr_t;
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1543,7 +1543,7 @@ Definition trait_incl_of_mut_ptr_offset (T_rt: RT) (T_st: syn_type) (DropGlue_T_
 Definition type_of_mut_ptr_offset (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (l, count) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) l :@: alias_ptr_t, count :@: (int ISize);
       (* precondition. *) (λ π : thread_id, (⌜(l `has_layout_loc` (use_layout_alg' (ty_syn_type T_ty MetaNone)))%Z⌝)
         ∗ (⌜((count * size_of_st (ty_syn_type T_ty MetaNone))%Z ∈ ISize)%Z⌝)
@@ -1562,7 +1562,7 @@ Definition trait_incl_of_mut_ptr_read (T_rt: RT) (T_st: syn_type) (DropGlue_T_sp
 Definition type_of_mut_ptr_read (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (k, ty, src) : ((_ * (xtype) * _)),
-      (* elctx........ *) (λ ϝ, [] ++ bor_kind_outlives_elctx k ϝ);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, [] ++ bor_kind_outlives_elctx k ϝ) ϝ);
       (* args......... *) src :@: alias_ptr_t;
       (* precondition. *) (λ π : thread_id, (src ◁ₗ[π, k] # ($# ty.(xtype_rfn)) @ ◁ ty.(xtype_ty))
         ∗ (⌜(ty_allows_ops ty.(xtype_ty))%Z⌝)
@@ -1580,7 +1580,7 @@ Definition trait_incl_of_mut_ptr_read_volatile (T_rt: RT) (T_st: syn_type) (Drop
 Definition type_of_mut_ptr_read_volatile (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (k, ty, src) : ((_ * (xtype) * _)),
-      (* elctx........ *) (λ ϝ, [] ++ bor_kind_outlives_elctx k ϝ);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, [] ++ bor_kind_outlives_elctx k ϝ) ϝ);
       (* args......... *) src :@: alias_ptr_t;
       (* precondition. *) (λ π : thread_id, (src ◁ₗ[π, k] # ($# ty.(xtype_rfn)) @ ◁ ty.(xtype_ty))
         ∗ (⌜(ty_allows_ops ty.(xtype_ty))%Z⌝)
@@ -1598,7 +1598,7 @@ Definition trait_incl_of_mut_ptr_sub (T_rt: RT) (T_st: syn_type) (DropGlue_T_spe
 Definition type_of_mut_ptr_sub (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (l, count) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) l :@: alias_ptr_t, count :@: (int USize);
       (* precondition. *) (λ π : thread_id, (⌜(l `has_layout_loc` (use_layout_alg' (ty_syn_type T_ty MetaNone)))%Z⌝)
         ∗ (⌜((count * size_of_st (ty_syn_type T_ty MetaNone))%Z ∈ ISize)%Z⌝)
@@ -1615,7 +1615,7 @@ Definition trait_incl_of_mut_ptr_with_addr (T_rt: RT) (T_st: syn_type) (DropGlue
 Definition type_of_mut_ptr_with_addr (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (x, addr) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) x :@: alias_ptr_t, addr :@: (int USize);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1630,7 +1630,7 @@ Definition trait_incl_of_mut_ptr_wrapping_add (T_rt: RT) (T_st: syn_type) (DropG
 Definition type_of_mut_ptr_wrapping_add (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (l, count) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) l :@: alias_ptr_t, count :@: (int USize);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1645,7 +1645,7 @@ Definition trait_incl_of_mut_ptr_wrapping_byte_add (T_rt: RT) (T_st: syn_type) (
 Definition type_of_mut_ptr_wrapping_byte_add (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (l, count) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) l :@: alias_ptr_t, count :@: (int USize);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1660,7 +1660,7 @@ Definition trait_incl_of_mut_ptr_wrapping_byte_offset (T_rt: RT) (T_st: syn_type
 Definition type_of_mut_ptr_wrapping_byte_offset (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (l, count) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) l :@: alias_ptr_t, count :@: (int ISize);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1675,7 +1675,7 @@ Definition trait_incl_of_mut_ptr_wrapping_byte_sub (T_rt: RT) (T_st: syn_type) (
 Definition type_of_mut_ptr_wrapping_byte_sub (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (l, count) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) l :@: alias_ptr_t, count :@: (int USize);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1690,7 +1690,7 @@ Definition trait_incl_of_mut_ptr_wrapping_offset (T_rt: RT) (T_st: syn_type) (Dr
 Definition type_of_mut_ptr_wrapping_offset (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (l, count) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) l :@: alias_ptr_t, count :@: (int ISize);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1705,7 +1705,7 @@ Definition trait_incl_of_mut_ptr_wrapping_sub (T_rt: RT) (T_st: syn_type) (DropG
 Definition type_of_mut_ptr_wrapping_sub (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (l, count) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) l :@: alias_ptr_t, count :@: (int USize);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1720,7 +1720,7 @@ Definition trait_incl_of_mut_ptr_write (T_rt: RT) (T_st: syn_type) (DropGlue_T_s
 Definition type_of_mut_ptr_write (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (dst, src) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) dst :@: alias_ptr_t, src :@: T_ty;
       (* precondition. *) (λ π : thread_id, (dst ◁ₗ[π, Owned] #(()) @ (◁ uninit (ty_syn_type T_ty MetaNone)))) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1735,7 +1735,7 @@ Definition trait_incl_of_mut_ptr_write_volatile (T_rt: RT) (T_st: syn_type) (Dro
 Definition type_of_mut_ptr_write_volatile (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (dst, src) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) dst :@: alias_ptr_t, src :@: T_ty;
       (* precondition. *) (λ π : thread_id, (dst ◁ₗ[π, Owned] #(()) @ (◁ uninit (ty_syn_type T_ty MetaNone)))) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1750,7 +1750,7 @@ Definition trait_incl_of_read (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs
 Definition type_of_read (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (k, ty, src) : ((_ * (xtype) * _)),
-      (* elctx........ *) (λ ϝ, [] ++ bor_kind_outlives_elctx k ϝ);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, [] ++ bor_kind_outlives_elctx k ϝ) ϝ);
       (* args......... *) src :@: alias_ptr_t;
       (* precondition. *) (λ π : thread_id, (src ◁ₗ[π, k] # ($# ty.(xtype_rfn)) @ ◁ ty.(xtype_ty))
         ∗ (⌜(ty_allows_ops ty.(xtype_ty))%Z⌝)
@@ -1768,7 +1768,7 @@ Definition trait_incl_of_read_volatile (T_rt: RT) (T_st: syn_type) (DropGlue_T_s
 Definition type_of_read_volatile (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (k, ty, src) : ((_ * (xtype) * _)),
-      (* elctx........ *) (λ ϝ, [] ++ bor_kind_outlives_elctx k ϝ);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, [] ++ bor_kind_outlives_elctx k ϝ) ϝ);
       (* args......... *) src :@: alias_ptr_t;
       (* precondition. *) (λ π : thread_id, (src ◁ₗ[π, k] # ($# ty.(xtype_rfn)) @ ◁ ty.(xtype_ty))
         ∗ (⌜(ty_allows_ops ty.(xtype_ty))%Z⌝)
@@ -1786,7 +1786,7 @@ Definition trait_incl_of_without_provenance (T_rt: RT) (T_st: syn_type) (DropGlu
 Definition type_of_without_provenance (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (addr) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) addr :@: (int USize);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1803,7 +1803,7 @@ Definition trait_incl_of_without_provenance_mut (T_rt: RT) (T_st: syn_type) (Dro
 Definition type_of_without_provenance_mut (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (addr) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) addr :@: (int USize);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1820,7 +1820,7 @@ Definition trait_incl_of_write (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attr
 Definition type_of_write (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (dst, src) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) dst :@: alias_ptr_t, src :@: T_ty;
       (* precondition. *) (λ π : thread_id, (dst ◁ₗ[π, Owned] #(()) @ (◁ uninit (ty_syn_type T_ty MetaNone)))) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1835,7 +1835,7 @@ Definition trait_incl_of_write_volatile (T_rt: RT) (T_st: syn_type) (DropGlue_T_
 Definition type_of_write_volatile (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (dst, src) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) dst :@: alias_ptr_t, src :@: T_ty;
       (* precondition. *) (λ π : thread_id, (dst ◁ₗ[π, Owned] #(()) @ (◁ uninit (ty_syn_type T_ty MetaNone)))) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1851,7 +1851,7 @@ Definition trait_incl_of_alignment_Alignment_new_unchecked  : (spec_with _ _ (th
 Definition type_of_alignment_Alignment_new_unchecked  :=
   fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
       (* params....... *) (align) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) align :@: (int USize);
       (* precondition. *) (λ π : thread_id, (⌜(is_power_of_two (Z.to_nat align))%Z⌝)) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1866,7 +1866,7 @@ Definition trait_incl_of_mem_replace (T_rt: RT) (T_st: syn_type) (DropGlue_T_spe
 Definition type_of_mem_replace (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[ulft_1]) : 1 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (dest, src) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, [(ϝ, ulft_1)]) ϝ);
       (* args......... *) dest :@: (mut_ref ulft_1 T_ty), src :@: T_ty;
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1881,7 +1881,7 @@ Definition trait_incl_of_mem_swap (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_a
 Definition type_of_mem_swap (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[ulft_1; ulft_2]) : 2 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (x, y) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1); (ϝ, ulft_2)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, [(ϝ, ulft_1); (ϝ, ulft_2)]) ϝ);
       (* args......... *) x :@: (mut_ref ulft_1 T_ty), y :@: (mut_ref ulft_2 T_ty);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1898,7 +1898,7 @@ Definition trait_incl_of_mem_take (T_rt: RT) (T_st: syn_type) (Default_T_spec_at
 Definition type_of_mem_take (T_rt: RT) (T_st: syn_type) (Default_T_spec_attrs: (Default_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[ulft_1]) : 1 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (dest) : ((_)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, [(ϝ, ulft_1)]) ϝ);
       (* args......... *) dest :@: (mut_ref ulft_1 T_ty);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1913,7 +1913,7 @@ Definition trait_incl_of_const_ptr_is_aligned (T_rt: RT) (T_st: syn_type) (DropG
 Definition type_of_const_ptr_is_aligned (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (a) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) a :@: alias_ptr_t;
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1928,7 +1928,7 @@ Definition trait_incl_of_const_ptr_is_aligned_to (T_rt: RT) (T_st: syn_type) (Dr
 Definition type_of_const_ptr_is_aligned_to (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (a, align) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) a :@: alias_ptr_t, align :@: (int USize);
       (* precondition. *) (λ π : thread_id, (⌜(is_power_of_two (Z.to_nat align))%Z⌝)) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1943,7 +1943,7 @@ Definition trait_incl_of_copy (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs
 Definition type_of_copy (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (l, off_src, off_dst, count, len, vs) : ((_ * _ * _ * _ * _ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) l offsetst{ (ty_syn_type T_ty MetaNone) }ₗ off_src :@: alias_ptr_t, l offsetst{ (ty_syn_type T_ty MetaNone) }ₗ off_dst :@: alias_ptr_t, count :@: (int USize);
       (* precondition. *) (λ π : thread_id, (l ◁ₗ[π, Owned] #(vs) @ (◁ value_t false (ArraySynType (ty_syn_type T_ty MetaNone) (Z.to_nat len))))
         ∗ (⌜((0 ≤ count)%Z)%Z⌝)
@@ -1963,7 +1963,7 @@ Definition trait_incl_of_mut_ptr_is_aligned (T_rt: RT) (T_st: syn_type) (DropGlu
 Definition type_of_mut_ptr_is_aligned (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (a) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) a :@: alias_ptr_t;
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1978,7 +1978,7 @@ Definition trait_incl_of_mut_ptr_is_aligned_to (T_rt: RT) (T_st: syn_type) (Drop
 Definition type_of_mut_ptr_is_aligned_to (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (a, align) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) a :@: alias_ptr_t, align :@: (int USize);
       (* precondition. *) (λ π : thread_id, (⌜(is_power_of_two (Z.to_nat align))%Z⌝)) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -1993,7 +1993,7 @@ Definition trait_incl_of_ptr_null (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_a
 Definition type_of_ptr_null (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) _ : unit,
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ _ : unit, NULL_loc @ alias_ptr_t;
@@ -2007,7 +2007,7 @@ Definition trait_incl_of_ptr_null_mut (T_rt: RT) (T_st: syn_type) (DropGlue_T_sp
 Definition type_of_ptr_null_mut (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) _ : unit,
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ _ : unit, NULL_loc @ alias_ptr_t;
@@ -2040,7 +2040,7 @@ Section usizeasDefault_spec.
     solve_trait_realization_pers.
   Qed.
   Definition usizeasDefault_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Default_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), usizeasDefault_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Default_base_spec Z (IntSynType USize) (drop_glue_trivial_spec_attrs (Z)) usizeasDefault_spec_attrs-[] -[(int USize)])))).
+    trait_incl_marker (lift_trait_incl Default_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), usizeasDefault_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Default_base_spec Z (IntSynType USize) (drop_glue_trivial_spec_attrs (Z)) usizeasDefault_spec_attrs-[] -[(int USize)])))).
 End usizeasDefault_spec.
 
 Section alignment_Alignmentasstd_clone_Clone_spec.
@@ -2068,7 +2068,7 @@ Section alignment_Alignmentasstd_clone_Clone_spec.
     solve_trait_realization_pers.
   Qed.
   Definition alignment_Alignmentasstd_clone_Clone_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Clone_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), alignment_Alignmentasstd_clone_Clone_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Clone_base_spec (alignment_Alignment_inv_t_rt) alignment_Alignment_st (drop_glue_trivial_spec_attrs ((alignment_Alignment_inv_t_rt))) alignment_Alignmentasstd_clone_Clone_spec_attrs-[] -[(alignment_Alignment_inv_t   -[] -[])])))).
+    trait_incl_marker (lift_trait_incl Clone_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), alignment_Alignmentasstd_clone_Clone_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Clone_base_spec (alignment_Alignment_inv_t_rt) alignment_Alignment_st (drop_glue_trivial_spec_attrs ((alignment_Alignment_inv_t_rt))) alignment_Alignmentasstd_clone_Clone_spec_attrs-[] -[(alignment_Alignment_inv_t   -[] -[])])))).
 End alignment_Alignmentasstd_clone_Clone_spec.
 
 Section alignment_Alignmentasstd_marker_Copy_spec.
@@ -2088,7 +2088,7 @@ Section alignment_Alignmentasstd_marker_Copy_spec.
     solve_trait_realization_pers.
   Qed.
   Definition alignment_Alignmentasstd_marker_Copy_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Copy_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), alignment_Alignmentasstd_marker_Copy_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Copy_base_spec (alignment_Alignment_inv_t_rt) alignment_Alignment_st alignment_Alignmentasstd_clone_Clone_spec_attrs (drop_glue_trivial_spec_attrs ((alignment_Alignment_inv_t_rt))) alignment_Alignmentasstd_marker_Copy_spec_attrs-[] -[(alignment_Alignment_inv_t   -[] -[])])))).
+    trait_incl_marker (lift_trait_incl Copy_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), alignment_Alignmentasstd_marker_Copy_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Copy_base_spec (alignment_Alignment_inv_t_rt) alignment_Alignment_st alignment_Alignmentasstd_clone_Clone_spec_attrs (drop_glue_trivial_spec_attrs ((alignment_Alignment_inv_t_rt))) alignment_Alignmentasstd_marker_Copy_spec_attrs-[] -[(alignment_Alignment_inv_t   -[] -[])])))).
   Lemma alignment_Alignmentasstd_marker_Copy_semantic_interp  : (Copy_semantic_interp (alignment_Alignment_inv_t_rt) (alignment_Alignment_inv_t   -[] -[])).
   Proof.
     unfold Copy_semantic_interp in *; apply _.
@@ -2121,7 +2121,7 @@ Section alignment_AlignmentEnumasstd_clone_Clone_spec.
     solve_trait_realization_pers.
   Qed.
   Definition alignment_AlignmentEnumasstd_clone_Clone_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Clone_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), alignment_AlignmentEnumasstd_clone_Clone_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Clone_base_spec (alignment_AlignmentEnum_rt) alignment_AlignmentEnum_st (drop_glue_trivial_spec_attrs ((alignment_AlignmentEnum_rt))) alignment_AlignmentEnumasstd_clone_Clone_spec_attrs-[] -[(alignment_AlignmentEnum_ty  -[] -[])])))).
+    trait_incl_marker (lift_trait_incl Clone_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), alignment_AlignmentEnumasstd_clone_Clone_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Clone_base_spec (alignment_AlignmentEnum_rt) alignment_AlignmentEnum_st (drop_glue_trivial_spec_attrs ((alignment_AlignmentEnum_rt))) alignment_AlignmentEnumasstd_clone_Clone_spec_attrs-[] -[(alignment_AlignmentEnum_ty  -[] -[])])))).
 End alignment_AlignmentEnumasstd_clone_Clone_spec.
 
 Section alignment_AlignmentEnumasstd_marker_Copy_spec.
@@ -2141,7 +2141,7 @@ Section alignment_AlignmentEnumasstd_marker_Copy_spec.
     solve_trait_realization_pers.
   Qed.
   Definition alignment_AlignmentEnumasstd_marker_Copy_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Copy_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), alignment_AlignmentEnumasstd_marker_Copy_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Copy_base_spec (alignment_AlignmentEnum_rt) alignment_AlignmentEnum_st alignment_AlignmentEnumasstd_clone_Clone_spec_attrs (drop_glue_trivial_spec_attrs ((alignment_AlignmentEnum_rt))) alignment_AlignmentEnumasstd_marker_Copy_spec_attrs-[] -[(alignment_AlignmentEnum_ty  -[] -[])])))).
+    trait_incl_marker (lift_trait_incl Copy_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), alignment_AlignmentEnumasstd_marker_Copy_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Copy_base_spec (alignment_AlignmentEnum_rt) alignment_AlignmentEnum_st alignment_AlignmentEnumasstd_clone_Clone_spec_attrs (drop_glue_trivial_spec_attrs ((alignment_AlignmentEnum_rt))) alignment_AlignmentEnumasstd_marker_Copy_spec_attrs-[] -[(alignment_AlignmentEnum_ty  -[] -[])])))).
   Lemma alignment_AlignmentEnumasstd_marker_Copy_semantic_interp  : (Copy_semantic_interp (alignment_AlignmentEnum_rt) (alignment_AlignmentEnum_ty  -[] -[])).
   Proof.
     unfold Copy_semantic_interp in *; apply _.

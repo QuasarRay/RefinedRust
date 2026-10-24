@@ -15,7 +15,10 @@ Set Default Proof Using "Type".
 Section proof.
 Context `{RRGS : !refinedrustGS Σ}.
 Definition errors_TryReserveErrorKindasstd_clone_Clone_clone_lemma (π : thread_id) : Prop :=
+  syn_type_is_layoutable ((layout_Layout_sls : syn_type)) →
   syn_type_is_layoutable ((errors_TryReserveErrorKind_els : syn_type)) →
+  syn_type_is_layoutable ((errors_TryReserveErrorKind_AllocError_sls : syn_type)) →
+  syn_type_is_layoutable ((errors_TryReserveErrorKind_CapacityOverflow_sls : syn_type)) →
   ⊢ typed_function π (errors_TryReserveErrorKindasstd_clone_Clone_clone_def ) (<tag_type> spec! ( *[ulft_1]) : 1 | ( *[]) : ([] : list RT), fn_spec_add_late_pre (type_of_errors_TryReserveErrorKindasstd_clone_Clone_clone -[ulft_1] -[]) (λ π, (True)
   ∗ ((trait_incl_of_errors_TryReserveErrorKindasstd_clone_Clone_clone-[ulft_1] -[]) π))).
 End proof.

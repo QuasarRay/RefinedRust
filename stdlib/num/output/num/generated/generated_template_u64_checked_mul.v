@@ -8,15 +8,12 @@ Set Default Proof Using "Type".
 Section proof.
 Context `{RRGS : !refinedrustGS Σ}.
 Definition u64_checked_mul_lemma (π : thread_id) : Prop :=
-  ∀ (panic_shim_loc : loc) (panic_shim_loc_linking : spec_with 0 [] (thread_id → iProp Σ)) , 
   syn_type_is_layoutable (((Option_els ((IntSynType U64))) : syn_type)) →
   syn_type_is_layoutable (((Option_None_sls ((IntSynType U64))) : syn_type)) →
   syn_type_is_layoutable (((Option_Some_sls ((IntSynType U64))) : syn_type)) →
   syn_type_is_layoutable (((tuple2_sls ((IntSynType U64)) (BoolSynType)) : syn_type)) →
-  panic_shim_loc ◁ᵥ{π, MetaNone} panic_shim_loc @ function_ptr [] (<tag_type> spec! ( *[]) : 0 | ( *[]) : ([] : list RT), fn_spec_add_late_pre (type_of_panic_shim (RRGS:=RRGS)  -[] -[]) (λ π, (from_assumption_hint (panic_shim_loc_linking -[] -[] π)))%I) -∗
-  typed_function π (u64_checked_mul_def panic_shim_loc  ) (<tag_type> spec! ( *[]) : 0 | ( *[]) : ([] : list RT), fn_spec_add_late_pre (type_of_u64_checked_mul -[] -[]) (λ π, (True)
-  ∗ ((trait_incl_of_u64_checked_mul-[] -[]) π)
-  ∗ (□ (panic_shim_loc_linking -[] -[] π)))).
+  ⊢ typed_function π (u64_checked_mul_def ) (<tag_type> spec! ( *[]) : 0 | ( *[]) : ([] : list RT), fn_spec_add_late_pre (type_of_u64_checked_mul -[] -[]) (λ π, (True)
+  ∗ ((trait_incl_of_u64_checked_mul-[] -[]) π))).
 End proof.
 
 Ltac u64_checked_mul_prelude :=

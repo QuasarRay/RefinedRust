@@ -71,10 +71,15 @@ Section errors_AllocError_inv_t.
           (λ π (inner_rfn : errors_AllocError_rt) (_ty_rfn : RT_rt ((unit)%type : RT)),
                   let '() := _ty_rfn in ⌜inner_rfn = -[]⌝ ∗ True)%I
           (true)
+          _
           ([])
           ([])
           _ _ _ _
         .
+  Next Obligation.
+    ex_plain_t_solve_is_xrfn.
+  Qed.
+
   Next Obligation.
     ex_plain_t_solve_shr_auto.
   Defined.
@@ -365,25 +370,73 @@ Section errors_TryReserveErrorKind_ty.
 
     #[global] Typeclasses Transparent errors_TryReserveErrorKind_AllocError_rt.
     #[global] Typeclasses Transparent errors_TryReserveErrorKind_AllocError_ty.
+    Program Definition errors_TryReserveErrorKind_AllocError_inv_t_inv_spec  : (spec_with 0 [] ((ex_inv_def (errors_TryReserveErrorKind_AllocError_rt)%type ((rust_layout))%type))) :=
+      spec! ( *[]) : 0 | ( *[]) : ([] : list RT), mk_auto_ex_inv_def
+            (λ π (inner_rfn : errors_TryReserveErrorKind_AllocError_rt) (_ty_rfn : RT_rt ((rust_layout)%type : RT)),
+                    let 'layout := _ty_rfn in ⌜inner_rfn = -[#layout; #tt]⌝ ∗ True)%I
+            (true)
+            _
+            ([])
+            ([])
+            _ _ _ _
+          .
+    Next Obligation.
+      ex_plain_t_solve_is_xrfn.
+    Qed.
+
+    Next Obligation.
+      ex_plain_t_solve_shr_auto.
+    Defined.
+
+    Next Obligation.
+      ex_plain_t_solve_ghost_drop_auto.
+    Defined.
+
+    Next Obligation.
+      ex_t_solve_persistent.
+    Qed.
+
+    Final Obligation.
+      ex_plain_t_solve_shr_mono.
+    Qed.
+
+    Definition errors_TryReserveErrorKind_AllocError_inv_t  : (spec_with 0 [] ((type (((rust_layout))%type)))) :=
+      spec! ( *[]) : 0 | ( *[]) : ([] : list RT), ex_plain_t _ _ (errors_TryReserveErrorKind_AllocError_inv_t_inv_spec  -[] -[]) (errors_TryReserveErrorKind_AllocError_ty -[] -[]).
+    #[global] Arguments errors_TryReserveErrorKind_AllocError_inv_t_inv_spec : simpl never.
+
+    #[global] Arguments errors_TryReserveErrorKind_AllocError_inv_t : simpl never.
+
+    #[global] Typeclasses Transparent errors_TryReserveErrorKind_AllocError_inv_t.
+    Definition errors_TryReserveErrorKind_AllocError_inv_t_rt  : RT.
+    Proof using  .
+      let __a := (normalized_rt_of_spec_ty (errors_TryReserveErrorKind_AllocError_inv_t)) in exact __a.
+    Defined.
+
+    #[global] Typeclasses Transparent errors_TryReserveErrorKind_AllocError_inv_t_rt.
     Definition errors_TryReserveErrorKind_enum_rt  :=
-      λ rfn : (reserve_error), match rfn with | ReserveCapacityOverflow => errors_TryReserveErrorKind_CapacityOverflow_rt| (ReserveAllocError (layout) (extra)) => errors_TryReserveErrorKind_AllocError_rt end.
+      λ rfn : (reserve_error), match rfn with | ReserveCapacityOverflow => errors_TryReserveErrorKind_CapacityOverflow_rt| (ReserveAllocError (layout)) => errors_TryReserveErrorKind_AllocError_inv_t_rt end.
     Definition errors_TryReserveErrorKind_enum_ty  : (spec_with 0 [] (∀ (x: _), (type (errors_TryReserveErrorKind_enum_rt (x))))) :=
-      spec! ( *[]) : 0 | ( *[]) : ([] : list RT), λ rfn, match rfn as x return type (errors_TryReserveErrorKind_enum_rt x) with | ReserveCapacityOverflow => errors_TryReserveErrorKind_CapacityOverflow_ty -[] -[]| (ReserveAllocError (layout) (extra)) => errors_TryReserveErrorKind_AllocError_ty -[] -[] end.
+      spec! ( *[]) : 0 | ( *[]) : ([] : list RT), λ rfn, match rfn as x return type (errors_TryReserveErrorKind_enum_rt x) with | ReserveCapacityOverflow => errors_TryReserveErrorKind_CapacityOverflow_ty -[] -[]| (ReserveAllocError (layout)) => errors_TryReserveErrorKind_AllocError_inv_t -[] -[] end.
     Program Definition errors_TryReserveErrorKind_enum  : (spec_with 0 [] ((enum ((reserve_error))))) :=
       spec! ( *[]) : 0 | ( *[]) : ([] : list RT), mk_enum
         _
         (errors_TryReserveErrorKind_els)
-        (λ rfn, Some (match rfn with | ReserveCapacityOverflow => "CapacityOverflow" | (ReserveAllocError (layout) (extra)) => "AllocError" end))
+        (λ rfn, Some (match rfn with | ReserveCapacityOverflow => "CapacityOverflow" | (ReserveAllocError (layout)) => "AllocError" end))
         (errors_TryReserveErrorKind_enum_rt)
         (errors_TryReserveErrorKind_enum_ty -[] -[])
-        (λ rfn, match rfn with | ReserveCapacityOverflow => *[]| (ReserveAllocError (layout) (extra)) => *[layout; extra] end)
-        ([("CapacityOverflow", mk_enum_tag_sem _ (errors_TryReserveErrorKind_CapacityOverflow_ty -[] -[]) (λ '( *[]), ReserveCapacityOverflow)); ("AllocError", mk_enum_tag_sem _ (errors_TryReserveErrorKind_AllocError_ty -[] -[]) (λ '( *[layout; extra]), (ReserveAllocError (layout) (extra))))])
+        (λ rfn, match rfn as x return RT_rt (errors_TryReserveErrorKind_enum_rt x) with | ReserveCapacityOverflow => *[]| (ReserveAllocError (layout)) => layout end)
+        ([("CapacityOverflow", mk_enum_tag_sem _ (errors_TryReserveErrorKind_CapacityOverflow_ty -[] -[]) (λ '( *[]), ReserveCapacityOverflow)); ("AllocError", mk_enum_tag_sem _ (errors_TryReserveErrorKind_AllocError_inv_t -[] -[]) (λ '( layout), (ReserveAllocError (layout))))])
+        _
         _
         _
         _.
     Next Obligation.
       solve_inhabited.
     Defined.
+
+    Next Obligation.
+      solve_enum_is_xrfn_congr.
+    Qed.
 
     Next Obligation.
       done.
@@ -487,10 +540,15 @@ Section errors_TryReserveError_inv_t.
           (λ π (inner_rfn : errors_TryReserveError_rt) (_ty_rfn : RT_rt ((reserve_error)%type : RT)),
                   let 'kind := _ty_rfn in ⌜inner_rfn = -[#kind]⌝ ∗ True)%I
           (true)
+          _
           ([])
           ([])
           _ _ _ _
         .
+  Next Obligation.
+    ex_plain_t_solve_is_xrfn.
+  Qed.
+
   Next Obligation.
     ex_plain_t_solve_shr_auto.
   Defined.
@@ -680,42 +738,42 @@ Definition trait_incl_of_errors_AllocErrorasstd_clone_Clone_clone  : (spec_with 
   spec! ( *[ulft_1]) : 1 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_errors_AllocErrorasstd_clone_Clone_clone  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Clone_base_spec ((errors_AllocError_inv_t_rt)) (errors_AllocError_st) ((drop_glue_trivial_spec_attrs ((errors_AllocError_inv_t_rt)))) (errors_AllocErrorasstd_clone_Clone_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Clone_base_spec ((errors_AllocError_inv_t_rt)) (errors_AllocError_st) ((drop_glue_trivial_spec_attrs ((errors_AllocError_inv_t_rt)))) (errors_AllocErrorasstd_clone_Clone_spec_attrs))
     -[] -[(errors_AllocError_inv_t   -[] -[])]).(Clone_clone_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_errors_TryReserveErrorasstd_clone_Clone_clone  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1]) : 1 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_errors_TryReserveErrorasstd_clone_Clone_clone  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Clone_base_spec ((errors_TryReserveError_inv_t_rt)) (errors_TryReserveError_st) ((drop_glue_trivial_spec_attrs ((errors_TryReserveError_inv_t_rt)))) (errors_TryReserveErrorasstd_clone_Clone_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Clone_base_spec ((errors_TryReserveError_inv_t_rt)) (errors_TryReserveError_st) ((drop_glue_trivial_spec_attrs ((errors_TryReserveError_inv_t_rt)))) (errors_TryReserveErrorasstd_clone_Clone_spec_attrs))
     -[] -[(errors_TryReserveError_inv_t   -[] -[])]).(Clone_clone_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_from  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_from  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((convert_From_base_spec ((errors_TryReserveError_inv_t_rt)) ((errors_TryReserveErrorKind_rt)) (errors_TryReserveError_st) (errors_TryReserveErrorKind_st) ((drop_glue_trivial_spec_attrs ((errors_TryReserveError_inv_t_rt)))) ((drop_glue_trivial_spec_attrs ((errors_TryReserveErrorKind_rt)))) (errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((convert_From_base_spec ((errors_TryReserveError_inv_t_rt)) ((errors_TryReserveErrorKind_rt)) (errors_TryReserveError_st) (errors_TryReserveErrorKind_st) ((drop_glue_trivial_spec_attrs ((errors_TryReserveError_inv_t_rt)))) ((drop_glue_trivial_spec_attrs ((errors_TryReserveErrorKind_rt)))) (errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_spec_attrs))
     -[] -[(errors_TryReserveError_inv_t   -[] -[]); (errors_TryReserveErrorKind_ty  -[] -[])]).(convert_From_from_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_errors_TryReserveErrorKindasstd_clone_Clone_clone  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1]) : 1 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_errors_TryReserveErrorKindasstd_clone_Clone_clone  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Clone_base_spec ((errors_TryReserveErrorKind_rt)) (errors_TryReserveErrorKind_st) ((drop_glue_trivial_spec_attrs ((errors_TryReserveErrorKind_rt)))) (errors_TryReserveErrorKindasstd_clone_Clone_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Clone_base_spec ((errors_TryReserveErrorKind_rt)) (errors_TryReserveErrorKind_st) ((drop_glue_trivial_spec_attrs ((errors_TryReserveErrorKind_rt)))) (errors_TryReserveErrorKindasstd_clone_Clone_spec_attrs))
     -[] -[(errors_TryReserveErrorKind_ty  -[] -[])]).(Clone_clone_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_from  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_from  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((convert_From_base_spec ((errors_TryReserveErrorKind_rt)) ((layout_LayoutError_rt)) (errors_TryReserveErrorKind_st) (layout_LayoutError_st) ((drop_glue_trivial_spec_attrs ((errors_TryReserveErrorKind_rt)))) ((drop_glue_trivial_spec_attrs ((layout_LayoutError_rt)))) (errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((convert_From_base_spec ((errors_TryReserveErrorKind_rt)) ((layout_LayoutError_rt)) (errors_TryReserveErrorKind_st) (layout_LayoutError_st) ((drop_glue_trivial_spec_attrs ((errors_TryReserveErrorKind_rt)))) ((drop_glue_trivial_spec_attrs ((layout_LayoutError_rt)))) (errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_spec_attrs))
     -[] -[(errors_TryReserveErrorKind_ty  -[] -[]); (layout_LayoutError_ty   -[] -[])]).(convert_From_from_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_layout_Layoutasstd_clone_Clone_clone  : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1]) : 1 | ( *[]) : ([] : list RT), (λ π, (True)%I).
 
 Definition type_of_layout_Layoutasstd_clone_Clone_clone  :=
-  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_typarams _ -[] (scope_add_elctx (λ ϝ, []) (((Clone_base_spec ((layout_Layout_inv_t_rt)) (layout_Layout_st) ((drop_glue_trivial_spec_attrs ((layout_Layout_inv_t_rt)))) (layout_Layoutasstd_clone_Clone_spec_attrs))
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Clone_base_spec ((layout_Layout_inv_t_rt)) (layout_Layout_st) ((drop_glue_trivial_spec_attrs ((layout_Layout_inv_t_rt)))) (layout_Layoutasstd_clone_Clone_spec_attrs))
     -[] -[(layout_Layout_inv_t   -[] -[])]).(Clone_clone_spec)   a b))) <MERGE!>.
 
 Definition trait_incl_of_layout_Layout_align  : (spec_with _ _ (thread_id → iProp Σ)) :=
@@ -724,7 +782,7 @@ Definition trait_incl_of_layout_Layout_align  : (spec_with _ _ (thread_id → iP
 Definition type_of_layout_Layout_align  :=
   fn(∀ ( *[ulft_1]) : 1 | ( *[]) : ([] : list (RT * syn_type)%type) | 
       (* params....... *) (self) : ((_)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, [(ϝ, ulft_1)]) ϝ);
       (* args......... *) self :@: (shr_ref ulft_1 (layout_Layout_inv_t   -[] -[]));
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -739,7 +797,7 @@ Definition trait_incl_of_layout_Layout_alignment  : (spec_with _ _ (thread_id �
 Definition type_of_layout_Layout_alignment  :=
   fn(∀ ( *[ulft_1]) : 1 | ( *[]) : ([] : list (RT * syn_type)%type) | 
       (* params....... *) (self) : ((_)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, [(ϝ, ulft_1)]) ϝ);
       (* args......... *) self :@: (shr_ref ulft_1 (layout_Layout_inv_t   -[] -[]));
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -754,7 +812,7 @@ Definition trait_incl_of_layout_Layout_from_size_align  : (spec_with _ _ (thread
 Definition type_of_layout_Layout_from_size_align  :=
   fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
       (* params....... *) (size, align) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) size :@: (int USize), align :@: (int USize);
       (* precondition. *) (λ π : thread_id, (⌜(is_power_of_two (Z.to_nat align))%Z⌝)
         ∗ (⌜(size ∈ isize)%Z⌝)
@@ -771,7 +829,7 @@ Definition trait_incl_of_layout_Layout_from_size_align_unchecked  : (spec_with _
 Definition type_of_layout_Layout_from_size_align_unchecked  :=
   fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
       (* params....... *) (size, align) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) size :@: (int USize), align :@: (int USize);
       (* precondition. *) (λ π : thread_id, (⌜(is_power_of_two (Z.to_nat align))%Z⌝)
         ∗ (⌜(size ∈ isize)%Z⌝)
@@ -782,13 +840,89 @@ Definition type_of_layout_Layout_from_size_align_unchecked  :=
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
 
+Definition trait_incl_of_layout_Layout_from_size_alignment  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_layout_Layout_from_size_alignment  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (size, alignment) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, []) ϝ);
+      (* args......... *) size :@: (int USize), alignment :@: (alignment_Alignment_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, (⌜(name_hint "Hsize_aligned" (Z.divide (alignment_to_align alignment) size)%Z)%Z⌝)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, if bool_decide (size ≤ MaxInt ISize) then Ok (mk_rust_layout (Z.to_nat size) alignment) else Err ( *[]) @ (Result_ty ((layout_Layout_inv_t_rt)) ((layout_LayoutError_rt)) -[] -[(layout_Layout_inv_t   -[] -[]); (layout_LayoutError_ty   -[] -[])]);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_layout_Layout_from_size_alignment_unchecked  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_layout_Layout_from_size_alignment_unchecked  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (size, alignment) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, []) ϝ);
+      (* args......... *) size :@: (int USize), alignment :@: (alignment_Alignment_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, (⌜(name_hint "Hsize_in_range" (size ∈ isize)%Z)%Z⌝)
+        ∗ (⌜(name_hint "Hsize_aligned" (Z.divide (alignment_to_align alignment) size)%Z)%Z⌝)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, mk_rust_layout (Z.to_nat size) alignment @ (layout_Layout_inv_t   -[] -[]);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_layout_Layout_is_size_align_valid  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_layout_Layout_is_size_align_valid  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (size, align) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, []) ϝ);
+      (* args......... *) size :@: (int USize), align :@: (int USize);
+      (* precondition. *) (λ π : thread_id, (⌜(is_power_of_two (Z.to_nat align))%Z⌝)) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, bool_decide (size ≤ MaxInt ISize + 1 - align) @ bool_t;
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_layout_Layout_is_size_alignment_valid  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_layout_Layout_is_size_alignment_valid  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (size, alignment) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, []) ϝ);
+      (* args......... *) size :@: (int USize), alignment :@: (alignment_Alignment_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, bool_decide (size ≤ MaxInt ISize + 1 - alignment_to_align alignment) @ bool_t;
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_layout_Layout_max_size_for_alignment  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_layout_Layout_max_size_for_alignment  :=
+  fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (alignment) : ((_)),
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, []) ϝ);
+      (* args......... *) alignment :@: (alignment_Alignment_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, MaxInt ISize + 1 - alignment_to_align alignment @ (int USize);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
 Definition trait_incl_of_layout_Layout_new (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) (DropGlue_T_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (T_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[]) : 0 | ( *[T_ty]) : ([T_rt] : list RT), (λ π, ((∃ (DropGlue_T_lfts_inst : prod_vec lft DropGlue_T_realization.(trait_ctx_lfts)) (DropGlue_T_tys_inst : plist type DropGlue_T_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_T_realization.(trait_ctx_spec) DropGlue_T_lfts_inst DropGlue_T_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (T_rt) T_st DropGlue_T_spec_attrs-[] -[T_ty]))⌝ ∗ DropGlue_T_realization.(trait_ctx_wf) DropGlue_T_lfts_inst DropGlue_T_tys_inst π))%I).
 
 Definition type_of_layout_Layout_new (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
       (* params....... *) _ : unit,
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ _ : unit, mk_rust_layout (ly_size (use_layout_alg' (ty_syn_type T_ty MetaNone))) (alignment_of_align (ly_align (use_layout_alg' (ty_syn_type T_ty MetaNone)))) @ (layout_Layout_inv_t   -[] -[]);
@@ -802,7 +936,7 @@ Definition trait_incl_of_layout_Layout_pad_to_align  : (spec_with _ _ (thread_id
 Definition type_of_layout_Layout_pad_to_align  :=
   fn(∀ ( *[ulft_1]) : 1 | ( *[]) : ([] : list (RT * syn_type)%type) | 
       (* params....... *) (self) : ((_)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, [(ϝ, ulft_1)]) ϝ);
       (* args......... *) self :@: (shr_ref ulft_1 (layout_Layout_inv_t   -[] -[]));
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -817,7 +951,7 @@ Definition trait_incl_of_layout_Layout_repeat_packed  : (spec_with _ _ (thread_i
 Definition type_of_layout_Layout_repeat_packed  :=
   fn(∀ ( *[ulft_1]) : 1 | ( *[]) : ([] : list (RT * syn_type)%type) | 
       (* params....... *) (self, n) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, [(ϝ, ulft_1)]) ϝ);
       (* args......... *) self :@: (shr_ref ulft_1 (layout_Layout_inv_t   -[] -[])), n :@: (int USize);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -832,9 +966,24 @@ Definition trait_incl_of_layout_Layout_size  : (spec_with _ _ (thread_id → iPr
 Definition type_of_layout_Layout_size  :=
   fn(∀ ( *[ulft_1]) : 1 | ( *[]) : ([] : list (RT * syn_type)%type) | 
       (* params....... *) (self) : ((_)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, [(ϝ, ulft_1)]) ϝ);
       (* args......... *) self :@: (shr_ref ulft_1 (layout_Layout_inv_t   -[] -[]));
       (* precondition. *) (λ π : thread_id, True) |
+      (* trait reqs... *) (λ π : thread_id, True)) →
+      (* existential.. *) ∃ _ : unit, Z.of_nat self.(layout_sz) @ (int USize);
+      (* postcondition *) (λ π : thread_id, True) |
+      (* unwind cond... *) False |
+      (* unwind post... *) (λ π : thread_id, True).
+
+Definition trait_incl_of_layout_Layout_size_rounded_up_to_custom_alignment  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[ulft_1]) : 1 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_layout_Layout_size_rounded_up_to_custom_alignment  :=
+  fn(∀ ( *[ulft_1]) : 1 | ( *[]) : ([] : list (RT * syn_type)%type) | 
+      (* params....... *) (self, alignment) : ((_ * _)),
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, [(ϝ, ulft_1)]) ϝ);
+      (* args......... *) self :@: (shr_ref ulft_1 (layout_Layout_inv_t   -[] -[])), alignment :@: (alignment_Alignment_inv_t  -[] -[]);
+      (* precondition. *) (λ π : thread_id, (⌜(name_hint "Hsize_aligned" (Z.divide (alignment_to_align alignment) (Z.of_nat self.(layout_sz)))%Z)%Z⌝)) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ _ : unit, Z.of_nat self.(layout_sz) @ (int USize);
       (* postcondition *) (λ π : thread_id, True) |
@@ -847,7 +996,7 @@ Definition trait_incl_of_alloc_alloc_internal  : (spec_with _ _ (thread_id → i
 Definition type_of_alloc_alloc_internal  :=
   fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
       (* params....... *) (size, align_log2) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) size :@: (int USize), align_log2 :@: (int USize);
       (* precondition. *) (λ π : thread_id, (⌜(size ∈ ISize)%Z⌝)
         ∗ (⌜((size > 0)%Z)%Z⌝)
@@ -867,7 +1016,7 @@ Definition trait_incl_of_alloc_dealloc_internal  : (spec_with _ _ (thread_id →
 Definition type_of_alloc_dealloc_internal  :=
   fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
       (* params....... *) (size, align_log2, ptr) : ((_ * _ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) size :@: (int USize), align_log2 :@: (int USize), ptr :@: alias_ptr_t;
       (* precondition. *) (λ π : thread_id, (freeable_nz ptr (Z.to_nat size) 1 HeapAlloc)
         ∗ (⌜((0 < size)%Z)%Z⌝)
@@ -884,7 +1033,7 @@ Definition trait_incl_of_errors_TryReserveError_kind  : (spec_with _ _ (thread_i
 Definition type_of_errors_TryReserveError_kind  :=
   fn(∀ ( *[ulft_1]) : 1 | ( *[]) : ([] : list (RT * syn_type)%type) | 
       (* params....... *) (self) : ((_)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, [(ϝ, ulft_1)]) ϝ);
       (* args......... *) self :@: (shr_ref ulft_1 (errors_TryReserveError_inv_t   -[] -[]));
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -900,7 +1049,7 @@ Definition trait_incl_of_alloc_alloc  : (spec_with _ _ (thread_id → iProp Σ))
 Definition type_of_alloc_alloc  :=
   fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
       (* params....... *) (ly) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) ly :@: (layout_Layout_inv_t   -[] -[]);
       (* precondition. *) (λ π : thread_id, (⌜(ly.(layout_sz) > 0)%Z⌝)) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -917,7 +1066,7 @@ Definition trait_incl_of_alloc_dealloc  : (spec_with _ _ (thread_id → iProp Σ
 Definition type_of_alloc_dealloc  :=
   fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
       (* params....... *) (ptr, ly) : ((_ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) ptr :@: alias_ptr_t, ly :@: (layout_Layout_inv_t   -[] -[]);
       (* precondition. *) (λ π : thread_id, (freeable_nz ptr ly.(layout_sz) 1 HeapAlloc)
         ∗ (⌜(0 < ly.(layout_sz))%Z⌝)
@@ -934,7 +1083,7 @@ Definition trait_incl_of_handle_alloc_error  : (spec_with _ _ (thread_id → iPr
 Definition type_of_handle_alloc_error  :=
   fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
       (* params....... *) (layout) : ((_)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) layout :@: (layout_Layout_inv_t   -[] -[]);
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →
@@ -949,7 +1098,7 @@ Definition trait_incl_of_realloc  : (spec_with _ _ (thread_id → iProp Σ)) :=
 Definition type_of_realloc  :=
   fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
       (* params....... *) (v, ptr, ly, new_size) : ((_ * _ * _ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) ptr :@: alias_ptr_t, ly :@: (layout_Layout_inv_t   -[] -[]), new_size :@: (int USize);
       (* precondition. *) (λ π : thread_id, (⌜((ly.(layout_sz) ≤ new_size)%Z)%Z⌝)
         ∗ (⌜((0 < ly.(layout_sz))%Z)%Z⌝)
@@ -972,7 +1121,7 @@ Definition trait_incl_of_alloc_realloc_internal  : (spec_with _ _ (thread_id →
 Definition type_of_alloc_realloc_internal  :=
   fn(∀ ( *[]) : 0 | ( *[]) : ([] : list (RT * syn_type)%type) | 
       (* params....... *) (v, old_size, align_log2, new_size, ptr_old) : ((_ * _ * _ * _ * _)),
-      (* elctx........ *) (λ ϝ, []);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) old_size :@: (int USize), align_log2 :@: (int USize), new_size :@: (int USize), ptr_old :@: alias_ptr_t;
       (* precondition. *) (λ π : thread_id, (⌜((old_size ≤ new_size)%Z)%Z⌝)
         ∗ (⌜((0 < old_size)%Z)%Z⌝)
@@ -1011,7 +1160,7 @@ Section REFAasAllocator_spec.
     solve_trait_realization_pers.
   Qed.
   Definition REFAasAllocator_spec_subsumption  :=
-    ∀ `(A_rt : !RT) `(A_st : !syn_type) `(Allocator_A_spec_attrs : !(Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) `(DropGlue_A_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )), trait_incl_marker (lift_trait_incl Allocator_spec_incl (spec! ( *[ulft_0]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (REFAasAllocator_spec (A_rt) (A_st) (Allocator_A_spec_attrs) (DropGlue_A_spec_attrs))-[ulft_0] -[A_ty]) (spec! ( *[ulft_0]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), scope_add_typarams _ -[A_ty] ((Allocator_base_spec (place_rfnRT (A_rt)) RefSynType (drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt)))) (REFAasAllocator_spec_attrs (A_rt) (Allocator_A_spec_attrs) (DropGlue_A_spec_attrs))-[] -[(shr_ref ulft_0 A_ty)])))).
+    ∀ `(A_rt : !RT) `(A_st : !syn_type) `(Allocator_A_spec_attrs : !(Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) `(DropGlue_A_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )), trait_incl_marker (lift_trait_incl Allocator_spec_incl (spec! ( *[ulft_0]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (REFAasAllocator_spec (A_rt) (A_st) (Allocator_A_spec_attrs) (DropGlue_A_spec_attrs))-[ulft_0] -[A_ty]) (spec! ( *[ulft_0]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[A_ty]) ((Allocator_base_spec (place_rfnRT (A_rt)) RefSynType (drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt)))) (REFAasAllocator_spec_attrs (A_rt) (Allocator_A_spec_attrs) (DropGlue_A_spec_attrs))-[] -[(shr_ref ulft_0 A_ty)])))).
 End REFAasAllocator_spec.
 
 Section REFAasAllocatorClone_spec.
@@ -1033,7 +1182,7 @@ Section REFAasAllocatorClone_spec.
     solve_trait_realization_pers.
   Qed.
   Definition REFAasAllocatorClone_spec_subsumption  :=
-    ∀ `(A_rt : !RT) `(A_st : !syn_type) `(Allocator_A_spec_attrs : !(Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) `(DropGlue_A_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )), trait_incl_marker (lift_trait_incl AllocatorClone_spec_incl (spec! ( *[ulft_0]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (REFAasAllocatorClone_spec (A_rt) (A_st) (Allocator_A_spec_attrs) (DropGlue_A_spec_attrs))-[ulft_0] -[A_ty]) (spec! ( *[ulft_0]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), scope_add_typarams _ -[A_ty] ((AllocatorClone_base_spec (place_rfnRT (A_rt)) RefSynType (REFAasAllocator_spec_attrs ((A_rt)) (Allocator_A_spec_attrs) (DropGlue_A_spec_attrs)) (REFTasClone_spec_attrs ((A_rt)) (DropGlue_A_spec_attrs)) (drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt)))) (REFAasAllocatorClone_spec_attrs (A_rt) (Allocator_A_spec_attrs) (DropGlue_A_spec_attrs))-[] -[(shr_ref ulft_0 A_ty)])))).
+    ∀ `(A_rt : !RT) `(A_st : !syn_type) `(Allocator_A_spec_attrs : !(Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) `(DropGlue_A_spec_attrs : !(DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )), trait_incl_marker (lift_trait_incl AllocatorClone_spec_incl (spec! ( *[ulft_0]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), (REFAasAllocatorClone_spec (A_rt) (A_st) (Allocator_A_spec_attrs) (DropGlue_A_spec_attrs))-[ulft_0] -[A_ty]) (spec! ( *[ulft_0]) : 1 | ( *[A_ty]) : ([A_rt] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[A_ty]) ((AllocatorClone_base_spec (place_rfnRT (A_rt)) RefSynType (REFAasAllocator_spec_attrs ((A_rt)) (Allocator_A_spec_attrs) (DropGlue_A_spec_attrs)) (REFTasClone_spec_attrs ((A_rt)) (DropGlue_A_spec_attrs)) (drop_glue_trivial_spec_attrs ((place_rfnRT (A_rt)))) (REFAasAllocatorClone_spec_attrs (A_rt) (Allocator_A_spec_attrs) (DropGlue_A_spec_attrs))-[] -[(shr_ref ulft_0 A_ty)])))).
 End REFAasAllocatorClone_spec.
 
 Section GlobalasAllocator_spec.
@@ -1053,7 +1202,7 @@ Section GlobalasAllocator_spec.
     solve_trait_realization_pers.
   Qed.
   Definition GlobalasAllocator_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Allocator_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), GlobalasAllocator_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Allocator_base_spec (Global_inv_t_rt) Global_st (drop_glue_trivial_spec_attrs ((Global_inv_t_rt))) GlobalasAllocator_spec_attrs-[] -[(Global_inv_t   -[] -[])])))).
+    trait_incl_marker (lift_trait_incl Allocator_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), GlobalasAllocator_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Allocator_base_spec (Global_inv_t_rt) Global_st (drop_glue_trivial_spec_attrs ((Global_inv_t_rt))) GlobalasAllocator_spec_attrs-[] -[(Global_inv_t   -[] -[])])))).
 End GlobalasAllocator_spec.
 
 Section errors_AllocErrorasstd_clone_Clone_spec.
@@ -1081,7 +1230,7 @@ Section errors_AllocErrorasstd_clone_Clone_spec.
     solve_trait_realization_pers.
   Qed.
   Definition errors_AllocErrorasstd_clone_Clone_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Clone_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), errors_AllocErrorasstd_clone_Clone_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Clone_base_spec (errors_AllocError_inv_t_rt) errors_AllocError_st (drop_glue_trivial_spec_attrs ((errors_AllocError_inv_t_rt))) errors_AllocErrorasstd_clone_Clone_spec_attrs-[] -[(errors_AllocError_inv_t   -[] -[])])))).
+    trait_incl_marker (lift_trait_incl Clone_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), errors_AllocErrorasstd_clone_Clone_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Clone_base_spec (errors_AllocError_inv_t_rt) errors_AllocError_st (drop_glue_trivial_spec_attrs ((errors_AllocError_inv_t_rt))) errors_AllocErrorasstd_clone_Clone_spec_attrs-[] -[(errors_AllocError_inv_t   -[] -[])])))).
 End errors_AllocErrorasstd_clone_Clone_spec.
 
 Section errors_AllocErrorasstd_marker_Copy_spec.
@@ -1101,7 +1250,7 @@ Section errors_AllocErrorasstd_marker_Copy_spec.
     solve_trait_realization_pers.
   Qed.
   Definition errors_AllocErrorasstd_marker_Copy_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Copy_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), errors_AllocErrorasstd_marker_Copy_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Copy_base_spec (errors_AllocError_inv_t_rt) errors_AllocError_st errors_AllocErrorasstd_clone_Clone_spec_attrs (drop_glue_trivial_spec_attrs ((errors_AllocError_inv_t_rt))) errors_AllocErrorasstd_marker_Copy_spec_attrs-[] -[(errors_AllocError_inv_t   -[] -[])])))).
+    trait_incl_marker (lift_trait_incl Copy_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), errors_AllocErrorasstd_marker_Copy_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Copy_base_spec (errors_AllocError_inv_t_rt) errors_AllocError_st errors_AllocErrorasstd_clone_Clone_spec_attrs (drop_glue_trivial_spec_attrs ((errors_AllocError_inv_t_rt))) errors_AllocErrorasstd_marker_Copy_spec_attrs-[] -[(errors_AllocError_inv_t   -[] -[])])))).
   Lemma errors_AllocErrorasstd_marker_Copy_semantic_interp  : (Copy_semantic_interp (errors_AllocError_inv_t_rt) (errors_AllocError_inv_t   -[] -[])).
   Proof.
     unfold Copy_semantic_interp in *; apply _.
@@ -1134,7 +1283,7 @@ Section errors_TryReserveErrorasstd_clone_Clone_spec.
     solve_trait_realization_pers.
   Qed.
   Definition errors_TryReserveErrorasstd_clone_Clone_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Clone_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), errors_TryReserveErrorasstd_clone_Clone_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Clone_base_spec (errors_TryReserveError_inv_t_rt) errors_TryReserveError_st (drop_glue_trivial_spec_attrs ((errors_TryReserveError_inv_t_rt))) errors_TryReserveErrorasstd_clone_Clone_spec_attrs-[] -[(errors_TryReserveError_inv_t   -[] -[])])))).
+    trait_incl_marker (lift_trait_incl Clone_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), errors_TryReserveErrorasstd_clone_Clone_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Clone_base_spec (errors_TryReserveError_inv_t_rt) errors_TryReserveError_st (drop_glue_trivial_spec_attrs ((errors_TryReserveError_inv_t_rt))) errors_TryReserveErrorasstd_clone_Clone_spec_attrs-[] -[(errors_TryReserveError_inv_t   -[] -[])])))).
 End errors_TryReserveErrorasstd_clone_Clone_spec.
 
 Section errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_spec.
@@ -1159,7 +1308,7 @@ Section errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_spec.
     solve_trait_realization_pers.
   Qed.
   Definition errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl convert_From_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((convert_From_base_spec (errors_TryReserveError_inv_t_rt) (errors_TryReserveErrorKind_rt) errors_TryReserveError_st errors_TryReserveErrorKind_st (drop_glue_trivial_spec_attrs ((errors_TryReserveError_inv_t_rt))) (drop_glue_trivial_spec_attrs ((errors_TryReserveErrorKind_rt))) errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_spec_attrs-[] -[(errors_TryReserveError_inv_t   -[] -[]); (errors_TryReserveErrorKind_ty  -[] -[])])))).
+    trait_incl_marker (lift_trait_incl convert_From_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((convert_From_base_spec (errors_TryReserveError_inv_t_rt) (errors_TryReserveErrorKind_rt) errors_TryReserveError_st errors_TryReserveErrorKind_st (drop_glue_trivial_spec_attrs ((errors_TryReserveError_inv_t_rt))) (drop_glue_trivial_spec_attrs ((errors_TryReserveErrorKind_rt))) errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_spec_attrs-[] -[(errors_TryReserveError_inv_t   -[] -[]); (errors_TryReserveErrorKind_ty  -[] -[])])))).
 End errors_TryReserveErrorasstd_convert_Fromerrors_TryReserveErrorKind_spec.
 
 Section errors_TryReserveErrorKindasstd_clone_Clone_spec.
@@ -1187,7 +1336,7 @@ Section errors_TryReserveErrorKindasstd_clone_Clone_spec.
     solve_trait_realization_pers.
   Qed.
   Definition errors_TryReserveErrorKindasstd_clone_Clone_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Clone_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), errors_TryReserveErrorKindasstd_clone_Clone_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Clone_base_spec (errors_TryReserveErrorKind_rt) errors_TryReserveErrorKind_st (drop_glue_trivial_spec_attrs ((errors_TryReserveErrorKind_rt))) errors_TryReserveErrorKindasstd_clone_Clone_spec_attrs-[] -[(errors_TryReserveErrorKind_ty  -[] -[])])))).
+    trait_incl_marker (lift_trait_incl Clone_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), errors_TryReserveErrorKindasstd_clone_Clone_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Clone_base_spec (errors_TryReserveErrorKind_rt) errors_TryReserveErrorKind_st (drop_glue_trivial_spec_attrs ((errors_TryReserveErrorKind_rt))) errors_TryReserveErrorKindasstd_clone_Clone_spec_attrs-[] -[(errors_TryReserveErrorKind_ty  -[] -[])])))).
 End errors_TryReserveErrorKindasstd_clone_Clone_spec.
 
 Section errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_spec.
@@ -1212,7 +1361,7 @@ Section errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_spec.
     solve_trait_realization_pers.
   Qed.
   Definition errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl convert_From_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((convert_From_base_spec (errors_TryReserveErrorKind_rt) (layout_LayoutError_rt) errors_TryReserveErrorKind_st layout_LayoutError_st (drop_glue_trivial_spec_attrs ((errors_TryReserveErrorKind_rt))) (drop_glue_trivial_spec_attrs ((layout_LayoutError_rt))) errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_spec_attrs-[] -[(errors_TryReserveErrorKind_ty  -[] -[]); (layout_LayoutError_ty   -[] -[])])))).
+    trait_incl_marker (lift_trait_incl convert_From_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((convert_From_base_spec (errors_TryReserveErrorKind_rt) (layout_LayoutError_rt) errors_TryReserveErrorKind_st layout_LayoutError_st (drop_glue_trivial_spec_attrs ((errors_TryReserveErrorKind_rt))) (drop_glue_trivial_spec_attrs ((layout_LayoutError_rt))) errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_spec_attrs-[] -[(errors_TryReserveErrorKind_ty  -[] -[]); (layout_LayoutError_ty   -[] -[])])))).
 End errors_TryReserveErrorKindasstd_convert_Fromlayout_LayoutError_spec.
 
 Section layout_Layoutasstd_clone_Clone_spec.
@@ -1240,7 +1389,7 @@ Section layout_Layoutasstd_clone_Clone_spec.
     solve_trait_realization_pers.
   Qed.
   Definition layout_Layoutasstd_clone_Clone_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Clone_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), layout_Layoutasstd_clone_Clone_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Clone_base_spec (layout_Layout_inv_t_rt) layout_Layout_st (drop_glue_trivial_spec_attrs ((layout_Layout_inv_t_rt))) layout_Layoutasstd_clone_Clone_spec_attrs-[] -[(layout_Layout_inv_t   -[] -[])])))).
+    trait_incl_marker (lift_trait_incl Clone_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), layout_Layoutasstd_clone_Clone_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Clone_base_spec (layout_Layout_inv_t_rt) layout_Layout_st (drop_glue_trivial_spec_attrs ((layout_Layout_inv_t_rt))) layout_Layoutasstd_clone_Clone_spec_attrs-[] -[(layout_Layout_inv_t   -[] -[])])))).
 End layout_Layoutasstd_clone_Clone_spec.
 
 Section layout_Layoutasstd_marker_Copy_spec.
@@ -1260,7 +1409,7 @@ Section layout_Layoutasstd_marker_Copy_spec.
     solve_trait_realization_pers.
   Qed.
   Definition layout_Layoutasstd_marker_Copy_spec_subsumption  :=
-    trait_incl_marker (lift_trait_incl Copy_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), layout_Layoutasstd_marker_Copy_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_typarams _ -[] ((Copy_base_spec (layout_Layout_inv_t_rt) layout_Layout_st layout_Layoutasstd_clone_Clone_spec_attrs (drop_glue_trivial_spec_attrs ((layout_Layout_inv_t_rt))) layout_Layoutasstd_marker_Copy_spec_attrs-[] -[(layout_Layout_inv_t   -[] -[])])))).
+    trait_incl_marker (lift_trait_incl Copy_spec_incl (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), layout_Layoutasstd_marker_Copy_spec-[] -[]) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) ((Copy_base_spec (layout_Layout_inv_t_rt) layout_Layout_st layout_Layoutasstd_clone_Clone_spec_attrs (drop_glue_trivial_spec_attrs ((layout_Layout_inv_t_rt))) layout_Layoutasstd_marker_Copy_spec_attrs-[] -[(layout_Layout_inv_t   -[] -[])])))).
   Lemma layout_Layoutasstd_marker_Copy_semantic_interp  : (Copy_semantic_interp (layout_Layout_inv_t_rt) (layout_Layout_inv_t   -[] -[])).
   Proof.
     unfold Copy_semantic_interp in *; apply _.

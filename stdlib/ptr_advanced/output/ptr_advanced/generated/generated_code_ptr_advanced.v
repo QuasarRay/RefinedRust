@@ -679,6 +679,34 @@ Qed.
 
 
 
+Program Definition unique_UniqueTasstd_convert_Fromnonnull_NonNullT_from_def (T_st: syn_type) : function :=
+  {|
+     f_args := [
+      ("pointer", (use_layout_alg' (nonnull_NonNull_st (T_st))) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (unique_Unique_st (T_st)) } "__0";
+      local_live{ (nonnull_NonNull_st (T_st)) } "__2";
+      "__2" <-{ (use_op_alg' (nonnull_NonNull_st (T_st))) } copy{ (use_op_alg' (nonnull_NonNull_st (T_st))) } ("pointer");
+      local_live{ ((core_marker_PhantomData_sls (T_st)) : syn_type) } "__3";
+      "__3" <-{ (use_op_alg' ((core_marker_PhantomData_sls (T_st)) : syn_type)) } StructInit (core_marker_PhantomData_sls (T_st)) [];
+      "__0" <-{ (use_op_alg' (unique_Unique_st (T_st))) } StructInit (unique_Unique_sls (T_st)) [("pointer", move{ (use_op_alg' (nonnull_NonNull_st (T_st))) } ("__2") : expr); ("_marker", move{ (use_op_alg' ((core_marker_PhantomData_sls (T_st)) : syn_type)) } ("__3") : expr)];
+      local_dead "__3";
+      local_dead "__2";
+      return (move{ (use_op_alg' (unique_Unique_st (T_st))) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
 Program Definition unique_Unique_T_as_non_null_ptr_def (T_st: syn_type) : function :=
   {|
      f_args := [
