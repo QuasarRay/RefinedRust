@@ -24,7 +24,7 @@ Next Obligation. solve_fn_vars_nodup. Qed.
 
 Definition type_of_panic_shim `{RRGS : !refinedrustGS Σ} :=
   fn(∀ ( *[]) : 0 | ( *[]) : [] | () : (), (λ _, []); (λ _, True)) →
-    ∃ () : (), () @ unit_t; (λ _, False) | True.
+    ∃ () : (), () @ unit_t; (λ _, False) | radium_panic_strategy_of = PanicUnwind.
 
 Lemma panic_shim_typed `{RRGS : !refinedrustGS Σ} π :
   ⊢ typed_function π panic_shim_def (<tag_type> type_of_panic_shim).
