@@ -34,7 +34,7 @@ Section place.
     iApply (wp_deref with "Hl") => //; [solve_ndisj | | | ].
     { intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v. }
     { intros st. exists (OVPtr l'). apply Hdec. }
-    iApply physical_step_intro_lc. iIntros "Hcred !> !>".
+    iApply credit_step_physical. iApply physical_step_intro_lc. iIntros "Hcred !> !>".
     iIntros (st ov) "%Hdec' Hl". iMod (fupd_mask_subseteq F) as "HclF"; first done.
     pose proof (Hdec st) as Hdec_st. rewrite Hdec_st in Hdec'. injection Hdec' as <-.
     iPoseProof (ltype_own_addr_in_usize with "Hb") as "%".
@@ -103,12 +103,14 @@ Section place.
     iMod "Hb" as "(%l' & (%vi & Hl & %Hdec) & Hb & Hcl)". iMod "HclF" as "_". iModIntro.
     iPoseProof (loc_in_bounds_in_range_usize with "Hlb") as "%".
     iApply wpe_fupd.
-    iApply (wpe_logical_step with "Hcl"); [solve_ndisj.. | ].
     iApply (wp_deref with "Hl") => //; [solve_ndisj | | | ].
     { intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v. }
     { intros st. exists (OVPtr l'). apply Hdec. }
-    iApply physical_step_intro_lc. iIntros "Hcred !> !>".
-    iIntros (st ov) "%Hdec' Hl Hc". iMod (fupd_mask_subseteq F) as "HclF"; first done.
+    iApply credit_step_physical.
+    iPoseProof (logical_step_mask_mono _ ⊤ with "Hcl") as "Hcl"; first done.
+    iApply (physical_step_step_upd with "Hcl").
+    iApply physical_step_intro_lc. iIntros "Hcred !> !> Hc".
+    iIntros (st ov) "%Hdec' Hl". iMod (fupd_mask_subseteq F) as "HclF"; first done.
     pose proof (Hdec st) as Hdec_st. rewrite Hdec_st in Hdec'. injection Hdec' as <-.
     iPoseProof (ltype_own_addr_in_usize with "Hb") as "%".
     iMod "HclF" as "_". iExists l'.
@@ -181,7 +183,7 @@ Section place.
     iApply (wp_deref with "Hl") => //; [solve_ndisj | | | ].
     { intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v. }
     { intros st. exists (OVPtr li). apply Hdec. }
-    iApply physical_step_intro_lc. iIntros "Hcred !>!>".
+    iApply credit_step_physical. iApply physical_step_intro_lc. iIntros "Hcred !>!>".
     iIntros (st ov) "%Hdec' Hl". iMod (fupd_mask_mono with "Hb") as "#Hb"; first done.
     pose proof (Hdec st) as Hdec_st. rewrite Hdec_st in Hdec'. injection Hdec' as <-.
     iExists li.

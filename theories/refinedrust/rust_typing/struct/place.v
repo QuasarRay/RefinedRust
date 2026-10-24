@@ -170,13 +170,15 @@ Section place.
     assert (field_index_of (sl_members sl) f = Some i) as Hfield'.
     { eapply struct_layout_spec_has_layout_lookup; done. }
     iPoseProof (loc_in_bounds_in_range_usize with "Hlb") as "%Haddr".
-    iApply (wpe_logical_step with "Hcl"); [done | solve_ndisj.. | ].
     iApply (wp_get_member).
     { intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v. }
     { done. }
     { by eapply field_index_of_to_index_of. }
     { done. }
-    iModIntro. iApply physical_step_intro; iNext. iIntros (v Hv) "Hcl". iExists (l at{sl}ₗ f). iSplitR.
+    iModIntro. iApply credit_step_physical.
+    iPoseProof (logical_step_mask_mono _ ⊤ with "Hcl") as "Hcl"; first done.
+    iApply (physical_step_step_upd with "Hcl").
+    iApply physical_step_intro; iNext. iIntros "Hcl" (v Hv). iExists (l at{sl}ₗ f). iSplitR.
     { iPureIntro. by apply val_to_of_loc. }
     iPoseProof (focus_struct_component with "Hb") as "(%Heq & %ly' & %Hst & Hb & Hc_close)".
     { done. }
@@ -290,14 +292,16 @@ Section place.
     assert (field_index_of (sl_members sl) f = Some i) as Hfield'.
     { eapply struct_layout_spec_has_layout_lookup; done. }
     iPoseProof (loc_in_bounds_in_range_usize with "Hlb") as "%Haddr".
-    iApply (wpe_logical_step with "Hcl"); [done | solve_ndisj.. | ].
     iApply (wp_get_member).
     { intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v. }
     { done. }
     { by eapply field_index_of_to_index_of. }
     { done. }
-    iModIntro. iModIntro. iApply physical_step_intro; iNext.
-    iIntros (v Hv) "Hcl". iExists (l at{sl}ₗ f). iSplitR.
+    iModIntro. iApply credit_step_physical.
+    iPoseProof (logical_step_mask_mono _ ⊤ with "Hcl") as "Hcl"; first done.
+    iApply (physical_step_step_upd with "Hcl").
+    iApply physical_step_intro. iModIntro. iNext.
+    iIntros "Hcl" (v Hv). iExists (l at{sl}ₗ f). iSplitR.
     { iPureIntro. by apply val_to_of_loc. }
     iPoseProof (focus_struct_component with "Hb") as "(%Heq & %ly' & %Hst & Hb & Hc_close)".
     { done. }
@@ -399,7 +403,7 @@ Section place.
     { done. }
     { by eapply field_index_of_to_index_of. }
     { done. }
-    iModIntro. iApply physical_step_intro; iNext.
+    iModIntro. iApply credit_step_physical. iApply physical_step_intro; iNext.
     iIntros (v Hv). iExists (l at{sl}ₗ f). iSplitR.
     { iPureIntro. by apply val_to_of_loc. }
     iPoseProof (focus_struct_component with "Hb") as "(%Heq & %ly' & %Hst & Hb & Hc_close)".

@@ -3516,6 +3516,7 @@ Section subsume.
     wpe_bind. iApply ("He1" with "LFT HE HL Hf"). iIntros (L1 v1 m1 rt1 ty1 r1) "HL Hf Hv1 Hif".
     iMod ("Hif" with "[] LFT HE HL Hv1") as "(%b & %L2 & % & HL & HT)"; first done.
     iApply wp_if_bool; [done|..].
+    iApply credit_step_physical.
     iApply physical_step_intro. iNext.
     destruct b; by iApply ("HT" with "LFT HE HL Hf").
   Qed.
@@ -3537,6 +3538,7 @@ Section subsume.
     }
     rewrite annot_expr_S_r. wpe_bind.
     iApply wp_skip.
+    iApply credit_step_physical.
     iApply physical_step_fupd_l.
     iApply physical_step_intro_lc.
     iModIntro. iIntros "(Hcred & Hcred1)".
@@ -3561,6 +3563,7 @@ Section subsume.
     iIntros "Hs". iIntros (Φ Φunwind) "#CTX #HE HL Hf Hcont".
     iMod ("Hs" with "CTX HE HL") as "Hstep".
     iApply wps_annot.
+    iApply credit_stepN_physical.
     iApply (physical_stepN_wand with "Hstep").
     iIntros "(%L' & HL & Hs)".
     by iApply ("Hs" with "CTX HE HL Hf").
@@ -3624,13 +3627,13 @@ Section subsume.
     iApply wpe_fupd.
     rewrite /Use. wpe_bind.
     iApply wpe_fupd.
-    iApply (wpe_logical_step with "Hl"); [solve_ndisj.. | ].
     iMod (tr_zero) as "Ha".
     iApply wp_skip.
+    iApply credit_step_physical. iApply (physical_step_step_upd with "Hl").
     iApply (physical_step_intro_tr with "Ha").
     iNext. iIntros "Hat Hcred!>".
     iIntros "(%v & %q & %rt & %ty & %r & %Hlyv & %Hv & Hl & %Hdec & Hv & Hcl)".
-    iModIntro. iApply (wpe_logical_step with "Hcl"); [solve_ndisj.. | ].
+    iModIntro.
     iPoseProof (heap_pointsto_loc_in_bounds with "Hl") as "#Hlb".
     iPoseProof (loc_in_bounds_in_range_usize with "Hlb") as "%".
     iApply (wp_deref with "Hl").
@@ -3638,8 +3641,9 @@ Section subsume.
     - intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v.
     - done.
     - exact Hdec.
-    - iApply (physical_step_intro_tr with "Hat").
-      iIntros "!> Hat Hcred2 !> %st %ov %Hdec' Hl Hcl".
+    - iApply credit_step_physical. iApply (physical_step_step_upd with "Hcl").
+      iApply (physical_step_intro_tr with "Hat").
+      iIntros "!> Hat Hcred2 !> Hcl %st %ov %Hdec' Hl".
       iMod ("Hcl" $! st ov with "[//] Hl Hv") as "(%L' & %rt' & %ty' & %r' & HL & Hf & Hv & HT)".
       iMod ("HT" with "[] [$] HE HL [Hat Hcred2]") as "(%L3 & HL & HT)"; first done.
       { iSplitL "Hat".
@@ -3697,14 +3701,14 @@ Section subsume.
     wps_bind. iApply ("He1" $! _ ⊤ with "[//] [//] [//] [//] [$LFT $LLCTX] HE HL Hf"). iIntros (l) "HT".
     unfold AssignSE. wps_bind. wpe_bind.
     iSpecialize ("HT" with "Hv").
-    iApply (wpe_logical_step with "HT"); [solve_ndisj.. | ].
     iMod (tr_zero) as "Ha".
     iApply wp_skip.
+    iApply credit_step_physical. iApply (physical_step_step_upd with "HT").
     iApply (physical_step_intro_tr with "Ha").
     iNext. iIntros "Ha Hcred !> HT".
     iApply wpe_fupd.
-    iApply (wpe_logical_step with "HT"); [solve_ndisj.. | ].
     iApply wp_skip.
+    iApply credit_step_physical. iApply (physical_step_step_upd with "HT").
     iApply (physical_step_intro_tr with "Ha").
     iNext. iIntros "Ha Hcred2 !> (%Hwf & %Hdecv & Hl & Hcl)".
     iDestruct "Hl" as "(%v' & % & % & Hl)".
@@ -3720,6 +3724,7 @@ Section subsume.
     iIntros "Hcl_m".
     iSplitR; first done. iFrame "Hl". iR.
     iMod "Hcl_m" as "_".
+    iApply credit_step_physical.
     iApply (physical_step_step_upd with "Hcl").
     iApply (physical_step_intro_tr with "Ha").
     iNext. iIntros "Ha Hcred' !> Hcl".
@@ -3749,11 +3754,13 @@ Section subsume.
     wpe_bind.
     iDestruct "CTX" as "(LFT & LLCTX)".
     iApply wpe_fupd.
-    iApply (wpe_logical_step with "HT"); [done.. | ].
-    iApply wp_skip. iApply physical_step_intro. iNext. iIntros "HT !>".
+    iApply wp_skip. iApply credit_step_physical.
+    iApply (physical_step_step_upd with "HT").
+    iApply physical_step_intro. iNext. iIntros "HT !>".
     iApply wpe_fupd.
-    iApply (wpe_logical_step with "HT"); [done.. | ].
-    iApply wp_skip. iApply physical_step_intro. iNext.
+    iApply wp_skip. iApply credit_step_physical.
+    iApply (physical_step_step_upd with "HT").
+    iApply physical_step_intro. iNext.
     iDestruct 1 as (L' rt ty r) "(Hl & HL & Hf & HT)".
     iApply ("Hcont" with "HL Hf Hl HT").
   Qed.
@@ -5017,6 +5024,7 @@ Section subsume.
   Proof.
     iIntros (HQ) "Hs". iIntros (Φ Φunwind) "#CTX #HE HL Hf Hcont".
     iApply wps_goto => //.
+    iApply credit_step_physical.
     iApply physical_step_intro_lc. iIntros "Hcred". iIntros "!> !>".
     iMod ("Hs" with "[] CTX HE HL Hcred") as "(%L2 & HL & HT)"; first done.
     by iApply ("HT" with "CTX HE HL Hf").
@@ -5058,6 +5066,7 @@ Section subsume.
     iIntros (Hs) "#Hb". iLöb as "IH".
     iIntros (Φ Φunwind) "#CTX #HE HL Hf HP Hcont".
     iApply wps_goto; first done.
+    iApply credit_step_physical.
     iApply (physical_step_step_upd with "HP").
     iApply physical_step_intro. iNext.
     iIntros "HP".
@@ -5140,6 +5149,7 @@ Section subsume.
     iApply ("He" with "CTX HE HL Hf"). iIntros (L' v rt ty r m) "HL Hf Hv (-> & Hs)".
     iMod ("Hs" with "[] CTX HE HL Hf Hv") as (?) "(HL & Hf & Hs)"; first done.
     iApply wps_assert_bool; [done.. | ].
+    iApply credit_step_physical.
     iApply physical_step_intro; iNext.
     by iApply ("Hs" with "CTX HE HL Hf").
   Qed.
@@ -5154,6 +5164,7 @@ Section subsume.
     iApply ("He" with "CTX HE HL Hf"). iIntros (L' v m rt ty r) "HL Hf Hv Hs".
     iMod ("Hs" with "[] CTX HE HL Hv") as "(%b & %L2 & % & HL & Hs)"; first done.
     iApply wps_if_bool; [done|..].
+    iApply credit_step_physical.
     iApply physical_step_intro; iNext.
     by destruct b; iApply ("Hs" with "CTX HE HL Hf").
   Qed.
@@ -5176,6 +5187,7 @@ Section subsume.
       iIntros (i ->). iDestruct "Hs" as (s ->) "_"; by eauto.
     }
     iApply wps_switch; [done|done|..].
+    iApply credit_step_physical.
     iApply physical_step_intro; iNext.
     destruct (m !! z) => /=.
     - iDestruct "Hs" as (s ->) "Hs". by iApply ("Hs" with "CTX HE HL Hf").
@@ -5192,6 +5204,7 @@ Section subsume.
     iApply ("Hs" with "CTX HE HL Hf").
     iIntros (L' v m rt ty r) "HL Hf Hv Hs".
     iApply wps_exprs.
+    iApply credit_step_physical.
     iApply physical_step_intro; iNext.
     iMod ("Hs" with "[] CTX HE HL Hv") as "(%L2 & HL & HT)"; first done.
     by iApply ("HT" with "CTX HE HL Hf").
@@ -5211,6 +5224,7 @@ Section subsume.
     iIntros "(%ly & %Hst & %locals & Hlocals & %Hfresh & HT)".
     iIntros (Φ Φunwind) "#CTX HE HL Hf Hpost". simpl.
     iApply (wps_local_live with "Hf Hlocals"); [done.. | ].
+    iApply credit_step_physical.
     iApply physical_step_intro. iNext.
     iIntros (l) "Hx Hframe Hlocals Hl %Hly".
     iPoseProof ("HT" with "Hlocals Hx [Hl]") as "Hs".
@@ -5265,11 +5279,13 @@ Section subsume.
           "(%L2 & %R2 & %rt2 & %lt2 & %r2 & HL & %Hsteq & Hstep & HT)"; [set_solver.. | ].
         simpl.
         iApply wps_skip.
+        iApply credit_step_physical.
         iApply (physical_step_logical_step with "Hstep").
         iApply physical_step_intro. iNext.
         iIntros "(Hl & HR2)".
         iMod ("HT" with "[] [] [] CTX HE HL Hl") as "(%L3 & %R3 & Hstep & HL & HT)"; [set_solver.. | ].
         iApply wps_skip.
+        iApply credit_step_physical.
         iApply (physical_step_logical_step with "Hstep").
         iApply physical_step_intro. iNext.
         iIntros "(Hl & HR3)".
@@ -5282,15 +5298,16 @@ Section subsume.
         iApply (wps_local_dead with "Hf Hlocals Hx [Hl]").
         { simpl in Hst. done. }
         { iExists _. iFrame. done. }
-        iApply physical_step_intro. iNext.
+        iApply credit_step_physical. iApply physical_step_intro. iNext.
         iIntros "Hf Hlocals".
         iMod ("HT" with "[] CTX HE HL [HR2 HR3]") as "(%L4 & HL & HT)"; first done.
         { iFrame. }
         iApply ("HT" with "Hlocals CTX HE HL Hf Hpost").
       + simpl.
-        iApply wps_skip. iApply physical_step_intro. iNext.
+        iApply wps_skip. iApply credit_step_physical. iApply physical_step_intro. iNext.
         iMod ("HT" with "[] [] [] CTX HE HL Hl") as "(%L2 & %R2 & Hstep & HL & HT)"; [set_solver.. | ].
         iApply wps_skip.
+        iApply credit_step_physical.
         iApply (physical_step_logical_step with "Hstep").
         iApply physical_step_intro. iNext.
         iIntros "(Hl & HR2)".
@@ -5303,7 +5320,7 @@ Section subsume.
         iApply (wps_local_dead with "Hf Hlocals Hx [Hl]").
         { simpl in Hst. done. }
         { iExists _. iFrame. done. }
-        iApply physical_step_intro. iNext.
+        iApply credit_step_physical. iApply physical_step_intro. iNext.
         iIntros "Hf Hlocals".
         iMod ("HT" with "[] CTX HE HL [HR2]") as "(%L3 & HL & HT)"; first done.
         { iFrame. }
@@ -5311,11 +5328,11 @@ Section subsume.
     - unfold LocalDeadSt.
       iIntros (Φ Φunwind) "#CTX #HE HL Hf Hpost".
       simpl.
-      iApply wps_skip. iApply physical_step_intro. iNext.
-      iApply wps_skip. iApply physical_step_intro. iNext.
+      iApply wps_skip. iApply credit_step_physical. iApply physical_step_intro. iNext.
+      iApply wps_skip. iApply credit_step_physical. iApply physical_step_intro. iNext.
       iApply (wps_local_dead_nop with "Hf Hlocals").
       { done. }
-      iApply physical_step_intro. iNext.
+      iApply credit_step_physical. iApply physical_step_intro. iNext.
       iIntros "Hf Hlocals".
       iApply ("HT" with "Hlocals CTX HE HL Hf Hpost").
   Qed.
@@ -5326,6 +5343,7 @@ Section subsume.
   Proof.
     iIntros "Hs". iIntros (Φ Φunwind) "#CTX #HE HL Hf Hcont".
     iApply wps_skip.
+    iApply credit_step_physical.
     iApply physical_step_intro_lc; iIntros "Hcred !>!>".
     by iApply ("Hs" with "Hcred CTX HE HL Hf").
   Qed.
@@ -6033,8 +6051,8 @@ Section subsume.
     iDestruct "CTX" as "(LFT & LLCTX)".
     iModIntro. wpe_bind.
     iApply wpe_fupd.
-    iApply (wpe_logical_step with "Hstep"); [done.. | ].
     iApply wp_skip.
+    iApply credit_step_physical. iApply (physical_step_step_upd with "Hstep").
     iApply physical_step_intro; iNext.
     iIntros "Hacc".
     rewrite /typed_context_fold_stratify_interp.
@@ -6045,8 +6063,8 @@ Section subsume.
       [set_solver.. | iApply maybe_logical_step_intro; iSplit; done | ].
 
     iModIntro. wpe_bind.
-    iApply (wpe_logical_step with "HP"); [done.. | ].
     iApply wp_skip.
+    iApply credit_step_physical. iApply (physical_step_step_upd with "HP").
     iApply physical_step_intro; iNext.
     iIntros "(HR2 & Ha & _)".
 
@@ -6072,8 +6090,8 @@ Section subsume.
       iExists _. done. }
     iSpecialize ("Hcont" with "Ha HT").
 
-    iApply (wpe_logical_step with "Hcont"); [done.. | ].
     iApply wp_skip.
+    iApply credit_step_physical. iApply (physical_step_step_upd with "Hcont").
     iApply physical_step_intro; iNext.
     iIntros "?".
     iApply wps_return.
@@ -6102,6 +6120,7 @@ Section subsume.
     { simpl. iApply logical_step_intro. iSplitR; last done. rewrite /type_ctx_interp. done. }
     iDestruct "CTX" as "(LFT & LLCTX)".
     iApply wps_unwind.
+    iApply credit_stepN_physical.
     iApply (physical_step_logical_step with "Hstep").
     iApply physical_step_intro. iNext.
     iIntros "Hacc".

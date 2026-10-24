@@ -19,6 +19,7 @@ Class typePreG Σ := PreTypeG {
   type_ghost_varG                :: ghost_varG Σ gvar_refinement.RT;
   type_pinnedBorG                :: pinnedBorG Σ;
   type_trG                       :: trGpreS Σ;
+  type_step_creditG              :: step_creditGpreS Σ;
   type_heap_heap_inG             :: inG Σ (authR heapUR);
   type_heap_alloc_meta_map_inG   :: ghost_mapG Σ alloc_id (Z * nat * alloc_kind);
   type_heap_alloc_alive_map_inG  :: ghost_mapG Σ alloc_id bool;
@@ -38,6 +39,7 @@ Definition typeΣ : gFunctors :=
     ghost_varΣ gvar_refinement.RT;
     pinnedBorΣ;
     trΣ;
+    step_creditΣ;
     GFunctor (constRF (authR heapUR));
     ghost_mapΣ alloc_id (Z * nat * alloc_kind);
     ghost_mapΣ alloc_id bool;
@@ -299,7 +301,7 @@ Proof.
   iIntros (os e2 σ2 efs Hstep Hinv2). inv_stmt_step.
   unfold state_get_thread, thread_get_frame in *. simplify_eq.
   have -> : hs0 = hs by apply: free_blocks_inj.
-  iApply physical_step_intro. iNext.
+  iApply credit_step_physical. iApply physical_step_intro. iNext.
   rewrite /state_ctx. simpl. iFrame.
   iSplit; first done.
   iApply wp_value. done.
@@ -347,7 +349,7 @@ Proof.
     unit_sl [] 1 ∅ Ψ False%I Hunit Hfresh with "Hframe Hlocals") as "Hlive".
   iMod (tr_zero) as "Htr".
   iSpecialize ("Hlive" with "[-]").
-  { iApply (physical_step_intro_tr with "Htr").
+  { iApply credit_step_physical. iApply (physical_step_intro_tr with "Htr").
     iNext. iIntros "Htr Hcred". iModIntro.
     iIntros (l) "Hlive Hframe Hlocals Hl %Hly".
     iAssert (credit_store 0 0) with "[Hcred Htr]" as "Hstore".
@@ -436,7 +438,9 @@ Lemma refinedrust_adequacy (config : RadiumConfig) (policy : unwind_policy) Σ `
   (* then it has not gotten stuck *)
   ∀ e2, e2 ∈ t2 → not_stuck e2 σ2.
 Proof.
-  move => Halloc -> Hran Hwp. apply: (wp_strong_adequacy _ _ refinedc_trgen NotStuck) . move => ? ?.
+  move => Halloc -> Hran Hwp.
+  apply: (@wp_strong_adequacy Σ (c_lang config) _ _ _ refinedc_trgen 2 NotStuck).
+  move => Hinv Htr Hcredits.
   (* heap/Caesium stuff *)
   set h := to_heapUR ∅.
   iMod (own_alloc (● h ⋅ ◯ h)) as (γh) "[Hh _]" => //.
@@ -453,7 +457,7 @@ Proof.
   iMod (ghost_map_alloc_empty (K:= nat * nat * string) (V:= loc * syn_type)) as (γloc) "Hlocals".
   set (HthreadG := ThreadG _ _ γcur _ γlocals _ γloc).
 
-  set (HrefinedCG := RefinedCG _ config _ HheapG HthreadG _ A).
+  set (HrefinedCG := RefinedCG _ config _ HheapG HthreadG _ _ A).
 
   (* lifetime logic stuff *)
   iMod (lft_init _ lft_userE) as "(%Hlft & #LFT)"; [solve_ndisj.. | ].

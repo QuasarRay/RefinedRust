@@ -550,6 +550,22 @@ Section soundness.
 End soundness.
 
 From iris.base_logic.lib Require Export later_credits fancy_updates.
+
+(** Executing a raw step without an operational reduction costs both its input
+    credits and one credit for each of its step-taking updates. This lemma does
+    not issue a banked step credit. *)
+Lemma physical_step_execute `{!invGS Σ, !trGS Σ, !tr_generation} E s P :
+  tr_supply s 0 -∗
+  £ (tr_f (1 + 2*s) + S (tr_f (2*s))) -∗
+  (|={E}⧗=> P) ={E}=∗
+  tr_supply (s + tr_f (1 + 2*s)) 0 ∗ P.
+Proof.
+  iIntros "Hsup [Hinput Hrun] Hstep".
+  iMod (physical_step_soundness with "Hsup Hinput Hstep") as "Hstep".
+  iMod (lc_fupd_add_step_fupdN with "Hrun Hstep") as "$".
+  done.
+Qed.
+
 Lemma physical_stepN_soundness `{!invGpreS Σ, !trGpreS Σ, !tr_generation} (P : iProp Σ) `{!Plain P} (hlc : has_lc) n k :
     (∀ {Hinv : invGS_gen hlc Σ} {Htr: trGS Σ}, ⧗ n ∗ £ n ⊢ |={⊤}=> |={⊤}⧗=>^k |={⊤, ∅}=> P) → ⊢ P.
 Proof.

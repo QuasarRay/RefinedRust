@@ -136,7 +136,7 @@ Section rules.
     rewrite -Hels.
     iApply (wp_enum_data _ _ _ _ el
       (interp_enum_ltype_variant en variant r).(eltv_tag) variant_ly with "Hlb"); [done | done | ].
-    iApply physical_step_intro. iModIntro. iNext. iIntros (v Hv).
+    iApply credit_step_physical. iApply physical_step_intro. iModIntro. iNext. iIntros (v Hv).
     iExists (GetEnumDataLocSt l (enum_els en)). iSplitR.
     { done. }
     iApply ("Hp" $! rv with "[] [//] [//] [$LFT $LLCTX] HE HL Hf [Hpayload]"); first done.
@@ -203,7 +203,7 @@ Section rules.
     rewrite -Hels.
     iApply (wp_enum_data _ _ _ _ el
       (interp_enum_ltype_variant en variant r).(eltv_tag) variant_ly with "Hlb"); [done | done | ].
-    iApply physical_step_intro. iModIntro. iNext. iIntros (v Hv).
+    iApply credit_step_physical. iApply physical_step_intro. iModIntro. iNext. iIntros (v Hv).
     iExists (GetEnumDataLocSt l (enum_els en)). iSplitR.
     { done. }
     iApply ("Hp" $! rv with "[] [//] [//] [$LFT $LLCTX] HE HL Hf [Hpayload]"); first done.
@@ -295,9 +295,11 @@ Section rules.
     iEval (rewrite interp_enum_ltype_variant_Some_match; last done) in "Hb".
     iDestruct "Hb" as "(%variant_ly & %Hcompat & %Hvariant & %Hst & Htagown & %rv & %Hrfn & Hpayload & Hcl)".
     rewrite -Hels.
-    iApply (wpe_logical_step with "Hcl"); [done | solve_ndisj.. |].
     iApply (wp_enum_data _ _ _ _ el tag variant_ly with "Hlb"); [done | done |].
-    iApply physical_step_intro. iModIntro. iNext. iIntros (v Hv) "Hcl".
+    iApply credit_step_physical.
+    iPoseProof (logical_step_mask_mono _ ⊤ with "Hcl") as "Hcl"; first done.
+    iApply (physical_step_step_upd with "Hcl").
+    iApply physical_step_intro. iModIntro. iNext. iIntros "Hcl" (v Hv).
     iExists (GetEnumDataLocSt l (enum_els en)). iSplitR; first done.
     iApply ("Hp" $! rv with "[] [//] [//] [$LFT $LLCTX] HE HL Hf [Hpayload]"); first done.
     { rewrite /GetEnumDataLocSt /use_enum_layout_alg' Halg /=. done. }

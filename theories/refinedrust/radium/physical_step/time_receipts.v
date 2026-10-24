@@ -94,6 +94,9 @@ Section time_receipt_theory.
   Global Instance tr_persistent_persistent n : Persistent (⧖ n).
   Proof. unseal. apply _. Qed.
 
+  Global Instance tr_supply_timeless n m : Timeless (tr_supply n m).
+  Proof. unseal_supply. unseal. apply _. Qed.
+
   (** Later credit rules *)
   Lemma tr_split n₁ n₂ :
     ⧗ (n₁ + n₂) ⊣⊢ ⧗ n₁ ∗ ⧗ n₂.
@@ -294,4 +297,3 @@ Proof.
   iMod (tr_supply_base_alloc n) as  (?) "[$ H]".
   by iApply (tr_persist).
 Qed.
-

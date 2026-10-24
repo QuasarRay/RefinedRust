@@ -57,7 +57,7 @@ Section init.
     iModIntro. iExists payload. iSplitR.
     { iPureIntro. intros hst.
       rewrite (decode_op_val_stable v _ hst inhabitant). done. }
-    iApply physical_step_intro; iNext.
+    iApply credit_step_physical. iApply physical_step_intro; iNext.
     iApply ("Hc" with "HL Hf [Hv] HT").
 
     set (ro := (enum_tag_rt_inj sem ri')).

@@ -133,6 +133,16 @@ End intro_persistent.
 Section credits.
   Context `{typeGS Σ}.
 
+  (** Compatibility for annotations: each real reduction pays for one old
+      physical step. No change to the annotation's raw-step contract. *)
+  Lemma credit_stepN_physical E n P :
+    (|={E}⧗=>^n P) -∗ |={E}£=>^n P.
+  Proof.
+    induction n as [|n IH]; simpl; first auto.
+    iIntros "HP". iApply credit_step_physical.
+    iApply (physical_step_wand with "HP"). iApply IH.
+  Qed.
+
   (* We require at least one credit here so that the majority of clients does not need any sideconditions.
     We require at least one tr here, as place accesses will use the receipt every step gains for boosting, so we need to have at least one here to regenerate a potential credit we use.
    *)
@@ -2091,7 +2101,7 @@ Section place.
     end.
     1: { iDestruct "HT" as ([st l])  "(Hx & HT)". destruct f as [π i].
       simpl. iApply (wp_var with "Hframe Hx").
-      iApply physical_step_intro. iNext.
+      iApply credit_step_physical. iApply physical_step_intro. iNext.
       iIntros (v Hv) "Hframe Hx". iSpecialize ("HT" with "Hx").
       iSpecialize ("HΦ'" with "HL Hframe HT"). simpl.
       erewrite l2v_correct; done. }
@@ -2366,7 +2376,6 @@ Section laws.
     simpl. iModIntro.
     iDestruct "CTX" as "(LFT & LLCTX)".
     iApply wpe_fupd.
-    iApply (wpe_logical_step with "Hcl"); [done.. | ].
     opose proof (ty_op_type_stable ty _ Hot) as Halg'.
     assert (ly = ot_layout ot) as ->.
     { rewrite ptr_ref_op_layout. by eapply syn_type_has_layout_inj. }
@@ -2378,8 +2387,10 @@ Section laws.
     iApply (wp_deref with "Hl"); [by right | | done | | ].
     { intros. apply val_to_loc_decode. apply val_to_of_loc. by apply val_of_loc_Some_l2v. }
     { intros st. exists (OVPtr li). apply Hdecode. }
+    iApply credit_step_physical.
+    iApply (physical_step_step_upd with "Hcl").
     iApply physical_step_intro. iNext.
-    iIntros (st ov) "%Hdecode' Hl Ha".
+    iIntros "Ha" (st ov) "%Hdecode' Hl".
     specialize (Hdecode st). rewrite Hdecode in Hdecode'. injection Hdecode' as <-.
     iMod ("HT" with "[] Hv") as "(%l2 & %rt2 & %lt2 & %r2 & %b2 & %Hdec & Hv & Hl2 & HT)"; first done.
     pose proof (Hdec_ptr st) as Hdec_ptr_st. specialize (Hdec st).
@@ -2431,7 +2442,6 @@ Section laws.
     simpl. iModIntro.
     iDestruct "CTX" as "(LFT & LLCTX)".
     iApply wpe_fupd.
-    iApply (wpe_logical_step with "Hcl"); [done.. | ].
     opose proof (ty_op_type_stable ty _ Hot) as Halg'.
     assert (ly = ot_layout ot) as ->.
     { rewrite ptr_ref_op_layout. by eapply syn_type_has_layout_inj. }
@@ -2443,8 +2453,11 @@ Section laws.
     iApply (wp_deref with "Hl"); [by right | | done | | ].
     { intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v. }
     { intros st. exists (OVPtr li). apply Hdecode. }
+    iApply credit_step_physical.
+    iPoseProof (logical_step_mask_mono _ ⊤ with "Hcl") as "Hcl"; first done.
+    iApply (physical_step_step_upd with "Hcl").
     iApply physical_step_intro. iNext.
-    iIntros (st ov) "%Hdecode' Hl [Ha _]".
+    iIntros "[Ha _]" (st ov) "%Hdecode' Hl".
     specialize (Hdecode st). rewrite Hdecode in Hdecode'. injection Hdecode' as <-.
     iMod ("HT" with "[] Hv") as "(%l2 & %rt2 & %lt2 & %r2 & %b2 & %Hdec & Hv & Hl2 & HT)"; first done.
     pose proof (Hdec_ptr st) as Hdec_ptr_st. specialize (Hdec st).
@@ -2508,7 +2521,7 @@ Section laws.
     iApply (wp_deref with "Hloc"); [by right | | done | | ].
     { intros. apply val_to_loc_decode. by rewrite val_to_loc_Some_l2v. }
     { intros st. exists (OVPtr li). apply Hdecode. }
-    iApply physical_step_intro. iNext.
+    iApply credit_step_physical. iApply physical_step_intro. iNext.
     iIntros (st ov') "%Hdecode' Hloc".
     specialize (Hdecode st). rewrite Hdecode in Hdecode'. injection Hdecode' as <-.
     iMod ("HT" with "[] Hv") as "(%l2 & %rt2 & %lt2 & %r2 & %b2 & %Hdec & Hv & Hl2 & HT)"; first done.

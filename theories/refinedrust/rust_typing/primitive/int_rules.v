@@ -79,7 +79,7 @@ Section relop.
         by apply val_of_bool_iff_val_of_Z.
       - move => ->. econstructor; [done.. | ].
         by apply val_of_bool_iff_val_of_Z. }
-    iApply physical_step_intro. iNext.
+    iApply credit_step_physical. iApply physical_step_intro. iNext.
     iApply ("HΦ" with "HL Hf") => //.
     rewrite /ty_own_val/= bool_own_val_unfold. by destruct b.
   Qed.
@@ -120,7 +120,7 @@ Section arithop.
     iApply wp_int_arithop; [done..| ].
 
     iIntros (v Hv).
-    iApply physical_step_intro. iNext.
+    iApply credit_step_physical. iApply physical_step_intro. iNext.
     rewrite /i2v Hv/=. iApply ("HΦ" with "HL Hf [] HT").
     rewrite /ty_own_val/= int_own_val_unfold.
     iR.
@@ -254,7 +254,7 @@ Section arithop.
     iApply wp_int_arithop; [done..| ].
 
     iIntros (v Hv).
-    iApply physical_step_intro. iNext.
+    iApply credit_step_physical. iApply physical_step_intro. iNext.
     assert (wrap_to_it n it = n) as Heq.
     { rewrite wrap_to_it_id; [done | ].
       eapply int_arithop_result_in_range.
@@ -363,7 +363,7 @@ Section check_arithop.
     iSplitR.
     { iPureIntro. exists b. econstructor; done. }
 
-    iApply physical_step_intro. iNext.
+    iApply credit_step_physical. iApply physical_step_intro. iNext.
     iIntros (v Hv).
     inversion Hv; subst. simplify_eq/=.
     iApply ("HΦ" with "HL Hf [] HT").
@@ -458,7 +458,7 @@ Section unop.
     rewrite /i2v Hv'/=.
     iApply wp_neg_int => //.
     { rewrite wrap_to_it_id//. }
-    iApply physical_step_intro. iNext.
+    iApply credit_step_physical. iApply physical_step_intro. iNext.
     iApply ("HΦ" with "HL Hf [] HT").
     rewrite /ty_own_val/= int_own_val_unfold.
     iR.
@@ -491,7 +491,7 @@ Section unop.
     { intros. subst nz. split; [inversion 1; simplify_eq/= | move => ->]; simplify_eq/=; first done.
       econstructor; done. }
     rewrite Hv' /=.
-    iApply physical_step_intro. iNext.
+    iApply credit_step_physical. iApply physical_step_intro. iNext.
     iApply ("HΦ" with "HL Hf"); last done.
     rewrite /ty_own_val/= int_own_val_unfold. iR. iPureIntro.
     by apply: val_to_of_Z.
@@ -510,7 +510,7 @@ Section unop.
     destruct (val_of_Z_is_Some it2 (wrap_to_it n it2)) as (n' & Hit').
     { apply wrap_to_it_in_range. }
     iApply wp_cast_int => //.
-    iApply physical_step_intro. iNext.
+    iApply credit_step_physical. iApply physical_step_intro. iNext.
     iApply ("HΦ" with "HL Hf [] HT") => //.
     rewrite /ty_own_val/= int_own_val_unfold. iR.
     iPureIntro. by apply: val_to_of_Z.
@@ -568,7 +568,7 @@ Section bool.
       all: try by (symmetry; eapply val_of_bool_iff_val_of_Z).
       all: econstructor => //; case_bool_decide; try done.
       all: by apply val_of_bool_iff_val_of_Z. }
-    iApply physical_step_intro. iNext.
+    iApply credit_step_physical. iApply physical_step_intro. iNext.
     iApply ("HΦ" with "HL Hf"); last done.
     rewrite /ty_own_val/= bool_own_val_unfold.
     iPureIntro. by destruct b.
@@ -590,7 +590,7 @@ Section bool.
     iApply (wp_unop_det_pure (val_of_bool (negb b))).
     { intros. split; [inversion 1; simplify_eq/= | move => ->]; simplify_eq/=; first done.
       econstructor; done. }
-    iApply physical_step_intro. iNext.
+    iApply credit_step_physical. iApply physical_step_intro. iNext.
     iApply ("HΦ" with "HL Hf"); last done.
     rewrite /ty_own_val/= bool_own_val_unfold. iPureIntro. by destruct b.
   Qed.
@@ -617,7 +617,7 @@ Section bool.
     { destruct op, b1, b2; simplify_eq/=.
       all: split; [ inversion 1; simplify_eq/= | move => -> ]; simplify_eq/=; try done.
       all: eapply ArithOpBB; done. }
-    iApply physical_step_intro. iNext.
+    iApply credit_step_physical. iApply physical_step_intro. iNext.
     iApply ("HΦ" with "HL Hf [] HT").
     rewrite /ty_own_val/= bool_own_val_unfold. destruct b; done.
   Qed.

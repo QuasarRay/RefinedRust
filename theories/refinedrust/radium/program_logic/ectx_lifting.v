@@ -1,180 +1,166 @@
-(** From the CPP'26 paper "Building Blocks for Step-Indexed Program Logics",
-    by Thomas Somers, Jonas Kastberg Hinrichsen, Lennard Gäher, and Robbert Krebbers.
-*)
-(** Some derived lemmas for ectx-based languages *)
+(** Credit-aware lifting for evaluation-context languages. *)
 From iris.proofmode Require Import proofmode.
 From iris.program_logic Require Export ectx_language.
 From radium.program_logic Require Export weakestpre lifting.
 From iris.prelude Require Import options.
 
 Section wp.
-Context {Λ : ectxLanguage} `{!irisGS_gen hlc Λ Σ} {Hinh : Inhabited (state Λ)}.
+Context {Λ : ectxLanguage} `{!irisGS Λ Σ} `{!Inhabited (state Λ)}.
 Implicit Types s : stuckness.
-Implicit Types P : iProp Σ.
 Implicit Types Φ : val Λ → iProp Σ.
-Implicit Types v : val Λ.
 Implicit Types e : expr Λ.
 Local Hint Resolve base_prim_reducible base_reducible_prim_step : core.
-Local Definition reducible_not_val_inhabitant e := reducible_not_val e inhabitant.
-Local Hint Resolve reducible_not_val_inhabitant : core.
-Local Hint Resolve base_stuck_stuck : core.
 
-Lemma wp_lift_base_step_fupd {s E Φ} e1 :
-  to_val e1 = None →
-  (∀ σ1 ns κ κs nt, state_interp σ1 ns (κ ++ κs) nt ={E,∅}=∗
-    ⌜base_reducible e1 σ1⌝ ∗
-    ∀ e2 σ2 efs, ⌜base_step e1 σ1 κ e2 σ2 efs⌝ -∗ £ (tr_f 1) ={∅}▷=∗ |={∅,E}=>
-      state_interp σ2 (S ns) κs (length efs + nt) ∗
-      WP e2 @ s; E {{ Φ }} ∗
-      [∗ list] ef ∈ efs, WP ef @ s; ⊤ {{ fork_post }})
-  ⊢ WP e1 @ s; E {{ Φ }}.
+Lemma wp_lift_base_step_fupd {s E Φ} e :
+  to_val e = None →
+  (∀ σ ns κ κs nt, state_interp σ ns (κ ++ κs) nt ={E,∅}=∗
+    ⌜base_reducible e σ⌝ ∗
+    ∀ e' σ' efs, ⌜base_step e σ κ e' σ' efs⌝ -∗
+      step_credit step_credits_per_step -∗ step_credit_update ∅
+        (|={∅,E}=> state_interp σ' (S ns) κs (length efs + nt) ∗
+         WP e' @ s; E {{ Φ }} ∗
+         [∗ list] ef ∈ efs, WP ef @ s; ⊤ {{ fork_post }}))
+  ⊢ WP e @ s; E {{ Φ }}.
 Proof.
-  iIntros (?) "H". iApply wp_lift_step_fupd=>//. iIntros (σ1 ns κ κs nt) "Hσ".
-  iMod ("H" with "Hσ") as "[% H]"; iModIntro.
-  iSplit; first by destruct s; eauto. iIntros (e2 σ2 efs ?).
-  iApply "H"; eauto.
+  iIntros (He) "H". iApply (wp_lift_step_fupd _ _ _ _ He).
+  iIntros (σ ns κ κs nt) "Hstate". iMod ("H" with "Hstate") as "[% H]".
+  iModIntro. iSplit; first by destruct s; eauto.
+  iIntros (e' σ' efs Hstep). iApply "H"; eauto.
 Qed.
 
-Lemma wp_lift_base_step {s E Φ} e1 :
-  to_val e1 = None →
-  (∀ σ1 ns κ κs nt, state_interp σ1 ns (κ ++ κs) nt ={E,∅}=∗
-    ⌜base_reducible e1 σ1⌝ ∗
-    ▷ ∀ e2 σ2 efs, ⌜base_step e1 σ1 κ e2 σ2 efs⌝ -∗ £ (tr_f 1) ={∅,E}=∗
-      state_interp σ2 (S ns) κs (length efs + nt) ∗
-      WP e2 @ s; E {{ Φ }} ∗
-      [∗ list] ef ∈ efs, WP ef @ s; ⊤ {{ fork_post }})
-  ⊢ WP e1 @ s; E {{ Φ }}.
+Lemma wp_lift_base_step {s E Φ} e :
+  to_val e = None →
+  (∀ σ ns κ κs nt, state_interp σ ns (κ ++ κs) nt ={E,∅}=∗
+    ⌜base_reducible e σ⌝ ∗
+    ▷ ∀ e' σ' efs, ⌜base_step e σ κ e' σ' efs⌝ -∗
+      step_credit step_credits_per_step -∗ step_credit_update ∅
+        (|={∅,E}=> state_interp σ' (S ns) κs (length efs + nt) ∗
+         WP e' @ s; E {{ Φ }} ∗
+         [∗ list] ef ∈ efs, WP ef @ s; ⊤ {{ fork_post }}))
+  ⊢ WP e @ s; E {{ Φ }}.
 Proof.
-  iIntros (?) "H". iApply wp_lift_base_step_fupd; [done|]. iIntros (?????) "?".
-  iMod ("H" with "[$]") as "[$ H]". iIntros "!>" (e2 σ2 efs ?) "Hcred !> !>". by iApply "H".
+  iIntros (He) "H". iApply (wp_lift_step _ _ _ _ He).
+  iIntros (σ ns κ κs nt) "Hstate". iMod ("H" with "Hstate") as "[% H]".
+  iModIntro. iSplit; first by destruct s; eauto.
+  iNext. iIntros (e' σ' efs Hstep). iApply "H"; eauto.
 Qed.
 
-Lemma wp_lift_base_step_physical_step {s E Φ} e1 :
-  to_val e1 = None →
-  (∀ σ1 ns κ κs nt, state_interp σ1 ns (κ ++ κs) nt ={E,∅}=∗
-    ⌜base_reducible e1 σ1⌝ ∗
-    ∀ e2 σ2 efs, ⌜base_step e1 σ1 κ e2 σ2 efs⌝ -∗
-      |={∅}⧗=>
-      (|={∅, E}=>
-      state_interp σ2 (S ns) κs (length efs + nt) ∗
-      WP e2 @ s; E {{ Φ }} ∗
-      [∗ list] ef ∈ efs, WP ef @ s; ⊤ {{ fork_post }}))
-  ⊢ WP e1 @ s; E {{ Φ }}.
+Lemma wp_lift_base_step_physical_step {s E Φ} e :
+  0 < step_credits_per_step → to_val e = None →
+  (∀ σ ns κ κs nt, state_interp σ ns (κ ++ κs) nt ={E,∅}=∗
+    ⌜base_reducible e σ⌝ ∗
+    ∀ e' σ' efs, ⌜base_step e σ κ e' σ' efs⌝ -∗
+      step_credit (step_credits_per_step - 1) -∗ physical_step ∅
+        (|={∅,E}=> state_interp σ' (S ns) κs (length efs + nt) ∗
+         WP e' @ s; E {{ Φ }} ∗
+         [∗ list] ef ∈ efs, WP ef @ s; ⊤ {{ fork_post }}))
+  ⊢ WP e @ s; E {{ Φ }}.
 Proof.
-  iIntros (?) "H". iApply wp_lift_step_physical_step=>//.
-  iIntros (σ1 ns κ κs nt) "Hσ".
-  iSpecialize ("H" with "Hσ").
-  iSplit. { iMod "H" as "(%Hred & _)".
-    iModIntro.
-    destruct s; iPureIntro; first apply base_prim_reducible; done. }
-  iIntros (e2 σ2 efs ?).
-  iMod "H" as "(%Hred & H)".
-  iSpecialize ("H" with "[]").
-  { iPureIntro. by eapply base_reducible_prim_step. }
-  done.
+  iIntros (Hr He) "H". iApply (wp_lift_base_step_fupd _ He).
+  iIntros (σ ns κ κs nt) "Hstate". iMod ("H" with "Hstate") as "[$ H]".
+  iModIntro. iIntros (e' σ' efs Hstep) "Hcredits".
+  replace step_credits_per_step with (1 + (step_credits_per_step - 1)) at 1 by lia.
+  rewrite step_credit_split. iDestruct "Hcredits" as "[Hexecute Hrest]".
+  iApply (step_credit_redeem with "Hexecute (H [//] Hrest)").
 Qed.
 
 Lemma wp_lift_base_stuck E Φ e :
-  to_val e = None →
-  sub_redexes_are_values e →
-  (∀ σ ns κs nt, state_interp σ ns κs nt ={E,∅}=∗ ⌜base_stuck e σ⌝)
-  ⊢ WP e @ E ?{{ Φ }}.
+  to_val e = None → sub_redexes_are_values e →
+  (∀ σ ns κs nt, state_interp σ ns κs nt ={E,∅}=∗ ⌜base_stuck e σ⌝) ⊢
+  WP e @ E ?{{ Φ }}.
 Proof.
-  iIntros (??) "H". iApply wp_lift_stuck; first done.
-  iIntros (σ ns κs nt) "Hσ". iMod ("H" with "Hσ") as "%". by auto.
+  iIntros (He Hsub) "H". iApply (wp_lift_stuck _ _ _ He).
+  iIntros (σ ns κs nt) "Hstate". iMod ("H" with "Hstate") as "%".
+  iModIntro. iPureIntro. by apply base_stuck_stuck.
 Qed.
 
 Lemma wp_lift_pure_base_stuck E Φ e :
-  to_val e = None →
-  sub_redexes_are_values e →
-  (∀ σ, base_stuck e σ) →
+  to_val e = None → sub_redexes_are_values e → (∀ σ, base_stuck e σ) →
   ⊢ WP e @ E ?{{ Φ }}.
-Proof using Hinh.
-  iIntros (?? Hstuck). iApply wp_lift_base_stuck; [done|done|].
-  iIntros (σ ns κs nt) "_". iApply fupd_mask_intro; by auto with set_solver.
-Qed.
-
-Lemma wp_lift_atomic_base_step_fupd {s E1 E2 Φ} e1 :
-  to_val e1 = None →
-  (∀ σ1 ns κ κs nt, state_interp σ1 ns (κ ++ κs) nt ={E1}=∗
-    ⌜base_reducible e1 σ1⌝ ∗
-    ∀ e2 σ2 efs, ⌜base_step e1 σ1 κ e2 σ2 efs⌝ -∗ £ (tr_f 1) ={E1}[E2]▷=∗
-      state_interp σ2 (S ns) κs (length efs + nt) ∗
-      from_option Φ False (to_val e2) ∗
-      [∗ list] ef ∈ efs, WP ef @ s; ⊤ {{ fork_post }})
-  ⊢ WP e1 @ s; E1 {{ Φ }}.
 Proof.
-  iIntros (?) "H". iApply wp_lift_atomic_step_fupd; [done|].
-  iIntros (σ1 ns κ κs nt) "Hσ1". iMod ("H" with "Hσ1") as "[% H]"; iModIntro.
-  iSplit; first by destruct s; auto. iIntros (e2 σ2 efs Hstep).
-  iApply "H"; eauto.
+  iIntros (He Hsub Hstuck). iApply (wp_lift_base_stuck _ _ _ He Hsub).
+  iIntros (σ ns κs nt) "_". iApply fupd_mask_intro; first set_solver.
+  iIntros "_". done.
 Qed.
 
-Lemma wp_lift_atomic_base_step {s E Φ} e1 :
-  to_val e1 = None →
-  (∀ σ1 ns κ κs nt, state_interp σ1 ns (κ ++ κs) nt ={E}=∗
-    ⌜base_reducible e1 σ1⌝ ∗
-    ▷ ∀ e2 σ2 efs, ⌜base_step e1 σ1 κ e2 σ2 efs⌝ -∗ £ (tr_f 1) ={E}=∗
-      state_interp σ2 (S ns) κs (length efs + nt) ∗
-      from_option Φ False (to_val e2) ∗
-      [∗ list] ef ∈ efs, WP ef @ s; ⊤ {{ fork_post }})
-  ⊢ WP e1 @ s; E {{ Φ }}.
+Lemma wp_lift_atomic_base_step_fupd {s E1 E2 Φ} e :
+  to_val e = None →
+  (∀ σ ns κ κs nt, state_interp σ ns (κ ++ κs) nt ={E1}=∗
+    ⌜base_reducible e σ⌝ ∗
+    ∀ e' σ' efs, ⌜base_step e σ κ e' σ' efs⌝ -∗
+      step_credit step_credits_per_step -∗ step_credit_update E1
+        (|={E1}[E2]▷=> state_interp σ' (S ns) κs (length efs + nt) ∗
+         from_option Φ False (to_val e') ∗
+         [∗ list] ef ∈ efs, WP ef @ s; ⊤ {{ fork_post }}))
+  ⊢ WP e @ s; E1 {{ Φ }}.
 Proof.
-  iIntros (?) "H". iApply wp_lift_atomic_step; eauto.
-  iIntros (σ1 ns κ κs nt) "Hσ1". iMod ("H" with "Hσ1") as "[% H]"; iModIntro.
-  iSplit; first by destruct s; auto. iNext. iIntros (e2 σ2 efs Hstep).
-  iApply "H"; eauto.
+  iIntros (He) "H". iApply (wp_lift_atomic_step_fupd _ He).
+  iIntros (σ ns κ κs nt) "Hstate". iMod ("H" with "Hstate") as "[% H]".
+  iModIntro. iSplit; first by destruct s; eauto.
+  iIntros (e' σ' efs Hstep). iApply "H"; eauto.
 Qed.
 
-Lemma wp_lift_atomic_base_step_no_fork_fupd {s E1 E2 Φ} e1 :
-  to_val e1 = None →
-  (∀ σ1 ns κ κs nt, state_interp σ1 ns (κ ++ κs) nt ={E1}=∗
-    ⌜base_reducible e1 σ1⌝ ∗
-    ∀ e2 σ2 efs, ⌜base_step e1 σ1 κ e2 σ2 efs⌝ -∗ £ (tr_f 1) ={E1}[E2]▷=∗
-      ⌜efs = []⌝ ∗ state_interp σ2 (S ns) κs nt ∗ from_option Φ False (to_val e2))
-  ⊢ WP e1 @ s; E1 {{ Φ }}.
+Lemma wp_lift_atomic_base_step {s E Φ} e :
+  to_val e = None →
+  (∀ σ ns κ κs nt, state_interp σ ns (κ ++ κs) nt ={E}=∗
+    ⌜base_reducible e σ⌝ ∗
+    ▷ ∀ e' σ' efs, ⌜base_step e σ κ e' σ' efs⌝ -∗
+      step_credit step_credits_per_step -∗ step_credit_update E
+        (state_interp σ' (S ns) κs (length efs + nt) ∗
+         from_option Φ False (to_val e') ∗
+         [∗ list] ef ∈ efs, WP ef @ s; ⊤ {{ fork_post }}))
+  ⊢ WP e @ s; E {{ Φ }}.
 Proof.
-  iIntros (?) "H". iApply wp_lift_atomic_base_step_fupd; [done|].
-  iIntros (σ1 ns κ κs nt) "Hσ1". iMod ("H" $! σ1 with "Hσ1") as "[$ H]"; iModIntro.
-  iIntros (v2 σ2 efs Hstep) "Hcred".
-  iMod ("H" $! v2 σ2 efs with "[# //] Hcred") as "H".
-  iIntros "!> !>". iMod "H" as "(-> & ? & ?) /=". by iFrame.
+  iIntros (He) "H". iApply (wp_lift_atomic_step _ He).
+  iIntros (σ ns κ κs nt) "Hstate". iMod ("H" with "Hstate") as "[% H]".
+  iModIntro. iSplit; first by destruct s; eauto.
+  iNext. iIntros (e' σ' efs Hstep). iApply "H"; eauto.
 Qed.
 
-Lemma wp_lift_atomic_base_step_no_fork {s E Φ} e1 :
-  to_val e1 = None →
-  (∀ σ1 ns κ κs nt, state_interp σ1 ns (κ ++ κs) nt ={E}=∗
-    ⌜base_reducible e1 σ1⌝ ∗
-    ▷ ∀ e2 σ2 efs, ⌜base_step e1 σ1 κ e2 σ2 efs⌝ -∗ £ (tr_f 1) ={E}=∗
-      ⌜efs = []⌝ ∗ state_interp σ2 (S ns) κs nt ∗ from_option Φ False (to_val e2))
-  ⊢ WP e1 @ s; E {{ Φ }}.
+Lemma wp_lift_atomic_base_step_no_fork_fupd {s E1 E2 Φ} e :
+  to_val e = None →
+  (∀ σ ns κ κs nt, state_interp σ ns (κ ++ κs) nt ={E1}=∗
+    ⌜base_reducible e σ⌝ ∗
+    ∀ e' σ' efs, ⌜base_step e σ κ e' σ' efs⌝ -∗
+      step_credit step_credits_per_step -∗ step_credit_update E1
+        (|={E1}[E2]▷=> ⌜efs = []⌝ ∗ state_interp σ' (S ns) κs nt ∗
+          from_option Φ False (to_val e')))
+  ⊢ WP e @ s; E1 {{ Φ }}.
 Proof.
-  iIntros (?) "H". iApply wp_lift_atomic_base_step; eauto.
-  iIntros (σ1 ns κ κs nt) "Hσ1". iMod ("H" $! σ1 with "Hσ1") as "[$ H]"; iModIntro.
-  iNext; iIntros (v2 σ2 efs Hstep) "Hcred".
-  iMod ("H" $! v2 σ2 efs with "[//] Hcred") as "(-> & ? & ?) /=". by iFrame.
+  iIntros (He) "H". iApply (wp_lift_atomic_base_step_fupd _ He).
+  iIntros (σ ns κ κs nt) "Hstate". iMod ("H" with "Hstate") as "[$ H]".
+  iModIntro. iIntros (e' σ' efs Hstep) "Hcredits Hbank".
+  iMod ("H" with "[//] Hcredits Hbank") as "[Hbank Hnext]".
+  iModIntro. iFrame "Hbank". iMod "Hnext" as "Hnext". iModIntro. iNext.
+  iMod "Hnext" as "(-> & Hstate & HΦ)". simpl. iModIntro. iFrame.
 Qed.
 
-Lemma wp_lift_pure_det_base_step_no_fork {s E E' Φ} e1 e2 :
-  to_val e1 = None →
-  (∀ σ1, base_reducible e1 σ1) →
-  (∀ σ1 κ e2' σ2 efs',
-    base_step e1 σ1 κ e2' σ2 efs' → κ = [] ∧ σ2 = σ1 ∧ e2' = e2 ∧ efs' = []) →
-  (|={E}[E']▷=> £ (tr_f 1) -∗ WP e2 @ s; E {{ Φ }}) ⊢ WP e1 @ s; E {{ Φ }}.
-Proof using Hinh.
-  intros. rewrite -(wp_lift_pure_det_step_no_fork e1 e2); eauto.
-  destruct s; by auto.
+Lemma wp_lift_atomic_base_step_no_fork {s E Φ} e :
+  to_val e = None →
+  (∀ σ ns κ κs nt, state_interp σ ns (κ ++ κs) nt ={E}=∗
+    ⌜base_reducible e σ⌝ ∗
+    ▷ ∀ e' σ' efs, ⌜base_step e σ κ e' σ' efs⌝ -∗
+      step_credit step_credits_per_step -∗ step_credit_update E
+        (⌜efs = []⌝ ∗ state_interp σ' (S ns) κs nt ∗ from_option Φ False (to_val e')))
+  ⊢ WP e @ s; E {{ Φ }}.
+Proof.
+  iIntros (He) "H". iApply (wp_lift_atomic_base_step _ He).
+  iIntros (σ ns κ κs nt) "Hstate". iMod ("H" with "Hstate") as "[$ H]".
+  iModIntro. iNext. iIntros (e' σ' efs Hstep) "Hcredits Hbank".
+  iMod ("H" with "[//] Hcredits Hbank") as "[Hbank (-> & Hstate & HΦ)]".
+  simpl. iModIntro. iFrame.
 Qed.
 
-Lemma wp_lift_pure_det_base_step_no_fork' {s E Φ} e1 e2 :
-  to_val e1 = None →
-  (∀ σ1, base_reducible e1 σ1) →
-  (∀ σ1 κ e2' σ2 efs',
-    base_step e1 σ1 κ e2' σ2 efs' → κ = [] ∧ σ2 = σ1 ∧ e2' = e2 ∧ efs' = []) →
-  ▷ (£ (tr_f 1) -∗ WP e2 @ s; E {{ Φ }}) ⊢ WP e1 @ s; E {{ Φ }}.
-Proof using Hinh.
-  intros. rewrite -[(WP e1 @ s; _ {{ _ }})%I]wp_lift_pure_det_base_step_no_fork //.
-  rewrite -step_fupd_intro //.
+Lemma wp_lift_pure_det_base_step_no_fork {s E Φ} e e' :
+  to_val e = None → (∀ σ, base_reducible e σ) →
+  (∀ σ κ e'' σ' efs, base_step e σ κ e'' σ' efs →
+    κ = [] ∧ σ' = σ ∧ e'' = e' ∧ efs = []) →
+  (step_credit step_credits_per_step -∗ step_credit_update E (WP e' @ s; E {{ Φ }})) ⊢
+  WP e @ s; E {{ Φ }}.
+Proof using All.
+  intros He Hsafe Hstep. apply wp_lift_pure_det_step_no_fork.
+  { intros σ. destruct s; eauto. }
+  intros σ κ e'' σ' efs Hp. apply Hstep.
+  by eapply base_reducible_prim_step.
 Qed.
 End wp.
-

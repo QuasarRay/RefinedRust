@@ -97,7 +97,7 @@ Section init.
     rewrite /ArrayInit. iApply wp_concat_bind.
     iApply (array_init_fold_elim with "CTX HE HL Hf [] HT [-]"); [done.. |].
     iIntros (L' vs rs) "%Hlen %Htotal %Hlys HL Hf Hvals HT".
-    iApply wp_concat. iApply physical_step_intro. iNext.
+    iApply wp_concat. iApply credit_step_physical. iApply physical_step_intro. iNext.
     iApply ("HΦ" with "HL Hf [Hvals] HT").
     rewrite /ty_own_val /= array_t_own_val_unfold.
     iExists ly. iR. iR.
@@ -139,7 +139,7 @@ Section init.
     iDestruct "Hv" as "#Hv".
     iPoseProof (ty_own_val_has_layout with "Hv") as "%Hvly"; first done.
     iApply wp_repeat; [done | done |].
-    iApply physical_step_intro. iNext.
+    iApply credit_step_physical. iApply physical_step_intro. iNext.
     iApply ("HΦ" with "HL Hf [Hv] HT").
     rewrite /ty_own_val /= array_t_own_val_unfold.
     iExists ly. iR. iR.

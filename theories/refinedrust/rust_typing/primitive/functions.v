@@ -356,6 +356,7 @@ Section call.
     (* eliminate the logical step *)
     iModIntro. iModIntro.
     iApply (wps_call with "He Hf") => //.
+    iApply credit_step_physical.
     iApply (physical_step_step_upd with "Hstep").
     iMod (tr_zero) as "Hc".
     iApply (physical_step_intro_tr with "Hc").
@@ -493,7 +494,7 @@ Section call.
         iFrame.
         simpl.
         iPoseProof (credit_store_borrow with "Hstore") as "(Hcred1 & Hat & _)".
-        iApply (physical_step_intro_tr with "Hat").
+        iApply credit_step_physical. iApply (physical_step_intro_tr with "Hat").
         iNext. iIntros "Hat Hcred".
 
         iPoseProof ("Hkill" with "Hϝ") as "(Htok & Hkill)".
@@ -512,7 +513,7 @@ Section call.
         iDestruct 1 as (κs' locals) "(Hϝ & Hstore & Hf & Hlocals & Hna & Hls & Hpanic)".
         iFrame.
         iPoseProof (credit_store_borrow with "Hstore") as "(Hcred1 & Hat & _)".
-        iApply (physical_step_intro_tr with "Hat").
+        iApply credit_step_physical. iApply (physical_step_intro_tr with "Hat").
         iNext. iIntros "Hat Hcred".
         iPoseProof ("Hkill" with "Hϝ") as "(Htok & Hkill)".
         iMod ("HL_cl'" with "Htok HL") as "HL".
@@ -1610,7 +1611,7 @@ Section inline.
       assert (ly = ly') as ->. { by eapply syn_type_has_layout_inj. }
       iPureIntro. constructor => //. }
     iApply (wps_call fp.1 fp.2 _ v vl l fn with "Hfn Hf"); [done|done|done|].
-    iApply physical_step_intro. iNext.
+    iApply credit_step_physical. iApply physical_step_intro. iNext.
 
     iIntros (lsa Hlya) "Hlsa Hlive Hf Halloc".
 
@@ -1674,7 +1675,7 @@ Section inline.
         iApply logical_step_intro. rewrite /UNWIND_PROP. iExists L', locals. iFrame.
     - iModIntro. iSplit.
       + iIntros (v') "H". iDestruct "H" as (L' locals) "(Hf & Halloc & Hlive & HL & HR)".
-        iExists locals. iFrame. iApply physical_step_intro. iNext. iIntros "Hf".
+        iExists locals. iFrame. iApply credit_step_physical. iApply physical_step_intro. iNext. iIntros "Hf".
         iEval (rewrite /R0 /li_tactic /llctx_find_llft_goal /find_in_context) in "HR".
         iDestruct "HR" as (M) "(Hcallee_named & HR)".
         iDestruct ("HR" with "Hcallee_named") as (L'' κs Hfind) "(%x & Hv & HT)".
@@ -1684,7 +1685,7 @@ Section inline.
           apply sublist_app; [done | by apply sublist_cons]. }
         iDestruct "Hcall" as "[Hcall _]". iApply ("Hcall" $! L'' v' rt ty r with "HL Hf (HT Hv)").
       + iIntros "H". iDestruct "H" as (L' locals) "(Hf & Halloc & Hlive & HL & HU)".
-        iExists locals. iFrame. iApply physical_step_intro. iNext. iIntros "Hf".
+        iExists locals. iFrame. iApply credit_step_physical. iApply physical_step_intro. iNext. iIntros "Hf".
         iEval (rewrite /U0 /li_tactic /llctx_find_llft_goal /find_in_context) in "HU".
         iDestruct "HU" as (M) "(Hcallee_named & HU)".
         iDestruct ("HU" with "Hcallee_named") as (L'' κs Hfind) "HT".

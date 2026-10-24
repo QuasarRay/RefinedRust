@@ -21,11 +21,12 @@ Section rule.
     iApply ("HT" $! _ ⊤ with "[//] [//] [//] [//] [$LFT $LLCTX] HE HL Hf").
     iIntros (l) "HT".
     unfold Ref. wpe_bind. iApply wpe_fupd.
-    iApply (wpe_logical_step with "HT"); [solve_ndisj.. | ].
-    iApply wp_skip. iApply physical_step_intro; iNext. iIntros "HT !>".
+    iApply wp_skip. iApply credit_step_physical.
+    iApply (physical_step_step_upd with "HT").
+    iApply physical_step_intro; iNext. iIntros "HT !>".
     iApply wpe_fupd.
-    iApply (wpe_logical_step with "HT"); [solve_ndisj.. | ].
     iApply wp_skip.
+    iApply credit_step_physical. iApply (physical_step_step_upd with "HT").
     iApply physical_step_intro_lc. iIntros "(Hcred & Hcred1) !> !> HT".
     iMod ("HT" with "Hcred1") as (L' rt ty r r' ly) "(#Hrfn & %Hxr_r & #Hshr & %Halg & %Hly & #Hlb & #Hsc & HL & Hf & HT)".
     iPoseProof (ty_shr_is_xrfn with "Hshr") as "%Hxr".

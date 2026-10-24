@@ -3,7 +3,7 @@
 *)
 From iris.proofmode Require Import base proofmode classes.
 From iris.base_logic.lib Require Export fancy_updates.
-From radium.physical_step Require Export time_receipts physical_step logical_step.
+From radium.physical_step Require Export step_credits.
 From iris.program_logic Require Export language.
 (* FIXME: If we import iris.bi.weakestpre earlier texan triples do not
    get pretty-printed correctly. *)
@@ -14,10 +14,13 @@ Import uPred.
 (* TODO: should move into stdpp eventually? *)
 Scheme Rewriting for TCEq.
 
-Class irisGS_gen (hlc : has_lc) (Λ : language) (Σ : gFunctors) := IrisG {
-  #[global] iris_invGS :: invGS_gen hlc Σ;
+Class irisGS (Λ : language) (Σ : gFunctors) := IrisG {
+  #[global] iris_invGS :: invGS Σ;
   #[global] iris_trGS :: trGS Σ;
   #[global] iris_trGen :: tr_generation;
+  #[global] iris_step_creditGS :: step_creditGS Σ;
+  (** Issuance per actual reduction; independent of the adequacy horizon. *)
+  step_credits_per_step : nat;
 
   (** The state interpretation is an invariant that should hold in
   between each step of reduction. Here [Λstate] is the global state,
@@ -32,13 +35,6 @@ Class irisGS_gen (hlc : has_lc) (Λ : language) (Σ : gFunctors) := IrisG {
   heap_lang, this will simply be [True]. However, it is useful if one wants to
   keep track of resources precisely, as in e.g. Iron. *)
   fork_post : val Λ → iProp Σ;
-
-  (** The number of additional logical steps (i.e., later modality in the
-  definition of WP) and later credits per physical step is
-  [S (num_laters_per_step ns)], where [ns] is the number of physical steps
-  executed so far. We add one to [num_laters_per_step] to ensure that there
-  is always at least one later and later credit for each physical step. *)
-  (* num_laters_per_step : nat → nat; *)
 
   (** When performing pure steps, the state interpretation needs to be
   adapted for the change in the [ns] parameter.
@@ -55,55 +51,67 @@ Class irisGS_gen (hlc : has_lc) (Λ : language) (Σ : gFunctors) := IrisG {
     state_interp σ ns κs nt ⊢ |={∅}=> state_interp σ (S ns) κs nt
 }.
 Global Opaque iris_invGS.
-Global Arguments IrisG {hlc Λ Σ}.
+Global Arguments IrisG {Λ Σ}.
 
-Abbreviation irisGS := (irisGS_gen HasLc).
+Definition wp_state_interp `{!irisGS Λ Σ} σ ns κs nt : iProp Σ :=
+  state_interp σ ns κs nt ∗ step_credit_state.
 
-(** The predicate we take the fixpoint of in order to define the WP. *)
-(** In the step case, we both provide [S (num_laters_per_step ns)]
-  later credits, as well as an iterated update modality that allows
-  stripping as many laters, where [ns] is the number of steps already taken.
-  We have both as each of these provides distinct advantages:
-  - Later credits do not have to be used right away, but can be kept to
-    eliminate laters at a later point.
-  - The step-taking update composes well in parallel: we can independently
-    compose two clients who want to eliminate their laters for the same
-    physical step, which is not possible with later credits, as they
-    can only be used by exactly one client.
-  - The step-taking update can even be used by clients that opt out of
-    later credits, e.g. because they use [BiFUpdPlainly]. *)
-Definition wp_pre `{!irisGS_gen hlc Λ Σ} (s : stuckness)
+Definition state_update `{!irisGS Λ Σ} E (P : iProp Σ) : iProp Σ :=
+  ∀ σ ns κs nt, wp_state_interp σ ns κs nt -∗
+    |={E}=> wp_state_interp σ ns κs nt ∗ P.
+
+Lemma wp_state_interp_mono `{!irisGS Λ Σ} σ ns κs nt :
+  wp_state_interp σ ns κs nt ⊢ |={∅}=> wp_state_interp σ (S ns) κs nt.
+Proof.
+  iIntros "[Hstate Hbank]". iMod (state_interp_mono with "Hstate") as "Hstate".
+  iModIntro. iFrame.
+Qed.
+
+Lemma step_credit_update_state_update `{!irisGS Λ Σ} E P :
+  step_credit_update E P -∗ state_update E P.
+Proof.
+  iIntros "Hupdate" (σ ns κs nt) "[Hstate Hbank]".
+  iMod ("Hupdate" with "Hbank") as "[Hbank HP]". iModIntro. iFrame.
+Qed.
+
+(** The operational later guards the recursive WP independently of receipt
+    advancement. Only the actual-successor branch receives issued credits;
+    the safety branch receives none. Adequacy supplies these credits from a
+    private, finitely backed stock. *)
+Definition wp_pre `{!irisGS Λ Σ} (s : stuckness)
     (wp : coPset -d> expr Λ -d> (val Λ -d> iPropO Σ) -d> iPropO Σ) :
     coPset -d> expr Λ -d> (val Λ -d> iPropO Σ) -d> iPropO Σ := λ E e1 Φ,
   match to_val e1 with
   | Some v => |={E}=> Φ v
   | None => ∀ σ1 ns κ κs nt,
-     state_interp σ1 ns (κ ++ κs) nt -∗
+     wp_state_interp σ1 ns (κ ++ κs) nt -∗
        (|={E,∅}=> ⌜if s is NotStuck then reducible e1 σ1 else True⌝) ∧
-       ∀ e2 σ2 efs, ⌜prim_step e1 σ1 κ e2 σ2 efs⌝ -∗ |={E}⧗=>
-         state_interp σ2 (S ns) κs (length efs + nt) ∗
+        ∀ e2 σ2 efs, ⌜prim_step e1 σ1 κ e2 σ2 efs⌝ -∗
+          step_credit step_credits_per_step -∗
+          |={E,∅}=> ▷ |={∅,E}=>
+          wp_state_interp σ2 (S ns) κs (length efs + nt) ∗
          wp E e2 Φ ∗
          [∗ list] i ↦ ef ∈ efs, wp ⊤ ef fork_post
   end%I.
 
 
-Local Instance wp_pre_contractive `{!irisGS_gen hlc Λ Σ} s : Contractive (wp_pre s).
+Local Instance wp_pre_contractive `{!irisGS Λ Σ} s : Contractive (wp_pre s).
 Proof.
   rewrite /wp_pre /= => n wp wp' Hwp E e1 Φ.
   repeat (f_contractive || f_equiv || apply Hwp).
 Qed.
 
-Local Definition wp_def `{!irisGS_gen hlc Λ Σ} : Wp (iProp Σ) (expr Λ) (val Λ) stuckness :=
+Local Definition wp_def `{!irisGS Λ Σ} : Wp (iProp Σ) (expr Λ) (val Λ) stuckness :=
   λ s : stuckness, fixpoint (wp_pre s).
 Local Definition wp_aux : seal ( @wp_def). Proof. by eexists. Qed.
 Definition wp' := wp_aux.(unseal).
-Global Arguments wp' {hlc Λ Σ _}.
+Global Arguments wp' {Λ Σ _}.
 Global Existing Instance wp'.
-Local Lemma wp_unseal `{!irisGS_gen hlc Λ Σ} : wp = @wp_def hlc Λ Σ _.
+Local Lemma wp_unseal `{!irisGS Λ Σ} : wp = @wp_def Λ Σ _.
 Proof. rewrite -wp_aux.(seal_eq) //. Qed.
 
 Section wp.
-Context `{!irisGS_gen hlc Λ Σ}.
+Context `{!irisGS Λ Σ}.
 Implicit Types s : stuckness.
 Implicit Types P : iProp Σ.
 Implicit Types Φ : val Λ → iProp Σ.
@@ -124,8 +132,8 @@ Proof.
   (* FIXME: figure out a way to properly automate this proof *)
   (* FIXME: reflexivity, as being called many times by f_equiv and f_contractive
   is very slow here *)
-  do 23 (f_contractive || f_equiv).
-  rewrite IH; [done..|]. intros v. by eapply dist_lt.
+  repeat first [solve [apply (IH _ Hlt); intros v; eapply dist_lt; [apply HΦ|exact Hlt]]
+    | f_contractive | f_equiv].
 Qed.
 Global Instance wp_proper s E e :
   Proper (pointwise_relation _ (≡) ==> (≡)) (wp (PROP:=iProp Σ) s E e).
@@ -158,11 +166,12 @@ Proof.
     iMod (fupd_mask_subseteq E1) as "Hclose"; first done.
     iMod "H" as "%Hst". by destruct s1, s2.
   }
-  iIntros (e2 σ2 efs Hstep).
-  iDestruct ("H" with "[//]") as "H".
-  iApply (physical_step_subseteq E1); [done|].
-  iApply (physical_step_wand_later with "H").
-  iIntros "!> ($ & H & Hefs)".
+  iIntros (e2 σ2 efs Hstep) "Hcredit".
+  iDestruct "H" as "[_ H]".
+  iMod (fupd_mask_subseteq E1) as "Hclose"; first done.
+  iMod ("H" with "[//] Hcredit") as "Hnext".
+  iModIntro. iNext. iMod "Hnext" as "($ & H & Hefs)".
+  iMod "Hclose" as "_". iModIntro.
   iSplitR "Hefs".
   - iApply ("IH" with "[//] H HΦ").
   - iApply (big_sepL_impl with "Hefs"); iIntros "!>" (k ef _).
@@ -191,9 +200,10 @@ Proof.
   iIntros (σ1 ns κ κs nt) "Hσ".
   iMod "H".
   iSplit; [iDestruct ("H" with "[$]") as "[$ _]"|].
-  iIntros (e2 σ2 efs Hstep).
-  iApply (physical_step_wand with "(H [$] [//])").
-  iIntros "(Hσ & H & Hefs)". destruct s.
+  iIntros (e2 σ2 efs Hstep) "Hcredit".
+  iDestruct ("H" with "Hσ") as "[_ H]".
+  iMod ("H" with "[//] Hcredit") as "Hnext".
+  iModIntro. iNext. iMod "Hnext" as "(Hσ & H & Hefs)". destruct s.
   - rewrite !wp_unfold /wp_pre. destruct (to_val e2) as [v2|] eqn:He2.
     + iDestruct "H" as ">> $". by iFrame.
     + iDestruct ("H" $! _ _ [] with "[$]") as "[>H _]". iDestruct "H" as %(? & ? & ? & ? & ?).
@@ -203,34 +213,52 @@ Proof.
     iModIntro. iFrame "Hσ Hefs". by iApply wp_value_fupd'.
 Qed.
 
-(** In this stronger version of [wp_step_fupdN], the masks in the
-   step-taking fancy update are a bit weird and somewhat difficult to
-   use in practice. Hence, we prove it for the sake of completeness,
-   but [wp_step_fupdN] is just a little bit weaker, suffices in
-   practice and is easier to use.
-
-   See the statement of [wp_step_fupdN] below to understand the use of
-   ordinary conjunction here. *)
-Lemma wp_step_fupdN_strong n s E1 E2 e P Φ :
-  TCEq (to_val e) None → E2 ⊆ E1 →
-  (∀ σ ns κs nt, state_interp σ ns κs nt
-       ={E1,∅}=∗ ⧖ n) ∧
-  ((|={E1,E2}=> |={∅}▷=>^(S (tr_f n)) |={E2,E1}=> P) ∗
-    WP e @ s; E2 {{ v, P ={E1}=∗ Φ v }}) -∗
-  WP e @ s; E1 {{ Φ }}.
+(** A state-preserving update executes before resuming the same nonvalue
+    expression. Values retain their ordinary fancy-update rule. *)
+Lemma wp_state_update s E e Φ :
+  TCEq (to_val e) None →
+  state_update E (WP e @ s; E {{ Φ }}) -∗ WP e @ s; E {{ Φ }}.
 Proof.
-  rewrite !wp_unfold /wp_pre. iIntros (-> ?) "H".
-  iIntros (σ1 ns κ κs nt) "Hσ".
-  iSplit.
-  { iDestruct "H" as "(_ & >HP & H)". iDestruct ("H" with "[$]") as "[>$ _]". done. }
-  iIntros.
-  iApply (physical_step_fupdN E2 _). iSplit.
-  { iDestruct "H" as "[H _]". by iApply "H". }
-  iDestruct "H" as "[_ [$ Hwp]]".
-  iApply (physical_step_wand with "(Hwp [$] [//])").
-  iIntros "($ & Hwp & $) HP !>".
-  iApply (wp_strong_mono with "Hwp"); [done|set_solver|].
-  iIntros (v) "HΦ". iApply ("HΦ" with "HP").
+  iIntros (He) "Hupdate". iEval (rewrite wp_unfold /wp_pre He).
+  iIntros (σ ns κ κs nt) "Hstate". iSplit.
+  - iMod ("Hupdate" with "Hstate") as "[Hstate Hwp]".
+    iEval (rewrite wp_unfold /wp_pre He) in "Hwp".
+    iDestruct ("Hwp" with "Hstate") as "[$ _]".
+  - iIntros (e' σ' efs Hstep) "Hcredit".
+    iMod ("Hupdate" with "Hstate") as "[Hstate Hwp]".
+    iEval (rewrite wp_unfold /wp_pre He) in "Hwp".
+    iDestruct ("Hwp" with "Hstate") as "[_ Hwp]".
+    iApply ("Hwp" with "[//] Hcredit").
+Qed.
+
+Lemma wp_step_credit_update s E e Φ :
+  TCEq (to_val e) None →
+  step_credit_update E (WP e @ s; E {{ Φ }}) -∗ WP e @ s; E {{ Φ }}.
+Proof.
+  iIntros (He) "Hupdate". iApply (wp_state_update _ _ _ _ He).
+  iIntros (σ ns κs nt) "[Hstate Hbank]".
+  iMod ("Hupdate" with "Hbank") as "[Hbank Hwp]". iModIntro. iFrame.
+Qed.
+
+Lemma wp_physical_step s E e P Φ :
+  TCEq (to_val e) None →
+  step_credit 1 -∗ physical_step E P -∗
+  (P -∗ WP e @ s; E {{ Φ }}) -∗ WP e @ s; E {{ Φ }}.
+Proof.
+  iIntros (He) "Hcredit Hraw Hcont". iApply (wp_step_credit_update _ _ _ _ He).
+  iIntros "Hbank". iMod (step_credit_redeem with "Hcredit Hraw Hbank") as "[Hbank HP]".
+  iModIntro. iFrame "Hbank". iApply ("Hcont" with "HP").
+Qed.
+
+Lemma wp_logical_step s E e P Φ :
+  TCEq (to_val e) None →
+  step_credit 1 -∗ logical_step.logical_step E P -∗
+  (P -∗ WP e @ s; E {{ Φ }}) -∗ WP e @ s; E {{ Φ }}.
+Proof.
+  iIntros (He) "Hcredit Hlogical Hcont". iApply (wp_step_credit_update _ _ _ _ He).
+  iIntros "Hbank".
+  iMod (step_credit_redeem_logical with "Hcredit Hlogical Hbank") as "[Hbank HP]".
+  iModIntro. iFrame "Hbank". iApply ("Hcont" with "HP").
 Qed.
 
 
@@ -245,11 +273,10 @@ Proof.
   iSplit.
   { iDestruct "H" as "[>%H _]". destruct s; eauto using reducible_fill. }
   iDestruct "H" as "[_ H]".
-  iIntros (e2 σ2 efs Hstep).
+  iIntros (e2 σ2 efs Hstep) "Hcredit".
   destruct (fill_step_inv e σ1 κ e2 σ2 efs) as (e2'&->&?); auto.
-  iDestruct ("H" $! e2' σ2 efs with "[//]") as "H".
-  iApply (physical_step_wand_later with "H").
-  iIntros "!> ($ & H & $)".
+  iMod ("H" $! e2' σ2 efs with "[//] Hcredit") as "Hnext".
+  iModIntro. iNext. iMod "Hnext" as "($ & H & $)". iModIntro.
   by iApply "IH".
 Qed.
 
@@ -263,9 +290,10 @@ Proof.
   iIntros (σ1 ns κ κs nt) "Hσ".
   iSplit.
   { iDestruct ("H" with "[$]") as "[>%H _]". destruct s; eauto using reducible_fill_inv. }
-  iIntros (e2 σ2 efs Hstep).
-  iApply (physical_step_wand_later with "(H [$] [])"); first eauto using fill_step.
-  iIntros "!> ($ & H & $)". by iApply "IH".
+  iIntros (e2 σ2 efs Hstep) "Hcredit".
+  iDestruct ("H" with "Hσ") as "[_ H]".
+  iMod ("H" with "[] Hcredit") as "Hnext"; first eauto using fill_step.
+  iModIntro. iNext. iMod "Hnext" as "($ & H & $)". iModIntro. by iApply "IH".
 Qed.
 
 (** * Derived rules *)
@@ -301,39 +329,79 @@ Proof. iIntros "[? H]". iApply (wp_strong_mono with "H"); auto with iFrame. Qed.
 Lemma wp_frame_r s E e Φ R : WP e @ s; E {{ Φ }} ∗ R ⊢ WP e @ s; E {{ v, Φ v ∗ R }}.
 Proof. iIntros "[H ?]". iApply (wp_strong_mono with "H"); auto with iFrame. Qed.
 
-(** This lemma states that if we can prove that [n] laters are used in
-   the current physical step, then one can perform an n-steps fancy
-   update during that physical step. The resources needed to prove the
-   bound on [n] are not used up: they can be reused in the proof of
-   the WP or in the proof of the n-steps fancy update. In order to
-   describe this unusual resource flow, we use ordinary conjunction as
-   a premise. *)
-Lemma wp_step_fupdN n s E1 E2 e P Φ :
+(** Direct payment with ordinary later credits does not need the bank. *)
+Lemma wp_laterN n s E1 E2 e P Φ :
   TCEq (to_val e) None → E2 ⊆ E1 →
-  (∀ σ ns κs nt, state_interp σ ns κs nt
-       ={E1,∅}=∗ ⧖ n) ∧
-  ((|={E1∖E2,∅}=> |={∅}▷=>^(S $ tr_f n) |={∅,E1∖E2}=> P) ∗
+  £ n -∗
+  (|={E1,E2}=> ▷^n |={E2,E1}=> P) -∗
+  WP e @ s; E2 {{ v, P ={E1}=∗ Φ v }} -∗
+  WP e @ s; E1 {{ Φ }}.
+Proof.
+  iIntros (He HE) "Hcredit HP Hwp". iApply fupd_wp.
+  iMod "HP" as "HP". iMod (lc_fupd_add_laterN with "Hcredit HP") as "HP".
+  iModIntro.
+  iApply (wp_strong_mono with "Hwp"); [done|done|].
+  iIntros (v) "HΦ". iApply ("HΦ" with "HP").
+Qed.
+(** Receipt-dependent step updates cost one banked credit. Conjunction lets
+    the receipt-bound observation temporarily inspect the base state without
+    consuming the resources needed for the continuation. *)
+Lemma wp_step_fupdN_strong n s E1 E2 e P Φ :
+  TCEq (to_val e) None → E2 ⊆ E1 →
+  step_credit 1 -∗
+  (∀ σ ns κs nt, state_interp σ ns κs nt ={E1,∅}=∗ ⧖ n) ∧
+  ((|={E1,E2}=> |={∅}▷=>^(S (tr_f n)) |={E2,E1}=> P) ∗
     WP e @ s; E2 {{ v, P ={E1}=∗ Φ v }}) -∗
   WP e @ s; E1 {{ Φ }}.
 Proof.
-  iIntros (??) "H". iApply (wp_step_fupdN_strong with "[H]"); [done|].
+  iIntros (He HE) "Hcredit H". iApply (wp_state_update _ _ _ _ He).
+  iIntros (σ ns κs nt) "[Hstate Hbank]".
+  iMod (step_credit_redeem E1
+    (state_interp σ ns κs nt ∗ P ∗ WP e @ s; E2 {{ v, P ={E1}=∗ Φ v }})%I
+    with "Hcredit [H Hstate] Hbank") as "[Hbank (Hstate & HP & Hwp)]".
+  { iApply (physical_step_fupdN E2 n P). iSplit.
+    - iDestruct "H" as "[H _]". iApply ("H" with "Hstate").
+    - iDestruct "H" as "[_ [$ Hwp]]".
+      iApply physical_step_intro. iNext. iIntros "HP". iModIntro. iFrame. }
+  iModIntro. iFrame "Hstate Hbank".
+  iApply (wp_strong_mono with "Hwp"); [done|done|].
+  iIntros (v) "HΦ". iApply ("HΦ" with "HP").
+Qed.
+
+Lemma wp_step_fupdN n s E1 E2 e P Φ :
+  TCEq (to_val e) None → E2 ⊆ E1 →
+  step_credit 1 -∗
+  (∀ σ ns κs nt, state_interp σ ns κs nt ={E1,∅}=∗ ⧖ n) ∧
+  ((|={E1∖E2,∅}=> |={∅}▷=>^(S (tr_f n)) |={∅,E1∖E2}=> P) ∗
+    WP e @ s; E2 {{ v, P ={E1}=∗ Φ v }}) -∗
+  WP e @ s; E1 {{ Φ }}.
+Proof.
+  iIntros (He HE) "Hcredit H".
+  iApply (wp_step_fupdN_strong _ _ _ _ _ _ _ He HE with "Hcredit [H]").
   iApply (and_mono_r with "H"). apply sep_mono_l. iIntros "HP".
-  iMod fupd_mask_subseteq_emptyset_difference as "H"; [|iMod "HP"]; [set_solver|].
-  iMod "H" as "_". replace (E1 ∖ (E1 ∖ E2)) with E2; last first.
+  iMod (fupd_mask_subseteq_emptyset_difference E1 (E1 ∖ E2)) as "H"; [set_solver|].
+  iMod "HP". iMod "H" as "_".
+  replace (E1 ∖ (E1 ∖ E2)) with E2; last first.
   { set_unfold=>x. destruct (decide (x ∈ E2)); naive_solver. }
   iModIntro. iApply (step_fupdN_wand with "HP"). iIntros "H".
   iApply fupd_mask_frame; [|iMod "H"; iModIntro]; [set_solver|].
   by rewrite difference_empty_L (comm_L (∪)) -union_difference_L.
 Qed.
+
 Lemma wp_step_fupd s E1 E2 e P Φ :
   TCEq (to_val e) None → E2 ⊆ E1 →
   (|={E1}[E2]▷=> P) -∗ WP e @ s; E2 {{ v, P ={E1}=∗ Φ v }} -∗ WP e @ s; E1 {{ Φ }}.
 Proof.
-  iIntros (??) "HR H".
-  iApply (wp_step_fupdN_strong 0 _ E1 E2 with "[-]"); [done|..]. iSplit.
-  - iIntros (????) "_". iMod (fupd_mask_subseteq ∅) as "_"; [set_solver+|].
-    by iMod tr_persistent_zero as "$".
-  - iFrame "H". rewrite tr_f_zero. by iMod "HR" as "$".
+  iIntros (He HE) "HP Hwp". rewrite !wp_unfold /wp_pre He.
+  iIntros (σ ns κ κs nt) "Hstate". iSplit.
+  { iMod "HP" as "HP". iDestruct ("Hwp" with "Hstate") as "[$ _]". }
+  iIntros (e' σ' efs Hstep) "Hcredit".
+  iMod "HP" as "HP". iDestruct ("Hwp" with "Hstate") as "[_ Hwp]".
+  iMod ("Hwp" with "[//] Hcredit") as "Hnext".
+  iModIntro. iNext. iMod "Hnext" as "($ & Hwp & $)".
+  iMod "HP" as "HP". iModIntro.
+  iApply (wp_strong_mono with "Hwp"); [done|done|].
+  iIntros (v) "HΦ". iApply ("HΦ" with "HP").
 Qed.
 
 Lemma wp_frame_step_l s E1 E2 e Φ R :
@@ -378,68 +446,67 @@ Qed.
 
 Lemma wp_step_update_strong E1 E2 P e s Φ :
   TCEq (to_val e) None → E2 ⊆ E1 →
+  step_credit 1 -∗
   (|~{E1, E2}~> P) -∗
   WP e @ s; E2 {{ v, P -∗ Φ v }} -∗
   WP e @ s; E1 {{ v, Φ v}}.
 Proof.
-  rewrite !wp_unfold /wp_pre /=. iIntros (-> Hle) "Hlb Hwp".
-  iIntros (σ1 ns κ κs m) "Hσ".
-  iSplit.
-  { iMod fupd_mask_subseteq; [done|].
-    iDestruct ("Hwp" with "Hσ") as "[$ _]". }
-  iIntros (e2 σ2 efs Hstep).
-  iDestruct ("Hwp" with "[$] [//]") as "Hwp".
-  iMod "Hlb" as "_".
-  iApply (physical_step_wand with "[$]").
-  iIntros "($ & Hwp & $) HP".
-  iApply (wp_strong_mono with "Hwp"); [done|set_solver|].
+  iIntros (He Hle) "Hcredit Hupdate Hwp".
+  iApply (wp_physical_step s E1 e P Φ He with "Hcredit [Hupdate] [Hwp]").
+  { iApply (physical_step_step_upd with "Hupdate").
+    iApply physical_step_intro. by iNext; iIntros "$". }
+  iIntros "HP". iApply (wp_strong_mono with "Hwp"); [done|done|].
   iIntros (v) "HΦ". iApply ("HΦ" with "HP").
 Qed.
 Lemma wp_step_update s E1 E2 e P Φ :
   TCEq (to_val e) None → E2 ⊆ E1 →
+  step_credit 1 -∗
   (|~{E1∖E2}~> P) -∗
   WP e @ s; E2 {{ v, P -∗ Φ v }} -∗
   WP e @ s; E1 {{ Φ }}.
 Proof.
-  iIntros (Hval HE) "Hstep Hwp".
+  iIntros (Hval HE) "Hcredit Hstep Hwp".
   iDestruct (step_update_frame (E1∖E2) ∅ (E2) with "Hstep") as "Hstep";
     [set_solver|set_solver|].
   replace (E1 ∖ E2 ∪ E2) with E1; last first.
   { rewrite difference_union_L. set_solver. }
   replace (∅ ∪ E2) with E2 by set_solver.
-  by iApply (wp_step_update_strong with "[$] [$]").
+  by iApply (wp_step_update_strong with "Hcredit [$] [$]").
 Qed.
 Lemma wp_step_update_emp s E1 e P Φ :
   TCEq (to_val e) None →
+  step_credit 1 -∗
   (|~~> P) -∗
   WP e @ s; E1 {{ v, P -∗ Φ v }} -∗
   WP e @ s; E1 {{ Φ }}.
 Proof.
-  iIntros (Hval) "Hstep Hwp".
-  iApply (wp_step_update with "[Hstep] Hwp"); [done|].
+  iIntros (Hval) "Hcredit Hstep Hwp".
+  iApply (wp_step_update with "Hcredit [Hstep] Hwp"); [done|].
   by rewrite difference_diag_L.
 Qed.
 
 Lemma wp_trp_update s n E e Φ :
   TCEq (to_val e) None →
+  step_credit 1 -∗
   ⧖ n -∗
   WP e @ s; E {{ v, ⧖ (tr_f $ S $ n) -∗ Φ v }} -∗
   WP e @ s; E {{ Φ }}.
 Proof.
-  iIntros (He) "H⧖ Hwp".
-  iApply (wp_step_update_emp with "[H⧖] Hwp").
+  iIntros (He) "Hcredit H⧖ Hwp".
+  iApply (wp_step_update_emp with "Hcredit [H⧖] Hwp").
   iApply (step_update_lb_update with "[$]").
 Qed.
 
 Lemma wp_tr_use s n E e Φ :
   TCEq (to_val e) None →
+  step_credit 1 -∗
   ⧗ n -∗
   WP e @ s; E {{ v, ⧗ (tr_f n) -∗ £ (tr_f n) -∗ Φ v }} -∗
   WP e @ s; E {{ Φ }}.
 Proof.
-  iIntros (He) "H⧗ Hwp".
+  iIntros (He) "Hcredit H⧗ Hwp".
   iDestruct (step_update_tr_use with "[$]") as "H".
-  iApply (wp_step_update_emp with "H").
+  iApply (wp_step_update_emp with "Hcredit H").
   iApply (wp_mono with "[$]").
   iIntros (v) "H [A B]". iApply ("H" with "A B").
 Qed.
@@ -448,7 +515,7 @@ End wp.
 
 (** Proofmode class instances *)
 Section proofmode_classes.
-  Context `{!irisGS_gen hlc Λ Σ}.
+  Context `{!irisGS Λ Σ}.
   Implicit Types P Q : iProp Σ.
   Implicit Types Φ : val Λ → iProp Σ.
   Implicit Types v : val Λ.
@@ -533,28 +600,15 @@ Use [iMod (fupd_mask_subseteq E2)] to adjust the mask of your goal to [E2]")
     iIntros (v) ">[Hβ HΦ]". iApply "HΦ". by iApply "Hclose".
   Qed.
 
-  Global Instance elim_modal_step_upd_wp_1 E1 E2 P s e Φ :
+  Global Instance elim_modal_step_credit_update_wp E P s e Φ :
     TCEq (to_val e) None →
-    ElimModal (E2 ⊆ E1) false false (|~{E1, E2}~> P) emp (WP e @ s ; E1 {{ Φ }}) (WP e @ s ; E2 {{ v, P -∗ Φ v }})%I.
+    ElimModal True false false (step_credit_update E P) P
+      (WP e @ s; E {{ Φ }}) (WP e @ s; E {{ Φ }}).
   Proof.
-    rewrite /ElimModal /=. iIntros (??) "[HP HPQ]".
-    by iApply (wp_step_update_strong with "[$] (HPQ [//])").
-  Qed.
-  Global Instance elim_modal_step_upd_step_upd_2 E1 E2 P s e Φ :
-    TCEq (to_val e) None →
-    ElimModal (E1 ⊆ E2) false false (|~{E1}~> P) emp (WP e @ s ; E2 {{ Φ }}) (WP e @ s ; E2∖E1 {{ v, P -∗ Φ v }})%I.
-  Proof.
-    rewrite /ElimModal /=. iIntros (? Hle) "[Hupd HPQ]".
-    iDestruct (step_update_frame _ _ (E2 ∖ E1) with "Hupd") as "Hupd"; [set_solver..|].
-    rewrite <-union_difference_L, (left_id_L ∅ (∪)); try done.
-    iMod "Hupd" as "_". by iApply "HPQ".
-  Qed.
-  Global Instance elim_modal_step_upd_step_upd_3 E P s e Φ :
-    TCEq (to_val e) None →
-    ElimModal True false false (|~~> P) emp (WP e @ s ; E {{ Φ }}) (WP e @ s ; E {{ v, P -∗ Φ v }})%I.
-  Proof.
-    rewrite /ElimModal /=. iIntros (? Hle) "[Hupd HPQ]".
-    iMod "Hupd" as "_". rewrite difference_empty_L. by iApply "HPQ".
+    rewrite /ElimModal. iIntros (He _) "[Hupdate Hcont]".
+    iApply (wp_step_credit_update _ _ _ _ He). iIntros "Hbank".
+    iMod ("Hupdate" with "Hbank") as "[Hbank HP]".
+    iModIntro. iFrame "Hbank". iApply ("Hcont" with "HP").
   Qed.
 
 End proofmode_classes.

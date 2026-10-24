@@ -109,7 +109,7 @@ Section place.
       iApply loc_in_bounds_shorten_suf; last done. lia. }
     { iApply loc_in_bounds_shorten_suf; last done. lia. }
     iModIntro.
-    iApply physical_step_intro; iNext.
+    iApply credit_step_physical. iApply physical_step_intro; iNext.
     iIntros (v' Hv). iExists (l offset{ly}ₗ i'). iSplitR.
     { iPureIntro. by apply val_to_of_loc. }
     iPoseProof (big_sepL2_length with "Hb") as "%Hlen_eq".
@@ -215,7 +215,6 @@ Section place.
     iEval (rewrite /ty_own_val/= int_own_val_unfold) in "Hi".
     iDestruct "Hi" as "(_ & %Hi)".
     iDestruct "CTX" as "(LFT & LLCTX)".
-    iApply (wpe_logical_step with "Hcl"); [done.. | ].
     iPoseProof (loc_in_bounds_in_range_usize with "Hlb") as "%Haddr".
     iApply wp_ptr_offset.
     { intros. apply val_to_loc_decode.
@@ -227,8 +226,11 @@ Section place.
       rewrite Z2Nat.id; last done.
       iApply loc_in_bounds_shorten_suf; last done. lia. }
     { iApply loc_in_bounds_shorten_suf; last done. lia. }
-    iModIntro. iApply physical_step_intro; iNext.
-    iIntros (v' Hv) "Hcl". iExists (l offset{ly}ₗ i'). iSplitR.
+    iModIntro. iApply credit_step_physical.
+    iPoseProof (logical_step_mask_mono _ ⊤ with "Hcl") as "Hcl"; first done.
+    iApply (physical_step_step_upd with "Hcl").
+    iApply physical_step_intro; iNext.
+    iIntros "Hcl" (v' Hv). iExists (l offset{ly}ₗ i'). iSplitR.
     { iPureIntro. by apply val_to_of_loc. }
     iPoseProof (big_sepL2_length with "Hb") as "%Hlen_eq".
     rewrite length_interpret_iml in Hlen_eq.
@@ -333,7 +335,7 @@ Section place.
       rewrite Z2Nat.id; last done.
       iApply loc_in_bounds_shorten_suf; last done. lia. }
     { iApply loc_in_bounds_shorten_suf; last done. lia. }
-    iModIntro. iApply physical_step_intro; iNext.
+    iModIntro. iApply credit_step_physical. iApply physical_step_intro; iNext.
     iIntros (v' Hv). iExists (l offset{ly}ₗ i'). iSplitR.
     { iPureIntro. by apply val_to_of_loc. }
     iModIntro.

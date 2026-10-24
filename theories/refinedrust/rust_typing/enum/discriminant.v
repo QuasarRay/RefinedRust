@@ -300,9 +300,9 @@ Section discriminant.
     iMod "Hb" as "(%L2 & %R & %rt3 & %lt3 & %ri3 & HL & %Hst & Hl2 & HT)".
     iMod ("HT" $! ⊤ with "[//] CTX HE HL") as "(HL & %upd & #Hincl & Hcond & %Hst' & HT)".
     wpe_bind.
-    iApply (wpe_logical_step with "Hl2"); [solve_ndisj.. | ].
     wpe_bind.
-    iApply wp_skip. iApply physical_step_intro. iNext.
+    iApply wp_skip. iApply credit_step_physical.
+    iApply (physical_step_step_upd with "Hl2"). iApply physical_step_intro. iNext.
     iIntros "(Hl2 & HR)".
     iMod ("HT" $! ⊤ with "[//] [//] [//] [//] CTX HE HL Hl2") as "Hdisc".
     iDestruct "Hdisc" as (q v discr) "(%Hloc & %Hval & Hl2 & Hv & Hclose)".
@@ -314,10 +314,10 @@ Section discriminant.
     iEval (rewrite /GetEnumDiscriminantLocSt) in "Hl2 Hclose".
     iPoseProof (heap_pointsto_loc_in_bounds with "Hl2") as "#Hlb".
     iPoseProof (loc_in_bounds_in_range_usize with "Hlb") as "%Haddr".
-    iApply (wpe_logical_step with "Hclose"); [solve_ndisj.. | ].
     iApply (wp_deref with "Hl2") => //; try by eauto using val_to_of_loc.
     { intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v. }
-    iApply physical_step_intro. iNext. iIntros (st ov) "%Hdecode' Hl2 Hclose".
+    iApply credit_step_physical. iApply (physical_step_step_upd with "Hclose").
+    iApply physical_step_intro. iNext. iIntros "Hclose" (st ov) "%Hdecode' Hl2".
     iMod ("Hclose" with "Hl2") as (L3 rt4 ty4 r4) "(Hv' & HL & Hl2 & HT)".
 
     set (upd_inner := typed_place_finish_upd upd lt3 ri3).

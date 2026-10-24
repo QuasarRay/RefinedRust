@@ -294,7 +294,7 @@ Section comparison.
     subst.
     iApply wp_ptr_relop; [done | done | | done | ].
     { by apply val_of_bool_iff_val_of_Z. }
-    iApply physical_step_intro. iNext.
+    iApply credit_step_physical. iApply physical_step_intro. iNext.
     iApply ("HΦ" with "HL Hf") => //.
     rewrite /ty_own_val/= bool_own_val_unfold. by destruct b.
   Qed.
@@ -324,7 +324,7 @@ Section cast.
     iIntros "(-> & HT) (_ & Hv) %Φ #CTX #HE HL Hf HΦ".
     iPoseProof (alias_ptr_kind_own_val_to_decodes with "Hv") as "%Hdec".
     iApply wp_cast_loc; first done.
-    iApply physical_step_intro. iNext. iApply ("HΦ" with "HL Hf [] HT").
+    iApply credit_step_physical. iApply physical_step_intro. iNext. iApply ("HΦ" with "HL Hf [] HT").
     rewrite /ty_own_val/= alias_ptr_own_val_unfold. iR. done.
   Qed.
   Definition type_cast_ptr_ptr_inst := [instance @type_cast_ptr_ptr].
@@ -341,7 +341,7 @@ Section cast.
     iPoseProof (alias_ptr_kind_own_val_to_decodes with "Hv") as "%Hdec".
     iApply wp_cast_ptr_ref.
     { intros st. by apply decode_ptr_nonnull_ref. }
-    iApply physical_step_intro. iNext. iApply ("HΦ" with "HL Hf [] HT").
+    iApply credit_step_physical. iApply physical_step_intro. iNext. iApply ("HΦ" with "HL Hf [] HT").
     rewrite /ty_own_val/= alias_ptr_own_val_unfold. iR.
     iPureIntro. apply l2v_decodes_to_loc.
     by apply val_decodes_to_loc_in_usize in Hdec.
@@ -359,7 +359,7 @@ Section cast.
     opose proof* val_decodes_to_loc_in_usize as Husize; first done.
     odestruct (val_of_Z_is_Some _ _ _) as (? & ?); first apply Husize.
     iApply wp_cast_ptr_int; [done.. | ].
-    iApply physical_step_intro. iNext. iApply ("HΦ" with "HL Hf [] HT") => //.
+    iApply credit_step_physical. iApply physical_step_intro. iNext. iApply ("HΦ" with "HL Hf [] HT") => //.
     rewrite /ty_own_val/= int_own_val_unfold.
     iR.
     iPureIntro. by apply: val_to_of_Z.
@@ -383,7 +383,7 @@ Section cast.
       { unfold min_alloc_start. lia. }
       { move: Hmax. rewrite MaxInt_eq. done. }
       { done. }
-      iApply physical_step_intro. iNext. iIntros (v1) "%Hv Hl".
+      iApply credit_step_physical. iApply physical_step_intro. iNext. iIntros (v1) "%Hv Hl".
 
       set (l2 := Loc ProvNone l).
       iAssert (l2 ◁ₗ[f.1, Owned] .@ ◁ unit_t)%I with "[Hl]" as "Hl2".
@@ -405,7 +405,7 @@ Section cast.
     - assert (l = 0) as -> by lia.
       iApply wp_cast_int_null_ptr.
       { done. }
-      iApply physical_step_intro. iNext.
+      iApply credit_step_physical. iApply physical_step_intro. iNext.
       assert (l2v (Loc ProvNone 0) = NULL) as HNULL.
       { apply l2v_correct, val_of_loc_Some. simpl.
         rewrite int_elem_of_it_iff. done. }

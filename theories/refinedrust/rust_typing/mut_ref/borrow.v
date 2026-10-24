@@ -25,7 +25,7 @@ Section rules.
     unfold Ref.
     wpe_bind.
     iApply wpe_fupd.
-    iApply (wpe_logical_step with "[HT Hat]"); [solve_ndisj.. | | ].
+    iAssert (logical_step ⊤ _)%I with "[HT Hat]" as "HT".
     { iApply (logical_step_compose with "HT").
       iApply (logical_step_intro_tr with "Hat").
       iIntros "Ha Hcred !> H3".
@@ -34,12 +34,14 @@ Section rules.
     (* also need to generate a new cumulative receipt for the created reference *)
     iMod (tr_zero) as "Hc".
     iApply wp_skip.
+    iApply credit_step_physical. iApply (physical_step_step_upd with "HT").
     iApply (physical_step_intro_tr with "Hc").
     iIntros "!> Hc Hcred1 !> HT" => /=.
     iMod ("HT") as "(%L' & %rt' & %ty & %r & %γ & %ly & Hobs & Hbor & %Hst & %Hly & #Hlb & #Hsc & HL & Hf & HT)".
     iModIntro.
     (* generate the credits for the new reference *)
     iApply wp_skip.
+    iApply credit_step_physical.
     iApply (physical_step_intro_tr with "Hc").
     simpl. unfold num_laters_per_step. simpl.
     iNext. iIntros "Hat Hcred2".
