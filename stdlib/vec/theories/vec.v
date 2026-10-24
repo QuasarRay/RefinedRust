@@ -290,10 +290,11 @@ Definition raw_vec_capacity_valid `{!LayoutAlg} (st : syn_type) (stored cap : na
 
 (* As with unconditional allocator permissions, shared access exposes no
    allocation token; ghost-drop may forget it without deallocating memory. *)
-Global Instance raw_vec_shareable_optional `{!refinedrustGS Σ} π κ κs
+Global Instance raw_vec_shareable_optional `{!refinedrustGS Σ} {rt : RT} π κ κs
+    (outer : rt) (assumptions : Prop)
     (P : Prop) `{!Decision P} (Q : iProp Σ) :
-  Shareable π κ κs (if decide P then True else Q)%I :=
-  shareable_discard _ _ _ _.
+  Shareable π κ κs outer assumptions (if decide P then True else Q)%I :=
+  shareable_discard outer assumptions _ _ _ _.
 
 Global Instance raw_vec_ghost_droppable_optional `{!refinedrustGS Σ}
     (P : Prop) `{!Decision P} (Q : iProp Σ) :

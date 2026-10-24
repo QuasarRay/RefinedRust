@@ -16,7 +16,8 @@ Proof.
   rewrite !ltype_own_shr_ref_unfold /shr_ltype_own.
   iIntros "(%ly & Hlayout & Halign & Hbounds & %ri & Hrfn & Hb)".
   iExists ly. iFrame.
-  iMod "Hb" as "(%li & Hli & Hshared)". iModIntro. iExists li. iFrame.
+  iMod "Hb" as "(%Hxr & %li & Hli & Hshared)".
+  iModIntro. iSplitR; first done. iExists li. iFrame.
   rewrite ltype_own_shadowed_unfold /shadowed_ltype_own. iDestruct "Hshared" as "(_ & $)".
 Qed.
 
