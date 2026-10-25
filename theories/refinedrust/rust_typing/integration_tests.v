@@ -6,6 +6,16 @@ Module test.
 Section paid_stratification_test.
   Context `{!typeGS Σ}.
 
+  (** Typeclass-opaque expression notation must still admit manual updates. *)
+  Lemma updateable_nonvalue_notation E L f o ot e T m κ ty :
+    (Updateable (typed_val_expr E L f (Copy o ot e) T) *
+    (Updateable (typed_val_expr E L f (Move o ot e) T) *
+     Updateable (typed_val_expr E L f (Ref m κ ty e) T)))%type.
+  Proof.
+    split; first typeclasses eauto.
+    split; typeclasses eauto.
+  Qed.
+
   Lemma updateable_stratify_blocked_twice E L f (l : loc) {rt} (ty : type rt)
       (r : place_rfn rt) κ n m :
     credit_store n m 2 -∗ l ◁ₗ[f.1, Owned] r @ BlockedLtype ty κ -∗

@@ -6,6 +6,12 @@ From refinedrust Require Import options.
 
 (** * Proofmode support for manual proofs *)
 
+(* Expression notation such as Copy, Move and Ref is typeclass-opaque.
+   Check the nonvalue condition by conversion rather than requiring typeclass
+   unification to unfold that notation. This still rejects value expressions. *)
+Global Hint Extern 10 (TCEq (to_val (to_rtexpr _ _)) None) =>
+  reflexivity : typeclass_instances.
+
 Section updateable.
   Context `{!typeGS Σ}.
 
