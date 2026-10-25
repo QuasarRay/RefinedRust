@@ -29,7 +29,7 @@ Proof.
   { rewrite Halign_log2. f_equiv.
     apply val_to_Z_unsigned_nonneg in Halign_log2; last done. lia. }
   { lia. }
-  iApply physical_step_intro; iNext.
+  iApply credit_step_physical. iApply physical_step_intro; iNext.
   iIntros (ld vd) "Hl Hfd %Hly %Hv".
   iPoseProof (heap_pointsto_loc_in_bounds with "Hl") as "#Hlb".
   iApply ("Hcont" $! _ _  _ (alias_ptr_t) ld with "HL Hf []").

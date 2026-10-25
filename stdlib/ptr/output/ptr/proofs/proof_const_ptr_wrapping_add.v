@@ -18,17 +18,19 @@ Proof.
   iIntros "Hv1 Hv2" (Φ) "#CTX #HE HL Hf Hcont".
   rewrite {1}/ty_own_val /= int_own_val_unfold. iDestruct "Hv1" as "(_ & %Hv1)".
   rewrite {1}/ty_own_val /= alias_ptr_own_val_unfold. iDestruct "Hv2" as "(_ & %)".
-  iRename select (credit_store _ _) into "Hstore".
+  iRename select (credit_store _ _ _) into "Hstore".
   iPoseProof (credit_store_borrow_receipt with "Hstore") as "(Hat & Hatcl)".
   iDestruct "CTX" as "(LFT & LLCTX)".
   iApply wp_ptr_wrapping_offset.
   { done. }
   { done. }
+  iApply credit_step_intro_physical. iIntros "Hsaved".
   iApply (physical_step_intro_tr with "Hat"). iIntros "!> [Hat Hat'] Hcred !>".
   iPoseProof ("Hatcl" with "[Hat']") as "Hstore".
   { iApply tr_weaken; last done. lia. }
   iPoseProof (credit_store_donate with "Hstore Hcred") as "Hstore".
   iPoseProof (credit_store_donate_tr with "Hstore Hat") as "Hstore".
+  iPoseProof (credit_store_donate_step with "Hstore Hsaved") as "Hstore".
   assert ((l wrapping_offset{T_st_ly}ₗ count).(loc_a) ∈ USize).
   { rewrite /wrapping_offset_loc /wrapping_shift_loc/=.
     by apply wrap_unsigned_in_range. }

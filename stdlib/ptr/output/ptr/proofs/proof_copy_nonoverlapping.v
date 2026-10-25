@@ -17,6 +17,7 @@ Proof.
 
   (* manual proof from here to formulate the loop invariant *)
   iApply typed_annot_stmt_skip.
+  liRStepUntil (typed_stmt).
   iSelect (_ ◁ₗ[_, _] # size @ _)%I (fun H => iRename H into "Hlen").
   iSelect (_ ◁ₗ[_, _] #0%Z @ _)%I (fun H => iRename H into "Hcount").
   iSelect (_ ◁ₗ[_, _] #src @ (◁ alias_ptr_t))%I (fun H => iRename H into "Hsrc").
@@ -40,7 +41,7 @@ Proof.
 
   set (loop_inv := (λ (_ : ()),
     ∃ (i : nat),
-    (credit_store 0 0 ∗
+    (credit_store 0 0 0 ∗
     arg_size ◁ₗ[π, Owned] #size @ (◁ int USize) ∗
     local_count ◁ₗ[π, Owned] #(Z.of_nat i) @ (◁ int USize) ∗
     arg_src ◁ₗ[π, Owned] #src @ (◁ alias_ptr_t) ∗

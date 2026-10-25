@@ -23,7 +23,7 @@ Proof.
   rewrite {1}/ty_own_val /= alias_ptr_own_val_unfold. iDestruct "Hv2" as "(_ & %)".
   iDestruct (loc_in_bounds_ptr_in_range with "Hbounds") as %[Hran1 Hran2].
   rewrite /size_of_st. simplify_layout_goal.
-  iRename select (credit_store _ _) into "Hstore".
+  iRename select (credit_store _ _ _) into "Hstore".
   iPoseProof (credit_store_borrow_receipt with "Hstore") as "(Hat & Hatcl)".
   iDestruct "CTX" as "(LFT & LLCTX)".
   iApply wp_ptr_neg_offset.
@@ -47,11 +47,13 @@ Proof.
     { clear Hran2. lia. }
     { clear Hran1. lia. }
   }
+  iApply credit_step_intro_physical. iIntros "Hsaved".
   iApply (physical_step_intro_tr with "Hat"). iNext. iIntros "[Hat Hat'] Hcred".
   iPoseProof ("Hatcl" with "[Hat']") as "Hstore".
   { iApply tr_weaken; last done. lia. }
   iPoseProof (credit_store_donate with "Hstore Hcred") as "Hstore".
   iPoseProof (credit_store_donate_tr with "Hstore Hat") as "Hstore".
+  iPoseProof (credit_store_donate_step with "Hstore Hsaved") as "Hstore".
   iModIntro.
   iAssert (loc_in_bounds (l offsetst{st_of T_ty MetaNone}ₗ -count) 0 0) as "#Hlb'".
   { iApply loc_in_bounds_offset; last done. all: sidecond_hammer. }

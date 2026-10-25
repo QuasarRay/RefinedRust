@@ -29,7 +29,7 @@ Proof.
   iApply wp_copy_alloc_id; [done | | | ].
   { done. }
   { solve_goal. }
-  iApply physical_step_intro; iNext.
+  iApply credit_step_physical. iApply physical_step_intro; iNext.
   set (l2 := Loc x.(loc_p) addr).
   iAssert (l2 ◁ᵥ{π, MetaNone} l2 @ alias_ptr_t)%I as "?".
   { rewrite /ty_own_val/= alias_ptr_own_val_unfold. iR.
