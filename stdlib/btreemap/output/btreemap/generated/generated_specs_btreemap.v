@@ -120,7 +120,7 @@ Definition trait_incl_of_BTreeMap_KVA_insert (K_rt: RT) (V_rt: RT) (A_rt: RT) (K
 Definition type_of_BTreeMap_KVA_insert (K_rt: RT) (V_rt: RT) (A_rt: RT) (K_st: syn_type) (V_st: syn_type) (A_st: syn_type) `{!(EqDecision (RT_xt (K_rt)))} `{!(Countable (RT_xt (K_rt)))} (DropGlue_K_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (K_rt) )) (DropGlue_V_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (V_rt) )) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (Allocator_A_spec_attrs: (Allocator_spec_attrs (RRGS:=RRGS) (A_rt) )) (Clone_A_spec_attrs: (Clone_spec_attrs (RRGS:=RRGS) (A_rt) )) (PartialEq_K_K_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (K_rt) (K_rt) )) (Eq_K_spec_attrs: (Eq_spec_attrs (RRGS:=RRGS) (K_rt) PartialEq_K_K_spec_attrs)) (PartialOrd_K_K_spec_attrs: (PartialOrd_spec_attrs (RRGS:=RRGS) (K_rt) (K_rt) PartialEq_K_K_spec_attrs)) (Ord_K_spec_attrs: (Ord_spec_attrs (RRGS:=RRGS) (K_rt) PartialEq_K_K_spec_attrs Eq_K_spec_attrs PartialOrd_K_K_spec_attrs)) :=
   fn(∀ ( *[ulft_1]) : 1 | ( *[K_ty; V_ty; A_ty]) : ([(K_rt, K_st); (V_rt, V_st); (A_rt, A_st)] : list (RT * syn_type)%type) | 
       (* params....... *) (m, k, v, γ) : ((_ * _ * _ * _)),
-      (* elctx........ *) (λ ϝ, [(ϝ, ulft_1)]);
+      (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[K_ty; V_ty; A_ty]) ϝ ++ (λ ϝ, [(ϝ, ulft_1)]) ϝ);
       (* args......... *) (m, γ) :@: (mut_ref ulft_1 (BTreeMap_inv_t ((K_rt)) ((V_rt)) ((A_rt)) Allocator_A_spec_attrs Clone_A_spec_attrs -[] -[K_ty; V_ty; A_ty])), k :@: K_ty, v :@: V_ty;
       (* precondition. *) (λ π : thread_id, True) |
       (* trait reqs... *) (λ π : thread_id, True)) →

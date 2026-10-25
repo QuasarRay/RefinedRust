@@ -1,5 +1,4 @@
-STDLIB = sized index mem clone closures result option num ptr arithops controlflow ptr_advanced alloc rr_internal boxed cmp range iterator vec rwlock cell spin stdlib
-#btreemap
+STDLIB = sized index mem clone closures result option num ptr arithops controlflow ptr_advanced alloc rr_internal boxed cmp range iterator vec rwlock cell spin stdlib btreemap
 
 RUST_TARGET ?= $(shell rustc -vV | sed -n 's|host: ||p')
 RUST_PATH ?=	target/$(RUST_TARGET)/release

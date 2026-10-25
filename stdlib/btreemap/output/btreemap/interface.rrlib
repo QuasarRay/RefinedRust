@@ -41,6 +41,7 @@
     "rrstd.closures.theories",
     "rrstd.cmp.cmp.generated",
     "rrstd.cmp.theories",
+    "rrstd.controlflow.controlflow.generated",
     "rrstd.mem.mem.generated",
     "rrstd.mem.theories",
     "rrstd.num.num.generated",
