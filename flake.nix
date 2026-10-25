@@ -202,6 +202,7 @@
             stdlib-ptr
             stdlib-option
             stdlib-clone
+            stdlib-controlflow
           ];
         }
         {
