@@ -139,7 +139,7 @@ Section function.
 
   Definition fn_init_context (fn : function) (fps : fn_params) (π : thread_id) (f : frame_id) (lsa : list loc) (sta : list syn_type) : iProp Σ :=
     (* initial credits from the beta step *)
-    credit_store 0 0 ∗
+    credit_store 0 0 0 ∗
     (* initial mask *)
     na_own π ⊤ ∗
     (* current frame *)
@@ -293,11 +293,11 @@ Section call.
 
       (* postconditions *)
       (
-       introduce_with_hooks E L2 (£ (S num_cred) ∗ tr 2 ∗ na_own π mask ∗ R3 ∗
+       introduce_with_hooks E L2 (£ (S num_cred) ∗ tr 2 ∗ step_credit 2 ∗ na_own π mask ∗ R3 ∗
          fn_unwind_prop fps π) Tunwind ∧
        (∀ v x', (* v = retval, x' = post existential *)
         (* also donate some credits we are generating here *)
-        introduce_with_hooks E L2 (£ (S num_cred) ∗ tr 2 ∗ na_own π mask ∗ R3 ∗ (fps.(fp_fr) x').(fr_R) π ∗ v ◁ᵥ{π, MetaNone} (fps.(fp_fr) x').(fr_ref) @ (fps.(fp_fr) x').(fr_ty)) (λ L3,
+        introduce_with_hooks E L2 (£ (S num_cred) ∗ tr 2 ∗ step_credit 2 ∗ na_own π mask ∗ R3 ∗ (fps.(fp_fr) x').(fr_R) π ∗ v ◁ᵥ{π, MetaNone} (fps.(fp_fr) x').(fr_ref) @ (fps.(fp_fr) x').(fr_ty)) (λ L3,
         Tnormal L3 v _ (fps.(fp_fr) x').(fr_ty) (fps.(fp_fr) x').(fr_ref)))
        ))))))
     ⊢ typed_call E L f eκs etys v (v ◁ᵥ{π, m} l @ function_ptr sta (eqp, fp)) vl tys destination normal unwind Tnormal Tunwind.
@@ -356,7 +356,7 @@ Section call.
     (* eliminate the logical step *)
     iModIntro. iModIntro.
     iApply (wps_call with "He Hf") => //.
-    iApply credit_step_physical.
+    iApply credit_step_intro_physical. iIntros "Hsaved_call".
     iApply (physical_step_step_upd with "Hstep").
     iMod (tr_zero) as "Hc".
     iApply (physical_step_intro_tr with "Hc").
@@ -381,7 +381,7 @@ Section call.
 
     set (RET_PROP v := (∃ κs' locals,
         llctx_elt_interp (ϝ ⊑ₗ{ 0} κs') ∗
-        credit_store 0 0 ∗
+        credit_store 0 0 0 ∗
         current_frame f.1 (S f.2) ∗
         allocated_locals (f.1, S f.2) locals ∗
         na_own f.1 ⊤ ∗
@@ -390,7 +390,7 @@ Section call.
         fn_ret_prop f.1 (fp_fr fps) v)%I).
     set (UNWIND_PROP := (∃ κs' locals,
         llctx_elt_interp (ϝ ⊑ₗ{ 0} κs') ∗
-        credit_store 0 0 ∗
+        credit_store 0 0 0 ∗
         current_frame f.1 (S f.2) ∗
         allocated_locals (f.1, S f.2) locals ∗
         na_own f.1 ⊤ ∗
@@ -399,9 +399,10 @@ Section call.
         fn_unwind_prop fps f.1)%I).
     unfold fn_init_context.
     (* prove the initial context *)
-    iSpecialize ("Hm" with "[Hcred Hc $Hna $Halloc $Hsc $HP Ha Hvl $Hx]").
+    iMod step_credit_zero as "Hstep0".
+    iSpecialize ("Hm" with "[Hcred Hc Hstep0 $Hna $Halloc $Hsc $HP Ha Hvl $Hx]").
     { (* we use the certificate + other credit to initialize the new functions credit store *)
-      iSplitL "Hcred Hc". { rewrite credit_store_eq /credit_store_def.
+      iSplitL "Hcred Hc Hstep0". { rewrite credit_store_eq /credit_store_def. iFrame "Hstep0".
         iSplitL "Hcred".
         - iApply lc_weaken; last done. unfold num_laters_per_step; lia.
         - iApply tr_weaken; last done. unfold num_laters_per_step; lia. }
@@ -460,7 +461,7 @@ Section call.
       destruct elt; try done. simpl in Helt. destruct Helt as [<- <-].
       unfold llctx_find_lft_key_interp in Hoc. subst.
       iDestruct "HL" as "(_ & Hϝ & _)".
-      iDestruct "HT" as ([n' m']) "(Hstore & HT)"; simpl.
+      iDestruct "HT" as ([[n' m'] k']) "(Hstore & HT)"; simpl.
       iDestruct "HT" as (mask) "(Hna & -> & _)"; simpl.
       subst RET_PROP; simpl.
       iExists _. iFrame.
@@ -481,7 +482,7 @@ Section call.
         destruct elt; try done. simpl in Helt. destruct Helt as [<- <-].
         unfold llctx_find_lft_key_interp in Hoc. subst.
         iDestruct "HL" as "(_ & Hϝ & _)".
-        iDestruct "HT" as ([n' m']) "(Hstore & HT)"; simpl.
+        iDestruct "HT" as ([[n' m'] k']) "(Hstore & HT)"; simpl.
         iDestruct "HT" as (mask) "(Hna & -> & _)"; simpl.
          subst UNWIND_PROP; simpl.
          iModIntro. iExists κs', locals. iFrame.
@@ -494,7 +495,7 @@ Section call.
         iFrame.
         simpl.
         iPoseProof (credit_store_borrow with "Hstore") as "(Hcred1 & Hat & _)".
-        iApply credit_step_physical. iApply (physical_step_intro_tr with "Hat").
+        iApply credit_step_intro_physical. iIntros "Hsaved_exit". iApply (physical_step_intro_tr with "Hat").
         iNext. iIntros "Hat Hcred".
 
         iPoseProof ("Hkill" with "Hϝ") as "(Htok & Hkill)".
@@ -502,8 +503,10 @@ Section call.
         iPoseProof ("HL_cl" with "HL") as "HL".
          (*we currently don't actually kill the lifetime, as we don't conceptually need that. *)
         iDestruct ("HPr") as (?) "(Hty & HR2 & _)".
-        iMod ("Hr" with "[] [$] HE HL [Hat Hcred Hna HR2 Hty HR]") as "(%L3 & HL & Hr)"; first done.
-        { iFrame. simpl. unfold num_laters_per_step.
+        iMod ("Hr" with "[] [$] HE HL [Hat Hcred Hna HR2 Hty HR Hsaved_call Hsaved_exit]") as "(%L3 & HL & Hr)"; first done.
+        { iAssert (step_credit 2) with "[Hsaved_call Hsaved_exit]" as "Hsaved".
+          { iApply (step_credit_split 1 1). iFrame. }
+          iFrame. simpl. unfold num_laters_per_step.
           iSplitL "Hcred".
           - iApply lc_weaken; last done. unfold num_cred. lia.
           - iApply tr_weaken; last done. lia. }
@@ -513,13 +516,15 @@ Section call.
         iDestruct 1 as (κs' locals) "(Hϝ & Hstore & Hf & Hlocals & Hna & Hls & Hpanic)".
         iFrame.
         iPoseProof (credit_store_borrow with "Hstore") as "(Hcred1 & Hat & _)".
-        iApply credit_step_physical. iApply (physical_step_intro_tr with "Hat").
+        iApply credit_step_intro_physical. iIntros "Hsaved_exit". iApply (physical_step_intro_tr with "Hat").
         iNext. iIntros "Hat Hcred".
         iPoseProof ("Hkill" with "Hϝ") as "(Htok & Hkill)".
         iMod ("HL_cl'" with "Htok HL") as "HL".
         iPoseProof ("HL_cl" with "HL") as "HL".
-        iMod ("Hr" with "[] [$] HE HL [Hat Hcred Hna HR Hpanic]") as "(%L3 & HL & Hr)"; first done.
-        { iFrame. simpl. unfold num_laters_per_step.
+        iMod ("Hr" with "[] [$] HE HL [Hat Hcred Hna HR Hpanic Hsaved_call Hsaved_exit]") as "(%L3 & HL & Hr)"; first done.
+        { iAssert (step_credit 2) with "[Hsaved_call Hsaved_exit]" as "Hsaved".
+          { iApply (step_credit_split 1 1). iFrame. }
+          iFrame. simpl. unfold num_laters_per_step.
           iSplitL "Hcred".
           - iApply lc_weaken; last done. unfold num_cred. lia.
           - iFrame. iApply tr_weaken; last done. lia. }

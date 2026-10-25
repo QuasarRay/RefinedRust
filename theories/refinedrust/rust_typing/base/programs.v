@@ -143,27 +143,51 @@ Section credits.
     iApply (physical_step_wand with "HP"). iApply IH.
   Qed.
 
+  (** Retain one credit per paid raw step, including annotation iterations. *)
+  Lemma credit_stepN_physical_saved E n k P :
+    step_credit k -∗ (|={E}⧗=>^n P) -∗
+    |={E}£=>^n (step_credit (n + k) ∗ P).
+  Proof.
+    iIntros "Hsaved Hsteps". iInduction n as [|n] "IH" forall (k); simpl.
+    { iFrame. }
+    iApply credit_step_intro_physical. iIntros "Hstep".
+    iApply (physical_step_wand with "Hsteps"). iIntros "Hsteps".
+    replace (S (n + k)) with (n + (1 + k)) by lia.
+    iApply ("IH" with "[Hstep Hsaved] Hsteps").
+    rewrite step_credit_split. iFrame.
+  Qed.
+
+  Lemma credit_stepN_wand E n P Q :
+    (|={E}£=>^n P) -∗ (P -∗ Q) -∗ |={E}£=>^n Q.
+  Proof.
+    induction n as [|n IH]; simpl.
+    { iIntros "HP Hwand". by iApply "Hwand". }
+    iIntros "Hsteps Hwand". iApply (credit_step_wand with "Hsteps").
+    iIntros "Hsteps". by iApply (IH with "Hsteps Hwand").
+  Qed.
+
   (* We require at least one credit here so that the majority of clients does not need any sideconditions.
     We require at least one tr here, as place accesses will use the receipt every step gains for boosting, so we need to have at least one here to regenerate a potential credit we use.
    *)
-  Definition credit_store_def (n m : nat) : iProp Σ :=
-    £(S n) ∗ tr (S m).
+  Definition credit_store_def (n m k : nat) : iProp Σ :=
+    £(S n) ∗ tr (S m) ∗ step_credit k.
   Definition credit_store_aux : seal (@credit_store_def). Proof. by eexists. Qed.
   Definition credit_store := unseal credit_store_aux.
   Definition credit_store_eq : @credit_store = @credit_store_def := seal_eq credit_store_aux.
 
-  Lemma credit_store_acc (n m : nat) :
-    credit_store n m -∗
-    £ (S n) ∗ tr (S m) ∗ (∀ n' m', £ (S n') -∗ tr (S m') -∗ credit_store n' m').
+  (** Ordinary credit/receipt access retains all banked credits privately. *)
+  Lemma credit_store_acc (n m k : nat) :
+    credit_store n m k -∗
+    £ (S n) ∗ tr (S m) ∗ (∀ n' m', £ (S n') -∗ tr (S m') -∗ credit_store n' m' k).
   Proof.
     rewrite credit_store_eq /credit_store_def.
-    iIntros "($ & $)". eauto with iFrame.
+    iIntros "(Hcred & Hat & Hstep)". iFrame "Hcred Hat". eauto with iFrame.
   Qed.
 
   (* allows direct access to one credit, and after regenerating some (usually m' = 0 or m' = 1), we get back *)
-  Lemma credit_store_get_reg (n m : nat) :
-    credit_store n m -∗
-    £ 1 ∗ tr (S m) ∗ (∀ m', £ (1 + m' + m) -∗ tr (1 + m' + m) -∗ credit_store (m' + m + n) (m' + m)).
+  Lemma credit_store_get_reg (n m k : nat) :
+    credit_store n m k -∗
+    £ 1 ∗ tr (S m) ∗ (∀ m', £ (1 + m' + m) -∗ tr (1 + m' + m) -∗ credit_store (m' + m + n) (m' + m) k).
   Proof.
     iIntros "Hst". iPoseProof (credit_store_acc with "Hst") as "(Hcred & $ & Hcl)".
     rewrite lc_succ. iDestruct "Hcred" as "($ & Hcred)".
@@ -173,26 +197,26 @@ Section credits.
   Qed.
 
   (* the two common instantiations of this *)
-  Lemma credit_store_get_reg0 (n m : nat) :
-    credit_store n m -∗
-    £ 1 ∗ tr (S m) ∗ (£ (1 + m) -∗ tr (S m) -∗ credit_store (m + n) (m)).
+  Lemma credit_store_get_reg0 (n m k : nat) :
+    credit_store n m k -∗
+    £ 1 ∗ tr (S m) ∗ (£ (1 + m) -∗ tr (S m) -∗ credit_store (m + n) m k).
   Proof.
     iIntros "Hst".
     iPoseProof (credit_store_get_reg with "Hst") as "($ & $ & Hcl)".
     iApply "Hcl".
   Qed.
-  Lemma credit_store_get_reg1 (n m : nat) :
-    credit_store n m -∗
-    £ 1 ∗ tr (S m) ∗ (£ (S (S m)) -∗ tr (S (S m)) -∗ credit_store (1 + m + n) (1 + m)).
+  Lemma credit_store_get_reg1 (n m k : nat) :
+    credit_store n m k -∗
+    £ 1 ∗ tr (S m) ∗ (£ (S (S m)) -∗ tr (S (S m)) -∗ credit_store (1 + m + n) (1 + m) k).
   Proof.
     iIntros "Hst".
     iPoseProof (credit_store_get_reg with "Hst") as "($ & $ & Hcl)".
     iApply ("Hcl" $! 1%nat).
   Qed.
 
-  Lemma credit_store_borrow_receipt (n m : nat) :
-    credit_store n m -∗
-    tr 1 ∗ (tr 1 -∗ credit_store n m).
+  Lemma credit_store_borrow_receipt (n m k : nat) :
+    credit_store n m k -∗
+    tr 1 ∗ (tr 1 -∗ credit_store n m k).
   Proof.
     iIntros "Hst".
     iPoseProof (credit_store_acc with "Hst") as "(Hcred & Hat & Hcl)".
@@ -202,9 +226,9 @@ Section credits.
     iApply tr_succ. iFrame.
   Qed.
 
-  Lemma credit_store_borrow (n m : nat) :
-    credit_store n m -∗
-    £ 1 ∗ tr 1 ∗ (£ 1 -∗ tr 1 -∗ credit_store n m).
+  Lemma credit_store_borrow (n m k : nat) :
+    credit_store n m k -∗
+    £ 1 ∗ tr 1 ∗ (£ 1 -∗ tr 1 -∗ credit_store n m k).
   Proof.
     iIntros "Hst".
     iPoseProof (credit_store_acc with "Hst") as "(Hcred & Hat & Hcl)".
@@ -217,28 +241,28 @@ Section credits.
   Qed.
 
   (* allows direct access to credits, but without regenerating and instead requires to prove a sidecondition *)
-  Lemma credit_store_scrounge {n m : nat} (k : nat) :
+  Lemma credit_store_scrounge {n m p : nat} (k : nat) :
     n ≥ k →
-    credit_store n m -∗
-    £ k ∗ credit_store (n - k) m.
+    credit_store n m p -∗
+    £ k ∗ credit_store (n - k) m p.
   Proof.
     iIntros (?) "Hst". iPoseProof (credit_store_acc with "Hst") as "(Hcred & Hc & Hcl)".
     replace (S n)%nat with (S (n - k) + k)%nat by lia.
     rewrite lc_split. iDestruct "Hcred" as "(Hcred & $)".
     iApply ("Hcl" with "Hcred Hc").
   Qed.
-  Lemma credit_store_scrounge_tr {n m : nat} (k : nat) :
+  Lemma credit_store_scrounge_tr {n m p : nat} (k : nat) :
     m ≥ k →
-    credit_store n m -∗
-    tr k ∗ credit_store n (m - k).
+    credit_store n m p -∗
+    tr k ∗ credit_store n (m - k) p.
   Proof.
     iIntros (?) "Hst". iPoseProof (credit_store_acc with "Hst") as "(Hcred & Hc & Hcl)".
     replace (S m)%nat with (S (m - k) + k)%nat by lia.
     rewrite tr_split. iDestruct "Hc" as "(Hc & $)".
     iApply ("Hcl" with "Hcred Hc").
   Qed.
-  Lemma credit_store_donate n m k :
-    credit_store n m -∗ £ k -∗ credit_store (k + n) m.
+  Lemma credit_store_donate n m p k :
+    credit_store n m p -∗ £ k -∗ credit_store (k + n) m p.
   Proof.
     iIntros "Hst Hcred0".
     iPoseProof (credit_store_acc with "Hst") as "(Hcred & Hat & Hcl)".
@@ -246,8 +270,8 @@ Section credits.
     iApply lc_succ. iDestruct "Hcred" as "($ & ?)".
     rewrite lc_split. iFrame.
   Qed.
-  Lemma credit_store_donate_tr n m k :
-    credit_store n m -∗ tr k -∗ credit_store n (k + m).
+  Lemma credit_store_donate_tr n m p k :
+    credit_store n m p -∗ tr k -∗ credit_store n (k + m) p.
   Proof.
     iIntros "Hst Hat0".
     iPoseProof (credit_store_acc with "Hst") as "(Hcred & Hat & Hcl)".
@@ -255,13 +279,48 @@ Section credits.
     rewrite -Nat.add_succ_r. rewrite tr_split. iFrame.
   Qed.
 
-  Lemma credit_store_mono (n m n' m' : nat) :
-    n' ≤ n → m' ≤ m → credit_store n m -∗ credit_store n' m'.
+  Lemma credit_store_init n m :
+    £ (S n) -∗ tr (S m) ==∗ credit_store n m 0.
+  Proof.
+    rewrite credit_store_eq /credit_store_def. iIntros "Hcred Hat".
+    iMod step_credit_zero as "Hstep". iModIntro. iFrame.
+  Qed.
+
+  Lemma credit_store_acc_step n m k :
+    credit_store n m k -∗ step_credit k ∗
+      (∀ k', step_credit k' -∗ credit_store n m k').
+  Proof.
+    rewrite credit_store_eq /credit_store_def.
+    iIntros "(Hcred & Hat & $)". iIntros (k') "Hstep". iFrame.
+  Qed.
+
+  Lemma credit_store_donate_step n m k q :
+    credit_store n m k -∗ step_credit q -∗ credit_store n m (q + k).
+  Proof.
+    iIntros "Hstore Hstep".
+    iDestruct (credit_store_acc_step with "Hstore") as "[Hsaved Hclose]".
+    iApply "Hclose". rewrite step_credit_split. iFrame.
+  Qed.
+
+  Lemma credit_store_scrounge_step n m k q :
+    q ≤ k → credit_store n m k -∗ step_credit q ∗ credit_store n m (k - q).
+  Proof.
+    iIntros (Hq) "Hstore".
+    iDestruct (credit_store_acc_step with "Hstore") as "[Hsaved Hclose]".
+    replace k with (q + (k - q)) at 1 by lia.
+    rewrite step_credit_split. iDestruct "Hsaved" as "[$ Hsaved]".
+    by iApply "Hclose".
+  Qed.
+
+  Lemma credit_store_mono (n m k n' m' k' : nat) :
+    n' ≤ n → m' ≤ m → k' ≤ k → credit_store n m k -∗ credit_store n' m' k'.
   Proof.
     rewrite credit_store_eq/credit_store_def.
-    iIntros (??) "(Ha & Hb)".
+    iIntros (???) "(Ha & Hb & Hstep)".
     iSplitL "Ha". { iApply lc_weaken; last done. lia. }
-    iApply tr_weaken; last done. lia.
+    iSplitL "Hb". { iApply tr_weaken; last done. lia. }
+    replace k with (k' + (k - k')) at 1 by lia.
+    rewrite step_credit_split. iDestruct "Hstep" as "[$ _]".
   Qed.
 End credits.
 
@@ -480,7 +539,7 @@ Global Typeclasses Opaque FindNamedLfts.
 
 (** find the credit store *)
 Definition FindCreditStore `{!typeGS Σ} :=
-  {| fic_A := nat * nat; fic_Prop '(n, m) := credit_store n m; |}.
+  {| fic_A := nat * nat * nat; fic_Prop '(n, m, k) := credit_store n m k; |}.
 Global Typeclasses Opaque FindCreditStore.
 
 (** find the mask token *)

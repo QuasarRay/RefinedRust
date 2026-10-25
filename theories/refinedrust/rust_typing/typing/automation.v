@@ -1141,7 +1141,7 @@ Section tac.
         fps.(fp_Pa) π ∗
         ([∗ list] l;'(existT rt (ty, r)) ∈ lsa;fp_atys fps, l ◁ₗ[ π, Owned] # r @ (◁ ty)) ∗
         ([∗ list] xl;synty ∈ zip (f_args fn).*1 lsa;sta, xl.1 is_live{ (π, f), synty} xl.2))%I in
-        (credit_store 0 0 -∗ na_own π ⊤ -∗ allocated_locals (π, f) (f_args fn).*1 -∗ introduce_with_hooks E L (Qinit) (λ L2,
+        (credit_store 0 0 0 -∗ na_own π ⊤ -∗ allocated_locals (π, f) (f_args fn).*1 -∗ introduce_with_hooks E L (Qinit) (λ L2,
         introduce_typed_stmt E L2 (π, f) ϝ fn
           (λ v L3, fn_body_end_prop E L3 ϝ π
             (fn_ret_prop π ((fp.2 κs tys).(fn_p) x).(fp_fr) v))

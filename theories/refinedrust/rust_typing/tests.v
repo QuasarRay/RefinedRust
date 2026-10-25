@@ -174,14 +174,14 @@ Section test.
   Abort.
 
   Lemma li_explain_goal_acquire_credits :
-    credit_store 10 2 ⊢ have_creds.
+    credit_store 10 2 0 ⊢ have_creds.
   Proof.
     iIntros "Hstore".
     liExplainGoal.
   Abort.
 
   Lemma li_explain_goal_acquire_credits_for_guard E L :
-    credit_store 10 2 ⊢
+    credit_store 10 2 0 ⊢
       prove_with_subtype E L false ProveDirect
         (guarded true True) True (λ _ _ _, True).
   Proof.
@@ -190,7 +190,7 @@ Section test.
   Abort.
 
   Lemma li_explain_goal_no_nested_guard_credit_hint E L :
-    credit_store 10 2 ⊢
+    credit_store 10 2 0 ⊢
       prove_with_subtype E L false ProveDirect
         (True ∗ guarded true True) True (λ _ _ _, True).
   Proof.

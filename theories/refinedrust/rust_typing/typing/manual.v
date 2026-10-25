@@ -429,9 +429,9 @@ Section updateable_rules.
       li_tactic (compute_list_map_lookup_nofail_goal M n) (λ κ,
       li_tactic (llctx_find_llft_goal updateable_L κ LlctxFindLftFull) (λ '(_, L'),
       li_tactic (simplify_lft_map_goal (map_list_delete M n)) (λ M',
-      find_in_context FindCreditStore (λ '(c, a),
+      find_in_context FindCreditStore (λ '(c, a, k),
         ⌜fast_lia_hint (1 ≤ c)⌝ ∗
-        (credit_store (c - 1) a -∗
+        (credit_store (c - 1) a k -∗
          named_lfts updateable_f M' -∗
          updateable_core updateable_E ((†ₗ κ) :: L')))))))
     ⊢ P.
@@ -439,7 +439,7 @@ Section updateable_rules.
     rewrite /compute_list_map_lookup_nofail_goal /llctx_find_llft_goal
       /simplify_lft_map_goal /FindCreditStore /find_in_context.
     iIntros "(%M & Hnamed & %κ & %Hlook & %L' & %κs & %Hfind & %M' & _ & %ca & Hstore & HT)".
-    destruct ca as [c a]. simpl.
+    destruct ca as [[c a] k]. simpl.
     unfold fast_lia_hint.
     iDestruct "HT" as "(%Hcredit & HT)".
     iPoseProof (credit_store_scrounge 1 with "Hstore") as "(Hcredit & Hstore)"; first lia.
@@ -628,14 +628,14 @@ Section credits.
   Context `{!typeGS Σ}.
 
   Lemma tac_credit_store_acquire_guard P :
-    find_in_context FindCreditStore (λ '(n, m),
+    find_in_context FindCreditStore (λ '(n, m, k),
       ⌜fast_lia_hint (5 ≤ n)⌝ ∗
       ⌜fast_lia_hint (1 ≤ m)⌝ ∗
-      (credit_store (n - 5) (m - 1) -∗ have_creds -∗ P))
+      (credit_store (n - 5) (m - 1) k -∗ have_creds -∗ P))
     ⊢ P.
   Proof.
     rewrite /FindCreditStore/find_in_context/=.
-    iIntros "(%p & Hstore & HT)". destruct p as [n m].
+    iIntros "(%p & Hstore & HT)". destruct p as [[n m] k].
     unfold fast_lia_hint.
     iDestruct "HT" as "(% & % & HT)".
     iPoseProof (credit_store_scrounge 5 with "Hstore") as "(Hcred & Hstore)".
@@ -647,13 +647,13 @@ Section credits.
   Qed.
 
   Lemma tac_credit_store_acquire_one_credit P :
-    find_in_context FindCreditStore (λ '(n, m),
+    find_in_context FindCreditStore (λ '(n, m, k),
       ⌜fast_lia_hint (1 ≤ n)⌝ ∗
-      (credit_store (n - 1) (m) -∗ £1 -∗ P))
+      (credit_store (n - 1) m k -∗ £1 -∗ P))
     ⊢ P.
   Proof.
     rewrite /FindCreditStore/find_in_context/=.
-    iIntros "(%p & Hstore & HT)". destruct p as [n m].
+    iIntros "(%p & Hstore & HT)". destruct p as [[n m] k].
     unfold fast_lia_hint.
     iDestruct "HT" as "(% & HT)".
     iPoseProof (credit_store_scrounge 1 with "Hstore") as "(Hcred & Hstore)".

@@ -352,10 +352,9 @@ Proof.
   { iApply credit_step_physical. iApply (physical_step_intro_tr with "Htr").
     iNext. iIntros "Htr Hcred". iModIntro.
     iIntros (l) "Hlive Hframe Hlocals Hl %Hly".
-    iAssert (credit_store 0 0) with "[Hcred Htr]" as "Hstore".
-    { rewrite credit_store_eq /credit_store_def. iSplitL "Hcred".
-      - iApply (lc_weaken with "Hcred"). simpl. unfold num_laters_per_step. lia.
-      - iApply (tr_weaken with "Htr"). simpl. unfold num_laters_per_step. lia. }
+    iMod (credit_store_init 0 0 with "[Hcred] [Htr]") as "Hstore".
+    { iApply (lc_weaken with "Hcred"). simpl. unfold num_laters_per_step. lia. }
+    { iApply (tr_weaken with "Htr"). simpl. unfold num_laters_per_step. lia. }
     iAssert (l ◁ₗ[π, Owned] .@ (◁ uninit UnitSynType))%I with "[Hl]" as "Hl".
     { rewrite ltype_own_ofty_unfold /lty_of_ty_own.
       iExists unit_sl. iSplitR.

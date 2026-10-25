@@ -34,7 +34,7 @@ Section find.
   Global Instance related_to_gvar_pobs {rt : Type} γ (r : rt) : RelatedTo (gvar_pobs γ r) | 100 :=
     {| rt_fic := FindGvarPobs γ |}.
 
-  Global Instance related_to_credit_store n m : RelatedTo (credit_store n m) | 100 :=
+  Global Instance related_to_credit_store n m k : RelatedTo (credit_store n m k) | 100 :=
     {| rt_fic := FindCreditStore |}.
 
   Global Instance related_to_na_own π E : RelatedTo (na_own π E) | 100 :=
@@ -208,29 +208,29 @@ Section find.
     λ T, i2p (find_in_context_named_lfts f T).
 
   (** CreditStore *)
-  Lemma subsume_credit_store_evar n m n' m' T `{!ContainsProtected (credit_store n' m')}:
-    ⌜n = n'⌝ ∗ ⌜m = m'⌝ ∗ T ⊢ subsume (Σ := Σ) (credit_store n m) (credit_store n' m') T.
+  Lemma subsume_credit_store_evar n m k n' m' k' T `{!ContainsProtected (credit_store n' m' k')}:
+    ⌜n = n'⌝ ∗ ⌜m = m'⌝ ∗ ⌜k = k'⌝ ∗ T ⊢ subsume (Σ := Σ) (credit_store n m k) (credit_store n' m' k') T.
   Proof.
-    iIntros "(<- & <- & HT) $ //".
+    iIntros "(<- & <- & <- & HT) $ //".
   Qed.
-  Global Instance subsume_credit_store_evar_inst n m n' m' `{!ContainsProtected (credit_store n' m')} : Subsume (credit_store n m) (credit_store n' m') | 10 :=
-    λ T, i2p (subsume_credit_store_evar n m n' m' T).
+  Global Instance subsume_credit_store_evar_inst n m k n' m' k' `{!ContainsProtected (credit_store n' m' k')} : Subsume (credit_store n m k) (credit_store n' m' k') | 10 :=
+    λ T, i2p (subsume_credit_store_evar n m k n' m' k' T).
 
-  Lemma subsume_credit_store n m n' m' T :
-    ⌜fast_lia_hint (n' ≤ n)⌝ ∗ ⌜fast_lia_hint (m' ≤ m)⌝ ∗ T ⊢ subsume (Σ := Σ) (credit_store n m) (credit_store n' m') T.
+  Lemma subsume_credit_store n m k n' m' k' T :
+    ⌜fast_lia_hint (n' ≤ n)⌝ ∗ ⌜fast_lia_hint (m' ≤ m)⌝ ∗ ⌜fast_lia_hint (k' ≤ k)⌝ ∗ T ⊢ subsume (Σ := Σ) (credit_store n m k) (credit_store n' m' k') T.
   Proof.
     rewrite /fast_lia_hint.
-    iIntros "(% & % & HT) Hc".
+    iIntros "(% & % & % & HT) Hc".
     iFrame. iApply (credit_store_mono with "Hc"); done.
   Qed.
-  Global Instance subsume_credit_store_inst n m n' m' : Subsume (credit_store n m) (credit_store n' m') :=
-    λ T, i2p (subsume_credit_store n m n' m' T).
+  Global Instance subsume_credit_store_inst n m k n' m' k' : Subsume (credit_store n m k) (credit_store n' m' k') :=
+    λ T, i2p (subsume_credit_store n m k n' m' k' T).
 
   Lemma find_in_context_credit_store T :
-    (∃ n m, credit_store n m ∗ T (n, m)) ⊢
+    (∃ n m k, credit_store n m k ∗ T (n, m, k)) ⊢
     find_in_context FindCreditStore T.
   Proof.
-    iDestruct 1 as (n m) "[Hc HT]". iExists (n, m). by iFrame.
+    iDestruct 1 as (n m k) "[Hc HT]". iExists (n, m, k). by iFrame.
   Qed.
   Global Instance find_in_context_credit_store_inst :
     FindInContext FindCreditStore FICSyntactic | 1 :=
@@ -734,12 +734,12 @@ Section introduce.
 
   (** credit related instances *)
   Lemma introduce_with_hooks_credits E L n T :
-    find_in_context (FindCreditStore) (λ '(c, a),
-      credit_store (n + c) a -∗ T L) ⊢
+    find_in_context (FindCreditStore) (λ '(c, a, k),
+      credit_store (n + c) a k -∗ T L) ⊢
     introduce_with_hooks E L (£ n) T.
   Proof.
     rewrite /FindCreditStore. iIntros "Ha".
-    iDestruct "Ha" as ([c a]) "(Hstore & HT)". simpl.
+    iDestruct "Ha" as ([[c a] k]) "(Hstore & HT)". simpl.
     iIntros (??) "#CTX #HE HL Hc".
     iPoseProof (credit_store_donate with "Hstore Hc") as "Hstore".
     iExists _. iFrame. iApply ("HT" with "Hstore").
@@ -748,12 +748,12 @@ Section introduce.
   Global Existing Instance introduce_with_hooks_credits_inst | 10.
 
   Lemma introduce_with_hooks_tr E L n T :
-    find_in_context (FindCreditStore) (λ '(c, a),
-      credit_store c (n + a) -∗ T L)
+    find_in_context (FindCreditStore) (λ '(c, a, k),
+      credit_store c (n + a) k -∗ T L)
     ⊢ introduce_with_hooks E L (tr n) T.
   Proof.
     rewrite /FindCreditStore. iIntros "Ha".
-    iDestruct "Ha" as ([c a]) "(Hstore & HT)". simpl.
+    iDestruct "Ha" as ([[c a] k]) "(Hstore & HT)". simpl.
     iIntros (??) "#CTX #HE HL Hc".
     iPoseProof (credit_store_acc with "Hstore") as "(Hcred & Hat & Hcl)".
     iPoseProof ("Hcl" $! _ (n + a)%nat with "Hcred [Hat Hc]") as "Hstore".
@@ -762,6 +762,20 @@ Section introduce.
   Qed.
   Definition introduce_with_hooks_tr_inst := [instance @introduce_with_hooks_tr].
   Global Existing Instance introduce_with_hooks_tr_inst | 10.
+
+  Lemma introduce_with_hooks_step_credits E L n T :
+    find_in_context FindCreditStore (λ '(c, a, k),
+      credit_store c a (n + k) -∗ T L) ⊢
+    introduce_with_hooks E L (step_credit n) T.
+  Proof.
+    rewrite /FindCreditStore. iIntros "Ha".
+    iDestruct "Ha" as ([[c a] k]) "(Hstore & HT)". simpl.
+    iIntros (??) "#CTX #HE HL Hstep".
+    iPoseProof (credit_store_donate_step with "Hstore Hstep") as "Hstore".
+    iExists _. iFrame. by iApply "HT".
+  Qed.
+  Definition introduce_with_hooks_step_credits_inst := [instance @introduce_with_hooks_step_credits].
+  Global Existing Instance introduce_with_hooks_step_credits_inst | 10.
 
   (** non-atomic token related instances *)
   Lemma introduce_with_hooks_na_own E L π mask T :
@@ -867,14 +881,14 @@ Section introduce.
   Global Existing Instance introduce_with_hooks_disj_guard_r_inst.
 
   Lemma introduce_with_hooks_guarded (E : elctx) (L : llctx) (P : iProp Σ) T :
-    find_in_context (FindCreditStore) (λ '(c, a),
-      ⌜fast_lia_hint (1 ≤ c)⌝ ∗ (credit_store (c - 1)%nat a -∗
+    find_in_context (FindCreditStore) (λ '(c, a, k),
+      ⌜fast_lia_hint (1 ≤ c)⌝ ∗ (credit_store (c - 1)%nat a k -∗
         introduce_with_hooks E L P T)) ⊢
     introduce_with_hooks E L (guarded false P) T.
   Proof.
     rewrite /guarded/FindCreditStore/fast_lia_hint/=.
     iIntros "Ha" (??) "CTX HE HL (_ & HP)".
-    iDestruct "Ha" as ([n m]) "(Hc & % & Ha)".
+    iDestruct "Ha" as ([[n m] k]) "(Hc & % & Ha)".
     simpl.
     iPoseProof (credit_store_scrounge 1 with "Hc") as "(Hc1 & Hc)"; first lia.
     iMod (lc_fupd_elim_later with "Hc1 HP") as "HP".
@@ -1299,12 +1313,12 @@ Section prove_subtype.
   Global Existing Instance prove_with_subtype_li_trace_inst.
 
   Lemma prove_with_subtype_scrounge_credits E L step pm (n : nat) A T :
-    find_in_context (FindCreditStore) (λ '(c, a),
-      ⌜fast_lia_hint (n ≤ c)⌝ ∗ (credit_store (c - n)%nat a -∗ T L [] A))
+    find_in_context (FindCreditStore) (λ '(c, a, k),
+      ⌜fast_lia_hint (n ≤ c)⌝ ∗ (credit_store (c - n)%nat a k -∗ T L [] A))
     ⊢ prove_with_subtype E L step pm (£ n) A T.
   Proof.
     iIntros "Ha". rewrite /FindCreditStore /fast_lia_hint.
-    iDestruct "Ha" as ([c a]) "(Hstore  & %Hn & HT)". simpl.
+    iDestruct "Ha" as ([[c a] k]) "(Hstore  & %Hn & HT)". simpl.
     iPoseProof (credit_store_scrounge n with "Hstore") as "(Hcred & Hstore)"; first lia.
     iPoseProof ("HT" with "Hstore") as "HT".
     iIntros (?????) "CTX HE HL HA". iModIntro. iExists _, _, _. iFrame.
@@ -1316,13 +1330,31 @@ Section prove_subtype.
   Definition prove_with_subtype_scrounge_credits_inst := [instance @prove_with_subtype_scrounge_credits].
   Global Existing Instance prove_with_subtype_scrounge_credits_inst | 10.
 
+  Lemma prove_with_subtype_scrounge_step_credits E L step pm (n : nat) A T :
+    find_in_context (FindCreditStore) (λ '(c, a, k),
+      ⌜fast_lia_hint (n ≤ k)⌝ ∗ (credit_store c a (k - n)%nat -∗ T L [] A))
+    ⊢ prove_with_subtype E L step pm (step_credit n) A T.
+  Proof.
+    iIntros "Ha". rewrite /FindCreditStore /fast_lia_hint.
+    iDestruct "Ha" as ([[c a] k]) "(Hstore & %Hn & HT)". simpl.
+    iPoseProof (credit_store_scrounge_step c a k n with "Hstore") as "(Hcred & Hstore)"; first lia.
+    iPoseProof ("HT" with "Hstore") as "HT".
+    iIntros (?????) "CTX HE HL HA". iModIntro. iExists _, _, _. iFrame.
+    iApply (maybe_logical_step_compose with "HA").
+    iApply maybe_logical_step_intro.
+    iIntros "($ & $)".
+    destruct pm; first done. iIntros "_ !>". done.
+  Qed.
+  Definition prove_with_subtype_scrounge_step_credits_inst := [instance @prove_with_subtype_scrounge_step_credits].
+  Global Existing Instance prove_with_subtype_scrounge_step_credits_inst | 10.
+
   Lemma prove_with_subtype_scrounge_tr E L step pm (n : nat) A T :
-    find_in_context (FindCreditStore) (λ '(c, a),
-      ⌜fast_lia_hint (n ≤ a)⌝ ∗ (credit_store c (a - n)%nat -∗ T L [] A))
+    find_in_context (FindCreditStore) (λ '(c, a, k),
+      ⌜fast_lia_hint (n ≤ a)⌝ ∗ (credit_store c (a - n)%nat k -∗ T L [] A))
     ⊢ prove_with_subtype E L step pm (tr n) A T.
   Proof.
     iIntros "Ha". rewrite /FindCreditStore /fast_lia_hint.
-    iDestruct "Ha" as ([c a]) "(Hstore  & %Hn & HT)". simpl.
+    iDestruct "Ha" as ([[c a] k]) "(Hstore  & %Hn & HT)". simpl.
     iPoseProof (credit_store_acc with "Hstore") as "(Hcred & Hat & Hcl)".
     replace (S a) with (S (a - n) + n)%nat by lia.
     iDestruct "Hat" as "(Hat & Hat')".
@@ -3557,15 +3589,19 @@ Section subsume.
     by iFrame.
   Qed.
   Lemma type_annot_stmt E L f n {A} (a : A) s fn R U ϝ :
-    typed_annot_stmt f n a E L (λ L', typed_stmt E L' f s fn R U ϝ)
+    typed_annot_stmt f n a E L (λ L',
+      introduce_with_hooks E L' (step_credit n) (λ L2, typed_stmt E L2 f s fn R U ϝ))
     ⊢ typed_stmt E L f (annot{n} : a; s) fn R U ϝ.
   Proof.
     iIntros "Hs". iIntros (Φ Φunwind) "#CTX #HE HL Hf Hcont".
     iMod ("Hs" with "CTX HE HL") as "Hstep".
+    iMod step_credit_zero as "Hsaved".
     iApply wps_annot.
-    iApply credit_stepN_physical.
-    iApply (physical_stepN_wand with "Hstep").
-    iIntros "(%L' & HL & Hs)".
+    iPoseProof (credit_stepN_physical_saved with "Hsaved Hstep") as "Hstep".
+    rewrite Nat.add_0_r.
+    iApply (credit_stepN_wand with "Hstep").
+    iIntros "[Hsaved (%L' & HL & Hs)]".
+    iMod ("Hs" with "[] CTX HE HL Hsaved") as "(%L2 & HL & Hs)"; first done.
     by iApply ("Hs" with "CTX HE HL Hf").
   Qed.
 
@@ -3615,7 +3651,7 @@ Section subsume.
   Lemma type_use m E L f ot e o (T : typed_val_expr_cont_t) :
     ⌜if o is Na2Ord then False else True⌝ ∗
       typed_read E L f e ot m (λ L2 v rt ty r,
-        introduce_with_hooks E L2 (tr 2 ∗ £ num_cred) (λ L3,
+        introduce_with_hooks E L2 (tr 2 ∗ £ num_cred ∗ step_credit 2) (λ L3,
           T L3 v MetaNone rt ty r))
     ⊢ typed_val_expr E L f (Use o ot e)%E T.
   Proof.
@@ -3629,7 +3665,7 @@ Section subsume.
     iApply wpe_fupd.
     iMod (tr_zero) as "Ha".
     iApply wp_skip.
-    iApply credit_step_physical. iApply (physical_step_step_upd with "Hl").
+    iApply credit_step_intro_physical. iIntros "Hsaved1". iApply (physical_step_step_upd with "Hl").
     iApply (physical_step_intro_tr with "Ha").
     iNext. iIntros "Hat Hcred!>".
     iIntros "(%v & %q & %rt & %ty & %r & %Hlyv & %Hv & Hl & %Hdec & Hv & Hcl)".
@@ -3641,22 +3677,23 @@ Section subsume.
     - intros. apply val_to_loc_decode. by apply val_to_loc_Some_l2v.
     - done.
     - exact Hdec.
-    - iApply credit_step_physical. iApply (physical_step_step_upd with "Hcl").
+    - iApply credit_step_intro_physical. iIntros "Hsaved2". iApply (physical_step_step_upd with "Hcl").
       iApply (physical_step_intro_tr with "Hat").
       iIntros "!> Hat Hcred2 !> Hcl %st %ov %Hdec' Hl".
       iMod ("Hcl" $! st ov with "[//] Hl Hv") as "(%L' & %rt' & %ty' & %r' & HL & Hf & Hv & HT)".
-      iMod ("HT" with "[] [$] HE HL [Hat Hcred2]") as "(%L3 & HL & HT)"; first done.
+      iMod ("HT" with "[] [$] HE HL [Hat Hcred2 Hsaved1 Hsaved2]") as "(%L3 & HL & HT)"; first done.
       { iSplitL "Hat".
         - iApply tr_weaken; last done.
           simpl. unfold num_laters_per_step; lia.
-        - iApply lc_weaken; last done.
-          simpl. unfold num_laters_per_step, num_cred; lia. }
+        - iSplitL "Hcred2".
+          { iApply lc_weaken; last done. simpl. unfold num_laters_per_step, num_cred; lia. }
+          iApply (step_credit_split 1 1). iFrame. }
       by iApply ("HΦ" with "HL Hf Hv HT").
   Qed.
   Lemma type_copy E L f ot e o (T : typed_val_expr_cont_t) :
     ⌜if o is Na2Ord then False else True⌝ ∗
       typed_read E L f e ot ReadDoCopy (λ L2 v rt ty r,
-        introduce_with_hooks E L2 (tr 2 ∗ £ num_cred) (λ L3,
+        introduce_with_hooks E L2 (tr 2 ∗ £ num_cred ∗ step_credit 2) (λ L3,
           T L3 v MetaNone rt ty r))
     ⊢ typed_val_expr E L f (copy{ot, o} e)%E T.
   Proof.
@@ -3666,7 +3703,7 @@ Section subsume.
   Lemma type_move E L f ot e o (T : typed_val_expr_cont_t) :
     ⌜if o is Na2Ord then False else True⌝ ∗
       typed_read E L f e ot ReadDoMove (λ L2 v rt ty r,
-        introduce_with_hooks E L2 (tr 2 ∗ £ num_cred) (λ L3,
+        introduce_with_hooks E L2 (tr 2 ∗ £ num_cred ∗ step_credit 2) (λ L3,
           T L3 v MetaNone rt ty r))
     ⊢ typed_val_expr E L f (move{ot, o} e)%E T.
   Proof.
@@ -3691,7 +3728,7 @@ Section subsume.
       ⌜m = MetaNone⌝ ∗
       ⌜if o is Na2Ord then False else True⌝ ∗
       typed_write E L' f e1 ot v ty r (λ L2,
-        introduce_with_hooks E L2 (tr 2 ∗ £ num_cred) (λ L3,
+        introduce_with_hooks E L2 (tr 2 ∗ £ num_cred ∗ step_credit 3) (λ L3,
         typed_stmt E L3 f s fn R U ϝ)))
     ⊢ typed_stmt E L f (e1 <-{ot, o} e2; s) fn R U ϝ.
   Proof.
@@ -3703,12 +3740,12 @@ Section subsume.
     iSpecialize ("HT" with "Hv").
     iMod (tr_zero) as "Ha".
     iApply wp_skip.
-    iApply credit_step_physical. iApply (physical_step_step_upd with "HT").
+    iApply credit_step_intro_physical. iIntros "Hsaved1". iApply (physical_step_step_upd with "HT").
     iApply (physical_step_intro_tr with "Ha").
     iNext. iIntros "Ha Hcred !> HT".
     iApply wpe_fupd.
     iApply wp_skip.
-    iApply credit_step_physical. iApply (physical_step_step_upd with "HT").
+    iApply credit_step_intro_physical. iIntros "Hsaved2". iApply (physical_step_step_upd with "HT").
     iApply (physical_step_intro_tr with "Ha").
     iNext. iIntros "Ha Hcred2 !> (%Hwf & %Hdecv & Hl & Hcl)".
     iDestruct "Hl" as "(%v' & % & % & Hl)".
@@ -3724,7 +3761,7 @@ Section subsume.
     iIntros "Hcl_m".
     iSplitR; first done. iFrame "Hl". iR.
     iMod "Hcl_m" as "_".
-    iApply credit_step_physical.
+    iApply credit_step_intro_physical. iIntros "Hsaved3".
     iApply (physical_step_step_upd with "Hcl").
     iApply (physical_step_intro_tr with "Ha").
     iNext. iIntros "Ha Hcred' !> Hcl".
@@ -3736,10 +3773,13 @@ Section subsume.
     (*iDestruct "Hcred'" as "(Hcred2 & Hcred')".*)
     iMod "Hcl_m" as "_".
     iMod ("Hcl" $! st ov with "[//] Hl") as "(%L'' & HL & Hf & Hs)".
-    iMod ("Hs" with "[] [$] HE HL [Ha Hcred']") as "(%L3 & HL & HT)"; first done.
+    iMod ("Hs" with "[] [$] HE HL [Ha Hcred' Hsaved1 Hsaved2 Hsaved3]") as "(%L3 & HL & HT)"; first done.
     { iSplitL "Ha".
       - iApply tr_weaken; last done. simpl. unfold num_laters_per_step; lia.
-      -  iApply lc_weaken; last done. simpl. unfold num_cred, num_laters_per_step; lia. }
+      - iSplitL "Hcred'".
+        { iApply lc_weaken; last done. simpl. unfold num_cred, num_laters_per_step; lia. }
+        iApply (step_credit_split 1 2). iFrame "Hsaved1".
+        iApply (step_credit_split 1 1). iFrame. }
     by iApply ("HT" with "[$LFT $LLCTX] HE HL Hf").
   Qed.
 
@@ -4492,11 +4532,11 @@ Section subsume.
         (* We need to be able to borrow at least at [κ] *)
         ⌜lctx_place_update_kind_outlives E L2 bmin [κ]⌝ ∗
         (** Omitted from paper: find the credit context to give the borrow-step a time receipt *)
-        find_in_context (FindCreditStore) (λ '(n, m),
+        find_in_context (FindCreditStore) (λ '(n, m, k),
         (** Stratify *)
         stratify_ltype_unblock f.1 E L2 StratRefoldFull l2 lt2 ri2 b2 (λ L3 R rt2' lt2' ri2',
         (** return the credit store *)
-        credit_store n m -∗
+        credit_store n m k -∗
         (** Omitted from paper: Certify that this stratification is allowed *)
         prove_place_cond E L3 bmin lt2 lt2' (λ upd,
         (** finish borrow *)
@@ -4515,7 +4555,7 @@ Section subsume.
     iPoseProof (lctx_place_update_kind_outlives_use with "HE HL2") as "#Houtl".
     { apply Houtl. }
 
-    iDestruct "HT" as ([n m]) "(Hstore & HT)".
+    iDestruct "HT" as ([[n m] k]) "(Hstore & HT)".
     iPoseProof (credit_store_borrow_receipt with "Hstore") as "(Hat & Hstore)".
     (* bring the place type in the right shape *)
     iApply ("HΦ" with "Hat").
@@ -5018,15 +5058,15 @@ Section subsume.
 
   Lemma type_goto E L f b fn R U s ϝ :
     fn.(f_code) !! b = Some s →
-    introduce_with_hooks E L (£ num_cred) (λ L2,
+    introduce_with_hooks E L (£ num_cred ∗ step_credit 1) (λ L2,
       typed_stmt E L2 f s fn R U ϝ)
     ⊢ typed_stmt E L f (Goto b) fn R U ϝ.
   Proof.
     iIntros (HQ) "Hs". iIntros (Φ Φunwind) "#CTX #HE HL Hf Hcont".
     iApply wps_goto => //.
-    iApply credit_step_physical.
+    iApply credit_step_intro_physical. iIntros "Hsaved".
     iApply physical_step_intro_lc. iIntros "Hcred". iIntros "!> !>".
-    iMod ("Hs" with "[] CTX HE HL Hcred") as "(%L2 & HL & HT)"; first done.
+    iMod ("Hs" with "[] CTX HE HL [$Hcred $Hsaved]") as "(%L2 & HL & HT)"; first done.
     by iApply ("HT" with "CTX HE HL Hf").
   Qed.
 
@@ -5157,16 +5197,18 @@ Section subsume.
   Lemma type_if E L f e s1 s2 fn R U ϝ :
     typed_val_expr E L f e (λ L' v m rt ty r,
       typed_if E L' f.1 v (v ◁ᵥ{f.1, m} r @ ty)
-          (λ L2, typed_stmt E L2 f s1 fn R U ϝ) (λ L2, typed_stmt E L2 f s2 fn R U ϝ))
+          (λ L2, introduce_with_hooks E L2 (step_credit 1) (λ L3, typed_stmt E L3 f s1 fn R U ϝ))
+          (λ L2, introduce_with_hooks E L2 (step_credit 1) (λ L3, typed_stmt E L3 f s2 fn R U ϝ)))
     ⊢ typed_stmt E L f (if{BoolOp}: e then s1 else s2) fn R U ϝ.
   Proof.
     iIntros "He". iIntros (Φ Φunwind) "#CTX #HE HL Hf Hcont". wps_bind.
     iApply ("He" with "CTX HE HL Hf"). iIntros (L' v m rt ty r) "HL Hf Hv Hs".
     iMod ("Hs" with "[] CTX HE HL Hv") as "(%b & %L2 & % & HL & Hs)"; first done.
     iApply wps_if_bool; [done|..].
-    iApply credit_step_physical.
+    iApply credit_step_intro_physical. iIntros "Hsaved".
     iApply physical_step_intro; iNext.
-    by destruct b; iApply ("Hs" with "CTX HE HL Hf").
+    destruct b; iMod ("Hs" with "[] CTX HE HL Hsaved") as "(%L3 & HL & Hs)"; try done;
+      by iApply ("Hs" with "CTX HE HL Hf").
   Qed.
 
   Lemma type_switch E L f it e m ss def fn R U ϝ:
@@ -5196,7 +5238,7 @@ Section subsume.
 
   Lemma type_exprs E L f s e fn R U ϝ :
     (typed_val_expr E L f e (λ L2 v m rt ty r,
-      introduce_with_hooks E L2 (v ◁ᵥ{f.1, m} r @ ty) (λ L3,
+      introduce_with_hooks E L2 (v ◁ᵥ{f.1, m} r @ ty ∗ step_credit 1) (λ L3,
         typed_stmt E L3 f s fn R U ϝ)))
     ⊢ typed_stmt E L f (ExprS e s) fn R U ϝ.
   Proof.
@@ -5204,9 +5246,9 @@ Section subsume.
     iApply ("Hs" with "CTX HE HL Hf").
     iIntros (L' v m rt ty r) "HL Hf Hv Hs".
     iApply wps_exprs.
-    iApply credit_step_physical.
+    iApply credit_step_intro_physical. iIntros "Hsaved".
     iApply physical_step_intro; iNext.
-    iMod ("Hs" with "[] CTX HE HL Hv") as "(%L2 & HL & HT)"; first done.
+    iMod ("Hs" with "[] CTX HE HL [$Hv $Hsaved]") as "(%L2 & HL & HT)"; first done.
     by iApply ("HT" with "CTX HE HL Hf").
   Qed.
 
@@ -5216,15 +5258,15 @@ Section subsume.
         ⌜local_fresh x locals⌝ ∗
         (∀ l : name_hint_ty (String.append "local_" x) loc, allocated_locals f (x :: locals) -∗
               x is_live{f, st} l -∗
-              l ◁ₗ[f.1, Owned] .@ (◁ uninit st) -∗
-              typed_stmt E L f s fn R U ϝ)))
+               l ◁ₗ[f.1, Owned] .@ (◁ uninit st) -∗
+              introduce_with_hooks E L (step_credit 1) (λ L2, typed_stmt E L2 f s fn R U ϝ))))
     ⊢ typed_stmt E L f (local_live{st} x; s) fn R U ϝ.
   Proof.
     unfold compute_layout_goal. destruct f as [π f].
     iIntros "(%ly & %Hst & %locals & Hlocals & %Hfresh & HT)".
-    iIntros (Φ Φunwind) "#CTX HE HL Hf Hpost". simpl.
+    iIntros (Φ Φunwind) "#CTX #HE HL Hf Hpost". simpl.
     iApply (wps_local_live with "Hf Hlocals"); [done.. | ].
-    iApply credit_step_physical.
+    iApply credit_step_intro_physical. iIntros "Hsaved".
     iApply physical_step_intro. iNext.
     iIntros (l) "Hx Hframe Hlocals Hl %Hly".
     iPoseProof ("HT" with "Hlocals Hx [Hl]") as "Hs".
@@ -5237,6 +5279,7 @@ Section subsume.
       iExists _. iR. iModIntro. iExists _. iFrame.
       rewrite uninit_own_spec. iR.
       iExists _. iR. rewrite /has_layout_val length_replicate//. }
+    iMod ("Hs" with "[] CTX HE HL Hsaved") as "(%L2 & HL & Hs)"; first done.
     iApply ("Hs" with "CTX HE HL Hframe Hpost").
   Qed.
 
@@ -5252,14 +5295,15 @@ Section subsume.
             | TCOrT_l _ _ _ =>
                 stratify_ltype_unblock f.1 E L StratRefoldOpened l lt r Owned (λ L2 R2 rt2 lt2 r2,
                   owned_subltype_step f.1 E L2 true l r2 (#()) lt2 (◁ uninit st) (λ L3 R3,
-                    introduce_with_hooks E L3 (R2 ∗ R3) (λ L4,
+                    introduce_with_hooks E L3 (R2 ∗ R3 ∗ step_credit 3) (λ L4,
                     li_clear l ((allocated_locals f locals' -∗ typed_stmt E L4 f s fn R U ϝ)))))
             | TCOrT_r _ _ _ =>
                 owned_subltype_step f.1 E L true l r (#()) lt (◁ uninit st) (λ L2 R2,
-                  introduce_with_hooks E L2 (True ∗ R2) (λ L3,
+                  introduce_with_hooks E L2 (True ∗ R2 ∗ step_credit 3) (λ L3,
                   li_clear l ((allocated_locals f locals' -∗ typed_stmt E L3 f s fn R U ϝ))))
             end))))
-    else (allocated_locals f locals -∗ typed_stmt E L f s fn R U ϝ))
+    else (allocated_locals f locals -∗ introduce_with_hooks E L (step_credit 3)
+      (λ L2, typed_stmt E L2 f s fn R U ϝ)))
     ⊢ typed_stmt E L f (local_dead x; s) fn R U ϝ.
   Proof.
     destruct f as [π f].
@@ -5279,13 +5323,13 @@ Section subsume.
           "(%L2 & %R2 & %rt2 & %lt2 & %r2 & HL & %Hsteq & Hstep & HT)"; [set_solver.. | ].
         simpl.
         iApply wps_skip.
-        iApply credit_step_physical.
+        iApply credit_step_intro_physical. iIntros "Hsaved1".
         iApply (physical_step_logical_step with "Hstep").
         iApply physical_step_intro. iNext.
         iIntros "(Hl & HR2)".
         iMod ("HT" with "[] [] [] CTX HE HL Hl") as "(%L3 & %R3 & Hstep & HL & HT)"; [set_solver.. | ].
         iApply wps_skip.
-        iApply credit_step_physical.
+        iApply credit_step_intro_physical. iIntros "Hsaved2".
         iApply (physical_step_logical_step with "Hstep").
         iApply physical_step_intro. iNext.
         iIntros "(Hl & HR3)".
@@ -5298,16 +5342,17 @@ Section subsume.
         iApply (wps_local_dead with "Hf Hlocals Hx [Hl]").
         { simpl in Hst. done. }
         { iExists _. iFrame. done. }
-        iApply credit_step_physical. iApply physical_step_intro. iNext.
+        iApply credit_step_intro_physical. iIntros "Hsaved3". iApply physical_step_intro. iNext.
         iIntros "Hf Hlocals".
-        iMod ("HT" with "[] CTX HE HL [HR2 HR3]") as "(%L4 & HL & HT)"; first done.
-        { iFrame. }
+        iMod ("HT" with "[] CTX HE HL [HR2 HR3 Hsaved1 Hsaved2 Hsaved3]") as "(%L4 & HL & HT)"; first done.
+        { iFrame. iApply (step_credit_split 1 2). iFrame "Hsaved1".
+          iApply (step_credit_split 1 1). iFrame. }
         iApply ("HT" with "Hlocals CTX HE HL Hf Hpost").
       + simpl.
-        iApply wps_skip. iApply credit_step_physical. iApply physical_step_intro. iNext.
+        iApply wps_skip. iApply credit_step_intro_physical. iIntros "Hsaved1". iApply physical_step_intro. iNext.
         iMod ("HT" with "[] [] [] CTX HE HL Hl") as "(%L2 & %R2 & Hstep & HL & HT)"; [set_solver.. | ].
         iApply wps_skip.
-        iApply credit_step_physical.
+        iApply credit_step_intro_physical. iIntros "Hsaved2".
         iApply (physical_step_logical_step with "Hstep").
         iApply physical_step_intro. iNext.
         iIntros "(Hl & HR2)".
@@ -5320,39 +5365,47 @@ Section subsume.
         iApply (wps_local_dead with "Hf Hlocals Hx [Hl]").
         { simpl in Hst. done. }
         { iExists _. iFrame. done. }
-        iApply credit_step_physical. iApply physical_step_intro. iNext.
+        iApply credit_step_intro_physical. iIntros "Hsaved3". iApply physical_step_intro. iNext.
         iIntros "Hf Hlocals".
-        iMod ("HT" with "[] CTX HE HL [HR2]") as "(%L3 & HL & HT)"; first done.
-        { iFrame. }
+        iMod ("HT" with "[] CTX HE HL [HR2 Hsaved1 Hsaved2 Hsaved3]") as "(%L3 & HL & HT)"; first done.
+        { iFrame. iApply (step_credit_split 1 2). iFrame "Hsaved1".
+          iApply (step_credit_split 1 1). iFrame. }
         iApply ("HT" with "Hlocals CTX HE HL Hf Hpost").
     - unfold LocalDeadSt.
       iIntros (Φ Φunwind) "#CTX #HE HL Hf Hpost".
       simpl.
-      iApply wps_skip. iApply credit_step_physical. iApply physical_step_intro. iNext.
-      iApply wps_skip. iApply credit_step_physical. iApply physical_step_intro. iNext.
+      iApply wps_skip. iApply credit_step_intro_physical. iIntros "Hsaved1". iApply physical_step_intro. iNext.
+      iApply wps_skip. iApply credit_step_intro_physical. iIntros "Hsaved2". iApply physical_step_intro. iNext.
       iApply (wps_local_dead_nop with "Hf Hlocals").
       { done. }
-      iApply credit_step_physical. iApply physical_step_intro. iNext.
+      iApply credit_step_intro_physical. iIntros "Hsaved3". iApply physical_step_intro. iNext.
       iIntros "Hf Hlocals".
-      iApply ("HT" with "Hlocals CTX HE HL Hf Hpost").
+      iPoseProof ("HT" with "Hlocals") as "HT".
+      iMod ("HT" with "[] CTX HE HL [Hsaved1 Hsaved2 Hsaved3]") as "(%L2 & HL & HT)"; first done.
+      { iApply (step_credit_split 1 2). iFrame "Hsaved1".
+        iApply (step_credit_split 1 1). iFrame. }
+      iApply ("HT" with "CTX HE HL Hf Hpost").
   Qed.
 
 
   Lemma type_skips E L f s fn R U ϝ :
-    ((£num_cred -∗ typed_stmt E L f s fn R U ϝ)) ⊢ typed_stmt E L f (SkipS s) fn R U ϝ.
+    (£num_cred -∗ step_credit 1 -∗ typed_stmt E L f s fn R U ϝ) ⊢ typed_stmt E L f (SkipS s) fn R U ϝ.
   Proof.
     iIntros "Hs". iIntros (Φ Φunwind) "#CTX #HE HL Hf Hcont".
     iApply wps_skip.
-    iApply credit_step_physical.
+    iApply credit_step_intro_physical. iIntros "Hsaved".
     iApply physical_step_intro_lc; iIntros "Hcred !>!>".
-    by iApply ("Hs" with "Hcred CTX HE HL Hf").
+    by iApply ("Hs" with "Hcred Hsaved CTX HE HL Hf").
   Qed.
 
   Lemma type_skips' E L f s fn R U ϝ :
-    typed_stmt E L f s fn R U ϝ ⊢ typed_stmt E L f (SkipS s) fn R U ϝ.
+    introduce_with_hooks E L (£num_cred ∗ step_credit 1)
+      (λ L2, typed_stmt E L2 f s fn R U ϝ) ⊢ typed_stmt E L f (SkipS s) fn R U ϝ.
   Proof.
-    iIntros "Hs". iApply type_skips. iIntros "Hcred".
-    done.
+    iIntros "Hs". iApply type_skips. iIntros "Hcred Hsaved".
+    iIntros (Φ Φunwind) "#CTX #HE HL Hf Hcont".
+    iMod ("Hs" with "[] CTX HE HL [$Hcred $Hsaved]") as "(%L2 & HL & Hs)"; first done.
+    by iApply ("Hs" with "CTX HE HL Hf").
   Qed.
 
   Lemma typed_expr_assert_type f E L n sty v {rt} (ty : type rt) r T :

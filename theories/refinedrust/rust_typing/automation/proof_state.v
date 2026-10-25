@@ -422,8 +422,8 @@ Ltac print_acquire_credits_hint P :=
     | Esnoc ?Hs' ?id ?Q =>
         first [
           lazymatch Q with
-          | credit_store ?n ?m =>
-              idtac "Hint: the context contains a credit store with" n "credits and" m "time receipts.";
+          | credit_store ?n ?m ?k =>
+              idtac "Hint: the context contains a credit store with" n "ordinary credits," m "time receipts and" k "banked step credits.";
               idtac "      If it has at least 5 credits and 1 time receipt, try 'iAcquireCredits as' with a fresh Iris hypothesis name."
           end
         | go Hs' ]
