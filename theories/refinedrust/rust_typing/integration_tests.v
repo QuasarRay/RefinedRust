@@ -2,6 +2,27 @@ From refinedrust Require Import typing.
 
 Module test.
 
+(** Paid stratification can unblock a location before a zero-step annotation. *)
+Section paid_stratification_test.
+  Context `{!typeGS Σ}.
+
+  Lemma updateable_stratify_blocked_twice E L f (l : loc) {rt} (ty : type rt)
+      (r : place_rfn rt) κ n m :
+    credit_store n m 2 -∗ l ◁ₗ[f.1, Owned] r @ BlockedLtype ty κ -∗
+    typed_annot_stmt f 0 tt E ((†ₗ κ) :: L)
+      (λ _, credit_store n m 0 ∗ l ◁ₗ[f.1, Owned] r @ ◁ ty).
+  Proof.
+    iIntros "Hstore Hl".
+    apply_update (updateable_stratify l).
+    rep <-! <100 liRStep.
+    li_unfold_lets_in_context.
+    apply_update (updateable_stratify l).
+    rep <-! <100 liRStep.
+    li_unfold_lets_in_context.
+    iApply typed_annot_stmt_skip. iFrame.
+  Qed.
+End paid_stratification_test.
+
 Lemma effective_unwind_condition_unwind (P : Prop) :
   @effective_unwind_condition panic_unwind_config P ↔ P.
 Proof. done. Qed.

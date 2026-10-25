@@ -12,8 +12,8 @@ Section updateable.
   Definition updateable (E : elctx) (L : llctx) (f : frame_path) (T : llctx → iProp Σ) : iProp Σ :=
     rrust_ctx -∗
     elctx_interp E -∗
-    llctx_interp L ={⊤}=∗
-    ∃ L2, llctx_interp L2 ∗ T L2.
+    llctx_interp L -∗
+    step_credit_update ⊤ (∃ L2, llctx_interp L2 ∗ T L2).
   Class Updateable (P : iProp Σ) := {
     updateable_E : elctx;
     updateable_L : llctx;
@@ -29,16 +29,16 @@ Section updateable.
     updateable E L f T2.
   Proof.
     iIntros "HT Hw".
-    iIntros "#CTX #HE HL".
-    iMod ("HT" with "CTX HE HL") as "(%L2 & HL & HT)".
+    iIntros "#CTX #HE HL Hbank".
+    iMod ("HT" with "CTX HE HL Hbank") as "(Hbank & %L2 & HL & HT)".
     iSpecialize ("Hw" with "HT").
-    iExists L2. by iFrame.
+    iModIntro. iFrame "Hbank". iExists L2. by iFrame.
   Qed.
   Lemma updateable_intro E L f T :
     T L ⊢ updateable E L f T.
   Proof.
-    iIntros "HT #CTX HE HL".
-    iExists L. by iFrame.
+    iIntros "HT #CTX HE HL Hbank".
+    iModIntro. iFrame "Hbank". iExists L. by iFrame.
   Qed.
 
   Lemma add_updateable P `{!Updateable P} :
@@ -51,7 +51,17 @@ Section updateable.
     eauto.
   Qed.
 
-  Global Program Instance updateable_typed_val_expr E L f e T :
+  Lemma add_updateable_fupd P `{!Updateable P} :
+    (rrust_ctx -∗ elctx_interp updateable_E -∗ llctx_interp updateable_L ={⊤}=∗
+      ∃ L2, llctx_interp L2 ∗ updateable_core updateable_E L2) ⊢ P.
+  Proof.
+    iIntros "HT". iApply add_updateable.
+    iIntros "CTX HE HL Hbank".
+    iMod ("HT" with "CTX HE HL") as "HT". iModIntro. iFrame.
+  Qed.
+
+  Global Program Instance updateable_typed_val_expr E L f e T
+      `{!TCEq (to_val (to_rtexpr f.1 e)) None} :
     Updateable (typed_val_expr E L f e T) := {|
       updateable_E := E;
       updateable_L := L;
@@ -59,10 +69,12 @@ Section updateable.
       updateable_core E L := typed_val_expr E L f e T;
   |}.
   Next Obligation.
-    iIntros (_ _ ? e T E L).
+    iIntros (_ _ ? e T ? E L).
     rewrite /typed_val_expr.
     iIntros "HT" (?) "#CTX #HE HL Hf Hc".
-    iApply fupd_wpe. iMod ("HT" with "CTX HE HL") as "(%L2 & HL & HT)".
+    iApply wpe_step_credit_update. iIntros "Hbank".
+    iMod ("HT" with "CTX HE HL Hbank") as "(Hbank & %L2 & HL & HT)".
+    iModIntro. iFrame "Hbank".
     iApply ("HT" with "CTX HE HL Hf Hc").
   Qed.
   Next Obligation.
@@ -81,7 +93,9 @@ Section updateable.
     rewrite /typed_call.
     iIntros "HT HP Ha".
     iIntros (Q Ψ Ψunwind) "#CTX #HE HL Hf Hc".
-    iApply fupd_wps. iMod ("HT" with "CTX HE HL") as "(%L2 & HL & HT)".
+    iApply wps_step_credit_update. iIntros "Hbank".
+    iMod ("HT" with "CTX HE HL Hbank") as "(Hbank & %L2 & HL & HT)".
+    iModIntro. iFrame "Hbank".
     iApply ("HT" with "HP Ha CTX HE HL Hf Hc").
   Qed.
   Next Obligation.
@@ -100,7 +114,9 @@ Section updateable.
     iIntros (_ _ ? ? ? ? ? ? E L).
     iIntros "HT". rewrite /typed_stmt.
     iIntros (Φ Φunwind) "#CTX #HE HL Hf Hcont".
-    iMod ("HT" with "CTX HE HL") as "(%L2 & HL & HT)".
+    iApply wps_step_credit_update. iIntros "Hbank".
+    iMod ("HT" with "CTX HE HL Hbank") as "(Hbank & %L2 & HL & HT)".
+    iModIntro. iFrame "Hbank".
     iApply ("HT" with "CTX HE HL Hf Hcont").
   Qed.
   Next Obligation.
@@ -117,9 +133,9 @@ Section updateable.
   Next Obligation.
     iIntros (?? f n _ _ T E L).
     iIntros "HT". rewrite /typed_annot_stmt.
-    iIntros "#CTX #HE HL".
-    iMod ("HT" with "CTX HE HL") as "(%L2 & HL & HT)".
-    iApply ("HT" with "CTX HE HL").
+    iIntros "#CTX #HE HL Hbank".
+    iMod ("HT" with "CTX HE HL Hbank") as "(Hbank & %L2 & HL & HT)".
+    iApply ("HT" with "CTX HE HL Hbank").
   Qed.
   Next Obligation.
     simpl. eauto.
@@ -135,9 +151,9 @@ Section updateable.
   Next Obligation.
     iIntros (_ _ ? ? ? ?) "HT".
     rewrite /updateable.
-    iIntros "#CTX #HE HL".
-    iMod ("HT" with "CTX HE HL") as "(%L2 & HL & HT)".
-    iApply ("HT" with "CTX HE HL").
+    iIntros "#CTX #HE HL Hbank".
+    iMod ("HT" with "CTX HE HL Hbank") as "(Hbank & %L2 & HL & HT)".
+    iApply ("HT" with "CTX HE HL Hbank").
   Qed.
   Next Obligation.
     eauto.
@@ -176,9 +192,38 @@ Section updateable_rules.
     ⊢ P.
   Proof.
     iIntros "HT".
-    unshelve iApply add_updateable; first apply _.
+    unshelve iApply add_updateable_fupd; first apply _.
     iIntros "CTX HE HL".
     iMod "HT" as "$". by iFrame.
+  Qed.
+
+  (** Stratify one selected assignment now, paying for its logical step from
+      the store instead of scheduling it for a later context fold. *)
+  Lemma updateable_stratify (l : loc) :
+    find_in_context FindCreditStore (λ '(c, a, k),
+      ⌜fast_lia_hint (1 ≤ k)⌝ ∗
+      find_in_context (FindLoc l) (λ '(existT rt (lt, r, bk, π)),
+        stratify_ltype_unblock π updateable_E updateable_L StratRefoldFull l lt r bk
+          (λ L2 R rt' lt' r',
+            credit_store c a (k - 1) -∗
+            l ◁ₗ[π, bk] r' @ lt' -∗ R -∗ updateable_core updateable_E L2)))
+    ⊢ P.
+  Proof.
+    rewrite /FindCreditStore /FindLoc /find_in_context /fast_lia_hint.
+    iIntros "(%p & Hstore & HT)". destruct p as [[c a] k]. simpl.
+    iDestruct "HT" as "(%Hcredit & %x & Hl & HT)".
+    destruct x as [rt [[[lt r] bk] π]]. simpl.
+    unshelve iApply add_updateable; first apply _.
+    iIntros "#CTX #HE HL Hbank".
+    iDestruct (credit_store_scrounge_step c a k 1 with "Hstore")
+      as "[Hcredit Hstore]"; first lia.
+    rewrite /stratify_ltype_unblock /stratify_ltype.
+    iMod ("HT" with "[] [] [] CTX HE HL Hl")
+      as "(%L2 & %R & %rt' & %lt' & %r' & HL & %Hst & Hstep & HT)"; [set_solver.. | ].
+    iMod (step_credit_redeem_logical with "Hcredit Hstep Hbank")
+      as "[Hbank [Hl HR]]".
+    iModIntro. iFrame "Hbank". iExists L2. iFrame "HL".
+    by iApply ("HT" with "Hstore Hl HR").
   Qed.
 
   (** Access an array element, moving its ownership out *)
@@ -191,7 +236,7 @@ Section updateable_rules.
     ⊢ P.
   Proof.
     iIntros "HT".
-    unshelve iApply add_updateable; first apply _.
+    unshelve iApply add_updateable_fupd; first apply _.
     iIntros "#CTX #HE HL".
     rewrite /FindLoc /find_in_context/=.
     iDestruct "HT" as ([rt [[[lt r] k] π]]) "(Ha & Hb)".
@@ -211,7 +256,7 @@ Section updateable_rules.
     ⊢ P.
   Proof.
     iIntros "HT".
-    unshelve iApply add_updateable; first apply _.
+    unshelve iApply add_updateable_fupd; first apply _.
     iIntros "#CTX #HE HL".
     rewrite /FindLoc /find_in_context.
     iDestruct "HT" as ([rt [[[lt r] bk] π]]) "(Ha & Hb)"; simpl.
@@ -231,7 +276,7 @@ Section updateable_rules.
     ⊢ P.
   Proof.
     iIntros "HT".
-    unshelve iApply add_updateable; first apply _.
+    unshelve iApply add_updateable_fupd; first apply _.
     iIntros "#CTX #HE HL".
     rewrite /FindLoc /find_in_context.
     iDestruct "HT" as ([rt [[[lt r] bk] π]]) "(Ha & Hb)"; simpl.
@@ -254,7 +299,7 @@ Section updateable_rules.
     ⊢ P.
   Proof.
     iIntros "HT".
-    unshelve iApply add_updateable; first apply _.
+    unshelve iApply add_updateable_fupd; first apply _.
     iIntros "#CTX #HE HL".
     rewrite /FindLoc /find_in_context.
     iDestruct "HT" as ([rt [[[lt r] bk] π]]) "(Ha & Hb)"; simpl.
@@ -282,7 +327,7 @@ Section updateable_rules.
     ⊢ P.
   Proof.
     iIntros "HT".
-    unshelve iApply add_updateable; first apply _.
+    unshelve iApply add_updateable_fupd; first apply _.
     iIntros "#CTX #HE HL".
     rewrite /FindLoc /find_in_context.
     iDestruct "HT" as ([rt [[[lt r] bk] π]]) "(Ha & %v & %st & -> & HT)"; simpl.
@@ -313,7 +358,7 @@ Section updateable_rules.
     ⊢ P.
   Proof.
     iIntros "HT".
-    unshelve iApply add_updateable; first apply _.
+    unshelve iApply add_updateable_fupd; first apply _.
     iIntros "#CTX #HE HL".
     rewrite /FindLoc /find_in_context.
     iDestruct "HT" as ([rt [[[lt r] bk] π]]) "(Ha & %rt' & -> & %rs & %n & %ty & -> & HT)"; simpl.
@@ -341,7 +386,7 @@ Section updateable_rules.
     ⊢ P.
   Proof.
     iIntros "HT".
-    unshelve iApply add_updateable; first apply _.
+    unshelve iApply add_updateable_fupd; first apply _.
     iIntros "#CTX #HE HL".
     rewrite /FindLoc /find_in_context.
     iDestruct "HT" as ([rt [[[lt r] bk] π]]) "(Ha & %rt' & -> & %rs & %n & %ty & -> & HT)"; simpl.
@@ -365,7 +410,7 @@ Section updateable_rules.
     ⊢ P.
   Proof.
     iIntros "HT".
-    unshelve iApply add_updateable; first apply _.
+    unshelve iApply add_updateable_fupd; first apply _.
     iIntros "#CTX #HE HL".
     rewrite /FindLoc /find_in_context.
     iDestruct "HT" as ([rt [[[lt r] bk] π]]) "(Ha & -> & Hb)"; simpl.
@@ -400,7 +445,7 @@ Section updateable_rules.
   Proof.
     rewrite /compute_list_map_lookup_nofail_goal.
     iIntros "(%M & Hnamed & %κ2 & _ & Hs)".
-    unshelve iApply add_updateable; first apply _.
+    unshelve iApply add_updateable_fupd; first apply _.
     iIntros "#CTX #HE HL".
     unfold simplify_lft_map_goal. iDestruct "Hs" as "(%M' & _ & Hs)".
     iModIntro. iExists updateable_L.
@@ -416,7 +461,7 @@ Section updateable_rules.
   Proof.
     rewrite /compute_list_map_lookups_nofail_goal.
     iIntros "(%M & Hnamed & %κs & %Hlook & HT)".
-    unshelve iApply add_updateable; first apply _.
+    unshelve iApply add_updateable_fupd; first apply _.
     iIntros "#(LFT & LLCTX) #HE HL".
     iMod (llctx_startlft _ _ κs with "LFT LLCTX HL") as (κ) "HL"; [solve_ndisj.. | ].
     iModIntro. iExists _. iFrame.
@@ -443,7 +488,7 @@ Section updateable_rules.
     unfold fast_lia_hint.
     iDestruct "HT" as "(%Hcredit & HT)".
     iPoseProof (credit_store_scrounge 1 with "Hstore") as "(Hcredit & Hstore)"; first lia.
-    unshelve iApply add_updateable; first apply _.
+    unshelve iApply add_updateable_fupd; first apply _.
     iIntros "#CTX #HE HL".
     iPoseProof (llctx_end_llft ⊤ with "HL") as "Hend"; [done | done | exact Hfind | ].
     iMod "Hend". iApply (lc_fupd_add_later with "Hcredit"). iNext.
@@ -460,7 +505,7 @@ Section updateable_rules.
       updateable_core updateable_E L)
     ⊢ P.
   Proof.
-    iIntros "HT". unshelve iApply add_updateable; first apply _.
+    iIntros "HT". unshelve iApply add_updateable_fupd; first apply _.
     iIntros "#CTX HE HL".
     unfold iterate_with_hooks.
     iMod ("HT" with "[] CTX HE HL") as "(%L2 & % & HL & Ha)"; first done.
@@ -557,7 +602,7 @@ Section extra_rules.
     iExists r'. iFrame.
   Qed.
 
-  (* TODO: ideally, we could do this anytime, not just at prove_with_subtype, by using logical_step receipts. *)
+  (** Compatibility rule for proofs already inside a logical-step judgment. *)
   Lemma prove_with_subtype_stratify l E L pm Q A T :
     find_in_context (FindLoc l) (λ '(existT rt (lt, r, bk, π)),
       stratify_ltype_unblock π E L StratRefoldFull l lt r bk (λ L2 R rt' lt' r',
@@ -610,12 +655,6 @@ Section extra_rules.
     iModIntro. iIntros "($ & $)".
     destruct pm; iFrame. eauto.
   Qed.
-
-  (* add another location to stratify *)
-  Lemma typed_context_fold_add_loc (l : loc) (Acc : Type) (Acc_interp : Acc → iProp Σ) {M} (E : elctx) (L : llctx) (m : M) (tctx : list loc) (acc : Acc) T :
-    typed_context_fold Acc_interp E L m (l :: tctx) acc T
-    ⊢ typed_context_fold Acc_interp E L m tctx acc T.
-  Proof. done. Qed.
 
   (* Leave a location in the surrounding context instead of folding it. *)
   Lemma typed_context_fold_remove_loc (l : loc) (Acc : Type) (Acc_interp : Acc → iProp Σ) {M} (E : elctx) (L : llctx) (m : M) (tctx : list loc) (acc : Acc) T :

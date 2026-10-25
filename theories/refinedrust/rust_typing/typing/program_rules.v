@@ -3584,7 +3584,7 @@ Section subsume.
     T L
     ⊢ typed_annot_stmt f n a E L T.
   Proof.
-    iIntros "Hs". iIntros "#CTX #HE HL".
+    iIntros "Hs". iApply typed_annot_stmt_intro. iIntros "#CTX #HE HL".
     iApply physical_stepN_intro.
     by iFrame.
   Qed.
@@ -3594,7 +3594,9 @@ Section subsume.
     ⊢ typed_stmt E L f (annot{n} : a; s) fn R U ϝ.
   Proof.
     iIntros "Hs". iIntros (Φ Φunwind) "#CTX #HE HL Hf Hcont".
-    iMod ("Hs" with "CTX HE HL") as "Hstep".
+    iApply wps_step_credit_update. iIntros "Hbank".
+    iMod ("Hs" with "CTX HE HL Hbank") as "[Hbank Hstep]".
+    iModIntro. iFrame "Hbank".
     iMod step_credit_zero as "Hsaved".
     iApply wps_annot.
     iPoseProof (credit_stepN_physical_saved with "Hsaved Hstep") as "Hstep".
@@ -5521,6 +5523,7 @@ Section subsume.
   Proof.
     rewrite /compute_list_map_lookups_nofail_goal.
     iIntros "(%M & Hnamed & %κs & %Hlook & Hcont)".
+    iApply typed_annot_stmt_intro.
     iIntros "#(LFT & LLCTX) #HE HL".
     iMod (llctx_startlft _ _ κs with "LFT LLCTX HL") as (κ) "HL"; [solve_ndisj.. | ].
     iApply physical_step_fupd.
@@ -5541,6 +5544,7 @@ Section subsume.
   Proof.
     rewrite /compute_list_map_lookups_nofail_goal.
     iIntros "(%M & Hnamed & %κs & %Hlook & Hcont)".
+    iApply typed_annot_stmt_intro.
     iIntros "#(LFT & LLCTX) #HE HL".
     set (κ := lft_intersect_list κs).
     iAssert (llctx_interp ((κ ≡ₗ κs) :: L))%I with "[HL]" as "HL".
@@ -5632,6 +5636,7 @@ Section subsume.
     ⊢ typed_annot_stmt f 2 (EndLftAnnot n) E L T.
   Proof.
     iIntros "(%M & Hnamed & Hlook)".
+    iApply typed_annot_stmt_intro.
     unfold compute_list_map_lookup_goal.
     iDestruct "Hlook" as (o) "(<- & HT)".
     destruct (lookup_iml M n) as [κ | ]; first last.
@@ -5701,6 +5706,7 @@ Section subsume.
   Proof.
     rewrite /compute_list_map_lookup_nofail_goal.
     iIntros "(%M & Hnamed & %κ1 & %Hlook1 & %κ2 & %Hlook2 & Hs)".
+    iApply typed_annot_stmt_intro.
     unfold lctx_lft_alive_count_goal.
     iDestruct "Hs" as "(%κs & %L' & %Hal & Hs)".
     iIntros "#(LFT & LCTX) #HE HL".
@@ -5798,6 +5804,7 @@ Section subsume.
   Proof.
     rewrite /compute_list_map_lookup_nofail_goal.
     iIntros "(%M & Hnamed & %κ & _ & Hs)".
+    iApply typed_annot_stmt_intro.
     iIntros "#CTX #HE HL".
     iMod ("Hs" with "[] CTX HE HL") as "(%L2 & % & HL & HT)"; first done.
     iModIntro.
@@ -5818,6 +5825,7 @@ Section subsume.
   Proof.
     rewrite /compute_list_map_lookup_nofail_goal.
     iIntros "(%M & Hnamed & %targetκ & _ & %sourceκ & _ & HT)".
+    iApply typed_annot_stmt_intro.
     iIntros "#CTX #HE HL".
     iMod ("HT" with "[] CTX HE HL") as "(%L2 & % & HL & HT)"; first done.
     iModIntro.
@@ -5847,6 +5855,7 @@ Section subsume.
   Proof.
     rewrite /compute_list_map_lookup_nofail_goal.
     iIntros "(%M & Hnamed & %κ2 & _ & Hs)".
+    iApply typed_annot_stmt_intro.
     iIntros "#CTX #HE HL".
     unfold simplify_lft_map_goal. iDestruct "Hs" as "(%M' & _ & Hs)".
     iModIntro.
@@ -5911,6 +5920,7 @@ Section subsume.
     ⊢ typed_annot_stmt f 1 (StratifyContextAnnot) E L T.
   Proof.
     iIntros "HT".
+    iApply typed_annot_stmt_intro.
     iIntros "#CTX #HE HL".
     iPoseProof ("HT" $! ⊤ with "[//] [//] [//] CTX HE HL") as "Hstep".
     iApply (physical_step_step_upd with "Hstep").

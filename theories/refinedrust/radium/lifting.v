@@ -683,6 +683,31 @@ Proof.
   by iApply "H".
 Qed.
 
+(** Bank updates are absorbed before resuming the same nonvalue expression. *)
+Lemma wpe_step_credit_update π e Φ :
+  TCEq (to_val (to_rtexpr π e)) None →
+  step_credit_update ⊤ (WPe{π} e {{ Φ }}) -∗ WPe{π} e {{ Φ }}.
+Proof.
+  iIntros (He) "HT". iEval (rewrite expr_wp_unfold).
+  iApply (@wp_step_credit_update (c_lang refinedcG_config) Σ c_irisG
+    NotStuck ⊤ (to_rtexpr π e) _ He).
+  iIntros "Hbank". iMod ("HT" with "Hbank") as "[Hbank HT]".
+  iModIntro. iFrame "Hbank". by rewrite expr_wp_unfold.
+Qed.
+
+Lemma wps_step_credit_update π s Q Ψ Ψunwind :
+  step_credit_update ⊤ (WPs{π} s {{ Q, Ψ | Ψunwind }}) -∗
+  WPs{π} s {{ Q, Ψ | Ψunwind }}.
+Proof.
+  iIntros "HT". iEval (rewrite stmt_wp_unfold).
+  iIntros (Φ Φunwind rf He) "Hresult".
+  iApply (@wp_step_credit_update (c_lang refinedcG_config) Σ c_irisG
+    NotStuck ⊤ (to_rtstmt π rf s) _).
+  iIntros "Hbank". iMod ("HT" with "Hbank") as "[Hbank HT]".
+  iModIntro. iFrame "Hbank". iEval (rewrite stmt_wp_unfold) in "HT".
+  by iApply ("HT" $! Φ Φunwind rf with "[//] Hresult").
+Qed.
+
 (** Spend a saved credit to put the existing physical-step modality in front
     of an unchanged expression goal. No operational reduction is required. *)
 Lemma wpe_physical_step (e : expr) π E Φ :

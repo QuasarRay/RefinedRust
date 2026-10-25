@@ -916,12 +916,22 @@ Section judgments.
   Class TypedAssert (E : elctx) (L : llctx) (f : frame_path) (v : val) {rt} (ty : type rt) (r : rt) : Type :=
     typed_assert_proof s fn R U ϝ : iProp_to_Prop (typed_assert E L f v ty r s fn R U ϝ).
 
-  (** annotated statements are allowed to execute an update and take a step *)
+  (** Bank updates precede raw annotation steps, while the bank is available. *)
   Definition typed_annot_stmt (f : frame_path) (n : nat) {A} (a : A) (E : elctx) (L : llctx) (T : llctx → iProp Σ) : iProp Σ :=
     (rrust_ctx -∗
      elctx_interp E -∗
      llctx_interp L -∗
-     |={⊤}=> |={⊤}⧗=>^n (∃ L', llctx_interp L' ∗  T L')%I).
+     step_credit_update ⊤ (|={⊤}⧗=>^n (∃ L', llctx_interp L' ∗ T L'))%I).
+
+  (** Embed annotation proofs that only need an ordinary fancy update. *)
+  Lemma typed_annot_stmt_intro f n {A} (a : A) E L T :
+    (rrust_ctx -∗ elctx_interp E -∗ llctx_interp L -∗
+      |={⊤}=> |={⊤}⧗=>^n (∃ L', llctx_interp L' ∗ T L')) -∗
+    typed_annot_stmt f n a E L T.
+  Proof.
+    iIntros "HT CTX HE HL Hbank".
+    iMod ("HT" with "CTX HE HL") as "HT". iModIntro. iFrame.
+  Qed.
   Class TypedAnnotStmt (f : frame_path) (n : nat) {A} (a : A) : Type :=
     typed_annot_stmt_proof E L T : iProp_to_Prop (typed_annot_stmt f n a E L T).
 

@@ -335,7 +335,7 @@ Section TrivialDropGlue.
 
     rep <-! liRStep; liShow.
     liRStep; liShow.
-    rewrite /typed_annot_stmt.
+    iApply typed_annot_stmt_intro.
     iIntros "CTX HE HL". simpl.
     iMod (ofty_own_split_value_typed _ ⊤ _ T_ty with "[$]") as "(%v & Hv & Hl)"; first done.
     { done. }
