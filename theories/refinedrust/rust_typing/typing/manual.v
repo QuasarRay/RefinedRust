@@ -205,14 +205,15 @@ Section updateable_rules.
 
   (** Stratify one selected assignment now, paying for its logical step from
       the store instead of scheduling it for a later context fold. *)
-  Lemma updateable_stratify (l : loc) :
+  Lemma updateable_stratify (l : loc) (ma : StratifyAscendMode) {M} (ml : M) :
     find_in_context FindCreditStore (λ '(c, a, k),
       ⌜fast_lia_hint (1 ≤ k)%N⌝ ∗
       find_in_context (FindLoc l) (λ '(existT rt (lt, r, bk, π)),
-        stratify_ltype_unblock π updateable_E updateable_L StratRefoldFull l lt r bk
+        stratify_ltype π updateable_E updateable_L StratNoUnfold ma ml l lt r bk
           (λ L2 R rt' lt' r',
             credit_store c a (k - 1)%N -∗
-            l ◁ₗ[π, bk] r' @ lt' -∗ R -∗ updateable_core updateable_E L2)))
+            introduce_with_hooks updateable_E L2 (l ◁ₗ[π, bk] r' @ lt' ∗ R)
+              (λ L3, updateable_core updateable_E L3))))
     ⊢ P.
   Proof.
     rewrite /FindCreditStore /FindLoc /find_in_context /fast_lia_hint.
@@ -223,13 +224,14 @@ Section updateable_rules.
     iIntros "#CTX #HE HL Hbank".
     iDestruct (credit_store_scrounge_step c a k 1 with "Hstore")
       as "[Hcredit Hstore]"; first lia.
-    rewrite /stratify_ltype_unblock /stratify_ltype.
+    rewrite /stratify_ltype.
     iMod ("HT" with "[] [] [] CTX HE HL Hl")
       as "(%L2 & %R & %rt' & %lt' & %r' & HL & %Hst & Hstep & HT)"; [set_solver.. | ].
     iMod (step_credit_redeem_logical with "Hcredit Hstep Hbank")
       as "[Hbank [Hl HR]]".
-    iModIntro. iFrame "Hbank". iExists L2. iFrame "HL".
-    by iApply ("HT" with "Hstore Hl HR").
+    iSpecialize ("HT" with "Hstore"). rewrite /introduce_with_hooks.
+    iMod ("HT" with "[] CTX HE HL [$Hl $HR]") as "(%L3 & HL & HT)"; first done.
+    iModIntro. iFrame "Hbank". iExists L3. iFrame.
   Qed.
 
   (** Access an array element, moving its ownership out *)

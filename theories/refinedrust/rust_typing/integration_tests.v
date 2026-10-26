@@ -23,10 +23,10 @@ Section paid_stratification_test.
       (λ _, credit_store n m 0 ∗ l ◁ₗ[f.1, Owned] r @ ◁ ty).
   Proof.
     iIntros "Hstore Hl".
-    apply_update (updateable_stratify l).
+    apply_update (updateable_stratify l StratRefoldFull StratifyUnblockOp).
     rep <-! <100 liRStep.
     li_unfold_lets_in_context.
-    apply_update (updateable_stratify l).
+    apply_update (updateable_stratify l StratNoRefold StratifyTypeInvOp).
     rep <-! <100 liRStep.
     li_unfold_lets_in_context.
     iApply typed_annot_stmt_skip. iFrame.
