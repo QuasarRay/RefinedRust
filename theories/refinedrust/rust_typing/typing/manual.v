@@ -207,11 +207,11 @@ Section updateable_rules.
       the store instead of scheduling it for a later context fold. *)
   Lemma updateable_stratify (l : loc) :
     find_in_context FindCreditStore (λ '(c, a, k),
-      ⌜fast_lia_hint (1 ≤ k)⌝ ∗
+      ⌜fast_lia_hint (1 ≤ k)%N⌝ ∗
       find_in_context (FindLoc l) (λ '(existT rt (lt, r, bk, π)),
         stratify_ltype_unblock π updateable_E updateable_L StratRefoldFull l lt r bk
           (λ L2 R rt' lt' r',
-            credit_store c a (k - 1) -∗
+            credit_store c a (k - 1)%N -∗
             l ◁ₗ[π, bk] r' @ lt' -∗ R -∗ updateable_core updateable_E L2)))
     ⊢ P.
   Proof.
@@ -481,8 +481,8 @@ Section updateable_rules.
       li_tactic (llctx_find_llft_goal updateable_L κ LlctxFindLftFull) (λ '(_, L'),
       li_tactic (simplify_lft_map_goal (map_list_delete M n)) (λ M',
       find_in_context FindCreditStore (λ '(c, a, k),
-        ⌜fast_lia_hint (1 ≤ c)⌝ ∗
-        (credit_store (c - 1) a k -∗
+        ⌜fast_lia_hint (1 ≤ c)%N⌝ ∗
+        (credit_store (c - 1)%N a k -∗
          named_lfts updateable_f M' -∗
          updateable_core updateable_E ((†ₗ κ) :: L')))))))
     ⊢ P.
@@ -674,9 +674,9 @@ Section credits.
 
   Lemma tac_credit_store_acquire_guard P :
     find_in_context FindCreditStore (λ '(n, m, k),
-      ⌜fast_lia_hint (5 ≤ n)⌝ ∗
-      ⌜fast_lia_hint (1 ≤ m)⌝ ∗
-      (credit_store (n - 5) (m - 1) k -∗ have_creds -∗ P))
+      ⌜fast_lia_hint (5 ≤ n)%N⌝ ∗
+      ⌜fast_lia_hint (1 ≤ m)%N⌝ ∗
+      (credit_store (n - 5)%N (m - 1)%N k -∗ have_creds -∗ P))
     ⊢ P.
   Proof.
     rewrite /FindCreditStore/find_in_context/=.
@@ -693,8 +693,8 @@ Section credits.
 
   Lemma tac_credit_store_acquire_one_credit P :
     find_in_context FindCreditStore (λ '(n, m, k),
-      ⌜fast_lia_hint (1 ≤ n)⌝ ∗
-      (credit_store (n - 1) m k -∗ £1 -∗ P))
+      ⌜fast_lia_hint (1 ≤ n)%N⌝ ∗
+      (credit_store (n - 1)%N m k -∗ £1 -∗ P))
     ⊢ P.
   Proof.
     rewrite /FindCreditStore/find_in_context/=.

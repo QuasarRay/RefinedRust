@@ -216,8 +216,8 @@ Section find.
   Global Instance subsume_credit_store_evar_inst n m k n' m' k' `{!ContainsProtected (credit_store n' m' k')} : Subsume (credit_store n m k) (credit_store n' m' k') | 10 :=
     λ T, i2p (subsume_credit_store_evar n m k n' m' k' T).
 
-  Lemma subsume_credit_store n m k n' m' k' T :
-    ⌜fast_lia_hint (n' ≤ n)⌝ ∗ ⌜fast_lia_hint (m' ≤ m)⌝ ∗ ⌜fast_lia_hint (k' ≤ k)⌝ ∗ T ⊢ subsume (Σ := Σ) (credit_store n m k) (credit_store n' m' k') T.
+  Lemma subsume_credit_store (n m k n' m' k' : N) T :
+    ⌜fast_lia_hint (n' ≤ n)%N⌝ ∗ ⌜fast_lia_hint (m' ≤ m)%N⌝ ∗ ⌜fast_lia_hint (k' ≤ k)%N⌝ ∗ T ⊢ subsume (Σ := Σ) (credit_store n m k) (credit_store n' m' k') T.
   Proof.
     rewrite /fast_lia_hint.
     iIntros "(% & % & % & HT) Hc".
@@ -735,7 +735,7 @@ Section introduce.
   (** credit related instances *)
   Lemma introduce_with_hooks_credits E L n T :
     find_in_context (FindCreditStore) (λ '(c, a, k),
-      credit_store (n + c) a k -∗ T L) ⊢
+      credit_store (N.of_nat n + c)%N a k -∗ T L) ⊢
     introduce_with_hooks E L (£ n) T.
   Proof.
     rewrite /FindCreditStore. iIntros "Ha".
@@ -749,15 +749,13 @@ Section introduce.
 
   Lemma introduce_with_hooks_tr E L n T :
     find_in_context (FindCreditStore) (λ '(c, a, k),
-      credit_store c (n + a) k -∗ T L)
+      credit_store c (N.of_nat n + a)%N k -∗ T L)
     ⊢ introduce_with_hooks E L (tr n) T.
   Proof.
     rewrite /FindCreditStore. iIntros "Ha".
     iDestruct "Ha" as ([[c a] k]) "(Hstore & HT)". simpl.
     iIntros (??) "#CTX #HE HL Hc".
-    iPoseProof (credit_store_acc with "Hstore") as "(Hcred & Hat & Hcl)".
-    iPoseProof ("Hcl" $! _ (n + a)%nat with "Hcred [Hat Hc]") as "Hstore".
-    { rewrite -Nat.add_succ_r. rewrite tr_split. iFrame. }
+    iPoseProof (credit_store_donate_tr with "Hstore Hc") as "Hstore".
     iExists _. iFrame. iApply ("HT" with "Hstore").
   Qed.
   Definition introduce_with_hooks_tr_inst := [instance @introduce_with_hooks_tr].
@@ -765,7 +763,7 @@ Section introduce.
 
   Lemma introduce_with_hooks_step_credits E L n T :
     find_in_context FindCreditStore (λ '(c, a, k),
-      credit_store c a (n + k) -∗ T L) ⊢
+      credit_store c a (N.of_nat n + k)%N -∗ T L) ⊢
     introduce_with_hooks E L (step_credit n) T.
   Proof.
     rewrite /FindCreditStore. iIntros "Ha".
@@ -882,7 +880,7 @@ Section introduce.
 
   Lemma introduce_with_hooks_guarded (E : elctx) (L : llctx) (P : iProp Σ) T :
     find_in_context (FindCreditStore) (λ '(c, a, k),
-      ⌜fast_lia_hint (1 ≤ c)⌝ ∗ (credit_store (c - 1)%nat a k -∗
+      ⌜fast_lia_hint (1 ≤ c)%N⌝ ∗ (credit_store (c - 1)%N a k -∗
         introduce_with_hooks E L P T)) ⊢
     introduce_with_hooks E L (guarded false P) T.
   Proof.
@@ -1314,7 +1312,7 @@ Section prove_subtype.
 
   Lemma prove_with_subtype_scrounge_credits E L step pm (n : nat) A T :
     find_in_context (FindCreditStore) (λ '(c, a, k),
-      ⌜fast_lia_hint (n ≤ c)⌝ ∗ (credit_store (c - n)%nat a k -∗ T L [] A))
+      ⌜fast_lia_hint (N.of_nat n ≤ c)%N⌝ ∗ (credit_store (c - N.of_nat n)%N a k -∗ T L [] A))
     ⊢ prove_with_subtype E L step pm (£ n) A T.
   Proof.
     iIntros "Ha". rewrite /FindCreditStore /fast_lia_hint.
@@ -1332,7 +1330,7 @@ Section prove_subtype.
 
   Lemma prove_with_subtype_scrounge_step_credits E L step pm (n : nat) A T :
     find_in_context (FindCreditStore) (λ '(c, a, k),
-      ⌜fast_lia_hint (n ≤ k)⌝ ∗ (credit_store c a (k - n)%nat -∗ T L [] A))
+      ⌜fast_lia_hint (N.of_nat n ≤ k)%N⌝ ∗ (credit_store c a (k - N.of_nat n)%N -∗ T L [] A))
     ⊢ prove_with_subtype E L step pm (step_credit n) A T.
   Proof.
     iIntros "Ha". rewrite /FindCreditStore /fast_lia_hint.
@@ -1350,15 +1348,12 @@ Section prove_subtype.
 
   Lemma prove_with_subtype_scrounge_tr E L step pm (n : nat) A T :
     find_in_context (FindCreditStore) (λ '(c, a, k),
-      ⌜fast_lia_hint (n ≤ a)⌝ ∗ (credit_store c (a - n)%nat k -∗ T L [] A))
+      ⌜fast_lia_hint (N.of_nat n ≤ a)%N⌝ ∗ (credit_store c (a - N.of_nat n)%N k -∗ T L [] A))
     ⊢ prove_with_subtype E L step pm (tr n) A T.
   Proof.
     iIntros "Ha". rewrite /FindCreditStore /fast_lia_hint.
     iDestruct "Ha" as ([[c a] k]) "(Hstore  & %Hn & HT)". simpl.
-    iPoseProof (credit_store_acc with "Hstore") as "(Hcred & Hat & Hcl)".
-    replace (S a) with (S (a - n) + n)%nat by lia.
-    iDestruct "Hat" as "(Hat & Hat')".
-    iPoseProof ("Hcl" with "Hcred Hat") as "Hstore".
+    iPoseProof (credit_store_scrounge_tr n with "Hstore") as "(Hat' & Hstore)"; first lia.
     iPoseProof ("HT" with "Hstore") as "HT".
     iIntros (?????) "CTX HE HL HA". iModIntro. iExists _, _, _. iFrame.
     iApply (maybe_logical_step_compose with "HA").
