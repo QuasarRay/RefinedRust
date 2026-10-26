@@ -155,10 +155,9 @@ impl<T> List<T> {
 
 impl<T> Drop for List<T> {
 
-    // Add a lifetime wellformedness constraint for &'a self;
-    // this is not added automatically via RefinedRust's usual mechanism as 
-    // we override the semantic type.
-    #[rr::unsafe_elctx("ty_outlives_E {T} ulft_1")]
+    // Add the well-formedness and outlives constraints for &'a self;
+    // these are not added automatically as we override the semantic type.
+    #[rr::unsafe_elctx("ty_wf_E {T} ++ ty_outlives_E {T} ulft_1")]
     #[rr::params("l", "xs")]
     #[rr::args("l" @ "alias_ref_t")]
     #[rr::requires(#type "l" : "$# xs" @ "List_inv_t T_rt -[] -[T_ty]")]
