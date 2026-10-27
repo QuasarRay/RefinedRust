@@ -1331,6 +1331,22 @@ Global Arguments is_struct_ot : simpl never.
 
 (* Simplifying this can lead to problems in some cases when used in specifications. *)
 Global Arguments replicate : simpl nomatch.
+
+(* Reduce credit-store counters, including conversions at the nat-indexed
+   resource boundary. stdpp marks these operations [simpl never]; use
+   [nomatch] so arithmetic with unknown arguments does not expose matches. *)
+Global Arguments N.of_nat : simpl nomatch.
+Global Arguments N.to_nat : simpl nomatch.
+Global Arguments N.add : simpl nomatch.
+Global Arguments N.sub : simpl nomatch.
+Global Arguments N.succ : simpl nomatch.
+Global Arguments N.mul : simpl nomatch.
+Global Arguments Pos.to_nat : simpl nomatch.
+Global Arguments Pos.succ : simpl nomatch.
+Global Arguments Pos.add : simpl nomatch.
+Global Arguments Pos.sub : simpl nomatch.
+Global Arguments Pos.mul : simpl nomatch.
+
 (* We don't want this to simplify away the zero case, as that can be a valuable hint. *)
 Global Arguments freeable_nz : simpl never.
 
