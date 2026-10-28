@@ -526,6 +526,8 @@
 
               stdlib = packages.stdlib-stdlib;
 
+              ci-image = import ./nix/mkCIImage.nix pkgs packages.default;
+
               devcontainer =
                 let
                   cargoVendorDir = rust.envBuilder.vendorMultipleCargoDeps {
