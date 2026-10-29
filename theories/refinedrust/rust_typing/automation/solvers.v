@@ -2444,6 +2444,14 @@ Section return_tac.
 End return_tac.
 
 Ltac solve_llctx_release_toks ::=
+  (* Manual update rules can supply the context through an Updateable
+     projection. Expose the list before searching, lest a present token be
+     treated as external and skipped. *)
+  lazymatch goal with
+  | |- llctx_release_toks ?L ?κs ?L' =>
+      let Lred := eval hnf in L in
+      change (llctx_release_toks Lred κs L')
+  end;
   match goal with
   | |- llctx_release_toks ?L [] _ =>
       notypeclasses refine (tac_llctx_release_toks_nil L)

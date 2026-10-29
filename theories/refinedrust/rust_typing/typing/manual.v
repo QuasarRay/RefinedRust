@@ -203,6 +203,45 @@ Section updateable_rules.
     iMod "HT" as "$". by iFrame.
   Qed.
 
+  (** Open a shared allocation loan, computing the counted lifetime context.
+      Only the witness and a closing wand escape to the client proof. *)
+  Lemma updateable_borrow_shared_freeable κ l n q kind b :
+    ⌜b = true → n ≠ 0%nat⌝ ∗
+    li_tactic (lctx_lft_alive_count_goal updateable_E updateable_L κ)
+      (λ '(κs, L'),
+        freeable_nz_shared κ l n q kind ∗
+        (∀ qa, if_iTrue b (alloc_alive_witness AliveAlloc l qa) -∗
+          (if_iTrue b (alloc_alive_witness AliveAlloc l qa) ={⊤}=∗ llft_elt_toks κs) -∗
+          updateable_core updateable_E L'))
+    ⊢ P.
+  Proof.
+    rewrite /li_tactic /lctx_lft_alive_count_goal.
+    iIntros "(%Hnz & %κs & %L' & %Halive & Hb & HT)".
+    unshelve iApply add_updateable_fupd; first apply _.
+    iIntros "#CTX #HE HL".
+    iMod (freeable_nz_shared_alive_count_acc with "CTX HE HL Hb")
+      as "(HL & %qa & Ha & Hclose)"; [done | done |].
+    iModIntro. iExists L'. iFrame "HL".
+    by iApply ("HT" with "Ha Hclose").
+  Qed.
+
+  (** Close any loan returning counted lifetime tokens. Release the counts in
+      the current context, which may have gained lifetimes since opening. *)
+  Lemma updateable_close_lft_loan Q :
+    (∃ κs, Q ∗ (Q ={⊤}=∗ llft_elt_toks κs) ∗
+    li_tactic (llctx_release_toks_goal updateable_L κs)
+      (λ L', updateable_core updateable_E L'))
+    ⊢ P.
+  Proof.
+    rewrite /li_tactic /llctx_release_toks_goal.
+    iIntros "(%κs & HQ & Hclose & %L' & %Hrelease & HT)".
+    unshelve iApply add_updateable_fupd; first apply _.
+    iIntros "#CTX #HE HL".
+    iMod ("Hclose" with "HQ") as "Hcounts".
+    iMod (llctx_return_elt_toks _ _ L' with "HL Hcounts") as "HL"; first done.
+    iModIntro. iExists L'. by iFrame.
+  Qed.
+
   (** Stratify one selected assignment now, paying for its logical step from
       the store instead of scheduling it for a later context fold. *)
   Lemma updateable_stratify (l : loc) (ma : StratifyAscendMode) {M} (ml : M) :

@@ -25,3 +25,17 @@ Section tests.
     all: rep liRStep; iFrame.
   Qed.
 End tests.
+
+Section lifetime_tokens.
+  Context `{!typeGS Σ}.
+
+  Definition release_test_context (κ κ' : lft) : llctx :=
+    [κ' ⊑ₗ{0} []; κ ⊑ₗ{1} []].
+
+  (* The returned token must decrement its count even when the context list
+     is hidden behind a definition, and must preserve the newer lifetime. *)
+  Lemma release_tokens_hidden_context κ κ' :
+    llctx_release_toks (release_test_context κ κ') [κ]
+      [κ' ⊑ₗ{0} []; κ ⊑ₗ{0} []].
+  Proof. solve_llctx_release_toks. Qed.
+End lifetime_tokens.

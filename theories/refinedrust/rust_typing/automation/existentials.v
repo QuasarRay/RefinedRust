@@ -454,10 +454,125 @@ Next Obligation.
   iIntros "HT". iApply "HT".
   iFrame.
 Qed.
-Global Instance shareable_discard_freeable `{!typeGS Σ} {rt : RT} π κ κs (outer : rt) (assumptions : Prop) l n q al :
-  Shareable π κ κs outer assumptions (freeable l n q al) := shareable_discard outer assumptions _ _ _ _.
-Global Instance shareable_discard_freeable_nz `{!typeGS Σ} {rt : RT} π κ κs (outer : rt) (assumptions : Prop) l n q al :
-  Shareable π κ κs outer assumptions (freeable_nz l n q al) := shareable_discard outer assumptions _ _ _ _.
+Global Program Instance freeable_shareable `{!typeGS Σ} {rt : RT} π κ κs
+    (outer : rt) (assumptions : Prop) l n q al :
+  Shareable π κ κs outer assumptions (freeable l n q al) := {|
+    shareable_prop := (&frac{κ} (λ p, freeable l n (q * p) al))%I
+  |}.
+Next Obligation.
+  iIntros (Σ Hgs rt π κ κs outer assumptions l n q al Hassum Houter F G qt HF)
+    "[#LFT #LLCTX] #Hna Htok Htok1 Hb HT".
+  iApply fupd_logical_step.
+  iMod (bor_fracture (λ p, freeable l n (q * p) al) with "LFT [Hb]") as "#Hfrac";
+    first solve_ndisj.
+  { rewrite Qp.mul_1_r. done. }
+  iApply (logical_step_wand with "HT").
+  iModIntro. iIntros "HT". iApply "HT". by iFrame "∗ #".
+Qed.
+
+Definition freeable_nz_shared `{!typeGS Σ} κ l n q al : iProp Σ :=
+  match n with
+  | O => True%I
+  | S _ => (&frac{κ} (λ p, freeable l n (q * p) al))%I
+  end.
+Global Instance freeable_nz_shared_persistent `{!typeGS Σ} κ l n q al :
+  Persistent (freeable_nz_shared κ l n q al).
+Proof. destruct n; apply _. Qed.
+
+Global Program Instance freeable_nz_shareable `{!typeGS Σ} {rt : RT} π κ κs
+    (outer : rt) (assumptions : Prop) l n q al :
+  Shareable π κ κs outer assumptions (freeable_nz l n q al) := {|
+    shareable_prop := freeable_nz_shared κ l n q al
+  |}.
+Next Obligation.
+  intros Σ Hgs rt π κ κs outer assumptions l n q al Hassum Houter.
+  destruct n; simpl; rewrite /freeable_nz.
+  - iIntros (F G qt HF) "#CTX #Hna Htok Htok1 Hb HT".
+    iApply (logical_step_wand with "HT").
+    iIntros "HT". iApply "HT". by iFrame.
+  - exact (@shareable_proof Σ Hgs rt π κ κs outer assumptions _
+      (freeable_shareable π κ κs outer assumptions l (S n) q al) Hassum Houter).
+Qed.
+
+Global Program Instance frac_bor_as_shared `{!typeGS Σ} κ (Φ : Qp → iProp Σ) :
+  AsShared κ (&frac{κ} Φ)%I := {| as_shared_pred κ' := (&frac{κ'} Φ)%I |}.
+Next Obligation. done. Qed.
+
+Global Program Instance frac_bor_share_mono `{!typeGS Σ} (Φ : Qp → iProp Σ) :
+  ShareMono (λ κ, &frac{κ} Φ)%I.
+Next Obligation.
+  iIntros (?????) "Hincl Hb". by iApply (frac_bor_shorten with "Hincl Hb").
+Qed.
+
+Global Program Instance freeable_nz_as_shared `{!typeGS Σ} κ l n q al :
+  AsShared κ (freeable_nz_shared κ l n q al) :=
+    {| as_shared_pred κ' := freeable_nz_shared κ' l n q al |}.
+Next Obligation. done. Qed.
+Global Program Instance freeable_nz_share_mono `{!typeGS Σ} l n q al :
+  ShareMono (λ κ, freeable_nz_shared κ l n q al).
+Next Obligation.
+  iIntros (Σ Hgs l n q al κ κ') "Hincl Hb".
+  destruct n; first done.
+  by iApply (frac_bor_shorten with "Hincl Hb").
+Qed.
+
+(** Borrow allocation liveness without accessing the allocation's contents or
+    retaining any non-atomic access token. *)
+Lemma freeable_frac_alive_acc `{!typeGS Σ} E κ l n q kind qt :
+  lftE ⊆ E →
+  rrust_ctx -∗ qt.[κ] -∗
+  &frac{κ} (λ p, freeable l n (q * p) kind) ={E}=∗
+  ∃ qa, alloc_alive_token l qa ∗
+    (alloc_alive_token l qa ={E}=∗ qt.[κ]).
+Proof.
+  iIntros (HE) "[#LFT #LLCTX] Htok Hb".
+  have Hfrac : Fractional (λ p, freeable l n (q * p) kind)%I.
+  { intros p1 p2. rewrite Qp.mul_add_distr_l.
+    exact (freeable_fractional l n kind (q * p1)%Qp (q * p2)%Qp). }
+  iMod (frac_bor_acc with "LFT Hb Htok") as (p) "(>Ha & Hclose)";
+    first solve_ndisj.
+  iDestruct (freeable_alive_acc with "Ha") as "(Ha & Hrestore)".
+  iModIntro. iExists (q * p)%Qp. iFrame "Ha".
+  iIntros "Ha". iApply "Hclose". iNext. by iApply "Hrestore".
+Qed.
+
+(** Lending allocation liveness is trivial when the client needs no witness. *)
+Lemma freeable_nz_shared_alive_acc `{!typeGS Σ} E κ l n q kind qt b :
+  lftE ⊆ E →
+  (b = true → n ≠ 0%nat) →
+  rrust_ctx -∗ qt.[κ] -∗ freeable_nz_shared κ l n q kind ={E}=∗
+  ∃ qa, if_iTrue b (alloc_alive_witness AliveAlloc l qa) ∗
+    (if_iTrue b (alloc_alive_witness AliveAlloc l qa) ={E}=∗ qt.[κ]).
+Proof.
+  iIntros (HE Hnz) "Hctx Htok Hb".
+  destruct b.
+  - destruct n; first by exfalso; apply (Hnz eq_refl).
+    iApply (freeable_frac_alive_acc with "Hctx Htok Hb"); done.
+  - iModIntro. iExists 1%Qp. rewrite /if_iTrue.
+    iSplit; first done. iIntros "_". by iFrame.
+Qed.
+
+(** Package the lifetime-token and allocation-token accessors into a loan whose
+    closer returns counted tokens. The remaining local context stays usable
+    while the allocation witness is passed through a call. *)
+Lemma freeable_nz_shared_alive_count_acc `{!typeGS Σ} E L κ κs L' l n q kind b :
+  lctx_lft_alive_count E L κ κs L' →
+  (b = true → n ≠ 0%nat) →
+  rrust_ctx -∗ elctx_interp E -∗ llctx_interp L -∗
+  freeable_nz_shared κ l n q kind ={⊤}=∗
+  llctx_interp L' ∗ ∃ qa,
+    if_iTrue b (alloc_alive_witness AliveAlloc l qa) ∗
+    (if_iTrue b (alloc_alive_witness AliveAlloc l qa) ={⊤}=∗ llft_elt_toks κs).
+Proof.
+  iIntros (Halive Hnz) "#CTX #HE HL Hb".
+  iMod (lctx_lft_alive_count_tok ⊤ E L κ κs L' with "HE HL")
+    as (qt) "(Htok & Htokclose & HL)"; [solve_ndisj | done |].
+  iMod (freeable_nz_shared_alive_acc with "CTX Htok Hb")
+    as (qa) "(Ha & Hclose)"; [solve_ndisj | done |].
+  iModIntro. iFrame "HL". iExists qa. iFrame "Ha".
+  iIntros "Ha". iMod ("Hclose" with "Ha") as "Htok".
+  by iApply "Htokclose".
+Qed.
 
 (** Can be declared as instances to discard props which won't survive drop *)
 Program Definition ghost_droppable_discard `{!typeGS Σ} (P : iProp Σ) :
