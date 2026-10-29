@@ -215,6 +215,21 @@ Ltac check_own_in_context P :=
   end.
 Global Hint Extern 1 (CheckOwnInContext ?P) => (check_own_in_context P; constructor; exact: I) : typeclass_instances.
 
+(** Unlike [check_own_in_context], this check only recognizes assertions already
+    present verbatim. In particular, it cannot choose a witness for a goal evar. *)
+Ltac check_exact_own_in_context P :=
+  let rec go Hs :=
+      lazymatch Hs with
+      | Esnoc ?Hs2 ?id ?Q =>
+        first [ constr_eq Q P | go Hs2 ]
+      end in
+  match goal with
+  | H := Envs ?Δi ?Δs _ |- _ =>
+      first [ go Δs | go Δi ]
+  end.
+Global Hint Extern 1 (CheckExactOwnInContext ?P) =>
+  (check_exact_own_in_context P; constructor; exact: I) : typeclass_instances.
+
 (** * Optimization: Introduce let-bindings for subterms of the goal *)
 Definition LET_ID {A} (x : A) : A := x.
 Arguments LET_ID : simpl never.

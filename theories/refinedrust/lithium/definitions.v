@@ -18,6 +18,11 @@ Arguments i2p_proof {_ _} _.
   The implementation can be found in proof_state.v *)
 Class CheckOwnInContext {Σ} (P : iProp Σ) : Prop := { check_own_in_context : True }.
 
+(** An exact check must not instantiate parameters of the requested assertion. *)
+Class CheckExactOwnInContext {Σ} (P : iProp Σ) : Prop := {
+  check_exact_own_in_context : True
+}.
+
 (** * [find_in_context] *)
 Record find_in_context_info {Σ} : Type := {
   fic_A : Type;
@@ -141,4 +146,3 @@ Definition li_trace {Σ A} (t : A) (T : iProp Σ) : iProp Σ := T.
 
 (** * clear *)
 Definition li_clear {Σ A} (t : A) (T : iProp Σ) : iProp Σ := T.
-

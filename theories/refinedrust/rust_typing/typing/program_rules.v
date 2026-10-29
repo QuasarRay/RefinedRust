@@ -1254,6 +1254,19 @@ Section prove_subtype.
   Definition prove_with_subtype_find_direct_inst := [instance @prove_with_subtype_find_direct].
   Global Existing Instance prove_with_subtype_find_direct_inst | 1000.
 
+  (** Recognize an existing whole assertion before destructing it. Keep the
+      late unifying lookup as a fallback, and leave stratification ordering
+      unchanged. The exact check cannot commit to unknown goal parameters. *)
+  Lemma prove_with_subtype_find_exact E L step P A
+      `{!CheckExactOwnInContext P} T :
+    P ∗ T L [] A
+    ⊢ prove_with_subtype E L step ProveDirect P A T.
+  Proof.
+    apply prove_with_subtype_find_direct. by constructor.
+  Qed.
+  Definition prove_with_subtype_find_exact_inst := [instance @prove_with_subtype_find_exact].
+  Global Existing Instance prove_with_subtype_find_exact_inst | 90.
+
   Lemma prove_with_subtype_primitive E L step pm P `{Hrel : !RelatedTo P} A T :
     find_in_context Hrel.(rt_fic) (λ a,
       subsume_full step (fic_Prop Hrel.(rt_fic) a) P E L (λ L R, T L [] (R ∗ A)))
