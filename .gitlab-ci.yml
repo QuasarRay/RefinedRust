@@ -141,7 +141,8 @@ publish-ci-image:
   script:
     - nix build ${NIX_OPTIONS} --print-build-logs .#packages.x86_64-linux.ci-image --out-link result-ci-image
     - |
-      nix run --inputs-from . nixpkgs#skopeo -- copy \
+      # Trust the local build without requiring a system signature policy.
+      nix run --inputs-from . nixpkgs#skopeo -- --insecure-policy copy \
         --dest-creds "$CI_REGISTRY_USER:$CI_REGISTRY_PASSWORD" \
         "docker-archive:$(readlink -f result-ci-image)" \
         "docker://$CI_REGISTRY/gaeher/refinedrust-ci:$CI_COMMIT_SHA"
