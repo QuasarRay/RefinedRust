@@ -881,9 +881,13 @@ Ltac liCase :=
   | |- @envs_entails ?PROP ?Δ (case_if ?P ?T1 ?T2) =>
       notypeclasses refine (tac_case_if _ _ _ _ _ _)
   | |- @envs_entails ?PROP ?Δ (case_destruct (@bool_decide ?P ?b) ?T) =>
-      notypeclasses refine (tac_case_destruct_bool_decide _ _ _ _ _)
-      (* notypeclasses refine (tac_case_destruct true _ _ _ _); *)
-      (* let H := fresh "H" in destruct_decide (@bool_decide_reflect P b) as H; revert H *)
+      (* Rewrite occurrences in the continuation too: merely introducing [P]
+         or [¬ P] leaves a closed-over [bool_decide P] unchanged, so a rule
+         destructing that expression can be selected repeatedly. *)
+      try (is_var Δ; unfold Δ; clear Δ);
+      notypeclasses refine (tac_case_destruct true _ _ _ _);
+      case_eq (@bool_decide P b);
+      [rewrite bool_decide_eq_true | rewrite bool_decide_eq_false]
   | |- @envs_entails ?PROP ?Δ (case_destruct ?x ?T) =>
       tryif (non_trivial_destruct x) then
         notypeclasses refine (tac_case_destruct true _ _ _ _);
