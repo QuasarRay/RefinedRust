@@ -10,6 +10,9 @@ From radium Require Export lang syntypes.
 Set Default Proof Using "Type".
 Import uPred.
 
+(** The backing resource of a returnable allocation-liveness loan. *)
+Inductive alloc_alive_kind := AliveByte | AliveAlloc.
+
 (** ** Heap state *)
 Definition lock_stateR : cmra :=
   csumR (exclR unitO) natR.
@@ -172,6 +175,35 @@ Section definitions.
   Definition alloc_alive_loc_eq : @alloc_alive_loc = @alloc_alive_loc_def :=
     seal_eq alloc_alive_loc_aux.
 
+  (** A returnable allocation-liveness witness. The address and fraction are
+      fixed so a retained fraction can recover the byte's value by agreement. *)
+  Definition alloc_alive_byte (w : loc) (q : Qp) : iProp Σ :=
+    (∃ b, heap_pointsto w q [b])%I.
+
+  (** Returnable liveness evidence independent of the allocation's contents. *)
+  Definition alloc_alive_token (l : loc) (q : Qp) : iProp Σ :=
+    (∃ id, ⌜l.(loc_p) = ProvAlloc id⌝ ∗ alloc_alive id (DfracOwn q) true)%I.
+
+  Definition alloc_alive_witness (kind : alloc_alive_kind) (l : loc) (q : Qp) : iProp Σ :=
+    match kind with
+    | AliveByte => alloc_alive_byte l q
+    | AliveAlloc => alloc_alive_token l q
+    end.
+  Global Typeclasses Opaque alloc_alive_witness.
+
+  Global Instance alloc_alive_token_fractional l : Fractional (alloc_alive_token l).
+  Proof.
+    intros p q. rewrite /alloc_alive_token. iSplit.
+    - iIntros "(%id & %Hp & [Hp Hq])". iSplitL "Hp"; iExists id; by iFrame.
+    - iIntros "[(%id & %Hp & Hp) (%id' & %Hq & Hq)]".
+      have -> : id' = id by congruence.
+      iExists id. iFrame. by iCombine "Hp Hq" as "$".
+  Qed.
+
+  Global Instance alloc_alive_token_as_fractional l q :
+    AsFractional (alloc_alive_token l q) (alloc_alive_token l) q.
+  Proof. split; [done|apply _]. Qed.
+
   (** * Freeable *)
 
   Definition freeable_def (l : loc) (n : nat) (q : Qp) (k : alloc_kind) : iProp Σ :=
@@ -202,6 +234,18 @@ Section definitions.
     freeable l n q k -∗ ⌜∃ id, l.(loc_p) = ProvAlloc id⌝.
   Proof.
     rewrite freeable_eq. iIntros "(%id & % & _)". eauto.
+  Qed.
+
+  Lemma freeable_alive_acc l n q k :
+    freeable l n q k -∗ alloc_alive_token l q ∗
+      (alloc_alive_token l q -∗ freeable l n q k).
+  Proof.
+    rewrite freeable_eq /freeable_def /alloc_alive_token.
+    iIntros "(%id & %Hp & #Hmeta & Ha)".
+    iSplitL "Ha"; first by iExists id; iFrame.
+    iIntros "(%id' & %Hp' & Ha)".
+    have -> : id' = id by congruence.
+    iExists id. iFrame "Ha Hmeta". done.
   Qed.
 
   (** Version of [freeable] that is compatible with zero-sized allocations
@@ -801,6 +845,24 @@ Section heap.
     l ↦|ly| -∗ ⌜l `has_layout_loc` ly⌝.
   Proof. iIntros "(% & % & % & ?)". done. Qed.
 
+  Lemma heap_pointsto_alive_byte_acc l p v :
+    v ≠ [] →
+    l ↦{p} v -∗
+    alloc_alive_byte l (p / 2) ∗
+    (alloc_alive_byte l (p / 2) -∗ l ↦{p} v).
+  Proof.
+    destruct v as [|b v]; first done.
+    iIntros (_) "Hl". rewrite heap_pointsto_cons.
+    iDestruct "Hl" as "([Hbyte Hkeep] & Htail)".
+    iSplitL "Hbyte".
+    - iExists b. iFrame.
+    - iIntros "(%b' & Hbyte)".
+      iDestruct (heap_pointsto_agree with "Hkeep Hbyte") as %Heq; first done.
+      injection Heq as <-.
+      iCombine "Hbyte Hkeep" as "Hbyte".
+      iFrame.
+  Qed.
+
   Lemma heap_pointsto_ptr_in_range l q v :
     l ↦{q} v -∗ ⌜min_alloc_start ≤ l.(loc_a) ∧ l.(loc_a) + length v ≤ max_alloc_end_zero⌝.
   Proof.
@@ -1189,6 +1251,40 @@ Section alloc_alive.
     l1.(loc_p) = l2.(loc_p) →
     alloc_alive_loc l1 -∗ alloc_alive_loc l2.
   Proof. rewrite alloc_alive_loc_eq /alloc_alive_loc_def => ->. by iIntros "$". Qed.
+
+  Lemma alloc_alive_loc_fupd l :
+    (|={⊤}=> alloc_alive_loc l) -∗ alloc_alive_loc l.
+  Proof. rewrite alloc_alive_loc_eq. iIntros ">H". done. Qed.
+
+  Lemma alloc_alive_byte_alive l w q :
+    w.(loc_p) = l.(loc_p) →
+    alloc_alive_byte w q -∗ alloc_alive_loc l.
+  Proof.
+    intros Hp. rewrite alloc_alive_loc_eq /alloc_alive_loc_def /alloc_alive_byte.
+    iIntros "(%b & Hw)".
+    iApply fupd_mask_intro; first set_solver. iIntros "_".
+    iRight. iExists w.(loc_a), q, [b]. iSplit; first done.
+    destruct w, l; simpl in *; subst. done.
+  Qed.
+
+  Lemma alloc_alive_token_alive l w q :
+    w.(loc_p) = l.(loc_p) →
+    alloc_alive_token w q -∗ alloc_alive_loc l.
+  Proof.
+    intros Hp. rewrite alloc_alive_loc_eq /alloc_alive_loc_def /alloc_alive_token.
+    iIntros "(%id & %Hid & Ha)".
+    iApply fupd_mask_intro; first set_solver. iIntros "_".
+    iLeft. iExists id, (DfracOwn q). iFrame. iPureIntro. congruence.
+  Qed.
+
+  Lemma alloc_alive_witness_alive kind l w q :
+    w.(loc_p) = l.(loc_p) →
+    alloc_alive_witness kind w q -∗ alloc_alive_loc l.
+  Proof.
+    destruct kind; simpl; intros Hp.
+    - by apply alloc_alive_byte_alive.
+    - by apply alloc_alive_token_alive.
+  Qed.
 
   Lemma heap_pointsto_alive_strong l :
     (|={⊤, ∅}=> (∃ q v, ⌜length v ≠ 0%nat⌝ ∗ l ↦{q} v)) -∗ alloc_alive_loc l.

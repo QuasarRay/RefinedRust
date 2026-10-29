@@ -492,6 +492,29 @@ Section accessors.
     iR. done.
   Qed.
 
+  (** Access one byte without changing the owned place or its refinement. *)
+  Lemma ofty_ltype_alive_acc_owned {rt} E π (ty : type rt) r l ly :
+    lftE ⊆ E →
+    syn_type_has_layout (ty_syn_type ty MetaNone) ly →
+    ly_size ly ≠ 0%nat →
+    l ◁ₗ[π, Owned] r @ (◁ ty)
+    ={E}=∗ ∃ qb, alloc_alive_byte l qb ∗
+      (alloc_alive_byte l qb ={E}=∗ l ◁ₗ[π, Owned] r @ (◁ ty)).
+  Proof.
+    iIntros (HE Hst Hsz) "Hl".
+    iEval (rewrite ltype_own_ofty_unfold /lty_of_ty_own) in "Hl".
+    iDestruct "Hl" as "(%ly' & %Hst' & %Hal & #Hsc & #Hlb & %r' & Hrfn & Hb)".
+    iMod (fupd_mask_mono with "Hb") as "(%v & Hl & Hv)"; first done.
+    iDestruct (ty_own_val_has_layout with "Hv") as %Hly; first exact Hst.
+    iDestruct (heap_pointsto_alive_byte_acc with "Hl") as "(Hw & Hrestore)".
+    { intros ->. rewrite /has_layout_val in Hly. simpl in Hly. lia. }
+    iModIntro. iExists (1 / 2)%Qp. iFrame "Hw".
+    iIntros "Hw". iPoseProof ("Hrestore" with "Hw") as "Hl".
+    rewrite ltype_own_ofty_unfold /lty_of_ty_own.
+    iModIntro. iExists ly'. iFrame "#%". iExists r'. iFrame "Hrfn".
+    iModIntro. iExists v. iFrame.
+  Qed.
+
   Lemma ofty_ltype_acc_uniq {rt} F π (ty : type rt) (r : rt) κ γ l R q :
     lftE ⊆ F →
     rrust_ctx -∗
