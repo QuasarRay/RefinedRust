@@ -3,6 +3,7 @@ From refinedrust Require Import typing shims.
 From rrstd.ptr.ptr.generated Require Import generated_code_ptr generated_specs_ptr generated_template_const_ptr_sub.
 
 Set Default Proof Using "Type".
+Local Typeclasses Opaque alloc_alive_witness.
 
 Section proof.
 Context `{RRGS : !refinedrustGS Σ}.
@@ -65,7 +66,11 @@ Proof.
     apply val_to_loc_decodes_to_loc.
     by apply val_to_of_loc. }
 
-  repeat liRStep; liShow.
+  iRename select (if_iTrue _ (alloc_alive_witness kind w q))%I into "Halive".
+  have Hsize : size_of_st (st_of T_ty MetaNone) = ly_size T_st_ly.
+  { by rewrite /size_of_st /use_layout_alg' T_st_alg. }
+  iEval (rewrite -Hsize) in "Halive".
+  all: rep liRStep; liShow.
 
   all: print_remaining_goal.
   Unshelve. all: sidecond_solver.

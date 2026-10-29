@@ -188,9 +188,12 @@ pub const fn copy<T>(src: *const T, dst: *mut T, count: usize) {
 }
 
 
-// TODO: offset, add, sub should require that the allocation is still alive, I think
 #[rr::export_as(#method core::ptr::const_ptr::offset)]
 #[rr::code_shim("ptr_offset")]
+#[rr::params("kind" : "alloc_alive_kind", "w" : "loc", "q" : "Qp")]
+#[rr::requires("size_of_st {st_of T} = 0%nat ∨ w.(loc_p) = l.(loc_p)")]
+#[rr::requires(#iris "if_iTrue (bool_decide (size_of_st {st_of T} ≠ 0%nat)) (alloc_alive_witness kind w q)")]
+#[rr::ensures(#iris "if_iTrue (bool_decide (size_of_st {st_of T} ≠ 0%nat)) (alloc_alive_witness kind w q)")]
 #[rr::requires("l `has_layout_loc` {ly_of T}")]
 #[rr::requires("(count * size_of_st {st_of T})%Z ∈ ISize")]
 #[rr::requires(#iris "
@@ -205,6 +208,10 @@ pub const fn const_ptr_offset<T>(l: *const T, count: isize) -> *const T
 
 #[rr::export_as(#method core::ptr::mut_ptr::offset)]
 #[rr::code_shim("ptr_offset")]
+#[rr::params("kind" : "alloc_alive_kind", "w" : "loc", "q" : "Qp")]
+#[rr::requires("size_of_st {st_of T} = 0%nat ∨ w.(loc_p) = l.(loc_p)")]
+#[rr::requires(#iris "if_iTrue (bool_decide (size_of_st {st_of T} ≠ 0%nat)) (alloc_alive_witness kind w q)")]
+#[rr::ensures(#iris "if_iTrue (bool_decide (size_of_st {st_of T} ≠ 0%nat)) (alloc_alive_witness kind w q)")]
 #[rr::requires("l `has_layout_loc` {ly_of T}")]
 #[rr::requires("(count * size_of_st {st_of T})%Z ∈ ISize")]
 #[rr::requires(#iris "
@@ -218,6 +225,10 @@ pub const fn mut_ptr_offset<T>(l: *mut T, count: isize) -> *mut T
 }
 
 #[rr::export_as(#method core::ptr::const_ptr::add)]
+#[rr::params("kind" : "alloc_alive_kind", "w" : "loc", "q" : "Qp")]
+#[rr::requires("size_of_st {st_of T} = 0%nat ∨ w.(loc_p) = l.(loc_p)")]
+#[rr::requires(#iris "if_iTrue (bool_decide (size_of_st {st_of T} ≠ 0%nat)) (alloc_alive_witness kind w q)")]
+#[rr::ensures(#iris "if_iTrue (bool_decide (size_of_st {st_of T} ≠ 0%nat)) (alloc_alive_witness kind w q)")]
 #[rr::requires("l `has_layout_loc` {ly_of T}")]
 #[rr::requires("(count * size_of_st {st_of T})%Z ∈ ISize")]
 #[rr::requires(#iris "loc_in_bounds l 0 ((Z.to_nat count) * size_of_st {st_of T})")]
@@ -231,6 +242,10 @@ pub const fn const_ptr_add<T>(l: *const T, count: usize) -> *const T {
 }
 
 #[rr::export_as(#method core::ptr::mut_ptr::add)]
+#[rr::params("kind" : "alloc_alive_kind", "w" : "loc", "q" : "Qp")]
+#[rr::requires("size_of_st {st_of T} = 0%nat ∨ w.(loc_p) = l.(loc_p)")]
+#[rr::requires(#iris "if_iTrue (bool_decide (size_of_st {st_of T} ≠ 0%nat)) (alloc_alive_witness kind w q)")]
+#[rr::ensures(#iris "if_iTrue (bool_decide (size_of_st {st_of T} ≠ 0%nat)) (alloc_alive_witness kind w q)")]
 #[rr::requires("l `has_layout_loc` {ly_of T}")]
 #[rr::requires("(count * size_of_st {st_of T})%Z ∈ ISize")]
 #[rr::requires(#iris "loc_in_bounds l 0 ((Z.to_nat count) * size_of_st {st_of T})")]
@@ -246,6 +261,10 @@ pub const fn mut_ptr_add<T>(l: *mut T, count: usize) -> *mut T {
 
 #[rr::export_as(#method core::ptr::const_ptr::sub)]
 #[rr::code_shim("ptr_sub")]
+#[rr::params("kind" : "alloc_alive_kind", "w" : "loc", "q" : "Qp")]
+#[rr::requires("size_of_st {st_of T} = 0%nat ∨ w.(loc_p) = l.(loc_p)")]
+#[rr::requires(#iris "if_iTrue (bool_decide (size_of_st {st_of T} ≠ 0%nat)) (alloc_alive_witness kind w q)")]
+#[rr::ensures(#iris "if_iTrue (bool_decide (size_of_st {st_of T} ≠ 0%nat)) (alloc_alive_witness kind w q)")]
 #[rr::requires("l `has_layout_loc` {ly_of T}")]
 #[rr::requires("(count * size_of_st {st_of T})%Z ∈ ISize")]
 #[rr::requires(#iris "loc_in_bounds l (Z.to_nat count * size_of_st {st_of T}) 0")]
@@ -257,6 +276,10 @@ pub const fn const_ptr_sub<T>(l: *const T, count: usize) -> *const T {
 
 #[rr::export_as(#method core::ptr::mut_ptr::sub)]
 #[rr::code_shim("ptr_sub")]
+#[rr::params("kind" : "alloc_alive_kind", "w" : "loc", "q" : "Qp")]
+#[rr::requires("size_of_st {st_of T} = 0%nat ∨ w.(loc_p) = l.(loc_p)")]
+#[rr::requires(#iris "if_iTrue (bool_decide (size_of_st {st_of T} ≠ 0%nat)) (alloc_alive_witness kind w q)")]
+#[rr::ensures(#iris "if_iTrue (bool_decide (size_of_st {st_of T} ≠ 0%nat)) (alloc_alive_witness kind w q)")]
 #[rr::requires("l `has_layout_loc` {ly_of T}")]
 #[rr::requires("(count * size_of_st {st_of T})%Z ∈ ISize")]
 #[rr::requires(#iris "loc_in_bounds l ((Z.to_nat count) * size_of_st {st_of T}) 0")]

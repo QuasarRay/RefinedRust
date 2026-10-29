@@ -27,9 +27,12 @@ Ltac const_ptr_offset_prelude :=
   let ϝ := fresh "ϝ" in
   let fid := fresh "fid" in
   let T_ty := fresh "T_ty" in
+  let kind := fresh "kind" in
+  let w := fresh "w" in
+  let q := fresh "q" in
   let l := fresh "l" in
   let count := fresh "count" in
-  start_function "const_ptr_offset" ϝ fid ( [] ) ( [T_ty [] ] ) ( [  l count ] ) ( l count );
+  start_function "const_ptr_offset" ϝ fid ( [] ) ( [T_ty [] ] ) ( [ [ [ [  kind w ] q ] l ] count ] ) ( kind w q l count );
   intros arg_l arg_count;
   let π := get_π in
   let Σ := get_Σ in

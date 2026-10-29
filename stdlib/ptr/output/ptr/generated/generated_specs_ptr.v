@@ -1158,15 +1158,18 @@ Definition trait_incl_of_const_ptr_add (T_rt: RT) (T_st: syn_type) (DropGlue_T_s
 
 Definition type_of_const_ptr_add (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
-      (* params....... *) (l, count) : ((_ * _)),
+      (* params....... *) (kind, w, q, l, count) : (((alloc_alive_kind) * (loc) * (Qp) * _ * _)),
       (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) l :@: alias_ptr_t, count :@: (int USize);
-      (* precondition. *) (λ π : thread_id, (⌜(l `has_layout_loc` (use_layout_alg' (ty_syn_type T_ty MetaNone)))%Z⌝)
+      (* precondition. *) (λ π : thread_id, (⌜(size_of_st (ty_syn_type T_ty MetaNone) = 0%nat ∨ w.(loc_p) = l.(loc_p))%Z⌝)
+        ∗ (if_iTrue (bool_decide (size_of_st (ty_syn_type T_ty MetaNone) ≠ 0%nat)) (alloc_alive_witness kind w q))
+        ∗ (⌜(l `has_layout_loc` (use_layout_alg' (ty_syn_type T_ty MetaNone)))%Z⌝)
         ∗ (⌜((count * size_of_st (ty_syn_type T_ty MetaNone))%Z ∈ ISize)%Z⌝)
         ∗ (loc_in_bounds l 0 ((Z.to_nat count) * size_of_st (ty_syn_type T_ty MetaNone)))) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ _ : unit, l offsetst{ (ty_syn_type T_ty MetaNone) }ₗ count @ alias_ptr_t;
-      (* postcondition *) (λ π : thread_id, (£ (S (num_laters_per_step 1)) ∗ tr 1)) |
+      (* postcondition *) (λ π : thread_id, (if_iTrue (bool_decide (size_of_st (ty_syn_type T_ty MetaNone) ≠ 0%nat)) (alloc_alive_witness kind w q))
+      ∗ (£ (S (num_laters_per_step 1)) ∗ tr 1)) |
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
 
@@ -1236,17 +1239,20 @@ Definition trait_incl_of_const_ptr_offset (T_rt: RT) (T_st: syn_type) (DropGlue_
 
 Definition type_of_const_ptr_offset (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
-      (* params....... *) (l, count) : ((_ * _)),
+      (* params....... *) (kind, w, q, l, count) : (((alloc_alive_kind) * (loc) * (Qp) * _ * _)),
       (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) l :@: alias_ptr_t, count :@: (int ISize);
-      (* precondition. *) (λ π : thread_id, (⌜(l `has_layout_loc` (use_layout_alg' (ty_syn_type T_ty MetaNone)))%Z⌝)
+      (* precondition. *) (λ π : thread_id, (⌜(size_of_st (ty_syn_type T_ty MetaNone) = 0%nat ∨ w.(loc_p) = l.(loc_p))%Z⌝)
+        ∗ (if_iTrue (bool_decide (size_of_st (ty_syn_type T_ty MetaNone) ≠ 0%nat)) (alloc_alive_witness kind w q))
+        ∗ (⌜(l `has_layout_loc` (use_layout_alg' (ty_syn_type T_ty MetaNone)))%Z⌝)
         ∗ (⌜((count * size_of_st (ty_syn_type T_ty MetaNone))%Z ∈ ISize)%Z⌝)
         ∗ (
             case_destruct (bool_decide (count < 0))%Z
               (λ b _, if b then loc_in_bounds l (Z.to_nat (-count) * size_of_st (ty_syn_type T_ty MetaNone)) 0 else loc_in_bounds l 0 (Z.to_nat count * size_of_st (ty_syn_type T_ty MetaNone))))) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ _ : unit, (l offsetst{ (ty_syn_type T_ty MetaNone) }ₗ count) @ alias_ptr_t;
-      (* postcondition *) (λ π : thread_id, (£ (S (num_laters_per_step 1)) ∗ tr 1)) |
+      (* postcondition *) (λ π : thread_id, (if_iTrue (bool_decide (size_of_st (ty_syn_type T_ty MetaNone) ≠ 0%nat)) (alloc_alive_witness kind w q))
+      ∗ (£ (S (num_laters_per_step 1)) ∗ tr 1)) |
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
 
@@ -1291,15 +1297,18 @@ Definition trait_incl_of_const_ptr_sub (T_rt: RT) (T_st: syn_type) (DropGlue_T_s
 
 Definition type_of_const_ptr_sub (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
-      (* params....... *) (l, count) : ((_ * _)),
+      (* params....... *) (kind, w, q, l, count) : (((alloc_alive_kind) * (loc) * (Qp) * _ * _)),
       (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) l :@: alias_ptr_t, count :@: (int USize);
-      (* precondition. *) (λ π : thread_id, (⌜(l `has_layout_loc` (use_layout_alg' (ty_syn_type T_ty MetaNone)))%Z⌝)
+      (* precondition. *) (λ π : thread_id, (⌜(size_of_st (ty_syn_type T_ty MetaNone) = 0%nat ∨ w.(loc_p) = l.(loc_p))%Z⌝)
+        ∗ (if_iTrue (bool_decide (size_of_st (ty_syn_type T_ty MetaNone) ≠ 0%nat)) (alloc_alive_witness kind w q))
+        ∗ (⌜(l `has_layout_loc` (use_layout_alg' (ty_syn_type T_ty MetaNone)))%Z⌝)
         ∗ (⌜((count * size_of_st (ty_syn_type T_ty MetaNone))%Z ∈ ISize)%Z⌝)
         ∗ (loc_in_bounds l (Z.to_nat count * size_of_st (ty_syn_type T_ty MetaNone)) 0)) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ _ : unit, l offsetst{ (ty_syn_type T_ty MetaNone) }ₗ (-count) @ alias_ptr_t;
-      (* postcondition *) (λ π : thread_id, (£ (S (num_laters_per_step 1)) ∗ tr 1)) |
+      (* postcondition *) (λ π : thread_id, (if_iTrue (bool_decide (size_of_st (ty_syn_type T_ty MetaNone) ≠ 0%nat)) (alloc_alive_witness kind w q))
+      ∗ (£ (S (num_laters_per_step 1)) ∗ tr 1)) |
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
 
@@ -1464,15 +1473,18 @@ Definition trait_incl_of_mut_ptr_add (T_rt: RT) (T_st: syn_type) (DropGlue_T_spe
 
 Definition type_of_mut_ptr_add (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
-      (* params....... *) (l, count) : ((_ * _)),
+      (* params....... *) (kind, w, q, l, count) : (((alloc_alive_kind) * (loc) * (Qp) * _ * _)),
       (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) l :@: alias_ptr_t, count :@: (int USize);
-      (* precondition. *) (λ π : thread_id, (⌜(l `has_layout_loc` (use_layout_alg' (ty_syn_type T_ty MetaNone)))%Z⌝)
+      (* precondition. *) (λ π : thread_id, (⌜(size_of_st (ty_syn_type T_ty MetaNone) = 0%nat ∨ w.(loc_p) = l.(loc_p))%Z⌝)
+        ∗ (if_iTrue (bool_decide (size_of_st (ty_syn_type T_ty MetaNone) ≠ 0%nat)) (alloc_alive_witness kind w q))
+        ∗ (⌜(l `has_layout_loc` (use_layout_alg' (ty_syn_type T_ty MetaNone)))%Z⌝)
         ∗ (⌜((count * size_of_st (ty_syn_type T_ty MetaNone))%Z ∈ ISize)%Z⌝)
         ∗ (loc_in_bounds l 0 ((Z.to_nat count) * size_of_st (ty_syn_type T_ty MetaNone)))) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ _ : unit, l offsetst{ (ty_syn_type T_ty MetaNone) }ₗ count @ alias_ptr_t;
-      (* postcondition *) (λ π : thread_id, (£ (S (num_laters_per_step 1)) ∗ tr 1)) |
+      (* postcondition *) (λ π : thread_id, (if_iTrue (bool_decide (size_of_st (ty_syn_type T_ty MetaNone) ≠ 0%nat)) (alloc_alive_witness kind w q))
+      ∗ (£ (S (num_laters_per_step 1)) ∗ tr 1)) |
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
 
@@ -1542,17 +1554,20 @@ Definition trait_incl_of_mut_ptr_offset (T_rt: RT) (T_st: syn_type) (DropGlue_T_
 
 Definition type_of_mut_ptr_offset (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
-      (* params....... *) (l, count) : ((_ * _)),
+      (* params....... *) (kind, w, q, l, count) : (((alloc_alive_kind) * (loc) * (Qp) * _ * _)),
       (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) l :@: alias_ptr_t, count :@: (int ISize);
-      (* precondition. *) (λ π : thread_id, (⌜(l `has_layout_loc` (use_layout_alg' (ty_syn_type T_ty MetaNone)))%Z⌝)
+      (* precondition. *) (λ π : thread_id, (⌜(size_of_st (ty_syn_type T_ty MetaNone) = 0%nat ∨ w.(loc_p) = l.(loc_p))%Z⌝)
+        ∗ (if_iTrue (bool_decide (size_of_st (ty_syn_type T_ty MetaNone) ≠ 0%nat)) (alloc_alive_witness kind w q))
+        ∗ (⌜(l `has_layout_loc` (use_layout_alg' (ty_syn_type T_ty MetaNone)))%Z⌝)
         ∗ (⌜((count * size_of_st (ty_syn_type T_ty MetaNone))%Z ∈ ISize)%Z⌝)
         ∗ (
             case_destruct (bool_decide (count < 0))%Z
               (λ b _, if b then loc_in_bounds l (Z.to_nat (-count) * size_of_st (ty_syn_type T_ty MetaNone)) 0 else loc_in_bounds l 0 (Z.to_nat count * size_of_st (ty_syn_type T_ty MetaNone))))) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ _ : unit, l offsetst{ (ty_syn_type T_ty MetaNone) }ₗ count @ alias_ptr_t;
-      (* postcondition *) (λ π : thread_id, (£ (S (num_laters_per_step 1)) ∗ tr 1)) |
+      (* postcondition *) (λ π : thread_id, (if_iTrue (bool_decide (size_of_st (ty_syn_type T_ty MetaNone) ≠ 0%nat)) (alloc_alive_witness kind w q))
+      ∗ (£ (S (num_laters_per_step 1)) ∗ tr 1)) |
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
 
@@ -1597,15 +1612,18 @@ Definition trait_incl_of_mut_ptr_sub (T_rt: RT) (T_st: syn_type) (DropGlue_T_spe
 
 Definition type_of_mut_ptr_sub (T_rt: RT) (T_st: syn_type) (DropGlue_T_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (T_rt) )) :=
   fn(∀ ( *[]) : 0 | ( *[T_ty]) : ([(T_rt, T_st)] : list (RT * syn_type)%type) | 
-      (* params....... *) (l, count) : ((_ * _)),
+      (* params....... *) (kind, w, q, l, count) : (((alloc_alive_kind) * (loc) * (Qp) * _ * _)),
       (* elctx........ *) (λ ϝ, (λ ϝ, typarams_elctx ϝ _ -[T_ty]) ϝ ++ (λ ϝ, []) ϝ);
       (* args......... *) l :@: alias_ptr_t, count :@: (int USize);
-      (* precondition. *) (λ π : thread_id, (⌜(l `has_layout_loc` (use_layout_alg' (ty_syn_type T_ty MetaNone)))%Z⌝)
+      (* precondition. *) (λ π : thread_id, (⌜(size_of_st (ty_syn_type T_ty MetaNone) = 0%nat ∨ w.(loc_p) = l.(loc_p))%Z⌝)
+        ∗ (if_iTrue (bool_decide (size_of_st (ty_syn_type T_ty MetaNone) ≠ 0%nat)) (alloc_alive_witness kind w q))
+        ∗ (⌜(l `has_layout_loc` (use_layout_alg' (ty_syn_type T_ty MetaNone)))%Z⌝)
         ∗ (⌜((count * size_of_st (ty_syn_type T_ty MetaNone))%Z ∈ ISize)%Z⌝)
         ∗ (loc_in_bounds l ((Z.to_nat count) * size_of_st (ty_syn_type T_ty MetaNone)) 0)) |
       (* trait reqs... *) (λ π : thread_id, True)) →
       (* existential.. *) ∃ _ : unit, l offsetst{ (ty_syn_type T_ty MetaNone) }ₗ (-count) @ alias_ptr_t;
-      (* postcondition *) (λ π : thread_id, (£ (S (num_laters_per_step 1)) ∗ tr 1)) |
+      (* postcondition *) (λ π : thread_id, (if_iTrue (bool_decide (size_of_st (ty_syn_type T_ty MetaNone) ≠ 0%nat)) (alloc_alive_witness kind w q))
+      ∗ (£ (S (num_laters_per_step 1)) ∗ tr 1)) |
       (* unwind cond... *) False |
       (* unwind post... *) (λ π : thread_id, True).
 
