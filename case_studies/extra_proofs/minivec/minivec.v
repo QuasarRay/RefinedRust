@@ -1,6 +1,20 @@
 From radium Require Import lang notation.
 From refinedrust Require Import typing.
 
+(* Allocation liveness can be lent without removing any array storage. *)
+Lemma freeable_nz_alive_acc `{!typeGS Σ} l n q kind b :
+  (b = true → n ≠ 0%nat) →
+  freeable_nz l n q kind -∗
+  if_iTrue b (alloc_alive_witness AliveAlloc l q) ∗
+    (if_iTrue b (alloc_alive_witness AliveAlloc l q) -∗ freeable_nz l n q kind).
+Proof.
+  iIntros (Hnz) "Hfree".
+  destruct b; rewrite /if_iTrue /=.
+  - destruct n; first naive_solver.
+    by iApply (freeable_alive_acc with "Hfree").
+  - iSplit; first done. iIntros "_". done.
+Qed.
+
 Lemma list_lookup_insert_Some' {A} (l : list A) i x j y :
   <[i:=x]>l !! j = Some y ↔
     (i = j → x = y ∧ (j < length l)%nat) ∧ (i ≠ j → l !! j = Some y).

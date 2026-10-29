@@ -371,7 +371,11 @@ impl<T> Vec<T> {
 
         // important: ptr::write does not call drop on the uninit mem.
         unsafe {
-            ptr::write(self.ptr().add(self.len), elem);
+            let buf = &mut self.buf;
+            let p = (buf.ptr as *mut T).add(self.len);
+            // Keep the RawVec reborrow live across pointer arithmetic.
+            buf.cap;
+            ptr::write(p, elem);
         }
 
         // Can't overflow, we'll OOM first.
@@ -387,7 +391,13 @@ impl<T> Vec<T> {
             None
         } else {
             self.len -= 1;
-            unsafe { Some(ptr::read(self.ptr().add(self.len))) }
+            unsafe {
+                let buf = &mut self.buf;
+                let p = (buf.ptr as *mut T).add(self.len);
+                // Keep the RawVec reborrow live across pointer arithmetic.
+                buf.cap;
+                Some(ptr::read(p))
+            }
         }
     }
 
@@ -448,7 +458,10 @@ impl<T> Vec<T> {
     pub unsafe fn get_unchecked_mut(&mut self, index: usize) -> &mut T {
         self.len;
         unsafe {
-            let p = self.ptr().add(index);
+            let buf = &mut self.buf;
+            let p = (buf.ptr as *mut T).add(index);
+            // Keep the RawVec reborrow live across pointer arithmetic.
+            buf.cap;
             let ret = &mut *p;
             ret
         }
@@ -478,8 +491,9 @@ impl<T> Vec<T> {
     #[rr::returns("xs !!! i")]
     pub unsafe fn get_unchecked(&self, index: usize) -> &T {
         self.len;
+        self.buf.cap;
         unsafe {
-            let p = self.ptr().add(index);
+            let p = (self.buf.ptr as *mut T).add(index);
             let ret = &*p;
             ret
         }

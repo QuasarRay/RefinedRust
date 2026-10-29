@@ -4,6 +4,7 @@ From refinedrust.examples.minivec.generated Require Import generated_code_minive
 From refinedrust.examples.minivec.generated Require Import generated_template_Vec_T_pop.
 
 Set Default Proof Using "Type".
+Local Typeclasses Opaque alloc_alive_token alloc_alive_witness.
 
 Section proof.
 Context `{!refinedrustGS Σ}.
@@ -11,11 +12,24 @@ Context `{!refinedrustGS Σ}.
 Lemma Vec_T_pop_proof (π : thread_id) :
   Vec_T_pop_lemma π.
 Proof.
-  generalize RR_CONFIG_DONT_FOLD_PLACES; intros ?.
   Vec_T_pop_prelude.
 
+  (* Lend only allocation liveness; the array remains available throughout. *)
   rep <-! liRStep; liShow.
   2: rep liRStep.
+  iRename select (freeable_nz _ _ _ _)%I into "Hfree".
+  iPoseProof (freeable_nz_alive_acc _ _ _ _
+    (bool_decide (ly_size T_st_ly ≠ 0%nat)) with "Hfree") as "(Halive & Hrestore)".
+  { intros Hnz. apply bool_decide_eq_true in Hnz.
+    rewrite /size_of_array_in_bytes /use_layout_alg' T_st_alg /=. nia. }
+  rep liRStep; liShow.
+  match goal with Hk := EVAR_ID _ : alloc_alive_kind |- _ =>
+    liInst Hk AliveAlloc end.
+  match goal with Hw := EVAR_ID _ : loc |- _ => liInst Hw l end.
+  match goal with Hq := EVAR_ID _ : Qp |- _ => liInst Hq 1%Qp end.
+  rep <-! liRStep; liShow.
+  iRename select (if_iTrue _ (alloc_alive_token l 1))%I into "Halive".
+  iPoseProof ("Hrestore" with "Halive") as "Hfree".
   apply_update (updateable_typed_array_access l (length xs - 1) (UntypedSynType $ st_of T_ty MetaNone)).
   liRStepUntil typed_call.
   (* We need to manually extract it now *)
