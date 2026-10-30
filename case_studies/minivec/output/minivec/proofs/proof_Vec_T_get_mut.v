@@ -11,18 +11,31 @@ Lemma Vec_T_get_mut_proof (π : thread_id) :
   Vec_T_get_mut_lemma π.
 Proof.
   Vec_T_get_mut_prelude.
-
-  repeat liRStep. liShow.
-  { iRename select (Inherit [κ0] _) into "Hinh1".
-    iRename select (Inherit [κ1] _) into "Hinh2".
-    liInst Hevar_x2 x'0.
-    repeat liRStep; liShow.
-    iApply (prove_with_subtype_inherit_manual with "Hinh1 []"); [shelve_sidecond |  | ].
-    { rewrite Nat2Z.id. iIntros "$". }
-    repeat liRStep; liShow.
-    iApply (prove_with_subtype_inherit_manual with "Hinh2 []"); [shelve_sidecond | iIntros "$" | ].
-    repeat liRStep; liShow.
-  }
+  (* On the successful branch, [self] is not used after the call. Move its
+     reference through the generated reborrow, preserving the observation γ. *)
+  liRStepUntil typed_call.
+  do 1 liRStep.
+  repeat lazymatch goal with
+  | |- environments.envs_entails _ (typed_val_expr _ _ _ (Ref Mut _ _ _) _) => fail
+  | _ => liRStep
+  end.
+  apply_update (updateable_stratify arg_self StratRefoldFull StratifyUnblockOp).
+  liRStepUntil typed_val_expr. li_pm_reduce.
+  iApply (type_reborrow_mut_move _ _ _ _ _ _ arg_self
+    (Vec_inv_t T_rt -[] -[T_ty]) ulft_a
+    (#((PlaceIn ∘ RT_xrt T_rt) <$> xs : list (place_rfn T_rt)), γ)).
+  iApply (type_local_addr _ _ _ "self" RefSynType arg_self).
+  liRStepUntil typed_call. do 1 liRStep.
+  (* Likewise move the returned temporary into [Some], preserving its ghost. *)
+  repeat lazymatch goal with
+  | |- environments.envs_entails _ (typed_val_expr _ _ _ (Ref Mut _ _ _) _) => fail
+  | _ => liRStep
+  end.
+  li_pm_reduce.
+  iApply (type_reborrow_mut_move _ _ _ _ _ _ local___8 T_ty κ0 (#($#xs !!! i), x'0)).
+  iApply (type_local_addr _ _ _ "__8" RefSynType local___8).
+  rep <-! liRStep; liShow.
+  all: rep liRStep; liShow.
 
   all: print_remaining_goal.
   Unshelve. all: sidecond_solver.

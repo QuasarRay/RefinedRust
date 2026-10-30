@@ -1,6 +1,8 @@
 From iris.proofmode Require Import rocq_tactics reduction string_ident.
 From refinedrust.base Require Import programs value.
 From refinedrust Require Import program_rules array.array automation.
+From refinedrust.primitive Require Import alias_ptr.
+From refinedrust.mut_ref Require Import def.
 From refinedrust Require Import options.
 
 
@@ -11,6 +13,83 @@ From refinedrust Require Import options.
    unification to unfold that notation. This still rejects value expressions. *)
 Global Hint Extern 10 (TCEq (to_val (to_rtexpr _ _)) None) =>
   reflexivity : typeclass_instances.
+
+Section manual_reference_moves.
+  Context `{!typeGS Σ}.
+
+  (** Explicitly evaluate a local's address without reading its contents. *)
+  Lemma type_local_addr E L f x st l (T : typed_val_expr_cont_t) :
+    x is_live{f, st} l ∗
+    (x is_live{f, st} l -∗ T L (l2v l) MetaNone _ alias_ptr_t l)
+    ⊢ typed_val_expr E L f (Var x) T.
+  Proof.
+    destruct f as [π fid].
+    rewrite /typed_val_expr.
+    iIntros "(Hx & HT)" (Φ) "#CTX #HE HL Hf HΦ".
+    iApply (wp_var with "Hf Hx").
+    iApply credit_step_physical. iApply physical_step_intro. iNext.
+    iIntros (v) "%Hval Hf Hx".
+    have [Hv Ha] := val_of_loc_Some_inv _ _ Hval.
+    have -> : v = l2v l.
+    { pose proof (val_of_loc_Some_l2v l Ha). congruence. }
+    iApply ("HΦ" $! L (l2v l) locRT alias_ptr_t l MetaNone with "HL Hf [] [HT Hx]").
+    { rewrite /ty_own_val /alias_ptr_t /=.
+      iSplitR; first done.
+      by iApply (l2v_alias_ptr_kind_own_val PRaw). }
+    by iApply ("HT" with "Hx").
+  Qed.
+
+  (** When the source reference is no longer needed, a reborrow can instead
+      transfer its ownership and preserve its refinement and ghost. This rule
+      executes the existing load and the two [Ref] skips; the source storage
+      becomes uninitialized. It is deliberately not an automation instance:
+      callers must explicitly choose to give up the source reference. *)
+  Lemma type_reborrow_mut_move E L f e κname orty l {rt} (ty : type rt) κ rγ (T : typed_val_expr_cont_t) :
+    typed_val_expr E L f e (λ L1 vl m rt1 ty1 r1,
+      ⌜vl = l2v l⌝ ∗
+      l ◁ₗ[f.1, Owned] #rγ @ (◁ mut_ref κ ty) ∗
+      (l ◁ₗ[f.1, Owned] .@ (◁ uninit RefSynType) -∗
+        ∀ v, T L1 v MetaNone _ (mut_ref κ ty) rγ))
+    ⊢ typed_val_expr E L f (&ref{Mut, orty, κname} (!{RefOp} e))%E T.
+  Proof.
+    rewrite /typed_val_expr.
+    iIntros "He" (Φ) "#CTX #HE HL Hf HΦ".
+    rewrite /Ref. wpe_bind.
+    iApply ("He" with "CTX HE HL Hf").
+    iIntros (L1 vl rt1 ty1 r1 m) "HL Hf _ (-> & Hl & HT)".
+    iApply wpe_fupd.
+    iEval (rewrite ltype_own_ofty_unfold /lty_of_ty_own) in "Hl".
+    iDestruct "Hl" as "(%ly & %Halg & %Halign & #Hsc & #Hbounds & %r' & <- & Hb)".
+    have Hly : ly = void* by apply syn_type_has_layout_ref_inv in Halg.
+    subst ly.
+    iMod (fupd_mask_mono lftE ⊤ _ with "Hb") as "(%v & Hmem & Hv)"; first solve_ndisj.
+    iPoseProof (ty_own_val_has_layout with "Hv") as "%Hlayout"; first done.
+    have Hot : ty_has_op_type (mut_ref κ ty) RefOp.
+    { by rewrite ty_has_op_type_unfold /mut_ref /is_ref_ot. }
+    iPoseProof (ty_decodable _ (mut_ref κ ty) RefOp inhabitant with "Hv") as (ov0) "%Hdecode"; first done.
+    have Hdec : ∀ st, ∃ ov, decode_op_val v RefOp st = Some ov.
+    { intros st. exists ov0. rewrite -(decode_op_val_stable v RefOp inhabitant st). done. }
+    iPoseProof (loc_in_bounds_in_range_usize with "Hbounds") as "%Haddr".
+    wpe_bind.
+    iApply (wp_deref with "Hmem"); [by right | | done | done |].
+    { intros st. apply val_to_loc_decode. by apply val_to_loc_Some_l2v. }
+    iApply credit_step_physical. iApply physical_step_intro.
+    iNext. iIntros (st ov) "%Hdecv Hmem".
+    iPoseProof (ty_encode_compat _ (mut_ref κ ty) RefOp st with "Hv") as "Hv"; [done | done |].
+    iAssert (l ◁ₗ[f.1, Owned] .@ (◁ uninit RefSynType))%I with "[Hmem]" as "Hl".
+    { rewrite ltype_own_ofty_unfold /lty_of_ty_own.
+      iExists (void*). iFrame "Hbounds".
+      iSplit; first by iPureIntro; apply syn_type_has_layout_untyped; apply syn_type_has_layout_ref.
+      iR.
+      iExists tt. iR. iModIntro. iExists v. iFrame "Hmem".
+      rewrite uninit_own_spec. iR. iExists (void*). iR; last done. }
+    iSpecialize ("HT" with "Hl").
+    wpe_bind.
+    iApply wp_skip. iApply credit_step_physical. iApply physical_step_intro. iNext.
+    iApply wp_skip. iApply credit_step_physical. iApply physical_step_intro. iNext.
+    iModIntro. iApply ("HΦ" with "HL Hf Hv HT").
+  Qed.
+End manual_reference_moves.
 
 Section updateable.
   Context `{!typeGS Σ}.
