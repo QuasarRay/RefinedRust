@@ -16,7 +16,8 @@ Section linkedlist.
       ⌜(locs ++ [NULL_loc]) !! S i = Some lnext⌝ ∗
       ⌜(prev_ptr :: locs) !! i = Some lprev⌝ ∗
       guarded false (l ◁ₗ[π, Shared κ] #( *[#x; #lnext; #lprev]) @
-        ◁ struct_t sls +[ty; alias_ptr_t; alias_ptr_t]) ∗ True.
+        ◁ struct_t sls +[ty; alias_ptr_t; alias_ptr_t]) ∗
+      freeable_nz_shared κ l (ly_size (use_struct_layout_alg' sls)) 1 HeapAlloc.
 
   Global Instance linkedlist_nodes_shareable π κ (ty : type rt) sls locs xs (assumptions : Prop) :
     Shareable π κ (ty_lfts ty) xs assumptions
