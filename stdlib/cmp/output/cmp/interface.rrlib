@@ -879,6 +879,16 @@
           "name": "i128asOrd_cmp",
           "spec": "type_of_i128asOrd_cmp",
           "trait_req_incl": "trait_incl_of_i128asOrd_cmp"
+        },
+        "max": {
+          "name": "i128asOrd_max",
+          "spec": "type_of_i128asOrd_max",
+          "trait_req_incl": "trait_incl_of_i128asOrd_max"
+        },
+        "min": {
+          "name": "i128asOrd_min",
+          "spec": "type_of_i128asOrd_min",
+          "trait_req_incl": "trait_incl_of_i128asOrd_min"
         }
       },
       "name": "i128asOrd",
@@ -1006,6 +1016,16 @@
           "name": "i16asOrd_cmp",
           "spec": "type_of_i16asOrd_cmp",
           "trait_req_incl": "trait_incl_of_i16asOrd_cmp"
+        },
+        "max": {
+          "name": "i16asOrd_max",
+          "spec": "type_of_i16asOrd_max",
+          "trait_req_incl": "trait_incl_of_i16asOrd_max"
+        },
+        "min": {
+          "name": "i16asOrd_min",
+          "spec": "type_of_i16asOrd_min",
+          "trait_req_incl": "trait_incl_of_i16asOrd_min"
         }
       },
       "name": "i16asOrd",
@@ -1133,6 +1153,16 @@
           "name": "i32asOrd_cmp",
           "spec": "type_of_i32asOrd_cmp",
           "trait_req_incl": "trait_incl_of_i32asOrd_cmp"
+        },
+        "max": {
+          "name": "i32asOrd_max",
+          "spec": "type_of_i32asOrd_max",
+          "trait_req_incl": "trait_incl_of_i32asOrd_max"
+        },
+        "min": {
+          "name": "i32asOrd_min",
+          "spec": "type_of_i32asOrd_min",
+          "trait_req_incl": "trait_incl_of_i32asOrd_min"
         }
       },
       "name": "i32asOrd",
@@ -1260,6 +1290,16 @@
           "name": "i64asOrd_cmp",
           "spec": "type_of_i64asOrd_cmp",
           "trait_req_incl": "trait_incl_of_i64asOrd_cmp"
+        },
+        "max": {
+          "name": "i64asOrd_max",
+          "spec": "type_of_i64asOrd_max",
+          "trait_req_incl": "trait_incl_of_i64asOrd_max"
+        },
+        "min": {
+          "name": "i64asOrd_min",
+          "spec": "type_of_i64asOrd_min",
+          "trait_req_incl": "trait_incl_of_i64asOrd_min"
         }
       },
       "name": "i64asOrd",
@@ -1387,6 +1427,16 @@
           "name": "i8asOrd_cmp",
           "spec": "type_of_i8asOrd_cmp",
           "trait_req_incl": "trait_incl_of_i8asOrd_cmp"
+        },
+        "max": {
+          "name": "i8asOrd_max",
+          "spec": "type_of_i8asOrd_max",
+          "trait_req_incl": "trait_incl_of_i8asOrd_max"
+        },
+        "min": {
+          "name": "i8asOrd_min",
+          "spec": "type_of_i8asOrd_min",
+          "trait_req_incl": "trait_incl_of_i8asOrd_min"
         }
       },
       "name": "i8asOrd",
@@ -1514,6 +1564,16 @@
           "name": "isizeasOrd_cmp",
           "spec": "type_of_isizeasOrd_cmp",
           "trait_req_incl": "trait_incl_of_isizeasOrd_cmp"
+        },
+        "max": {
+          "name": "isizeasOrd_max",
+          "spec": "type_of_isizeasOrd_max",
+          "trait_req_incl": "trait_incl_of_isizeasOrd_max"
+        },
+        "min": {
+          "name": "isizeasOrd_min",
+          "spec": "type_of_isizeasOrd_min",
+          "trait_req_incl": "trait_incl_of_isizeasOrd_min"
         }
       },
       "name": "isizeasOrd",
@@ -1641,6 +1701,16 @@
           "name": "u128asOrd_cmp",
           "spec": "type_of_u128asOrd_cmp",
           "trait_req_incl": "trait_incl_of_u128asOrd_cmp"
+        },
+        "max": {
+          "name": "u128asOrd_max",
+          "spec": "type_of_u128asOrd_max",
+          "trait_req_incl": "trait_incl_of_u128asOrd_max"
+        },
+        "min": {
+          "name": "u128asOrd_min",
+          "spec": "type_of_u128asOrd_min",
+          "trait_req_incl": "trait_incl_of_u128asOrd_min"
         }
       },
       "name": "u128asOrd",
@@ -1768,6 +1838,16 @@
           "name": "u16asOrd_cmp",
           "spec": "type_of_u16asOrd_cmp",
           "trait_req_incl": "trait_incl_of_u16asOrd_cmp"
+        },
+        "max": {
+          "name": "u16asOrd_max",
+          "spec": "type_of_u16asOrd_max",
+          "trait_req_incl": "trait_incl_of_u16asOrd_max"
+        },
+        "min": {
+          "name": "u16asOrd_min",
+          "spec": "type_of_u16asOrd_min",
+          "trait_req_incl": "trait_incl_of_u16asOrd_min"
         }
       },
       "name": "u16asOrd",
@@ -1895,6 +1975,16 @@
           "name": "u32asOrd_cmp",
           "spec": "type_of_u32asOrd_cmp",
           "trait_req_incl": "trait_incl_of_u32asOrd_cmp"
+        },
+        "max": {
+          "name": "u32asOrd_max",
+          "spec": "type_of_u32asOrd_max",
+          "trait_req_incl": "trait_incl_of_u32asOrd_max"
+        },
+        "min": {
+          "name": "u32asOrd_min",
+          "spec": "type_of_u32asOrd_min",
+          "trait_req_incl": "trait_incl_of_u32asOrd_min"
         }
       },
       "name": "u32asOrd",
@@ -2022,6 +2112,16 @@
           "name": "u64asOrd_cmp",
           "spec": "type_of_u64asOrd_cmp",
           "trait_req_incl": "trait_incl_of_u64asOrd_cmp"
+        },
+        "max": {
+          "name": "u64asOrd_max",
+          "spec": "type_of_u64asOrd_max",
+          "trait_req_incl": "trait_incl_of_u64asOrd_max"
+        },
+        "min": {
+          "name": "u64asOrd_min",
+          "spec": "type_of_u64asOrd_min",
+          "trait_req_incl": "trait_incl_of_u64asOrd_min"
         }
       },
       "name": "u64asOrd",
@@ -2149,6 +2249,16 @@
           "name": "u8asOrd_cmp",
           "spec": "type_of_u8asOrd_cmp",
           "trait_req_incl": "trait_incl_of_u8asOrd_cmp"
+        },
+        "max": {
+          "name": "u8asOrd_max",
+          "spec": "type_of_u8asOrd_max",
+          "trait_req_incl": "trait_incl_of_u8asOrd_max"
+        },
+        "min": {
+          "name": "u8asOrd_min",
+          "spec": "type_of_u8asOrd_min",
+          "trait_req_incl": "trait_incl_of_u8asOrd_min"
         }
       },
       "name": "u8asOrd",
@@ -2276,6 +2386,16 @@
           "name": "usizeasOrd_cmp",
           "spec": "type_of_usizeasOrd_cmp",
           "trait_req_incl": "trait_incl_of_usizeasOrd_cmp"
+        },
+        "max": {
+          "name": "usizeasOrd_max",
+          "spec": "type_of_usizeasOrd_max",
+          "trait_req_incl": "trait_incl_of_usizeasOrd_max"
+        },
+        "min": {
+          "name": "usizeasOrd_min",
+          "spec": "type_of_usizeasOrd_min",
+          "trait_req_incl": "trait_incl_of_usizeasOrd_min"
         }
       },
       "name": "usizeasOrd",

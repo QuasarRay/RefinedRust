@@ -3088,6 +3088,174 @@ Definition type_of_usizeasPartialOrd_lt  :=
   spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((PartialOrd_base_spec (Z) (Z) ((IntSynType USize)) ((IntSynType USize)) (usizeasPartialEq_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) ((drop_glue_trivial_spec_attrs (Z))) (usizeasPartialOrd_spec_attrs))
     -[] -[(int USize); (int USize)]).(PartialOrd_lt_spec)   a b))) <MERGE!>.
 
+Definition trait_incl_of_i128asOrd_max  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_i128asOrd_max  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType I128)) (i128asPartialEq_spec_attrs) (i128asEq_spec_attrs) (i128asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (i128asOrd_spec_attrs))
+    -[] -[(int I128)]).(Ord_max_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_i16asOrd_max  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_i16asOrd_max  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType I16)) (i16asPartialEq_spec_attrs) (i16asEq_spec_attrs) (i16asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (i16asOrd_spec_attrs))
+    -[] -[(int I16)]).(Ord_max_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_i32asOrd_max  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_i32asOrd_max  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType I32)) (i32asPartialEq_spec_attrs) (i32asEq_spec_attrs) (i32asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (i32asOrd_spec_attrs))
+    -[] -[(int I32)]).(Ord_max_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_i64asOrd_max  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_i64asOrd_max  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType I64)) (i64asPartialEq_spec_attrs) (i64asEq_spec_attrs) (i64asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (i64asOrd_spec_attrs))
+    -[] -[(int I64)]).(Ord_max_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_i8asOrd_max  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_i8asOrd_max  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType I8)) (i8asPartialEq_spec_attrs) (i8asEq_spec_attrs) (i8asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (i8asOrd_spec_attrs))
+    -[] -[(int I8)]).(Ord_max_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_isizeasOrd_max  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_isizeasOrd_max  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType ISize)) (isizeasPartialEq_spec_attrs) (isizeasEq_spec_attrs) (isizeasPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (isizeasOrd_spec_attrs))
+    -[] -[(int ISize)]).(Ord_max_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_u128asOrd_max  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_u128asOrd_max  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType U128)) (u128asPartialEq_spec_attrs) (u128asEq_spec_attrs) (u128asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (u128asOrd_spec_attrs))
+    -[] -[(int U128)]).(Ord_max_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_u16asOrd_max  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_u16asOrd_max  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType U16)) (u16asPartialEq_spec_attrs) (u16asEq_spec_attrs) (u16asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (u16asOrd_spec_attrs))
+    -[] -[(int U16)]).(Ord_max_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_u32asOrd_max  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_u32asOrd_max  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType U32)) (u32asPartialEq_spec_attrs) (u32asEq_spec_attrs) (u32asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (u32asOrd_spec_attrs))
+    -[] -[(int U32)]).(Ord_max_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_u64asOrd_max  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_u64asOrd_max  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType U64)) (u64asPartialEq_spec_attrs) (u64asEq_spec_attrs) (u64asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (u64asOrd_spec_attrs))
+    -[] -[(int U64)]).(Ord_max_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_u8asOrd_max  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_u8asOrd_max  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType U8)) (u8asPartialEq_spec_attrs) (u8asEq_spec_attrs) (u8asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (u8asOrd_spec_attrs))
+    -[] -[(int U8)]).(Ord_max_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_usizeasOrd_max  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_usizeasOrd_max  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType USize)) (usizeasPartialEq_spec_attrs) (usizeasEq_spec_attrs) (usizeasPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (usizeasOrd_spec_attrs))
+    -[] -[(int USize)]).(Ord_max_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_i128asOrd_min  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_i128asOrd_min  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType I128)) (i128asPartialEq_spec_attrs) (i128asEq_spec_attrs) (i128asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (i128asOrd_spec_attrs))
+    -[] -[(int I128)]).(Ord_min_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_i16asOrd_min  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_i16asOrd_min  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType I16)) (i16asPartialEq_spec_attrs) (i16asEq_spec_attrs) (i16asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (i16asOrd_spec_attrs))
+    -[] -[(int I16)]).(Ord_min_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_i32asOrd_min  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_i32asOrd_min  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType I32)) (i32asPartialEq_spec_attrs) (i32asEq_spec_attrs) (i32asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (i32asOrd_spec_attrs))
+    -[] -[(int I32)]).(Ord_min_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_i64asOrd_min  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_i64asOrd_min  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType I64)) (i64asPartialEq_spec_attrs) (i64asEq_spec_attrs) (i64asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (i64asOrd_spec_attrs))
+    -[] -[(int I64)]).(Ord_min_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_i8asOrd_min  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_i8asOrd_min  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType I8)) (i8asPartialEq_spec_attrs) (i8asEq_spec_attrs) (i8asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (i8asOrd_spec_attrs))
+    -[] -[(int I8)]).(Ord_min_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_isizeasOrd_min  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_isizeasOrd_min  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType ISize)) (isizeasPartialEq_spec_attrs) (isizeasEq_spec_attrs) (isizeasPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (isizeasOrd_spec_attrs))
+    -[] -[(int ISize)]).(Ord_min_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_u128asOrd_min  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_u128asOrd_min  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType U128)) (u128asPartialEq_spec_attrs) (u128asEq_spec_attrs) (u128asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (u128asOrd_spec_attrs))
+    -[] -[(int U128)]).(Ord_min_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_u16asOrd_min  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_u16asOrd_min  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType U16)) (u16asPartialEq_spec_attrs) (u16asEq_spec_attrs) (u16asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (u16asOrd_spec_attrs))
+    -[] -[(int U16)]).(Ord_min_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_u32asOrd_min  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_u32asOrd_min  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType U32)) (u32asPartialEq_spec_attrs) (u32asEq_spec_attrs) (u32asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (u32asOrd_spec_attrs))
+    -[] -[(int U32)]).(Ord_min_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_u64asOrd_min  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_u64asOrd_min  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType U64)) (u64asPartialEq_spec_attrs) (u64asEq_spec_attrs) (u64asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (u64asOrd_spec_attrs))
+    -[] -[(int U64)]).(Ord_min_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_u8asOrd_min  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_u8asOrd_min  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType U8)) (u8asPartialEq_spec_attrs) (u8asEq_spec_attrs) (u8asPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (u8asOrd_spec_attrs))
+    -[] -[(int U8)]).(Ord_min_spec)   a b))) <MERGE!>.
+
+Definition trait_incl_of_usizeasOrd_min  : (spec_with _ _ (thread_id → iProp Σ)) :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT), (λ π, (True)%I).
+
+Definition type_of_usizeasOrd_min  :=
+  spec! ( *[]) : 0 | ( *[]) : ([] : list RT),(λ a b, scope_add_elctx (λ ϝ, typarams_elctx ϝ _ -[]) (scope_add_elctx (λ ϝ, []) (((Ord_base_spec (Z) ((IntSynType USize)) (usizeasPartialEq_spec_attrs) (usizeasEq_spec_attrs) (usizeasPartialOrd_spec_attrs) ((drop_glue_trivial_spec_attrs (Z))) (usizeasOrd_spec_attrs))
+    -[] -[(int USize)]).(Ord_min_spec)   a b))) <MERGE!>.
+
 Definition trait_incl_of_REFAasPartialEqREFB_ne (A_rt: RT) (B_rt: RT) (A_st: syn_type) (B_st: syn_type) (PartialEq_A_B_spec_attrs: (PartialEq_spec_attrs (RRGS:=RRGS) (A_rt) (B_rt) )) (PartialEq_A_B_realization: (trait_spec_realization (spec_with 0 [] (PartialEq_spec (RRGS:=RRGS) (A_rt) (B_rt))))) (DropGlue_A_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (A_rt) )) (DropGlue_A_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (A_rt))))) (DropGlue_B_spec_attrs: (DropGlue_spec_attrs (RRGS:=RRGS) (B_rt) )) (DropGlue_B_realization: (trait_spec_realization (spec_with 0 [] (DropGlue_spec (RRGS:=RRGS) (B_rt))))) : (spec_with _ _ (thread_id → iProp Σ)) :=
   spec! ( *[ulft_1; ulft_2; ulft_3; ulft_4]) : 4 | ( *[A_ty; B_ty]) : ([A_rt; B_rt] : list RT), (λ π, ((∃ (PartialEq_A_B_lfts_inst : prod_vec lft PartialEq_A_B_realization.(trait_ctx_lfts)) (PartialEq_A_B_tys_inst : plist type PartialEq_A_B_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl PartialEq_spec_incl (PartialEq_A_B_realization.(trait_ctx_spec) PartialEq_A_B_lfts_inst PartialEq_A_B_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), PartialEq_base_spec (A_rt) (B_rt) A_st B_st DropGlue_A_spec_attrs DropGlue_B_spec_attrs PartialEq_A_B_spec_attrs-[] -[A_ty; B_ty]))⌝ ∗ PartialEq_A_B_realization.(trait_ctx_wf) PartialEq_A_B_lfts_inst PartialEq_A_B_tys_inst π)
     ∗ (∃ (DropGlue_A_lfts_inst : prod_vec lft DropGlue_A_realization.(trait_ctx_lfts)) (DropGlue_A_tys_inst : plist type DropGlue_A_realization.(trait_ctx_tys)), ⌜trait_incl_marker (lift_trait_incl DropGlue_spec_incl (DropGlue_A_realization.(trait_ctx_spec) DropGlue_A_lfts_inst DropGlue_A_tys_inst) (spec! ( *[]) : 0 | ( *[]) : ([] : list RT), DropGlue_base_spec (A_rt) A_st DropGlue_A_spec_attrs-[] -[A_ty]))⌝ ∗ DropGlue_A_realization.(trait_ctx_wf) DropGlue_A_lfts_inst DropGlue_A_tys_inst π)
@@ -4015,11 +4183,11 @@ Section i128asOrd_spec.
           type_of_i128asOrd_cmp 
              : (spec_with 2 [] fn_spec);
         Ord_max_spec  :=
-          (Ord_max_base_spec (Z) ((IntSynType I128))) i128asPartialEq_spec_attrs i128asEq_spec_attrs i128asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i128asOrd_spec_attrs 
-             <TY> (int I128) : (spec_with 0 [] fn_spec);
+          type_of_i128asOrd_max 
+             : (spec_with 0 [] fn_spec);
         Ord_min_spec  :=
-          (Ord_min_base_spec (Z) ((IntSynType I128))) i128asPartialEq_spec_attrs i128asEq_spec_attrs i128asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i128asOrd_spec_attrs 
-             <TY> (int I128) : (spec_with 0 [] fn_spec);
+          type_of_i128asOrd_min 
+             : (spec_with 0 [] fn_spec);
       |}
   .
   Arguments i128asOrd_spec : simpl never.
@@ -4139,11 +4307,11 @@ Section i16asOrd_spec.
           type_of_i16asOrd_cmp 
              : (spec_with 2 [] fn_spec);
         Ord_max_spec  :=
-          (Ord_max_base_spec (Z) ((IntSynType I16))) i16asPartialEq_spec_attrs i16asEq_spec_attrs i16asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i16asOrd_spec_attrs 
-             <TY> (int I16) : (spec_with 0 [] fn_spec);
+          type_of_i16asOrd_max 
+             : (spec_with 0 [] fn_spec);
         Ord_min_spec  :=
-          (Ord_min_base_spec (Z) ((IntSynType I16))) i16asPartialEq_spec_attrs i16asEq_spec_attrs i16asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i16asOrd_spec_attrs 
-             <TY> (int I16) : (spec_with 0 [] fn_spec);
+          type_of_i16asOrd_min 
+             : (spec_with 0 [] fn_spec);
       |}
   .
   Arguments i16asOrd_spec : simpl never.
@@ -4263,11 +4431,11 @@ Section i32asOrd_spec.
           type_of_i32asOrd_cmp 
              : (spec_with 2 [] fn_spec);
         Ord_max_spec  :=
-          (Ord_max_base_spec (Z) ((IntSynType I32))) i32asPartialEq_spec_attrs i32asEq_spec_attrs i32asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i32asOrd_spec_attrs 
-             <TY> (int I32) : (spec_with 0 [] fn_spec);
+          type_of_i32asOrd_max 
+             : (spec_with 0 [] fn_spec);
         Ord_min_spec  :=
-          (Ord_min_base_spec (Z) ((IntSynType I32))) i32asPartialEq_spec_attrs i32asEq_spec_attrs i32asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i32asOrd_spec_attrs 
-             <TY> (int I32) : (spec_with 0 [] fn_spec);
+          type_of_i32asOrd_min 
+             : (spec_with 0 [] fn_spec);
       |}
   .
   Arguments i32asOrd_spec : simpl never.
@@ -4387,11 +4555,11 @@ Section i64asOrd_spec.
           type_of_i64asOrd_cmp 
              : (spec_with 2 [] fn_spec);
         Ord_max_spec  :=
-          (Ord_max_base_spec (Z) ((IntSynType I64))) i64asPartialEq_spec_attrs i64asEq_spec_attrs i64asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i64asOrd_spec_attrs 
-             <TY> (int I64) : (spec_with 0 [] fn_spec);
+          type_of_i64asOrd_max 
+             : (spec_with 0 [] fn_spec);
         Ord_min_spec  :=
-          (Ord_min_base_spec (Z) ((IntSynType I64))) i64asPartialEq_spec_attrs i64asEq_spec_attrs i64asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i64asOrd_spec_attrs 
-             <TY> (int I64) : (spec_with 0 [] fn_spec);
+          type_of_i64asOrd_min 
+             : (spec_with 0 [] fn_spec);
       |}
   .
   Arguments i64asOrd_spec : simpl never.
@@ -4511,11 +4679,11 @@ Section i8asOrd_spec.
           type_of_i8asOrd_cmp 
              : (spec_with 2 [] fn_spec);
         Ord_max_spec  :=
-          (Ord_max_base_spec (Z) ((IntSynType I8))) i8asPartialEq_spec_attrs i8asEq_spec_attrs i8asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i8asOrd_spec_attrs 
-             <TY> (int I8) : (spec_with 0 [] fn_spec);
+          type_of_i8asOrd_max 
+             : (spec_with 0 [] fn_spec);
         Ord_min_spec  :=
-          (Ord_min_base_spec (Z) ((IntSynType I8))) i8asPartialEq_spec_attrs i8asEq_spec_attrs i8asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) i8asOrd_spec_attrs 
-             <TY> (int I8) : (spec_with 0 [] fn_spec);
+          type_of_i8asOrd_min 
+             : (spec_with 0 [] fn_spec);
       |}
   .
   Arguments i8asOrd_spec : simpl never.
@@ -4635,11 +4803,11 @@ Section isizeasOrd_spec.
           type_of_isizeasOrd_cmp 
              : (spec_with 2 [] fn_spec);
         Ord_max_spec  :=
-          (Ord_max_base_spec (Z) ((IntSynType ISize))) isizeasPartialEq_spec_attrs isizeasEq_spec_attrs isizeasPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) isizeasOrd_spec_attrs 
-             <TY> (int ISize) : (spec_with 0 [] fn_spec);
+          type_of_isizeasOrd_max 
+             : (spec_with 0 [] fn_spec);
         Ord_min_spec  :=
-          (Ord_min_base_spec (Z) ((IntSynType ISize))) isizeasPartialEq_spec_attrs isizeasEq_spec_attrs isizeasPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) isizeasOrd_spec_attrs 
-             <TY> (int ISize) : (spec_with 0 [] fn_spec);
+          type_of_isizeasOrd_min 
+             : (spec_with 0 [] fn_spec);
       |}
   .
   Arguments isizeasOrd_spec : simpl never.
@@ -4759,11 +4927,11 @@ Section u128asOrd_spec.
           type_of_u128asOrd_cmp 
              : (spec_with 2 [] fn_spec);
         Ord_max_spec  :=
-          (Ord_max_base_spec (Z) ((IntSynType U128))) u128asPartialEq_spec_attrs u128asEq_spec_attrs u128asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u128asOrd_spec_attrs 
-             <TY> (int U128) : (spec_with 0 [] fn_spec);
+          type_of_u128asOrd_max 
+             : (spec_with 0 [] fn_spec);
         Ord_min_spec  :=
-          (Ord_min_base_spec (Z) ((IntSynType U128))) u128asPartialEq_spec_attrs u128asEq_spec_attrs u128asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u128asOrd_spec_attrs 
-             <TY> (int U128) : (spec_with 0 [] fn_spec);
+          type_of_u128asOrd_min 
+             : (spec_with 0 [] fn_spec);
       |}
   .
   Arguments u128asOrd_spec : simpl never.
@@ -4883,11 +5051,11 @@ Section u16asOrd_spec.
           type_of_u16asOrd_cmp 
              : (spec_with 2 [] fn_spec);
         Ord_max_spec  :=
-          (Ord_max_base_spec (Z) ((IntSynType U16))) u16asPartialEq_spec_attrs u16asEq_spec_attrs u16asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u16asOrd_spec_attrs 
-             <TY> (int U16) : (spec_with 0 [] fn_spec);
+          type_of_u16asOrd_max 
+             : (spec_with 0 [] fn_spec);
         Ord_min_spec  :=
-          (Ord_min_base_spec (Z) ((IntSynType U16))) u16asPartialEq_spec_attrs u16asEq_spec_attrs u16asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u16asOrd_spec_attrs 
-             <TY> (int U16) : (spec_with 0 [] fn_spec);
+          type_of_u16asOrd_min 
+             : (spec_with 0 [] fn_spec);
       |}
   .
   Arguments u16asOrd_spec : simpl never.
@@ -5007,11 +5175,11 @@ Section u32asOrd_spec.
           type_of_u32asOrd_cmp 
              : (spec_with 2 [] fn_spec);
         Ord_max_spec  :=
-          (Ord_max_base_spec (Z) ((IntSynType U32))) u32asPartialEq_spec_attrs u32asEq_spec_attrs u32asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u32asOrd_spec_attrs 
-             <TY> (int U32) : (spec_with 0 [] fn_spec);
+          type_of_u32asOrd_max 
+             : (spec_with 0 [] fn_spec);
         Ord_min_spec  :=
-          (Ord_min_base_spec (Z) ((IntSynType U32))) u32asPartialEq_spec_attrs u32asEq_spec_attrs u32asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u32asOrd_spec_attrs 
-             <TY> (int U32) : (spec_with 0 [] fn_spec);
+          type_of_u32asOrd_min 
+             : (spec_with 0 [] fn_spec);
       |}
   .
   Arguments u32asOrd_spec : simpl never.
@@ -5131,11 +5299,11 @@ Section u64asOrd_spec.
           type_of_u64asOrd_cmp 
              : (spec_with 2 [] fn_spec);
         Ord_max_spec  :=
-          (Ord_max_base_spec (Z) ((IntSynType U64))) u64asPartialEq_spec_attrs u64asEq_spec_attrs u64asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u64asOrd_spec_attrs 
-             <TY> (int U64) : (spec_with 0 [] fn_spec);
+          type_of_u64asOrd_max 
+             : (spec_with 0 [] fn_spec);
         Ord_min_spec  :=
-          (Ord_min_base_spec (Z) ((IntSynType U64))) u64asPartialEq_spec_attrs u64asEq_spec_attrs u64asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u64asOrd_spec_attrs 
-             <TY> (int U64) : (spec_with 0 [] fn_spec);
+          type_of_u64asOrd_min 
+             : (spec_with 0 [] fn_spec);
       |}
   .
   Arguments u64asOrd_spec : simpl never.
@@ -5255,11 +5423,11 @@ Section u8asOrd_spec.
           type_of_u8asOrd_cmp 
              : (spec_with 2 [] fn_spec);
         Ord_max_spec  :=
-          (Ord_max_base_spec (Z) ((IntSynType U8))) u8asPartialEq_spec_attrs u8asEq_spec_attrs u8asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u8asOrd_spec_attrs 
-             <TY> (int U8) : (spec_with 0 [] fn_spec);
+          type_of_u8asOrd_max 
+             : (spec_with 0 [] fn_spec);
         Ord_min_spec  :=
-          (Ord_min_base_spec (Z) ((IntSynType U8))) u8asPartialEq_spec_attrs u8asEq_spec_attrs u8asPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) u8asOrd_spec_attrs 
-             <TY> (int U8) : (spec_with 0 [] fn_spec);
+          type_of_u8asOrd_min 
+             : (spec_with 0 [] fn_spec);
       |}
   .
   Arguments u8asOrd_spec : simpl never.
@@ -5379,11 +5547,11 @@ Section usizeasOrd_spec.
           type_of_usizeasOrd_cmp 
              : (spec_with 2 [] fn_spec);
         Ord_max_spec  :=
-          (Ord_max_base_spec (Z) ((IntSynType USize))) usizeasPartialEq_spec_attrs usizeasEq_spec_attrs usizeasPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) usizeasOrd_spec_attrs 
-             <TY> (int USize) : (spec_with 0 [] fn_spec);
+          type_of_usizeasOrd_max 
+             : (spec_with 0 [] fn_spec);
         Ord_min_spec  :=
-          (Ord_min_base_spec (Z) ((IntSynType USize))) usizeasPartialEq_spec_attrs usizeasEq_spec_attrs usizeasPartialOrd_spec_attrs (drop_glue_trivial_spec_attrs (Z)) usizeasOrd_spec_attrs 
-             <TY> (int USize) : (spec_with 0 [] fn_spec);
+          type_of_usizeasOrd_min 
+             : (spec_with 0 [] fn_spec);
       |}
   .
   Arguments usizeasOrd_spec : simpl never.

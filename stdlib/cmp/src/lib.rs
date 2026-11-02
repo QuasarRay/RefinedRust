@@ -314,6 +314,18 @@ macro_rules! ord_impl {
                     Ordering::Greater
                 }
             }
+
+            // Upstream overrides these with integer_min/integer_max intrinsics.
+            // Model the equivalent comparison and verify the inherited contracts.
+            #[rr::default_spec]
+            fn min(self, other: Self) -> Self {
+                if self < other { self } else { other }
+            }
+
+            #[rr::default_spec]
+            fn max(self, other: Self) -> Self {
+                if self < other { other } else { self }
+            }
         }
     )*)
 }

@@ -1516,6 +1516,106 @@ Qed.
 
 
 
+Program Definition i128asOrd_max_def  : function :=
+  {|
+     f_args := [
+      ("self", (it_layout I128) : layout);
+     ("other", (it_layout I128) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType I128) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType I128) } "__4";
+      "__4" <-{ (IntOp I128) } copy{ (IntOp I128) } ("self");
+      local_live{ (IntSynType I128) } "__5";
+      "__5" <-{ (IntOp I128) } copy{ (IntOp I128) } ("other");
+      "__3" <-{ BoolOp } (move{ (IntOp I128) } ("__4")) <{ (IntOp I128) , (IntOp I128) , U8 } (move{ (IntOp I128) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp I128) } copy{ (IntOp I128) } ("other");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp I128) } copy{ (IntOp I128) } ("self");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__3";
+      return (move{ (IntOp I128) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition i128asOrd_min_def  : function :=
+  {|
+     f_args := [
+      ("self", (it_layout I128) : layout);
+     ("other", (it_layout I128) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType I128) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType I128) } "__4";
+      "__4" <-{ (IntOp I128) } copy{ (IntOp I128) } ("self");
+      local_live{ (IntSynType I128) } "__5";
+      "__5" <-{ (IntOp I128) } copy{ (IntOp I128) } ("other");
+      "__3" <-{ BoolOp } (move{ (IntOp I128) } ("__4")) <{ (IntOp I128) , (IntOp I128) , U8 } (move{ (IntOp I128) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp I128) } copy{ (IntOp I128) } ("self");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp I128) } copy{ (IntOp I128) } ("other");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__3";
+      return (move{ (IntOp I128) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
 Program Definition i128asPartialEq_eq_def  : function :=
   {|
      f_args := [
@@ -1816,6 +1916,106 @@ Program Definition i16asOrd_cmp_def  : function :=
      "_bb6" :=
       local_dead "__3";
       return (move{ (use_op_alg' Ordering_st) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition i16asOrd_max_def  : function :=
+  {|
+     f_args := [
+      ("self", (it_layout I16) : layout);
+     ("other", (it_layout I16) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType I16) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType I16) } "__4";
+      "__4" <-{ (IntOp I16) } copy{ (IntOp I16) } ("self");
+      local_live{ (IntSynType I16) } "__5";
+      "__5" <-{ (IntOp I16) } copy{ (IntOp I16) } ("other");
+      "__3" <-{ BoolOp } (move{ (IntOp I16) } ("__4")) <{ (IntOp I16) , (IntOp I16) , U8 } (move{ (IntOp I16) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp I16) } copy{ (IntOp I16) } ("other");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp I16) } copy{ (IntOp I16) } ("self");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__3";
+      return (move{ (IntOp I16) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition i16asOrd_min_def  : function :=
+  {|
+     f_args := [
+      ("self", (it_layout I16) : layout);
+     ("other", (it_layout I16) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType I16) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType I16) } "__4";
+      "__4" <-{ (IntOp I16) } copy{ (IntOp I16) } ("self");
+      local_live{ (IntSynType I16) } "__5";
+      "__5" <-{ (IntOp I16) } copy{ (IntOp I16) } ("other");
+      "__3" <-{ BoolOp } (move{ (IntOp I16) } ("__4")) <{ (IntOp I16) , (IntOp I16) , U8 } (move{ (IntOp I16) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp I16) } copy{ (IntOp I16) } ("self");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp I16) } copy{ (IntOp I16) } ("other");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__3";
+      return (move{ (IntOp I16) } ("__0"))
      ]>%E $
       ∅;
      f_init := "_bb0";
@@ -2138,6 +2338,106 @@ Qed.
 
 
 
+Program Definition i32asOrd_max_def  : function :=
+  {|
+     f_args := [
+      ("self", (it_layout I32) : layout);
+     ("other", (it_layout I32) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType I32) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType I32) } "__4";
+      "__4" <-{ (IntOp I32) } copy{ (IntOp I32) } ("self");
+      local_live{ (IntSynType I32) } "__5";
+      "__5" <-{ (IntOp I32) } copy{ (IntOp I32) } ("other");
+      "__3" <-{ BoolOp } (move{ (IntOp I32) } ("__4")) <{ (IntOp I32) , (IntOp I32) , U8 } (move{ (IntOp I32) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp I32) } copy{ (IntOp I32) } ("other");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp I32) } copy{ (IntOp I32) } ("self");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__3";
+      return (move{ (IntOp I32) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition i32asOrd_min_def  : function :=
+  {|
+     f_args := [
+      ("self", (it_layout I32) : layout);
+     ("other", (it_layout I32) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType I32) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType I32) } "__4";
+      "__4" <-{ (IntOp I32) } copy{ (IntOp I32) } ("self");
+      local_live{ (IntSynType I32) } "__5";
+      "__5" <-{ (IntOp I32) } copy{ (IntOp I32) } ("other");
+      "__3" <-{ BoolOp } (move{ (IntOp I32) } ("__4")) <{ (IntOp I32) , (IntOp I32) , U8 } (move{ (IntOp I32) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp I32) } copy{ (IntOp I32) } ("self");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp I32) } copy{ (IntOp I32) } ("other");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__3";
+      return (move{ (IntOp I32) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
 Program Definition i32asPartialEq_eq_def  : function :=
   {|
      f_args := [
@@ -2438,6 +2738,106 @@ Program Definition i64asOrd_cmp_def  : function :=
      "_bb6" :=
       local_dead "__3";
       return (move{ (use_op_alg' Ordering_st) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition i64asOrd_max_def  : function :=
+  {|
+     f_args := [
+      ("self", (it_layout I64) : layout);
+     ("other", (it_layout I64) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType I64) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType I64) } "__4";
+      "__4" <-{ (IntOp I64) } copy{ (IntOp I64) } ("self");
+      local_live{ (IntSynType I64) } "__5";
+      "__5" <-{ (IntOp I64) } copy{ (IntOp I64) } ("other");
+      "__3" <-{ BoolOp } (move{ (IntOp I64) } ("__4")) <{ (IntOp I64) , (IntOp I64) , U8 } (move{ (IntOp I64) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp I64) } copy{ (IntOp I64) } ("other");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp I64) } copy{ (IntOp I64) } ("self");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__3";
+      return (move{ (IntOp I64) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition i64asOrd_min_def  : function :=
+  {|
+     f_args := [
+      ("self", (it_layout I64) : layout);
+     ("other", (it_layout I64) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType I64) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType I64) } "__4";
+      "__4" <-{ (IntOp I64) } copy{ (IntOp I64) } ("self");
+      local_live{ (IntSynType I64) } "__5";
+      "__5" <-{ (IntOp I64) } copy{ (IntOp I64) } ("other");
+      "__3" <-{ BoolOp } (move{ (IntOp I64) } ("__4")) <{ (IntOp I64) , (IntOp I64) , U8 } (move{ (IntOp I64) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp I64) } copy{ (IntOp I64) } ("self");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp I64) } copy{ (IntOp I64) } ("other");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__3";
+      return (move{ (IntOp I64) } ("__0"))
      ]>%E $
       ∅;
      f_init := "_bb0";
@@ -2760,6 +3160,106 @@ Qed.
 
 
 
+Program Definition i8asOrd_max_def  : function :=
+  {|
+     f_args := [
+      ("self", (it_layout I8) : layout);
+     ("other", (it_layout I8) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType I8) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType I8) } "__4";
+      "__4" <-{ (IntOp I8) } copy{ (IntOp I8) } ("self");
+      local_live{ (IntSynType I8) } "__5";
+      "__5" <-{ (IntOp I8) } copy{ (IntOp I8) } ("other");
+      "__3" <-{ BoolOp } (move{ (IntOp I8) } ("__4")) <{ (IntOp I8) , (IntOp I8) , U8 } (move{ (IntOp I8) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp I8) } copy{ (IntOp I8) } ("other");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp I8) } copy{ (IntOp I8) } ("self");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__3";
+      return (move{ (IntOp I8) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition i8asOrd_min_def  : function :=
+  {|
+     f_args := [
+      ("self", (it_layout I8) : layout);
+     ("other", (it_layout I8) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType I8) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType I8) } "__4";
+      "__4" <-{ (IntOp I8) } copy{ (IntOp I8) } ("self");
+      local_live{ (IntSynType I8) } "__5";
+      "__5" <-{ (IntOp I8) } copy{ (IntOp I8) } ("other");
+      "__3" <-{ BoolOp } (move{ (IntOp I8) } ("__4")) <{ (IntOp I8) , (IntOp I8) , U8 } (move{ (IntOp I8) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp I8) } copy{ (IntOp I8) } ("self");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp I8) } copy{ (IntOp I8) } ("other");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__3";
+      return (move{ (IntOp I8) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
 Program Definition i8asPartialEq_eq_def  : function :=
   {|
      f_args := [
@@ -3060,6 +3560,106 @@ Program Definition isizeasOrd_cmp_def  : function :=
      "_bb6" :=
       local_dead "__3";
       return (move{ (use_op_alg' Ordering_st) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition isizeasOrd_max_def  : function :=
+  {|
+     f_args := [
+      ("self", (it_layout ISize) : layout);
+     ("other", (it_layout ISize) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType ISize) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType ISize) } "__4";
+      "__4" <-{ (IntOp ISize) } copy{ (IntOp ISize) } ("self");
+      local_live{ (IntSynType ISize) } "__5";
+      "__5" <-{ (IntOp ISize) } copy{ (IntOp ISize) } ("other");
+      "__3" <-{ BoolOp } (move{ (IntOp ISize) } ("__4")) <{ (IntOp ISize) , (IntOp ISize) , U8 } (move{ (IntOp ISize) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp ISize) } copy{ (IntOp ISize) } ("other");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp ISize) } copy{ (IntOp ISize) } ("self");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__3";
+      return (move{ (IntOp ISize) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition isizeasOrd_min_def  : function :=
+  {|
+     f_args := [
+      ("self", (it_layout ISize) : layout);
+     ("other", (it_layout ISize) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType ISize) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType ISize) } "__4";
+      "__4" <-{ (IntOp ISize) } copy{ (IntOp ISize) } ("self");
+      local_live{ (IntSynType ISize) } "__5";
+      "__5" <-{ (IntOp ISize) } copy{ (IntOp ISize) } ("other");
+      "__3" <-{ BoolOp } (move{ (IntOp ISize) } ("__4")) <{ (IntOp ISize) , (IntOp ISize) , U8 } (move{ (IntOp ISize) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp ISize) } copy{ (IntOp ISize) } ("self");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp ISize) } copy{ (IntOp ISize) } ("other");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__3";
+      return (move{ (IntOp ISize) } ("__0"))
      ]>%E $
       ∅;
      f_init := "_bb0";
@@ -4088,6 +4688,106 @@ Qed.
 
 
 
+Program Definition u128asOrd_max_def  : function :=
+  {|
+     f_args := [
+      ("self", (it_layout U128) : layout);
+     ("other", (it_layout U128) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType U128) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U128) } "__4";
+      "__4" <-{ (IntOp U128) } copy{ (IntOp U128) } ("self");
+      local_live{ (IntSynType U128) } "__5";
+      "__5" <-{ (IntOp U128) } copy{ (IntOp U128) } ("other");
+      "__3" <-{ BoolOp } (move{ (IntOp U128) } ("__4")) <{ (IntOp U128) , (IntOp U128) , U8 } (move{ (IntOp U128) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp U128) } copy{ (IntOp U128) } ("other");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp U128) } copy{ (IntOp U128) } ("self");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__3";
+      return (move{ (IntOp U128) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u128asOrd_min_def  : function :=
+  {|
+     f_args := [
+      ("self", (it_layout U128) : layout);
+     ("other", (it_layout U128) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType U128) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U128) } "__4";
+      "__4" <-{ (IntOp U128) } copy{ (IntOp U128) } ("self");
+      local_live{ (IntSynType U128) } "__5";
+      "__5" <-{ (IntOp U128) } copy{ (IntOp U128) } ("other");
+      "__3" <-{ BoolOp } (move{ (IntOp U128) } ("__4")) <{ (IntOp U128) , (IntOp U128) , U8 } (move{ (IntOp U128) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp U128) } copy{ (IntOp U128) } ("self");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp U128) } copy{ (IntOp U128) } ("other");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__3";
+      return (move{ (IntOp U128) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
 Program Definition u128asPartialEq_eq_def  : function :=
   {|
      f_args := [
@@ -4388,6 +5088,106 @@ Program Definition u16asOrd_cmp_def  : function :=
      "_bb6" :=
       local_dead "__3";
       return (move{ (use_op_alg' Ordering_st) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u16asOrd_max_def  : function :=
+  {|
+     f_args := [
+      ("self", (it_layout U16) : layout);
+     ("other", (it_layout U16) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType U16) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U16) } "__4";
+      "__4" <-{ (IntOp U16) } copy{ (IntOp U16) } ("self");
+      local_live{ (IntSynType U16) } "__5";
+      "__5" <-{ (IntOp U16) } copy{ (IntOp U16) } ("other");
+      "__3" <-{ BoolOp } (move{ (IntOp U16) } ("__4")) <{ (IntOp U16) , (IntOp U16) , U8 } (move{ (IntOp U16) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp U16) } copy{ (IntOp U16) } ("other");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp U16) } copy{ (IntOp U16) } ("self");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__3";
+      return (move{ (IntOp U16) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u16asOrd_min_def  : function :=
+  {|
+     f_args := [
+      ("self", (it_layout U16) : layout);
+     ("other", (it_layout U16) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType U16) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U16) } "__4";
+      "__4" <-{ (IntOp U16) } copy{ (IntOp U16) } ("self");
+      local_live{ (IntSynType U16) } "__5";
+      "__5" <-{ (IntOp U16) } copy{ (IntOp U16) } ("other");
+      "__3" <-{ BoolOp } (move{ (IntOp U16) } ("__4")) <{ (IntOp U16) , (IntOp U16) , U8 } (move{ (IntOp U16) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp U16) } copy{ (IntOp U16) } ("self");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp U16) } copy{ (IntOp U16) } ("other");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__3";
+      return (move{ (IntOp U16) } ("__0"))
      ]>%E $
       ∅;
      f_init := "_bb0";
@@ -4710,6 +5510,106 @@ Qed.
 
 
 
+Program Definition u32asOrd_max_def  : function :=
+  {|
+     f_args := [
+      ("self", (it_layout U32) : layout);
+     ("other", (it_layout U32) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType U32) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U32) } "__4";
+      "__4" <-{ (IntOp U32) } copy{ (IntOp U32) } ("self");
+      local_live{ (IntSynType U32) } "__5";
+      "__5" <-{ (IntOp U32) } copy{ (IntOp U32) } ("other");
+      "__3" <-{ BoolOp } (move{ (IntOp U32) } ("__4")) <{ (IntOp U32) , (IntOp U32) , U8 } (move{ (IntOp U32) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp U32) } copy{ (IntOp U32) } ("other");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp U32) } copy{ (IntOp U32) } ("self");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__3";
+      return (move{ (IntOp U32) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u32asOrd_min_def  : function :=
+  {|
+     f_args := [
+      ("self", (it_layout U32) : layout);
+     ("other", (it_layout U32) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType U32) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U32) } "__4";
+      "__4" <-{ (IntOp U32) } copy{ (IntOp U32) } ("self");
+      local_live{ (IntSynType U32) } "__5";
+      "__5" <-{ (IntOp U32) } copy{ (IntOp U32) } ("other");
+      "__3" <-{ BoolOp } (move{ (IntOp U32) } ("__4")) <{ (IntOp U32) , (IntOp U32) , U8 } (move{ (IntOp U32) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp U32) } copy{ (IntOp U32) } ("self");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp U32) } copy{ (IntOp U32) } ("other");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__3";
+      return (move{ (IntOp U32) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
 Program Definition u32asPartialEq_eq_def  : function :=
   {|
      f_args := [
@@ -5021,6 +5921,106 @@ Qed.
 
 
 
+Program Definition u64asOrd_max_def  : function :=
+  {|
+     f_args := [
+      ("self", (it_layout U64) : layout);
+     ("other", (it_layout U64) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType U64) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U64) } "__4";
+      "__4" <-{ (IntOp U64) } copy{ (IntOp U64) } ("self");
+      local_live{ (IntSynType U64) } "__5";
+      "__5" <-{ (IntOp U64) } copy{ (IntOp U64) } ("other");
+      "__3" <-{ BoolOp } (move{ (IntOp U64) } ("__4")) <{ (IntOp U64) , (IntOp U64) , U8 } (move{ (IntOp U64) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp U64) } copy{ (IntOp U64) } ("other");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp U64) } copy{ (IntOp U64) } ("self");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__3";
+      return (move{ (IntOp U64) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u64asOrd_min_def  : function :=
+  {|
+     f_args := [
+      ("self", (it_layout U64) : layout);
+     ("other", (it_layout U64) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType U64) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U64) } "__4";
+      "__4" <-{ (IntOp U64) } copy{ (IntOp U64) } ("self");
+      local_live{ (IntSynType U64) } "__5";
+      "__5" <-{ (IntOp U64) } copy{ (IntOp U64) } ("other");
+      "__3" <-{ BoolOp } (move{ (IntOp U64) } ("__4")) <{ (IntOp U64) , (IntOp U64) , U8 } (move{ (IntOp U64) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp U64) } copy{ (IntOp U64) } ("self");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp U64) } copy{ (IntOp U64) } ("other");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__3";
+      return (move{ (IntOp U64) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
 Program Definition u64asPartialEq_eq_def  : function :=
   {|
      f_args := [
@@ -5321,6 +6321,106 @@ Program Definition u8asOrd_cmp_def  : function :=
      "_bb6" :=
       local_dead "__3";
       return (move{ (use_op_alg' Ordering_st) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u8asOrd_max_def  : function :=
+  {|
+     f_args := [
+      ("self", (it_layout U8) : layout);
+     ("other", (it_layout U8) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType U8) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U8) } "__4";
+      "__4" <-{ (IntOp U8) } copy{ (IntOp U8) } ("self");
+      local_live{ (IntSynType U8) } "__5";
+      "__5" <-{ (IntOp U8) } copy{ (IntOp U8) } ("other");
+      "__3" <-{ BoolOp } (move{ (IntOp U8) } ("__4")) <{ (IntOp U8) , (IntOp U8) , U8 } (move{ (IntOp U8) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp U8) } copy{ (IntOp U8) } ("other");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp U8) } copy{ (IntOp U8) } ("self");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__3";
+      return (move{ (IntOp U8) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition u8asOrd_min_def  : function :=
+  {|
+     f_args := [
+      ("self", (it_layout U8) : layout);
+     ("other", (it_layout U8) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType U8) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType U8) } "__4";
+      "__4" <-{ (IntOp U8) } copy{ (IntOp U8) } ("self");
+      local_live{ (IntSynType U8) } "__5";
+      "__5" <-{ (IntOp U8) } copy{ (IntOp U8) } ("other");
+      "__3" <-{ BoolOp } (move{ (IntOp U8) } ("__4")) <{ (IntOp U8) , (IntOp U8) , U8 } (move{ (IntOp U8) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp U8) } copy{ (IntOp U8) } ("self");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp U8) } copy{ (IntOp U8) } ("other");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__3";
+      return (move{ (IntOp U8) } ("__0"))
      ]>%E $
       ∅;
      f_init := "_bb0";
@@ -5735,6 +6835,106 @@ Program Definition usizeasOrd_cmp_def  : function :=
      "_bb6" :=
       local_dead "__3";
       return (move{ (use_op_alg' Ordering_st) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition usizeasOrd_max_def  : function :=
+  {|
+     f_args := [
+      ("self", (it_layout USize) : layout);
+     ("other", (it_layout USize) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType USize) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType USize) } "__4";
+      "__4" <-{ (IntOp USize) } copy{ (IntOp USize) } ("self");
+      local_live{ (IntSynType USize) } "__5";
+      "__5" <-{ (IntOp USize) } copy{ (IntOp USize) } ("other");
+      "__3" <-{ BoolOp } (move{ (IntOp USize) } ("__4")) <{ (IntOp USize) , (IntOp USize) , U8 } (move{ (IntOp USize) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp USize) } copy{ (IntOp USize) } ("other");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp USize) } copy{ (IntOp USize) } ("self");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__3";
+      return (move{ (IntOp USize) } ("__0"))
+     ]>%E $
+      ∅;
+     f_init := "_bb0";
+    |}.
+Final Obligation.
+  solve_fn_vars_nodup.
+Qed.
+
+
+
+
+Program Definition usizeasOrd_min_def  : function :=
+  {|
+     f_args := [
+      ("self", (it_layout USize) : layout);
+     ("other", (it_layout USize) : layout)
+     ];
+     f_code :=
+      <[
+     "_bb0" :=
+      local_live{ (IntSynType USize) } "__0";
+      local_live{ BoolSynType } "__3";
+      local_live{ (IntSynType USize) } "__4";
+      "__4" <-{ (IntOp USize) } copy{ (IntOp USize) } ("self");
+      local_live{ (IntSynType USize) } "__5";
+      "__5" <-{ (IntOp USize) } copy{ (IntOp USize) } ("other");
+      "__3" <-{ BoolOp } (move{ (IntOp USize) } ("__4")) <{ (IntOp USize) , (IntOp USize) , U8 } (move{ (IntOp USize) } ("__5"));
+      if{ BoolOp }: move{ BoolOp } ("__3") then
+       Goto "_bb1"
+      else
+       Goto "_bb2"
+     ]>%E $
+     <[
+     "_bb1" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp USize) } copy{ (IntOp USize) } ("self");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb2" :=
+      local_dead "__5";
+      local_dead "__4";
+      "__0" <-{ (IntOp USize) } copy{ (IntOp USize) } ("other");
+      Goto "_bb3"
+     ]>%E $
+     <[
+     "_bb3" :=
+      local_dead "__3";
+      return (move{ (IntOp USize) } ("__0"))
      ]>%E $
       ∅;
      f_init := "_bb0";
