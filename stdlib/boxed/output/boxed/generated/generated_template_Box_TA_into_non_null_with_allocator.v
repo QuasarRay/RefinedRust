@@ -1,6 +1,8 @@
 From radium Require Import lang notation.
 From refinedrust Require Import typing shims.
 From rrstd.alloc.alloc.generated Require Export generated_specs_alloc.
+From rrstd.clone.clone.generated Require Export generated_specs_clone.
+From rrstd.controlflow.controlflow.generated Require Export generated_specs_controlflow.
 From rrstd.mem.mem.generated Require Export generated_specs_mem.
 From rrstd.option.option.generated Require Export generated_specs_option.
 From rrstd.ptr.ptr.generated Require Export generated_specs_ptr.

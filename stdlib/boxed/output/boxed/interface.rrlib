@@ -21,6 +21,25 @@
       "syntype": "Box_sls"
     },
     {
+      "info": {
+        "enum_name": null,
+        "needs_trait_attrs": true
+      },
+      "kind": "adt",
+      "path": [
+        "alloc",
+        "boxed",
+        "BoxRaw"
+      ],
+      "raw_type": {
+        "rtype": "(box_raw_BoxRaw_rt)",
+        "semtype": "box_raw_BoxRaw_ty"
+      },
+      "rtype": "(box_raw_BoxRaw_inv_t_rt)",
+      "semtype": "box_raw_BoxRaw_inv_t",
+      "syntype": "box_raw_BoxRaw_sls"
+    },
+    {
       "kind": "method",
       "name": "Box_T_from_raw",
       "path": [
@@ -117,6 +136,66 @@
       "trait_req_incl": "trait_incl_of_Box_TA_new_in"
     },
     {
+      "kind": "method",
+      "name": "box_raw_BoxRaw_T_as_non_null_ptr",
+      "path": [
+        "alloc",
+        "boxed",
+        "BoxRaw",
+        "as_non_null_ptr"
+      ],
+      "spec": "type_of_box_raw_BoxRaw_T_as_non_null_ptr",
+      "trait_req_incl": "trait_incl_of_box_raw_BoxRaw_T_as_non_null_ptr"
+    },
+    {
+      "kind": "method",
+      "name": "box_raw_BoxRaw_T_as_ptr",
+      "path": [
+        "alloc",
+        "boxed",
+        "BoxRaw",
+        "as_ptr"
+      ],
+      "spec": "type_of_box_raw_BoxRaw_T_as_ptr",
+      "trait_req_incl": "trait_incl_of_box_raw_BoxRaw_T_as_ptr"
+    },
+    {
+      "kind": "method",
+      "name": "box_raw_BoxRaw_T_cast",
+      "path": [
+        "alloc",
+        "boxed",
+        "BoxRaw",
+        "cast"
+      ],
+      "spec": "type_of_box_raw_BoxRaw_T_cast",
+      "trait_req_incl": "trait_incl_of_box_raw_BoxRaw_T_cast"
+    },
+    {
+      "kind": "method",
+      "name": "box_raw_BoxRaw_T_dangling",
+      "path": [
+        "alloc",
+        "boxed",
+        "BoxRaw",
+        "dangling"
+      ],
+      "spec": "type_of_box_raw_BoxRaw_T_dangling",
+      "trait_req_incl": "trait_incl_of_box_raw_BoxRaw_T_dangling"
+    },
+    {
+      "kind": "method",
+      "name": "box_raw_BoxRaw_T_new_unchecked",
+      "path": [
+        "alloc",
+        "boxed",
+        "BoxRaw",
+        "new_unchecked"
+      ],
+      "spec": "type_of_box_raw_BoxRaw_T_new_unchecked",
+      "trait_req_incl": "trait_incl_of_box_raw_BoxRaw_T_new_unchecked"
+    },
+    {
       "for_type": {
         "Adt": {
           "args": [
@@ -152,6 +231,123 @@
           "std",
           "ops",
           "Drop"
+        ]
+      }
+    },
+    {
+      "for_type": {
+        "Adt": {
+          "args": [
+            {
+              "Param": 0
+            }
+          ],
+          "path": [
+            "alloc",
+            "boxed",
+            "BoxRaw"
+          ]
+        }
+      },
+      "has_semantic_interp": false,
+      "impl_kind": "rust",
+      "kind": "trait_impl",
+      "method_specs": {
+        "clone": {
+          "name": "box_raw_BoxRawTasstd_clone_Clone_clone",
+          "spec": "type_of_box_raw_BoxRawTasstd_clone_Clone_clone",
+          "trait_req_incl": "trait_incl_of_box_raw_BoxRawTasstd_clone_Clone_clone"
+        }
+      },
+      "name": "box_raw_BoxRawTasstd_clone_Clone",
+      "realization": "box_raw_BoxRawTasstd_clone_Clone_realization",
+      "trait_path": {
+        "args": [],
+        "path": [
+          "std",
+          "clone",
+          "Clone"
+        ]
+      }
+    },
+    {
+      "for_type": {
+        "Adt": {
+          "args": [
+            {
+              "Param": 0
+            }
+          ],
+          "path": [
+            "alloc",
+            "boxed",
+            "BoxRaw"
+          ]
+        }
+      },
+      "has_semantic_interp": true,
+      "impl_kind": "rust",
+      "kind": "trait_impl",
+      "method_specs": {},
+      "name": "box_raw_BoxRawTasstd_marker_Copy",
+      "realization": "box_raw_BoxRawTasstd_marker_Copy_realization",
+      "trait_path": {
+        "args": [],
+        "path": [
+          "std",
+          "marker",
+          "Copy"
+        ]
+      }
+    },
+    {
+      "for_type": {
+        "Adt": {
+          "args": [
+            {
+              "Param": 0
+            }
+          ],
+          "path": [
+            "std",
+            "ptr",
+            "NonNull"
+          ]
+        }
+      },
+      "has_semantic_interp": false,
+      "impl_kind": "rust",
+      "kind": "trait_impl",
+      "method_specs": {
+        "from": {
+          "name": "box_raw_implstd_convert_Frombox_raw_BoxRawTforstd_ptr_NonNullT_from",
+          "spec": "type_of_box_raw_implstd_convert_Frombox_raw_BoxRawTforstd_ptr_NonNullT_from",
+          "trait_req_incl": "trait_incl_of_box_raw_implstd_convert_Frombox_raw_BoxRawTforstd_ptr_NonNullT_from"
+        }
+      },
+      "name": "box_raw_implstd_convert_Frombox_raw_BoxRawTforstd_ptr_NonNullT",
+      "realization": "box_raw_implstd_convert_Frombox_raw_BoxRawTforstd_ptr_NonNullT_realization",
+      "trait_path": {
+        "args": [
+          {
+            "Adt": {
+              "args": [
+                {
+                  "Param": 0
+                }
+              ],
+              "path": [
+                "alloc",
+                "boxed",
+                "BoxRaw"
+              ]
+            }
+          }
+        ],
+        "path": [
+          "std",
+          "convert",
+          "From"
         ]
       }
     },

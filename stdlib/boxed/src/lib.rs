@@ -4,9 +4,6 @@
 #![allow(unused)]
 #![allow(internal_features)]
 
-#![feature(allocator_api)]
-#![feature(ptr_internals)]
-#![feature(layout_for_ptr)]
 
 #![rr::package("refinedrust-stdlib")]
 #![rr::coq_prefix("rrstd.boxed")]
@@ -18,14 +15,18 @@
 #![rr::include("mem")]
 #![rr::include("ptr")]
 #![rr::include("ptr_advanced")]
+#![rr::include("clone")]
+#![rr::include("controlflow")]
 
 
 use std::alloc::{self, Allocator, Global, Layout};
 use std::marker::PhantomData;
 use std::ptr::dangling;
-use core::ptr::{self, Unique, NonNull};
+use core::ptr::{self, NonNull};
 use std::mem;
 
+mod box_raw;
+use box_raw::BoxRaw;
 
 // TODO: maybe we should seal this definition at the module boundary so that there's no chance of
 // the definition details leaking?
@@ -40,7 +41,7 @@ use std::mem;
 #[rr::ty_lfts("ty_lfts {T}")]
 #[rr::ty_wf_E("ty_wf_E {T}")]
 #[rr::ghost_drop(#iris "∃ r, place_rfn_interp_owned x r ∗ ty_ghost_drop {T} π r")]
-pub struct Box<T, A: Allocator = Global, >(#[rr::field("#(l)")] Unique<T>, #[rr::field("#($# a)")] A);
+pub struct Box<T, A: Allocator = Global, >(#[rr::field("#(l)")] BoxRaw<T>, #[rr::field("#($# a)")] A);
 
 // TODO: should be T: ?Sized
 #[rr::export_as(alloc::boxed::Box)]
@@ -51,7 +52,7 @@ impl<T, A: Allocator> Box<T, A> {
     #[rr::requires("raw.(loc_a) ≠ 0")]
     #[rr::returns("(b, alloc)")]
     pub unsafe fn from_raw_in(raw: *mut T, alloc: A) -> Self {
-        Box(unsafe { Unique::new_unchecked(raw) }, alloc)
+        Box(unsafe { BoxRaw::new_unchecked(raw) }, alloc)
     }
 
     #[rr::only_spec]
@@ -150,7 +151,7 @@ fn box_new<T>(x: T) -> Box<T> {
         unsafe {
             ptr.write(x);
         }
-        Box(unsafe { Unique::new_unchecked(ptr) }, Global)
+        Box(unsafe { BoxRaw::new_unchecked(ptr) }, Global)
     } else {
         let layout = Layout::new::<T>();
         let ptr = unsafe { alloc::alloc(layout) };
@@ -158,7 +159,7 @@ fn box_new<T>(x: T) -> Box<T> {
         unsafe {
             ptr.write(x);
         };
-        Box(unsafe { Unique::new_unchecked(ptr) }, Global)
+        Box(unsafe { BoxRaw::new_unchecked(ptr) }, Global)
     }
 }
 

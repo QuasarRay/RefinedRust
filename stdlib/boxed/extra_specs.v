@@ -1,6 +1,38 @@
 Section contractive.
   Context `{!refinedrustGS Σ}.
 
+  Global Instance BoxRaw_inv_t_contr {rt1 T_rt : RT} (T : type rt1 → type T_rt) :
+    TypeNonExpansive T →
+    TypeContractive (λ ty, box_raw_BoxRaw_inv_t T_rt <TY> (T ty) <INST!>).
+  Proof.
+    intros X.
+    apply ex_plain_t_contr.
+    - constructor.
+      + solve_proper.
+      + solve_proper.
+    - cbn; apply _.
+  Qed.
+  Global Instance BoxRaw_inv_t_ne {rt1 T_rt : RT} (T : type rt1 → type T_rt) :
+    TypeNonExpansive T →
+    TypeNonExpansive (λ ty, box_raw_BoxRaw_inv_t T_rt <TY> (T ty) <INST!>).
+  Proof. apply _. Qed.
+
+  Global Program Instance BoxRaw_inv_t_dep_lft_mor rts (rt : RT) (T : mut_types rts → type rt) deps :
+    DepLftMorphism deps T →
+    DepLftMorphism deps (λ x : mut_types rts, box_raw_BoxRaw_inv_t rt *[] *[(T x)]) :=
+    λ Ht,
+      dep_lft_morph_make_id _ _ _ Ht _ _.
+  Next Obligation.
+    intros. rewrite /lifecycle_lfts/=.
+    repeat rewrite !ty_lfts_unfold/=.
+    rewrite !right_id//.
+  Qed.
+  Next Obligation.
+    intros. rewrite /lifecycle_wf_E/=.
+    repeat rewrite !ty_wf_E_unfold/=.
+    rewrite !right_id//.
+  Qed.
+
   Global Instance Box_inv_t_contr {rt1 T_rt A_rt : RT} (T : type rt1 → type T_rt) (A_ty : type A_rt) (A_attrs : Allocator_spec_attrs A_rt) :
     TypeNonExpansive T →
     TypeContractive (λ ty, Box_inv_t T_rt A_rt A_attrs <TY> (T ty) <TY> A_ty <INST!>).
