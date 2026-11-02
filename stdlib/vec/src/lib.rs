@@ -3,9 +3,7 @@
 #![feature(custom_inner_attributes)]
 #![allow(unused)]
 
-#![feature(allocator_api)]
 #![allow(internal_features)]
-#![feature(ptr_internals)]
 #![feature(sized_type_properties)]
 
 #![rr::import("rrstd.vec.theories", "vec")]
@@ -27,7 +25,7 @@
 
 use std::alloc::{Allocator, Global};
 use std::marker::PhantomData;
-use core::ptr::{Unique, NonNull};
+use core::ptr::NonNull;
 use std::ptr;
 use std::alloc::Layout;
 use std::mem::SizedTypeProperties;
@@ -47,7 +45,7 @@ type Cap = usize;
 #[rr::derive_instantiate("DropGlueUnwind" := "{A::DropGlueUnwind}")]
 struct RawVecInner<A: Allocator = Global> {
     #[rr::field("#(l)")]
-    ptr: Unique<u8>,
+    ptr: NonNull<u8>,
     #[rr::field("#(Z.of_nat cap)")]
     cap: Cap,
     #[rr::field("#(alloc)")]
@@ -67,7 +65,7 @@ impl<A: Allocator> RawVecInner<A> {
             unsafe {
                 let alloc_size = elem_layout.size().unchecked_mul(self.cap);
                 let layout = Layout::from_size_align_unchecked(alloc_size, elem_layout.align());
-                Some((self.ptr.into(), layout))
+                Some((self.ptr, layout))
             }
         }
     }
@@ -372,19 +370,13 @@ impl<T, A: Allocator> Iterator for Drain<'_, T, A> {
 
 
 
-mod private_slice_index {
-    #[rr::export_as(core::slice::index::private_slice_index::SliceIndex)]
-    pub trait Sealed {}
-
-    impl Sealed for usize {}
-}
 
 
 
 #[rr::export_as(core::slice::index::SliceIndex)]
 #[rr::exists("SliceIndexProj" : "{xt_of T} → {xt_of Self} → option {xt_of Output}")]
 #[rr::exists("SliceIndexInj" : "{xt_of T} → {xt_of Self} → gname → {rt_of T}")]
-pub unsafe trait SliceIndex<T: ?Sized>: private_slice_index::Sealed {
+pub unsafe trait SliceIndex<T: ?Sized> {
     /// The output type returned by methods.
     type Output: ?Sized;
 

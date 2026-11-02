@@ -3,7 +3,6 @@
 #![feature(custom_inner_attributes)]
 #![feature(stmt_expr_attributes)]
 #![rr::package("iterators")]
-#![feature(allocator_api)]
 #![rr::include("stdlib")]
 
 use std::vec::Vec;

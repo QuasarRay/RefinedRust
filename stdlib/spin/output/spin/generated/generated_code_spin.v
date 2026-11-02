@@ -75,6 +75,7 @@ Program Definition drop_glue_rwlock_RwLock_def (drop_glue_UnsafeCell_T_loc: loc)
      ]>%E $
      <[
      "_bb1" :=
+      "ret" <-{ (StructOp unit_sl []) } zst_val;
       return (zst_val)
      ]>%E $
       ∅;
@@ -102,6 +103,7 @@ Program Definition drop_glue_rwlock_RwLockWriteGuard_def (DropGlue_R_drop_glue_l
      ]>%E $
      <[
      "_bb1" :=
+      "ret" <-{ (StructOp unit_sl []) } zst_val;
       return (zst_val)
      ]>%E $
       ∅;

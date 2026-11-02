@@ -310,6 +310,7 @@ Program Definition drop_glue_ControlFlow_def (DropGlue_B_drop_glue_loc: loc) (Dr
      ]>%E $
      <[
      "_bb1" :=
+      "ret" <-{ (StructOp unit_sl []) } zst_val;
       return (zst_val)
      ]>%E $
      <[

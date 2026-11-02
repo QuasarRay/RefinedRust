@@ -341,6 +341,7 @@ Program Definition drop_glue_Result_def (DropGlue_E_drop_glue_loc: loc) (DropGlu
      ]>%E $
      <[
      "_bb1" :=
+      "ret" <-{ (StructOp unit_sl []) } zst_val;
       return (zst_val)
      ]>%E $
      <[

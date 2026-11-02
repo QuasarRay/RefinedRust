@@ -780,6 +780,7 @@ Program Definition drop_glue_Option_def (DropGlue_T_drop_glue_loc: loc) (T_st: s
      ]>%E $
      <[
      "_bb1" :=
+      "ret" <-{ (StructOp unit_sl []) } zst_val;
       return (zst_val)
      ]>%E $
      <[

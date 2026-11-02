@@ -3,7 +3,6 @@
 #![feature(custom_inner_attributes)]
 #![allow(unused)]
 
-#![feature(allocator_api)]
 #![feature(pointer_is_aligned_to)]
 
 #![rr::package("refinedrust-stdlib")]
@@ -18,4 +17,3 @@
 //! Advanced pointer functionality so that we can depend on `option`.
 
 mod nonnull;
-mod unique;

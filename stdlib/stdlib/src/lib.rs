@@ -4,7 +4,6 @@
 #![register_tool(rr)]
 #![feature(custom_inner_attributes)]
 
-#![feature(allocator_api)]
 
 #![rr::package("refinedrust-stdlib")]
 #![rr::coq_prefix("rrstd.stdlib")]

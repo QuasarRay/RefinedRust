@@ -569,6 +569,7 @@ Program Definition drop_glue_adapters_map_Map_def (DropGlue_F_drop_glue_loc: loc
      ]>%E $
      <[
      "_bb1" :=
+      "ret" <-{ (StructOp unit_sl []) } zst_val;
       return (zst_val)
      ]>%E $
      <[
@@ -612,6 +613,7 @@ Program Definition drop_glue_adapters_skip_Skip_def (DropGlue_I_drop_glue_loc: l
      ]>%E $
      <[
      "_bb1" :=
+      "ret" <-{ (StructOp unit_sl []) } zst_val;
       return (zst_val)
      ]>%E $
       ∅;
@@ -639,6 +641,7 @@ Program Definition drop_glue_adapters_step_by_StepBy_def (DropGlue_I_drop_glue_l
      ]>%E $
      <[
      "_bb1" :=
+      "ret" <-{ (StructOp unit_sl []) } zst_val;
       return (zst_val)
      ]>%E $
       ∅;
@@ -666,6 +669,7 @@ Program Definition drop_glue_adapters_take_Take_def (DropGlue_I_drop_glue_loc: l
      ]>%E $
      <[
      "_bb1" :=
+      "ret" <-{ (StructOp unit_sl []) } zst_val;
       return (zst_val)
      ]>%E $
       ∅;
@@ -693,6 +697,7 @@ Program Definition drop_glue_adapters_zip_Zip_def (DropGlue_A_drop_glue_loc: loc
      ]>%E $
      <[
      "_bb1" :=
+      "ret" <-{ (StructOp unit_sl []) } zst_val;
       return (zst_val)
      ]>%E $
      <[
@@ -731,7 +736,7 @@ Program Definition step_impltraits_iterator_Iteratorforstd_ops_RangeA_next_def (
      "_bb0" :=
       local_live{ ((Option_els (A_st)) : syn_type) } "__0";
       local_live{ NeverSynType } "__2";
-      annot{ 1 }: CopyLftNameAnnot "plft4" "ulft_1"; (* initialization *)
+      annot{ 1 }: CopyLftNameAnnot "plft3" "ulft_1"; (* initialization *)
       local_live{ NeverSynType } "__3";
       CallS panic_shim_loc [] [] [@{expr} ] None
       ( StuckS)

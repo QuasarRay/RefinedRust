@@ -1,6 +1,5 @@
 
 use core::ptr;
-use crate::unique::Unique;
 
 
 #[rr::export_as(core::ptr::NonNull)]
@@ -12,14 +11,6 @@ pub struct NonNull<T: ?Sized> {
     // this is banned by <https://github.com/rust-lang/compiler-team/issues/807>.
     #[rr::field("#(l)")]
     pointer: *const T,
-}
-
-// TODO(verification): Use an ordinary impl instead of upstream's const impl
-// until const conversion traits are supported by the verification model.
-#[rr::instantiate("FromFn" := "id")]
-impl<T: ?Sized> From<Unique<T>> for NonNull<T> {
-    #[rr::default_spec]
-    fn from(unique: Unique<T>) -> Self { unique.as_non_null_ptr() }
 }
 
 #[rr::verify]

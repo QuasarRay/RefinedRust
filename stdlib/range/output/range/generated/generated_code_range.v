@@ -76,6 +76,7 @@ Program Definition drop_glue_Range_def (DropGlue_Idx_drop_glue_loc: loc) (Idx_st
      ]>%E $
      <[
      "_bb1" :=
+      "ret" <-{ (StructOp unit_sl []) } zst_val;
       return (zst_val)
      ]>%E $
      <[

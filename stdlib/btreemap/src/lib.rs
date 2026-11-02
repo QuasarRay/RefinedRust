@@ -10,7 +10,6 @@
 #![rr::include("cmp")]
 #![rr::include("clone")]
 
-#![feature(allocator_api)]
 
 use std::alloc::{Allocator, Global};
 

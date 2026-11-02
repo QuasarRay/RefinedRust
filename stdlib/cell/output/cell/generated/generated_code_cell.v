@@ -30,6 +30,7 @@ Program Definition drop_glue_UnsafeCell_def (DropGlue_T_drop_glue_loc: loc) (T_s
      ]>%E $
      <[
      "_bb1" :=
+      "ret" <-{ (StructOp unit_sl []) } zst_val;
       return (zst_val)
      ]>%E $
       ∅;

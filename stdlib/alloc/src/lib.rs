@@ -3,7 +3,6 @@
 #![feature(custom_inner_attributes)]
 #![allow(unused)]
 
-#![feature(allocator_api)]
 #![feature(ptr_alignment_type)]
 
 #![rr::package("refinedrust-stdlib")]

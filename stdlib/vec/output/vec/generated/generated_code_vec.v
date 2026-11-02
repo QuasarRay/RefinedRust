@@ -51,7 +51,7 @@ Section RawVecInner_sls.
   Definition RawVecInner_sls (A_st: syn_type) : struct_layout_spec :=
     let RawVecInner_st (A_st: syn_type) := UnitSynType in
     mk_sls "RawVecInner" [
-    ("ptr", ((unique_Unique_sls ((IntSynType U8))) : syn_type));
+    ("ptr", ((nonnull_NonNull_sls ((IntSynType U8))) : syn_type));
     ("cap", (IntSynType USize));
     ("alloc", A_st)] StructReprRust.
   Definition RawVecInner_st (A_st: syn_type) : syn_type := RawVecInner_sls A_st.
@@ -136,6 +136,7 @@ Program Definition drop_glue_IntoIter_def (DropGlue_A_drop_glue_loc: loc) (T_st:
      ]>%E $
      <[
      "_bb1" :=
+      "ret" <-{ (StructOp unit_sl []) } zst_val;
       return (zst_val)
      ]>%E $
       ∅;
@@ -163,6 +164,7 @@ Program Definition drop_glue_RawVecInner_def (DropGlue_A_drop_glue_loc: loc) (A_
      ]>%E $
      <[
      "_bb1" :=
+      "ret" <-{ (StructOp unit_sl []) } zst_val;
       return (zst_val)
      ]>%E $
       ∅;

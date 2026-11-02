@@ -3,7 +3,6 @@
 #![feature(custom_inner_attributes)]
 #![allow(unused)]
 
-#![feature(allocator_api)]
 
 #![rr::package("refinedrust-stdlib")]
 #![rr::coq_prefix("rrstd.mem")]
