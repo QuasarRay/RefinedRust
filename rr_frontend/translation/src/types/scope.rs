@@ -147,21 +147,6 @@ fn trait_args_match_region_pattern<'tcx>(
     region_instantiation_is_consistent(region_occurrences)
 }
 
-#[cfg(test)]
-mod tests {
-    use super::region_instantiation_is_consistent;
-
-    #[test]
-    fn repeated_region_variable_rejects_distinct_regions() {
-        assert!(!region_instantiation_is_consistent([(Some(0), 10), (Some(0), 11),]));
-    }
-
-    #[test]
-    fn independent_region_variables_accept_distinct_regions() {
-        assert!(region_instantiation_is_consistent([(Some(0), 10), (Some(1), 11),]));
-    }
-}
-
 impl<'tcx> ty::TypeFolder<ty::TyCtxt<'tcx>> for GenericKeyFolder<'tcx> {
     fn cx(&self) -> ty::TyCtxt<'tcx> {
         self.tcx
@@ -1337,5 +1322,20 @@ impl<'tcx, 'def> Traits<'tcx, 'def> {
             return Some(trait_use);
         }
         None
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::region_instantiation_is_consistent;
+
+    #[test]
+    fn repeated_region_variable_rejects_distinct_regions() {
+        assert!(!region_instantiation_is_consistent([(Some(0), 10), (Some(0), 11),]));
+    }
+
+    #[test]
+    fn independent_region_variables_accept_distinct_regions() {
+        assert!(region_instantiation_is_consistent([(Some(0), 10), (Some(1), 11),]));
     }
 }

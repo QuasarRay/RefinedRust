@@ -1495,9 +1495,9 @@ impl SpecDecl<'_> {
                         coq::term::Term::App(Box::new(coq::term::App::new(
                             coq::term::Term::RecordProj(
                                 Box::new(coq::term::Term::Literal(spec_param_name2.clone())),
-                                record_item_name.clone(),
+                                record_item_name,
                             ),
-                            param_uses.clone(),
+                            param_uses,
                         ))),
                     ],
                 )))),

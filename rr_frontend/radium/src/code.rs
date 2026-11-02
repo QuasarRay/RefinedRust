@@ -1512,6 +1512,7 @@ impl fmt::Display for UsedProcedureSpec<'_> {
 }
 
 #[cfg(test)]
+#[expect(clippy::items_after_test_module, reason = "keep these tests next to UsedProcedureSpec")]
 mod used_procedure_spec_tests {
     use std::cell::RefCell;
 

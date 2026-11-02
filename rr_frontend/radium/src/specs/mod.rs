@@ -249,7 +249,7 @@ pub struct TypeAnnotMeta {
 
 impl TypeAnnotMeta {
     #[must_use]
-    pub fn is_empty(&self) -> bool {
+    pub const fn is_empty(&self) -> bool {
         self.escaped_lfts.is_empty() && self.escaped_tyvars.is_empty()
     }
 

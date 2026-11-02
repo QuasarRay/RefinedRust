@@ -12,6 +12,7 @@ use std::env;
 
 use analysis::abstract_interpretation::FixpointEngine as _;
 use analysis::domains::DefinitelyInitializedAnalysis;
+use rr_rustc_interface::attr_ir::{AttrArgs, AttrItem, AttrPath, Attribute};
 use rr_rustc_interface::borrowck::consumers::{self, BodyWithBorrowckFacts};
 use rr_rustc_interface::data_structures::fx::FxHashMap;
 use rr_rustc_interface::hir::def_id::{DefId, LocalDefId};
@@ -21,7 +22,6 @@ use rr_rustc_interface::middle::queries::mir_borrowck::ProvidedValue;
 use rr_rustc_interface::middle::{ty, util};
 use rr_rustc_interface::polonius_engine::{Algorithm, Output};
 use rr_rustc_interface::session::{self, EarlyDiagCtxt, Session};
-use rr_rustc_interface::hir;
 use rr_rustc_interface::span;
 
 use rr_rustc_interface::driver::*;
@@ -31,7 +31,7 @@ struct OurCompilerCalls {
     args: Vec<String>,
 }
 
-fn get_attributes(tcx: ty::TyCtxt<'_>, def_id: DefId) -> &[hir::Attribute] {
+fn get_attributes(tcx: ty::TyCtxt<'_>, def_id: DefId) -> &[Attribute] {
     #[expect(deprecated)]
     tcx.get_all_attrs(def_id)
 }
@@ -41,17 +41,19 @@ fn get_attribute<'tcx>(
     def_id: DefId,
     segment1: &str,
     segment2: &str,
-) -> Option<&'tcx hir::Attribute> {
-    get_attributes(tcx, def_id).iter().find(|attr| match &attr {
-        hir::Attribute::Unparsed(normal_attr) => match normal_attr.as_ref() {
-            hir::AttrItem {
-                path: hir::AttrPath { segments, .. },
-                args: hir::AttrArgs::Empty,
+) -> Option<&'tcx AttrItem> {
+    get_attributes(tcx, def_id).iter().find_map(|attr| match attr {
+        Attribute::Tool(normal_attr) => match normal_attr.as_ref() {
+            AttrItem {
+                path: AttrPath { segments, .. },
+                args: AttrArgs::Empty,
                 ..
-            } => segments.len() == 2 && segments[0].as_str() == segment1 && segments[1].as_str() == segment2,
-            _ => false,
+            } if segments.len() == 2 && segments[0].as_str() == segment1 && segments[1].as_str() == segment2 => {
+                Some(normal_attr.as_ref())
+            },
+            _ => None,
         },
-        _ => false,
+        _ => None,
     })
 }
 
@@ -153,8 +155,10 @@ impl Callbacks for OurCompilerCalls {
             .collect();
 
         // sort according to argument span to ensure deterministic output
-        local_def_ids
-            .sort_unstable_by_key(|id| get_attribute(tcx, id.to_def_id(), "analyzer", "run").unwrap().span());
+        local_def_ids.sort_unstable_by_key(|id| {
+            let span = get_attribute(tcx, id.to_def_id(), "analyzer", "run").unwrap().span;
+            (span.lo(), span.hi())
+        });
 
         for &local_def_id in local_def_ids {
             println!("Result for function {}():", tcx.item_name(local_def_id.to_def_id()));
@@ -218,7 +222,7 @@ fn main() {
     };
     // Invoke compiler, and handle return code.
     let exit_code = catch_with_exit_code(move || {
-        run_compiler(&compiler_args, &mut callbacks);
+        compiler_entrypoint(&compiler_args, &mut callbacks);
     });
     exit_code.exit_process()
 }

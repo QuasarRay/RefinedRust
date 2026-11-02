@@ -181,7 +181,7 @@ impl<'tcx, 'def> GenericTraitUse<'tcx, 'def> {
             let trait_use_ref = self.trait_use.borrow();
             let trait_use = trait_use_ref.as_ref().unwrap();
             let lit = trait_use.make_assoc_type_use(idx);
-            assoc_tys.push((ty_name.clone(), lit));
+            assoc_tys.push((ty_name, lit));
         }
         assoc_tys
     }

@@ -123,6 +123,7 @@ rustflags = [
     "-Aclippy::min_ident_chars",
     "-Aclippy::missing_inline_in_public_items",
     "-Aclippy::missing_trait_methods",
+    "-Aclippy::must_use_without_reason", # ordinary getters/builders need no additional explanation
     "-Aclippy::question_mark_used",
     "-Aclippy::shadow_reuse",
     "-Aclippy::shadow_same",

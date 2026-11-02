@@ -17,6 +17,7 @@ use crate::environment::mir_mapper::{
 use crate::environment::mir_utils::box_alias;
 use crate::environment::mir_utils::real_edges::RealEdges;
 use crate::environment::{loops, mir_storage};
+use crate::error::Message;
 
 /// Index of a Basic Block
 pub(crate) type BasicBlockIndex = mir::BasicBlock;
@@ -501,7 +502,7 @@ impl<'tcx> Procedure<'tcx> {
                 mir::ProjectionElem::PhantomDeref => {
                     // Reborrow's symbolic place does not expose an ordinary reference
                     // lifetime. Do not apply the access-region rules for real derefs.
-                    self.tcx.dcx().fatal(crate::error::Message::UnsupportedFeature(
+                    self.tcx.dcx().fatal(Message::UnsupportedFeature(
                         "region-sensitive place typing for experimental Reborrow PhantomDeref".to_owned(),
                     ));
                 },

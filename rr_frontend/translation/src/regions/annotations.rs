@@ -856,7 +856,7 @@ impl<'a, 'tcx: 'a> AnnotationGenerator<'a, 'tcx> {
     ) -> Result<LocationAnnotationPlan, TranslationError> {
         let startpoint = self.start_point_for_target(loc);
         let midpoint = self.mid_point_for_target(loc);
-        let loan_supports = self.assignment_loan_supports.get(&loc).map(Vec::as_slice).unwrap_or_default();
+        let loan_supports = self.assignment_loan_supports.get(&loc).map_or_default(Vec::as_slice);
         let mut borrow_annots = assignment::get_assignment_loan_annots(
             &self.inclusion_tracker,
             ty_translator,

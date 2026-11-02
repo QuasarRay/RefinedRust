@@ -106,14 +106,14 @@ impl CrateAttrParser for VerboseCrateAttrParser {
                     if prefix.is_some() {
                         return Err(spanned_error(span, ParserError::DuplicatePrefix));
                     }
-                    prefix = Some(path.value().clone());
+                    prefix = Some(path.value());
                 },
                 "package" => {
                     let path: parse::LitStr = buffer.parse(&()).map_err(|e| parse_err(attr_span, e))?;
                     if package.is_some() {
                         return Err(spanned_error(span, ParserError::DuplicatePackage));
                     }
-                    package = Some(path.value().clone());
+                    package = Some(path.value());
                 },
                 _ => {
                     return Err(spanned_error(span, ParserError::UnknownAttribute(format!("{:?}", args))));
