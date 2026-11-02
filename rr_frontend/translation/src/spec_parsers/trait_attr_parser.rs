@@ -9,7 +9,7 @@ use std::collections::{HashMap, HashSet};
 use attribute_parse::{MToken, parse};
 use derive_more::Constructor;
 use radium::specs;
-use rr_rustc_interface::hir;
+use rr_rustc_interface::attr_ir::AttrItem;
 use rr_rustc_interface::span::Span;
 
 use crate::spec_parsers::SpannedError;
@@ -52,7 +52,7 @@ fn parse_err(span: Span, err: parse::Error) -> SpannedError<ParserError> {
 pub(crate) trait TraitAttrParser {
     fn parse_trait_attrs<'a>(
         &'a mut self,
-        attrs: &'a [&'a hir::AttrItem],
+        attrs: &'a [&'a AttrItem],
     ) -> Result<TraitAttrs, SpannedError<ParserError>>;
 }
 
@@ -113,7 +113,7 @@ where
 {
     fn parse_trait_attrs<'a>(
         &'a mut self,
-        attrs: &'a [&'a hir::AttrItem],
+        attrs: &'a [&'a AttrItem],
     ) -> Result<TraitAttrs, SpannedError<ParserError>> {
         let mut trait_attrs = Vec::new();
         let mut used_attrs = HashSet::new();
@@ -189,7 +189,7 @@ where
 
 /// Get all the trait attrs declared on a trait with `rr::exists`, without validating them yet.
 pub(crate) fn get_declared_trait_attrs(
-    attrs: &[&hir::AttrItem],
+    attrs: &[&AttrItem],
 ) -> Result<Vec<String>, SpannedError<ParserError>> {
     let mut trait_attrs = Vec::new();
 

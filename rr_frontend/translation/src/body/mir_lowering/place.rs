@@ -38,6 +38,12 @@ pub(crate) trait MirPlaceTranslation<'def, 'tcx: 'def>:
         // iterate in evaluation order
         for it in pl.projection {
             match &it {
+                mir::ProjectionElem::PhantomDeref => {
+                    // This is a symbolic borrow-checker projection, not a pointer load.
+                    return Err(TranslationError::ErrorReported(self.tcx().dcx().err(
+                        Message::UnsupportedFeature("places: experimental Reborrow PhantomDeref".to_owned()),
+                    )));
+                },
                 mir::ProjectionElem::Deref => {
                     if matches!(cur_ty.ty.kind(), ty::TyKind::Adt(def, _) if def.is_box()) {
                         return Err(TranslationError::ErrorReported(self.tcx().dcx().err(
@@ -144,7 +150,7 @@ pub(crate) trait MirPlaceTranslation<'def, 'tcx: 'def>:
                     info!("Downcast of ty {:?} to {:?}", cur_ty, variant_idx);
                     if let ty::TyKind::Adt(def, args) = cur_ty.ty.kind() {
                         if def.is_enum() {
-                            let enum_use = self.generate_enum_use(*def, args)?;
+                            let enum_use = self.generate_enum_use(*def, *args)?;
                             let els = enum_use.generate_raw_syn_type_term();
 
                             let variant_name =

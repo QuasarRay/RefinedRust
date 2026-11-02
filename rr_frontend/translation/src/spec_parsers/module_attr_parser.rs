@@ -8,7 +8,7 @@ use std::collections::BTreeMap;
 
 use attribute_parse::parse;
 use radium::coq;
-use rr_rustc_interface::hir;
+use rr_rustc_interface::attr_ir::AttrItem;
 use rr_rustc_interface::hir::def_id::LocalDefId;
 use rr_rustc_interface::span::Span;
 
@@ -38,7 +38,7 @@ pub(crate) trait ModuleAttrParser {
     fn parse_module_attrs<'a>(
         &'a mut self,
         did: LocalDefId,
-        attrs: &'a [&'a hir::AttrItem],
+        attrs: &'a [&'a AttrItem],
     ) -> Result<ModuleAttrs, SpannedError<ParserError>>;
 }
 
@@ -61,7 +61,7 @@ impl ModuleAttrParser for VerboseModuleAttrParser {
     fn parse_module_attrs<'a>(
         &'a mut self,
         _did: LocalDefId,
-        attrs: &'a [&'a hir::AttrItem],
+        attrs: &'a [&'a AttrItem],
     ) -> Result<ModuleAttrs, SpannedError<ParserError>> {
         let mut exports: Vec<coq::module::Export> = Vec::new();
         let mut includes: BTreeMap<String, Span> = BTreeMap::new();

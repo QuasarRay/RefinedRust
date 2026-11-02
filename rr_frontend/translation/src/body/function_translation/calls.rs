@@ -111,7 +111,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
 
     fn validate_inline_type_instantiation(
         &self,
-        ty_params: ty::GenericArgsRef<'tcx>,
+        ty_params: ty::GenericArgs<'tcx>,
     ) -> Result<(), TranslationError> {
         for arg in ty_params {
             let ty::GenericArgKind::Type(arg_ty) = arg.kind() else {
@@ -144,7 +144,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
     fn register_inline_callee_dependencies(
         &mut self,
         callee_did: DefId,
-        ty_params: ty::GenericArgsRef<'tcx>,
+        ty_params: ty::GenericArgs<'tcx>,
     ) -> Result<(Vec<String>, Vec<String>), TranslationError> {
         let dependencies = self
             .procedure_registry()
@@ -234,7 +234,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
     fn register_use_procedure(
         &mut self,
         callee_did: DefId,
-        ty_params: ty::GenericArgsRef<'tcx>,
+        ty_params: ty::GenericArgs<'tcx>,
         trait_specs: Vec<ResolvedTraitReq<'tcx, 'def>>,
     ) -> Result<ExprWithInfo<'tcx, 'def>, TranslationError> {
         trace!("enter register_use_procedure callee_did={callee_did:?} ty_params={ty_params:?}");
@@ -279,7 +279,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
     fn register_use_procedure_with_spec(
         &mut self,
         callee_did: DefId,
-        ty_params: ty::GenericArgsRef<'tcx>,
+        ty_params: ty::GenericArgs<'tcx>,
         quantified_args: types::AbstractedGenerics<'def>,
         meta: &procedures::Meta,
         spec_term: code::UsedProcedureSpec<'def>,
@@ -287,7 +287,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
         let expected_num_lft_hints = quantified_args.scope.get_lfts().len();
         // The key does not include associated types: their resolution is unique for one combination
         // of type parameters within a procedure's fixed typing environment.
-        let key = types::generate_args_inst_key(self.tcx, ty_params)?;
+        let key = types::generate_args_inst_key(self.tcx, ty_params.as_slice())?;
         let tcx = self.tcx;
         let loc_key = key.clone();
         let tup = TranslationKey::Function(OrderedDefId::new(tcx, callee_did), key);
@@ -390,9 +390,9 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
     fn register_use_realized_trait_method(
         &mut self,
         trait_method_did: DefId,
-        trait_method_args: ty::GenericArgsRef<'tcx>,
+        trait_method_args: ty::GenericArgs<'tcx>,
         callee_did: DefId,
-        callee_args: ty::GenericArgsRef<'tcx>,
+        callee_args: ty::GenericArgs<'tcx>,
         selected_impl: resolution::ResolvedImpl<'tcx>,
         trait_specs: Vec<ResolvedTraitReq<'tcx, 'def>>,
     ) -> Result<ExprWithInfo<'tcx, 'def>, TranslationError> {
@@ -476,13 +476,13 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
     fn register_use_trait_method(
         &mut self,
         callee_did: DefId,
-        ty_params: ty::GenericArgsRef<'tcx>,
+        ty_params: ty::GenericArgs<'tcx>,
         trait_specs: Vec<ResolvedTraitReq<'tcx, 'def>>,
     ) -> Result<ExprWithInfo<'tcx, 'def>, TranslationError> {
         trace!("enter register_use_trait_method did={:?} ty_params={:?}", callee_did, ty_params);
         // Does not include the associated types in the key; see `register_use_procedure` for an
         // explanation.
-        let key = types::generate_args_inst_key(self.tcx, ty_params)?;
+        let key = types::generate_args_inst_key(self.tcx, ty_params.as_slice())?;
 
         let (method_loc_name, (method_spec_term, spec_scope, spec_inst), mapped_early_regions, method_params) =
             self.ty_translator.register_use_trait_procedure(self.tcx, callee_did, ty_params);
@@ -568,7 +568,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
         closure_did: DefId,
         closure_args: ty::ClosureArgs<ty::TyCtxt<'tcx>>,
         kind: ty::ClosureKind,
-        params: ty::GenericArgsRef<'tcx>,
+        params: ty::GenericArgs<'tcx>,
     ) -> types::AbstractedGenerics<'def> {
         trace!("enter create_closure_impl_abstraction with closure_args={closure_args:?}, params={params:?}");
 
@@ -677,7 +677,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
         closure_did: DefId,
         closure_args: ty::ClosureArgs<ty::TyCtxt<'tcx>>,
         call_fn_did: DefId,
-        ty_params: ty::GenericArgsRef<'tcx>,
+        ty_params: ty::GenericArgs<'tcx>,
         _trait_specs: Vec<ResolvedTraitReq<'tcx, 'def>>,
     ) -> Result<ExprWithInfo<'tcx, 'def>, TranslationError> {
         trace!(
@@ -699,7 +699,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
         // the same environment (which is the case within this procedure).
         // Therefore, already the type parameters are sufficient to distinguish different
         // instantiations.
-        let key = types::generate_args_inst_key(self.tcx, ty_params)?;
+        let key = types::generate_args_inst_key(self.tcx, ty_params.as_slice())?;
 
         let info = self.procedure_registry().lookup_closure_info(closure_did).unwrap();
 
@@ -813,7 +813,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
     fn resolve_trait_requirements_of_call(
         &self,
         did: DefId,
-        params: ty::GenericArgsRef<'tcx>,
+        params: ty::GenericArgs<'tcx>,
         include_self: bool,
     ) -> Result<Vec<ResolvedTraitReq<'tcx, 'def>>, TranslationError> {
         let mut scope = self.ty_translator.scope.borrow_mut();
@@ -930,7 +930,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
     fn call_expr_op_split_inst(
         &self,
         constant: &mir::Const<'tcx>,
-    ) -> Result<(DefId, ty::PolyFnSig<'tcx>, ty::GenericArgsRef<'tcx>, ty::PolyFnSig<'tcx>), TranslationError>
+    ) -> Result<(DefId, ty::PolyFnSig<'tcx>, ty::GenericArgs<'tcx>, ty::PolyFnSig<'tcx>), TranslationError>
     {
         match constant {
             mir::Const::Ty(ty, _) | mir::Const::Val(_, ty) => {

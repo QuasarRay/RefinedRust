@@ -7,7 +7,8 @@
 use log::trace;
 use rr_rustc_interface::data_structures::fx::{FxHashMap, FxHashSet};
 use rr_rustc_interface::hir::def_id::DefId;
-use rr_rustc_interface::middle::{bug, mir, ty};
+use rr_rustc_interface::middle::{mir, ty};
+use rr_rustc_interface::span::bug;
 use rr_rustc_interface::type_ir::TypeFoldable as _;
 
 use crate::environment::mir_mapper::{
@@ -497,6 +498,13 @@ impl<'tcx> Procedure<'tcx> {
 
         for elem in pl.projection {
             cur_ty = match elem {
+                mir::ProjectionElem::PhantomDeref => {
+                    // Reborrow's symbolic place does not expose an ordinary reference
+                    // lifetime. Do not apply the access-region rules for real derefs.
+                    self.tcx.dcx().fatal(crate::error::Message::UnsupportedFeature(
+                        "region-sensitive place typing for experimental Reborrow PhantomDeref".to_owned(),
+                    ));
+                },
                 mir::ProjectionElem::Deref => {
                     match cur_ty.ty.kind() {
                         // A shared reference can be copied out of the access path, so its own

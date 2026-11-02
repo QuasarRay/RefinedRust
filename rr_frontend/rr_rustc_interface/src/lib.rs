@@ -10,6 +10,7 @@
 pub extern crate polonius_engine as polonius_engine;
 pub extern crate rustc_abi as abi;
 pub extern crate rustc_ast as ast;
+pub extern crate rustc_attr_ir as attr_ir;
 pub extern crate rustc_attr_parsing as attr_parsing;
 pub extern crate rustc_borrowck as borrowck;
 pub extern crate rustc_data_structures as data_structures;

@@ -7,7 +7,8 @@ use std::mem;
 
 use log::trace;
 use rr_rustc_interface::hir::def_id::{CrateNum, DefId, LOCAL_CRATE};
-use rr_rustc_interface::middle::{metadata, ty};
+use rr_rustc_interface::middle::middle::resolve::ModChild;
+use rr_rustc_interface::middle::ty;
 use rr_rustc_interface::{hir, span};
 
 use crate::{types, unification};
@@ -52,12 +53,12 @@ where
         index: hir::def_id::CRATE_DEF_INDEX,
     };
 
-    let mut items: &[metadata::ModChild] = tcx.module_children(krate);
+    let mut items: &[ModChild] = tcx.module_children(krate);
     let mut path_it = path.iter().peekable();
 
     while let Some(segment) = path_it.next() {
         for item in mem::take(&mut items) {
-            let item: &metadata::ModChild = item;
+            let item: &ModChild = item;
             if item.ident.name.as_str() == segment.as_ref() {
                 let did = item.res.def_id();
                 let def_kind = tcx.def_kind(did);
@@ -112,12 +113,12 @@ where
     };
     let krate = krate.as_local().unwrap();
 
-    let mut items: &[metadata::ModChild] = tcx.module_children_local(krate);
+    let mut items: &[ModChild] = tcx.module_children_local(krate);
     let mut path_it = path.iter().peekable();
 
     while let Some(segment) = path_it.next() {
         for item in mem::take(&mut items) {
-            let item: &metadata::ModChild = item;
+            let item: &ModChild = item;
             if item.ident.name.as_str() == segment.as_ref() {
                 let did = item.res.def_id();
                 let def_kind = tcx.def_kind(did);
@@ -318,13 +319,13 @@ where
                 index: hir::def_id::CRATE_DEF_INDEX,
             };
 
-            let mut items: &[metadata::ModChild] = tcx.module_children(krate);
+            let mut items: &[ModChild] = tcx.module_children(krate);
             let mut path_it = path.iter().skip(1).peekable();
 
             while let Some(segment) = path_it.next() {
                 //trace!("following segment {:?}; items to look at: {:?}", segment.as_ref(), items);
                 for item in mem::take(&mut items) {
-                    let item: &metadata::ModChild = item;
+                    let item: &ModChild = item;
 
                     if item.ident.name.as_str() != segment.as_ref() {
                         continue;

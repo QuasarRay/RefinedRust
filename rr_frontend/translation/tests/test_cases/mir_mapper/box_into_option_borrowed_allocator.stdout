@@ -2,11 +2,11 @@ Mapping for function box_into_option:
 summary: total=10 mapped=10 unmapped=0
 
 bb0[0] StorageLive(_2) -> Source(bb0[0] StorageLive(_2))
-bb0[1] _8 = copy (_1.0: std::ptr::Unique<Node<T>>) as *const Node<T> (BoxDerefTransmute) -> SplitFrom(bb0[1] _2 = move ((*_1).0: T))
+bb0[1] _8 = copy (_1.0: std::boxed::BoxRaw<Node<T>>) as *const Node<T> (BoxDerefTransmute) -> SplitFrom(bb0[1] _2 = move ((*_1).0: T))
 bb0[2] _2 = move ((*_8).0: T) -> SplitFrom(bb0[1] _2 = move ((*_1).0: T))
 bb0[3] _0 = std::option::Option::<T>::Some(move _2) -> Source(bb0[2] _0 = std::option::Option::<T>::Some(move _2))
 bb0[4] StorageDead(_2) -> FoldedFrom(bb1[0] StorageDead(_2))
-bb0[5] _7 = copy ((_1.0: std::ptr::Unique<Node<T>>).0: std::ptr::NonNull<Node<T>>) as *const Node<T> (Transmute) -> Inserted
+bb0[5] _7 = copy ((_1.0: std::boxed::BoxRaw<Node<T>>).0: std::ptr::NonNull<Node<T>>) as *const Node<T> (Transmute) -> Inserted
 bb0[6] _3 = &mut _1 -> Inserted
 bb0[7] _4 = <std::boxed::Box<Node<T>, &A> as std::ops::Drop>::drop(move _3) -> [return: bb1, unwind: bb2] -> SplitFrom(bb1[1] drop(_1) -> [return: bb2, unwind: bb4])
 bb1[0] return -> Source(bb2[0] return)

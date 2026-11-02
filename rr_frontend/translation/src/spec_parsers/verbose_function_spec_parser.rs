@@ -11,7 +11,7 @@ use attribute_parse::{MToken, parse};
 use log::info;
 use parse::{Parse, Peek as _};
 use radium::{coq, fmt_list, model, push_str_list, specs};
-use rr_rustc_interface::hir;
+use rr_rustc_interface::attr_ir::AttrItem;
 use rr_rustc_interface::middle::hir::place;
 use rr_rustc_interface::middle::ty;
 use rr_rustc_interface::span::{DUMMY_SP, Span};
@@ -351,7 +351,7 @@ pub(crate) trait FunctionSpecParser<'def> {
     /// that it does not need to deal with any other attributes.
     fn parse_function_spec<'a>(
         &'a mut self,
-        attrs: &'a [&'a hir::AttrItem],
+        attrs: &'a [&'a AttrItem],
         builder: &'a mut specs::functions::LiteralSpecBuilder<'def>,
     ) -> Result<(), SpannedError<ParserError>>;
 
@@ -360,7 +360,7 @@ pub(crate) trait FunctionSpecParser<'def> {
     /// that it does not need to deal with any other attributes.
     fn parse_closure_spec<'a, F>(
         &'a mut self,
-        attrs: &'a [&'a hir::AttrItem],
+        attrs: &'a [&'a AttrItem],
         builder: &'a mut specs::functions::LiteralSpecBuilder<'def>,
         closure_meta: ClosureMetaInfo<'_, '_, 'def>,
         make_tuple: F,
@@ -1437,7 +1437,7 @@ where
 {
     fn parse_closure_spec<'a, H>(
         &'a mut self,
-        attrs: &'a [&'a hir::AttrItem],
+        attrs: &'a [&'a AttrItem],
         builder: &'a mut specs::functions::LiteralSpecBuilder<'def>,
         closure_meta: ClosureMetaInfo<'_, '_, 'def>,
         make_tuple: H,
@@ -1562,7 +1562,7 @@ where
 
     fn parse_function_spec(
         &mut self,
-        attrs: &[&hir::AttrItem],
+        attrs: &[&AttrItem],
         builder: &mut specs::functions::LiteralSpecBuilder<'def>,
     ) -> Result<(), SpannedError<ParserError>> {
         let span = attrs.first().map_or(DUMMY_SP, |a| a.span);

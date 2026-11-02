@@ -9,7 +9,7 @@
 use std::collections::{BTreeSet, HashSet};
 
 use rr_rustc_interface::middle::ty;
-use rr_rustc_interface::middle::ty::{RegionExt as _, TypeSuperFoldable as _};
+use rr_rustc_interface::middle::ty::TypeSuperFoldable as _;
 use rr_rustc_interface::type_ir::TypeFoldable as _;
 
 use crate::{rustcmp, traits};
@@ -106,6 +106,6 @@ impl<'tcx> ty::TypeFolder<ty::TyCtxt<'tcx>> for TyRegionEraseFolder<'tcx> {
     }
 
     fn fold_region(&mut self, _: ty::Region<'tcx>) -> ty::Region<'tcx> {
-        ty::Region::new_from_kind(self.cx(), ty::RegionKind::ReErased)
+        self.cx().lifetimes.re_erased
     }
 }

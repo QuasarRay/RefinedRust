@@ -11,7 +11,6 @@ use std::collections::{BTreeMap, BTreeSet};
 use derive_more::Debug;
 use log::{info, warn};
 use rr_rustc_interface::middle::ty;
-use rr_rustc_interface::middle::ty::RegionExt as _;
 
 use crate::base::*;
 use crate::environment::borrowck::facts;

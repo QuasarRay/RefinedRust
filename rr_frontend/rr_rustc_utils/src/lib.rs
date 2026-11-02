@@ -60,7 +60,7 @@ where
                 (TyKind::Float(a), TyKind::Float(b)) => a.cmp(b),
                 (TyKind::Adt(a_def, a_args), TyKind::Adt(b_def, b_args)) => self
                     .cmp_def_id(a_def.did(), b_def.did())
-                    .then_with(|| self.cmp_generic_args(a_args, b_args)),
+                    .then_with(|| self.cmp_generic_args(a_args.as_slice(), b_args.as_slice())),
                 (TyKind::Foreign(a), TyKind::Foreign(b)) => self.cmp_def_id(*a, *b),
                 (TyKind::Array(a_ty, a_const), TyKind::Array(b_ty, b_const)) => {
                     self.cmp_ty(*a_ty, *b_ty).then_with(|| cmp_const(*a_const, *b_const))
@@ -82,15 +82,15 @@ where
                 (TyKind::Closure(a_def, a_args), TyKind::Closure(b_def, b_args))
                 | (TyKind::CoroutineClosure(a_def, a_args), TyKind::CoroutineClosure(b_def, b_args))
                 | (TyKind::Coroutine(a_def, a_args), TyKind::Coroutine(b_def, b_args))
-                | (TyKind::CoroutineWitness(a_def, a_args), TyKind::CoroutineWitness(b_def, b_args)) => {
-                    self.cmp_def_id(*a_def, *b_def).then_with(|| self.cmp_generic_args(a_args, b_args))
-                },
+                | (TyKind::CoroutineWitness(a_def, a_args), TyKind::CoroutineWitness(b_def, b_args)) => self
+                    .cmp_def_id(*a_def, *b_def)
+                    .then_with(|| self.cmp_generic_args(a_args.as_slice(), b_args.as_slice())),
                 (TyKind::Tuple(a), TyKind::Tuple(b)) => a.iter().cmp_by(b.iter(), |a, b| self.cmp_ty(a, b)),
                 (TyKind::Alias(a_rigid, a), TyKind::Alias(b_rigid, b)) => is_rigid_variant(*a_rigid)
                     .cmp(&is_rigid_variant(*b_rigid))
                     .then_with(|| alias_kind_variant(a.kind).cmp(&alias_kind_variant(b.kind)))
                     .then_with(|| self.cmp_def_id(alias_kind_def_id(a.kind), alias_kind_def_id(b.kind)))
-                    .then_with(|| self.cmp_generic_args(a.args, b.args)),
+                    .then_with(|| self.cmp_generic_args(a.args.as_slice(), b.args.as_slice())),
                 (TyKind::Param(a), TyKind::Param(b)) => a.cmp(b),
                 (TyKind::Bound(a_kind, a_ty), TyKind::Bound(b_kind, b_ty)) => {
                     cmp_bound_var_index_kind(*a_kind, *b_kind).then_with(|| a_ty.var.cmp(&b_ty.var))
@@ -143,11 +143,11 @@ where
 
     fn cmp_bound_generic_args(
         &self,
-        a: ty::Binder<'tcx, ty::GenericArgsRef<'tcx>>,
-        b: ty::Binder<'tcx, ty::GenericArgsRef<'tcx>>,
+        a: ty::Binder<'tcx, ty::GenericArgs<'tcx>>,
+        b: ty::Binder<'tcx, ty::GenericArgs<'tcx>>,
     ) -> Ordering {
         cmp_bound_variable_kinds(a.bound_vars(), b.bound_vars())
-            .then_with(|| self.cmp_generic_args(a.skip_binder(), b.skip_binder()))
+            .then_with(|| self.cmp_generic_args(a.skip_binder().as_slice(), b.skip_binder().as_slice()))
     }
 }
 

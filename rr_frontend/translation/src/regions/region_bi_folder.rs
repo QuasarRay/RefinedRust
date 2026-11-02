@@ -76,7 +76,7 @@ pub(crate) trait RegionBiFolder<'tcx> {
                     unreachable!();
                 };
                 assert_eq!(def1, def2);
-                self.map_generic_args(args1, args2);
+                self.map_generic_args(*args1, *args2);
             },
             ty::TyKind::Param(p1) => {
                 let ty::TyKind::Param(p2) = ty2.kind() else {
@@ -179,7 +179,7 @@ pub(crate) trait RegionBiFolder<'tcx> {
         }
     }
 
-    fn map_generic_args(&mut self, a1: ty::GenericArgsRef<'tcx>, a2: ty::GenericArgsRef<'tcx>) {
+    fn map_generic_args(&mut self, a1: ty::GenericArgs<'tcx>, a2: ty::GenericArgs<'tcx>) {
         for (a1, a2) in a1.iter().zip(a2.iter()) {
             self.map_generic_arg(a1, a2);
         }

@@ -13,8 +13,9 @@ use log::{info, trace};
 use radium::{code, coq, lang, specs};
 use rr_rustc_interface::abi;
 use rr_rustc_interface::hir::def_id::DefId;
+use rr_rustc_interface::middle::ty;
 use rr_rustc_interface::middle::ty::TypeFolder as _;
-use rr_rustc_interface::middle::{bug, ty};
+use rr_rustc_interface::span::bug;
 use rr_rustc_interface::type_ir::TypeFoldable as _;
 
 use crate::base::*;
@@ -148,7 +149,7 @@ impl<'def, 'tcx> LocalTX<'def, 'tcx> {
     pub(crate) fn generate_enum_use_with_regions(
         &self,
         adt_def: ty::AdtDef<'tcx>,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
     ) -> Result<specs::types::LiteralUse<'def>, TranslationError> {
         let mut scope = self.scope.borrow_mut();
         let mut scope = STInner::InFunction(&mut scope);
@@ -158,7 +159,7 @@ impl<'def, 'tcx> LocalTX<'def, 'tcx> {
     pub(crate) fn generate_enum_use(
         &self,
         adt_def: ty::AdtDef<'tcx>,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
     ) -> Result<specs::types::LiteralUse<'def>, TranslationError> {
         let mut scope = self.scope.borrow_mut();
         let mut state = self.syntype_state(&mut scope);
@@ -172,7 +173,7 @@ impl<'def, 'tcx> LocalTX<'def, 'tcx> {
     pub(crate) fn generate_struct_use(
         &self,
         variant_id: DefId,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
     ) -> Result<specs::types::LiteralUse<'def>, TranslationError> {
         let mut scope = self.scope.borrow_mut();
         let mut state = self.syntype_state(&mut scope);
@@ -184,7 +185,7 @@ impl<'def, 'tcx> LocalTX<'def, 'tcx> {
     pub(crate) fn generate_enum_variant_use(
         &self,
         variant_id: DefId,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
     ) -> Result<specs::types::LiteralUse<'def>, TranslationError> {
         let mut scope = self.scope.borrow_mut();
         let mut state = self.syntype_state(&mut scope);
@@ -225,8 +226,8 @@ impl<'def, 'tcx> LocalTX<'def, 'tcx> {
     pub(crate) fn split_trait_method_args(
         tcx: ty::TyCtxt<'tcx>,
         trait_did: DefId,
-        ty_params: ty::GenericArgsRef<'tcx>,
-    ) -> (ty::GenericArgsRef<'tcx>, ty::GenericArgsRef<'tcx>) {
+        ty_params: ty::GenericArgs<'tcx>,
+    ) -> (ty::GenericArgs<'tcx>, ty::GenericArgs<'tcx>) {
         // split args
         let trait_generics: &'tcx ty::Generics = tcx.generics_of(trait_did);
         let trait_generic_count = trait_generics.own_params.len();
@@ -241,7 +242,7 @@ impl<'def, 'tcx> LocalTX<'def, 'tcx> {
     pub(crate) fn mark_impl_params_surrounding(
         &self,
         scope: &mut specs::GenericScope<'def>,
-        impl_args: ty::GenericArgsRef<'tcx>,
+        impl_args: ty::GenericArgs<'tcx>,
     ) -> Result<(), TranslationError> {
         let tcx = self.translator.tcx();
         let mut folder = TyVarFolder::new(tcx, ty::TypingEnv::post_analysis(tcx, self.scope.borrow().did));
@@ -274,12 +275,12 @@ impl<'def, 'tcx> LocalTX<'def, 'tcx> {
         &self,
         tcx: ty::TyCtxt<'tcx>,
         trait_method_did: DefId,
-        ty_params: ty::GenericArgsRef<'tcx>,
+        ty_params: ty::GenericArgs<'tcx>,
     ) -> (
         String,
         (code::UsedProcedureSpec<'def>, specs::traits::ReqScope, specs::traits::ReqScopeInst),
         BTreeMap<specs::Lft, usize>,
-        ty::GenericArgsRef<'tcx>,
+        ty::GenericArgs<'tcx>,
     ) {
         let Some(trait_did) = tcx.trait_of_assoc(trait_method_did) else {
             tcx.dcx().span_bug(
@@ -354,7 +355,7 @@ impl<'def, 'tcx> LocalTX<'def, 'tcx> {
     pub(crate) fn get_generic_abstraction_for_procedure(
         &self,
         callee_did: DefId,
-        method_params: ty::GenericArgsRef<'tcx>,
+        method_params: ty::GenericArgs<'tcx>,
         late_bounds: &[ty::BoundVariableKind<'tcx>],
         trait_reqs: Vec<ResolvedTraitReq<'tcx, 'def>>,
         with_surrounding_deps: bool,
@@ -375,7 +376,7 @@ impl<'def, 'tcx> LocalTX<'def, 'tcx> {
     pub(crate) fn get_generic_abstraction_for_item(
         &self,
         owner_did: DefId,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
         late_bounds: &[ty::BoundVariableKind<'tcx>],
         trait_reqs: Vec<ResolvedTraitReq<'tcx, 'def>>,
         with_surrounding_deps: bool,
@@ -391,7 +392,7 @@ impl<'def, 'tcx> LocalTX<'def, 'tcx> {
 
     pub(crate) fn get_generic_abstraction_for_args_all_direct(
         &self,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
         late_bounds: &[ty::BoundVariableKind<'tcx>],
         trait_reqs: Vec<ResolvedTraitReq<'tcx, 'def>>,
     ) -> Result<AbstractedGenerics<'def>, TranslationError> {
@@ -400,7 +401,7 @@ impl<'def, 'tcx> LocalTX<'def, 'tcx> {
 
     fn get_generic_abstraction(
         &self,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
         late_bounds: &[ty::BoundVariableKind<'tcx>],
         trait_reqs: Vec<ResolvedTraitReq<'tcx, 'def>>,
         mode: GenericAbstractionMode,
@@ -551,7 +552,7 @@ impl<'def, 'tcx> LocalTX<'def, 'tcx> {
             };
             let trait_did = tcx.parent(assoc_did);
             let param_scope = self.scope.borrow().make_params_scope();
-            let entry = param_scope.trait_scope().lookup_trait_use(tcx, trait_did, alias_ty.args);
+            let entry = param_scope.trait_scope().lookup_trait_use(tcx, trait_did, alias_ty.args.as_slice());
             let assoc_type = entry.get_associated_type_use(tcx, assoc_did);
             if let specs::Type::LiteralParam(mut lit) = assoc_type {
                 lit.set_origin(specs::TyParamOrigin::Direct);

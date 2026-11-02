@@ -12,7 +12,6 @@ use log::{info, trace};
 use radium::{coq, specs};
 use rr_rustc_interface::hir::def_id::DefId;
 use rr_rustc_interface::middle::ty;
-use rr_rustc_interface::middle::ty::RegionExt as _;
 
 use crate::base::*;
 use crate::environment::borrowck::facts;
@@ -173,10 +172,10 @@ pub(crate) fn replace_fnsig_args_with_polonius_vars<'def, 'tcx>(
     let inputs: Vec<_> = late_sig
         .inputs()
         .iter()
-        .map(|ty| instantiate_open(*ty, tcx, subst_early_bounds))
+        .map(|ty| instantiate_open(*ty, tcx, subst_early_bounds.as_slice()))
         .collect();
 
-    let output = instantiate_open(late_sig.output(), tcx, subst_early_bounds);
+    let output = instantiate_open(late_sig.output(), tcx, subst_early_bounds.as_slice());
 
     trace!("Computed late region map {region_substitution_late:?}");
 

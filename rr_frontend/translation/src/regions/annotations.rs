@@ -123,7 +123,6 @@ use std::mem;
 use log::info;
 use radium::{code, coq, specs};
 use rr_rustc_interface::hir::def_id::DefId;
-use rr_rustc_interface::middle::ty::RegionExt as _;
 use rr_rustc_interface::middle::{mir, ty};
 use rr_rustc_interface::type_ir::TypeFolder as _;
 
@@ -305,8 +304,8 @@ pub(crate) struct CallAnnotationPlan {
 
 /// Callee-generic region information needed to discover and classify a call's Polonius regions.
 pub(crate) struct CallRegionInputs<'a, 'tcx> {
-    pub(crate) source_params: ty::GenericArgsRef<'tcx>,
-    pub(crate) resolved_params: ty::GenericArgsRef<'tcx>,
+    pub(crate) source_params: ty::GenericArgs<'tcx>,
+    pub(crate) resolved_params: ty::GenericArgs<'tcx>,
     pub(crate) source_sig: ty::PolyFnSig<'tcx>,
     pub(crate) num_late_bounds: usize,
     pub(crate) mapped_early_regions: &'a BTreeMap<coq::Ident, usize>,
@@ -617,8 +616,8 @@ impl<'a, 'tcx: 'a> AnnotationGenerator<'a, 'tcx> {
         let discovery = calls::discover_call_regions(
             self.tcx,
             self.info,
-            call_regions.source_params,
-            call_regions.resolved_params,
+            call_regions.source_params.as_slice(),
+            call_regions.resolved_params.as_slice(),
             call_regions.source_sig,
             midpoint,
             call_regions.num_late_bounds,

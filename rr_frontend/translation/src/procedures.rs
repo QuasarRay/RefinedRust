@@ -189,7 +189,7 @@ pub(crate) enum ProcedureKey {
 pub(crate) enum InlineProcedureDependency<'tcx> {
     Function {
         did: DefId,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
         loc_name: String,
     },
     PanicShim {

@@ -8,7 +8,7 @@
 
 use std::collections::HashSet;
 
-use rr_rustc_interface::hir;
+use rr_rustc_interface::attr_ir::{AttrArgs, AttrItem, Attribute};
 use rr_rustc_interface::span::Span;
 
 #[derive(Debug, Clone, Copy)]
@@ -20,19 +20,19 @@ pub(crate) struct UnexpectedAttr<'a> {
 /// Check if `<tool>::<name>` is among the attributes, where `tool` is determined by the
 /// `spec_hotword` config.
 /// Any arguments of the attribute are ignored.
-pub(crate) fn has_tool_attr(attrs: impl IntoIterator<Item = &hir::Attribute>, name: &str) -> bool {
+pub(crate) fn has_tool_attr(attrs: impl IntoIterator<Item = &Attribute>, name: &str) -> bool {
     get_tool_attr(attrs, name).is_some()
 }
 
 /// Check if `<tool>::<name>` is among the attributes without arguments.
-pub(crate) fn has_bare_tool_attr(attrs: impl IntoIterator<Item = &hir::Attribute>, name: &str) -> bool {
+pub(crate) fn has_bare_tool_attr(attrs: impl IntoIterator<Item = &Attribute>, name: &str) -> bool {
     attrs.into_iter().any(|attr| match &attr {
-        hir::Attribute::Unparsed(na) => {
+        Attribute::Tool(na) => {
             let segments = &na.path.segments;
             segments.len() == 2
                 && segments[0].as_str() == rrconfig::spec_hotword().as_str()
                 && segments[1].as_str() == name
-                && matches!(na.args, hir::AttrArgs::Empty)
+                && matches!(na.args, AttrArgs::Empty)
         },
         _ => false,
     })
@@ -40,11 +40,11 @@ pub(crate) fn has_bare_tool_attr(attrs: impl IntoIterator<Item = &hir::Attribute
 
 /// Get the arguments for a tool attribute, if it exists.
 pub(crate) fn get_tool_attr<'a>(
-    attrs: impl IntoIterator<Item = &'a hir::Attribute>,
+    attrs: impl IntoIterator<Item = &'a Attribute>,
     name: &str,
-) -> Option<&'a hir::AttrArgs> {
+) -> Option<&'a AttrArgs> {
     attrs.into_iter().find_map(|attr| match &attr {
-        hir::Attribute::Unparsed(na) => {
+        Attribute::Tool(na) => {
             let segments = &na.path.segments;
             let args = &na.args;
             (segments.len() == 2
@@ -57,7 +57,7 @@ pub(crate) fn get_tool_attr<'a>(
 }
 
 /// Check if `<tool>::name` is among the filtered attributes.
-pub(crate) fn has_tool_attr_filtered(attrs: &[&hir::AttrItem], name: &str) -> bool {
+pub(crate) fn has_tool_attr_filtered(attrs: &[&AttrItem], name: &str) -> bool {
     attrs.iter().any(|item| {
         let segments = &item.path.segments;
         segments.len() == 2
@@ -67,9 +67,9 @@ pub(crate) fn has_tool_attr_filtered(attrs: &[&hir::AttrItem], name: &str) -> bo
 }
 
 /// Check if any attribute starting with `<tool>` is among the attributes.
-pub(crate) fn has_any_tool_attr(attrs: impl IntoIterator<Item = &hir::Attribute>) -> bool {
+pub(crate) fn has_any_tool_attr(attrs: impl IntoIterator<Item = &Attribute>) -> bool {
     attrs.into_iter().any(|attr| match &attr {
-        hir::Attribute::Unparsed(na) => {
+        Attribute::Tool(na) => {
             let segments = &na.path.segments;
             segments[0].as_str() == rrconfig::spec_hotword().as_str()
         },
@@ -79,13 +79,11 @@ pub(crate) fn has_any_tool_attr(attrs: impl IntoIterator<Item = &hir::Attribute>
 
 /// Get all tool attributes, i.e. attributes of the shape `<tool>::attr`, where `tool` is
 /// determined by the `spec_hotword` config.
-pub(crate) fn filter_for_tool<'a>(
-    attrs: impl IntoIterator<Item = &'a hir::Attribute>,
-) -> Vec<&'a hir::AttrItem> {
+pub(crate) fn filter_for_tool<'a>(attrs: impl IntoIterator<Item = &'a Attribute>) -> Vec<&'a AttrItem> {
     attrs
         .into_iter()
         .filter_map(|attr| match &attr {
-            hir::Attribute::Unparsed(na) => {
+            Attribute::Tool(na) => {
                 let seg = na.path.segments.first()?;
 
                 (seg.as_str() == rrconfig::spec_hotword()).then_some(na.as_ref())
@@ -95,14 +93,14 @@ pub(crate) fn filter_for_tool<'a>(
         .collect()
 }
 
-pub(crate) fn get_tool_attr_name(attr: &hir::AttrItem) -> Option<&str> {
+pub(crate) fn get_tool_attr_name(attr: &AttrItem) -> Option<&str> {
     let segments = &attr.path.segments;
     (segments.len() == 2 && segments[0].as_str() == rrconfig::spec_hotword().as_str())
         .then(|| segments[1].as_str())
 }
 
 pub(crate) fn check_tool_attrs<'a>(
-    attrs: &[&'a hir::AttrItem],
+    attrs: &[&'a AttrItem],
     accepted: impl IntoIterator<Item = &'a str>,
 ) -> Result<(), UnexpectedAttr<'a>> {
     check_tool_attr_names(

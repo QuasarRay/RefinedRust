@@ -27,7 +27,7 @@ struct TraitRequirement<'tcx> {
     is_assoc_bound: bool,
 }
 
-pub(crate) type ProjectionEquality<'tcx> = (DefId, ty::GenericArgsRef<'tcx>, ty::Ty<'tcx>);
+pub(crate) type ProjectionEquality<'tcx> = (DefId, ty::GenericArgs<'tcx>, ty::Ty<'tcx>);
 
 struct CollectedRequirements<'tcx> {
     /// Requirements in deterministic, dependency-first DFS postorder.

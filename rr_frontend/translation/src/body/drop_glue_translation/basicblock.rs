@@ -144,7 +144,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> DropGlueTX<'a, 'def, 'tcx> {
         loc: mir::Location,
     ) -> Result<code::Stmt, TranslationError> {
         match &term.kind {
-            mir::TerminatorKind::Goto { target } => Ok(self.translate_goto_like(loc, *target)),
+            mir::TerminatorKind::Goto { target, .. } => Ok(self.translate_goto_like(loc, *target)),
             mir::TerminatorKind::Return => Ok(code::Stmt::Return(code::Expr::Literal(code::Literal::ZST))),
             mir::TerminatorKind::Unreachable => Ok(code::Stmt::Stuck),
             mir::TerminatorKind::UnwindResume => Ok(code::Stmt::Unwind),

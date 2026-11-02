@@ -7,7 +7,7 @@ use log::{info, trace};
 use rr_rustc_interface::hir::def_id::DefId;
 use rr_rustc_interface::infer::infer::TyCtxtInferExt as _;
 use rr_rustc_interface::middle::ty::{
-    RegionExt as _, TypeVisitableExt as _, {self},
+    TypeVisitableExt as _, {self},
 };
 use rr_rustc_interface::span::Symbol;
 use rr_rustc_interface::thin_vec::ThinVec;
@@ -124,7 +124,7 @@ pub(crate) fn resolve_impl_source<'tcx>(
     tcx: ty::TyCtxt<'tcx>,
     typing_env: ty::TypingEnv<'tcx>,
     did: DefId,
-    substs: ty::GenericArgsRef<'tcx>,
+    substs: ty::GenericArgs<'tcx>,
     below_binders: ty::Binder<'tcx, ()>,
 ) -> Option<trait_selection::traits::ImplSource<'tcx, ()>> {
     // we erase regions, because candidate selection cannot deal with open region variables
@@ -167,7 +167,7 @@ pub(crate) fn resolve_impl_source<'tcx>(
 fn recover_lifetimes_for_impl_source<'tcx>(
     tcx: ty::TyCtxt<'tcx>,
     typing_env: ty::TypingEnv<'tcx>,
-    substs: ty::GenericArgsRef<'tcx>,
+    substs: ty::GenericArgs<'tcx>,
     impl_source: &'tcx trait_selection::traits::ImplSource<'tcx, ()>,
     below_binders: ty::Binder<'tcx, ()>,
 ) -> trait_selection::traits::ImplSource<'tcx, ()> {
@@ -295,9 +295,9 @@ pub(crate) fn resolve_trait<'tcx>(
     tcx: ty::TyCtxt<'tcx>,
     typing_env: ty::TypingEnv<'tcx>,
     did: DefId,
-    substs: ty::GenericArgsRef<'tcx>,
+    substs: ty::GenericArgs<'tcx>,
     below_binders: ty::Binder<'tcx, ()>,
-) -> Option<(DefId, ty::GenericArgsRef<'tcx>, TraitResolutionKind)> {
+) -> Option<(DefId, ty::GenericArgs<'tcx>, TraitResolutionKind)> {
     if tcx.is_trait(did) {
         let impl_source = resolve_impl_source(tcx, typing_env, did, substs, below_binders);
         info!("trait impl_source for {:?}: {:?}", did, impl_source);
@@ -332,7 +332,7 @@ pub(crate) enum TraitResolutionKind {
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub(crate) struct ResolvedImpl<'tcx> {
     pub impl_did: DefId,
-    pub impl_args: ty::GenericArgsRef<'tcx>,
+    pub impl_args: ty::GenericArgs<'tcx>,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
@@ -347,7 +347,7 @@ pub(crate) enum AssocItemResolutionKind<'tcx> {
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub(crate) struct ResolvedAssocItem<'tcx> {
     pub callable_did: DefId,
-    pub callable_args: ty::GenericArgsRef<'tcx>,
+    pub callable_args: ty::GenericArgs<'tcx>,
     pub kind: AssocItemResolutionKind<'tcx>,
 }
 
@@ -357,7 +357,7 @@ pub(crate) fn resolve_assoc_item<'tcx>(
     tcx: ty::TyCtxt<'tcx>,
     typing_env: ty::TypingEnv<'tcx>,
     did: DefId,
-    substs: ty::GenericArgsRef<'tcx>,
+    substs: ty::GenericArgs<'tcx>,
     below_binders: ty::Binder<'tcx, ()>,
 ) -> Option<ResolvedAssocItem<'tcx>> {
     let assoc = tcx.opt_associated_item(did)?;
@@ -403,10 +403,17 @@ pub(crate) fn resolve_assoc_item<'tcx>(
 
             // Translate the original substitution into one on the selected impl method
 
-            let typing_env = typing_env.with_post_analysis_normalized(tcx);
+            // Both substitutions cross into the post-analysis environment. Invalidate
+            // rigid aliases so that opaque types can be normalized in that environment,
+            // while retaining the regions needed by RefinedRust's call translation.
+            let ty::PseudoCanonicalInput {
+                typing_env,
+                value: (substs, impl_args),
+            } = typing_env
+                .with_post_analysis_normalized_invalidating_rigid_aliases(tcx, (substs, impl_data.args));
             let infcx = tcx.infer_ctxt().build(typing_env.typing_mode());
 
-            let substs = substs.rebase_onto(tcx, trait_did, impl_data.args);
+            let substs = substs.rebase_onto(tcx, trait_did, impl_args);
             let substs = trait_selection::traits::translate_args(
                 &infcx,
                 typing_env.param_env,
@@ -422,7 +429,7 @@ pub(crate) fn resolve_assoc_item<'tcx>(
                 callable_args: leaf_substs,
                 kind: AssocItemResolutionKind::UserDefined(ResolvedImpl {
                     impl_did: impl_data.impl_def_id,
-                    impl_args: impl_data.args,
+                    impl_args,
                 }),
             })
         },

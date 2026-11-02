@@ -141,7 +141,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> DropGlueTX<'a, 'def, 'tcx> {
     fn resolve_trait_requirements_of_call(
         &self,
         did: DefId,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
         include_self: bool,
     ) -> Result<Vec<ResolvedTraitReq<'tcx, 'def>>, TranslationError> {
         // Collect requirement-only layout dependencies, but discard lifetime-erased specs.
@@ -166,13 +166,13 @@ impl<'a, 'def: 'a, 'tcx: 'def> DropGlueTX<'a, 'def, 'tcx> {
     fn register_use_drop_call_procedure(
         &mut self,
         callee_did: DefId,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
         late_bounds: &[ty::BoundVariableKind<'tcx>],
         trait_reqs: Vec<ResolvedTraitReq<'tcx, 'def>>,
     ) -> Result<(code::Expr, ProcedureInst<'tcx, 'def>), TranslationError> {
         trace!("enter register_use_drop_call_procedure callee_did={callee_did:?} args={args:?}");
 
-        let key = types::generate_args_inst_key(self.tcx, args)?;
+        let key = types::generate_args_inst_key(self.tcx, args.as_slice())?;
         let quantified_args = self.get_drop_glue_generic_abstraction_with_mode(
             args,
             late_bounds,
@@ -288,7 +288,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> DropGlueTX<'a, 'def, 'tcx> {
     fn get_drop_call_late_bounds(
         &self,
         callee_did: DefId,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
     ) -> &'tcx [ty::BoundVariableKind<'tcx>] {
         if let Some(impl_did) = self.tcx.impl_of_assoc(callee_did)
             && self.tcx.impl_is_of_trait(impl_did)
@@ -305,7 +305,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> DropGlueTX<'a, 'def, 'tcx> {
 
     fn get_drop_glue_generic_abstraction_with_mode(
         &self,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
         late_bounds: &[ty::BoundVariableKind<'tcx>],
         trait_reqs: Vec<ResolvedTraitReq<'tcx, 'def>>,
         mode: types::GenericAbstractionMode,
@@ -389,7 +389,11 @@ impl<'a, 'def: 'a, 'tcx: 'def> DropGlueTX<'a, 'def, 'tcx> {
                 continue;
             };
             let trait_did = self.tcx.parent(assoc_did);
-            let entry = self.generic_scope.trait_scope().lookup_trait_use(self.tcx, trait_did, alias_ty.args);
+            let entry = self.generic_scope.trait_scope().lookup_trait_use(
+                self.tcx,
+                trait_did,
+                alias_ty.args.as_slice(),
+            );
             let assoc_type = entry.get_associated_type_use(self.tcx, assoc_did);
             if let specs::Type::LiteralParam(mut lit) = assoc_type {
                 lit.set_origin(specs::TyParamOrigin::Direct);
@@ -466,7 +470,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> MirDropTranslation<'def, 'tcx> for DropGlueTX<'a,
     fn get_drop_glue_generic_abstraction(
         &self,
         owner_did: DefId,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
         trait_reqs: Vec<ResolvedTraitReq<'tcx, 'def>>,
     ) -> Result<types::AbstractedGenerics<'def>, TranslationError> {
         self.get_drop_glue_generic_abstraction_with_mode(
@@ -479,7 +483,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> MirDropTranslation<'def, 'tcx> for DropGlueTX<'a,
 
     fn get_tuple_drop_glue_generic_abstraction(
         &self,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
     ) -> Result<types::AbstractedGenerics<'def>, TranslationError> {
         let trait_reqs = {
             let mut state = self.shim_state();
@@ -508,7 +512,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> MirDropTranslation<'def, 'tcx> for DropGlueTX<'a,
     fn resolve_drop_glue_trait_requirements(
         &self,
         owner_did: DefId,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
     ) -> Result<Vec<ResolvedTraitReq<'tcx, 'def>>, TranslationError> {
         self.resolve_trait_requirements_of_call(owner_did, args, true)
     }
@@ -564,7 +568,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> MirTypeTranslation<'def, 'tcx> for DropGlueTX<'a,
     fn generate_enum_use(
         &self,
         adt_def: ty::AdtDef<'tcx>,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
     ) -> Result<specs::types::LiteralUse<'def>, TranslationError> {
         self.ty_translator.generate_enum_use(adt_def, args, &mut self.shim_state())
     }
@@ -572,7 +576,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> MirTypeTranslation<'def, 'tcx> for DropGlueTX<'a,
     fn generate_enum_use_with_regions(
         &self,
         adt_def: ty::AdtDef<'tcx>,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
     ) -> Result<specs::types::LiteralUse<'def>, TranslationError> {
         self.ty_translator.generate_enum_use(adt_def, args, &mut self.shim_state())
     }
@@ -580,7 +584,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> MirTypeTranslation<'def, 'tcx> for DropGlueTX<'a,
     fn generate_struct_use(
         &self,
         variant_id: DefId,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
     ) -> Result<specs::types::LiteralUse<'def>, TranslationError> {
         self.ty_translator.generate_struct_use(variant_id, args, &mut self.shim_state())
     }
@@ -588,7 +592,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> MirTypeTranslation<'def, 'tcx> for DropGlueTX<'a,
     fn generate_enum_variant_use(
         &self,
         variant_id: DefId,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
     ) -> Result<specs::types::LiteralUse<'def>, TranslationError> {
         self.ty_translator.generate_enum_variant_use(variant_id, args, &mut self.shim_state())
     }

@@ -1,4 +1,3 @@
-#![feature(allocator_api)]
 #![allow(dead_code)]
 
 use std::alloc::Allocator;

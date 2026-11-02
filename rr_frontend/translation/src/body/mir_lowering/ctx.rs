@@ -103,25 +103,25 @@ pub(crate) trait MirTypeTranslation<'def, 'tcx: 'def>: MirTranslationCtx<'def, '
     fn generate_enum_use(
         &self,
         adt_def: ty::AdtDef<'tcx>,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
     ) -> Result<specs::types::LiteralUse<'def>, TranslationError>;
 
     fn generate_enum_use_with_regions(
         &self,
         adt_def: ty::AdtDef<'tcx>,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
     ) -> Result<specs::types::LiteralUse<'def>, TranslationError>;
 
     fn generate_struct_use(
         &self,
         variant_id: DefId,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
     ) -> Result<specs::types::LiteralUse<'def>, TranslationError>;
 
     fn generate_enum_variant_use(
         &self,
         variant_id: DefId,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
     ) -> Result<specs::types::LiteralUse<'def>, TranslationError>;
 
     fn generate_tuple_use<F>(&self, tys: F) -> Result<specs::types::LiteralUse<'def>, TranslationError>

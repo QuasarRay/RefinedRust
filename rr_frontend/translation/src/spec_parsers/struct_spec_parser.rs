@@ -10,7 +10,7 @@ use derive_more::Display;
 use log::info;
 use parse::{Parse, Peek as _};
 use radium::{coq, specs};
-use rr_rustc_interface::hir;
+use rr_rustc_interface::attr_ir::AttrItem;
 use rr_rustc_interface::span::{DUMMY_SP, Span};
 
 use crate::spec_parsers::SpannedError;
@@ -86,7 +86,7 @@ pub(crate) trait InvariantSpecParser {
         struct_name: &str,
         has_trivial_drop: bool,
         span: Span,
-        attrs: &'a [&'a hir::AttrItem],
+        attrs: &'a [&'a AttrItem],
     ) -> Result<(specs::invariants::Spec, bool), SpannedError<ParserError>>;
 }
 
@@ -265,7 +265,7 @@ impl<'def, T: ParamLookup<'def>> InvariantSpecParser for VerboseInvariantSpecPar
         struct_name: &str,
         has_trivial_drop: bool,
         span: Span,
-        attrs: &'a [&'a hir::AttrItem],
+        attrs: &'a [&'a AttrItem],
     ) -> Result<(specs::invariants::Spec, bool), SpannedError<ParserError>> {
         if attrs.is_empty() {
             return Err(spanned_error(span, ParserError::NoInvariantSpecifications));
@@ -466,7 +466,7 @@ pub(crate) trait StructFieldSpecParser<'def> {
         &'a mut self,
         field_name: &str,
         span: Span,
-        attrs: &'a [&'a hir::AttrItem],
+        attrs: &'a [&'a AttrItem],
     ) -> Result<StructFieldSpec<'def>, SpannedError<ParserError>>;
 }
 
@@ -545,7 +545,7 @@ where
         &mut self,
         field_name: &str,
         span: Span,
-        attrs: &[&hir::AttrItem],
+        attrs: &[&AttrItem],
     ) -> Result<StructFieldSpec<'def>, SpannedError<ParserError>> {
         info!("parsing attributes of field {:?}: {:?}", field_name, attrs);
 

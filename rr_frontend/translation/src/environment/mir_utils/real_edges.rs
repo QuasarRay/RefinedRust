@@ -45,7 +45,7 @@ impl RealEdges {
 
 fn real_targets(terminator: &mir::Terminator<'_>) -> Vec<mir::BasicBlock> {
     match &terminator.kind {
-        mir::TerminatorKind::Goto { target } | mir::TerminatorKind::Assert { target, .. } => {
+        mir::TerminatorKind::Goto { target, .. } | mir::TerminatorKind::Assert { target, .. } => {
             vec![*target]
         },
 

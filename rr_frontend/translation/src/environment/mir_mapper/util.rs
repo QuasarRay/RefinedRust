@@ -49,7 +49,7 @@ pub(super) fn compute_predecessors(body: &Body<'_>) -> FxHashMap<BasicBlock, Vec
 /// Return CFG targets excluding unwind-only pseudo-continuations.
 pub(super) fn real_targets(terminator: &mir::Terminator<'_>) -> Vec<BasicBlock> {
     match &terminator.kind {
-        mir::TerminatorKind::Goto { target }
+        mir::TerminatorKind::Goto { target, .. }
         | mir::TerminatorKind::Assert { target, .. }
         | mir::TerminatorKind::Drop { target, .. } => vec![*target],
         mir::TerminatorKind::SwitchInt { targets, .. } => targets.all_targets().to_vec(),
@@ -75,7 +75,7 @@ pub(super) fn terminator_targets(terminator: &mir::Terminator<'_>) -> Vec<BasicB
 /// Return the normal, non-unwind continuation of a terminator when it is unique.
 pub(super) const fn normal_successor(terminator: &mir::Terminator<'_>) -> Option<BasicBlock> {
     match &terminator.kind {
-        mir::TerminatorKind::Goto { target }
+        mir::TerminatorKind::Goto { target, .. }
         | mir::TerminatorKind::Assert { target, .. }
         | mir::TerminatorKind::Drop { target, .. }
         | mir::TerminatorKind::FalseEdge {
@@ -215,6 +215,7 @@ pub(super) fn aggregate_kind_equiv<'tcx>(
 pub(super) const fn normalize_projection_elem(elem: mir::PlaceElem<'_>) -> NormalizedPlaceElem {
     match elem {
         mir::ProjectionElem::Deref => NormalizedPlaceElem::Deref,
+        mir::ProjectionElem::PhantomDeref => NormalizedPlaceElem::PhantomDeref,
         mir::ProjectionElem::Field(field, _) => NormalizedPlaceElem::Field(field.as_usize()),
         mir::ProjectionElem::Index(local) => NormalizedPlaceElem::Index(local),
         mir::ProjectionElem::ConstantIndex {

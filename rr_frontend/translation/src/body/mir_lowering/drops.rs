@@ -27,19 +27,19 @@ pub(crate) trait MirDropTranslation<'def, 'tcx: 'def>:
     fn get_drop_glue_generic_abstraction(
         &self,
         owner_did: DefId,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
         trait_reqs: Vec<ResolvedTraitReq<'tcx, 'def>>,
     ) -> Result<types::AbstractedGenerics<'def>, TranslationError>;
 
     fn resolve_drop_glue_trait_requirements(
         &self,
         owner_did: DefId,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
     ) -> Result<Vec<ResolvedTraitReq<'tcx, 'def>>, TranslationError>;
 
     fn get_tuple_drop_glue_generic_abstraction(
         &self,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
     ) -> Result<types::AbstractedGenerics<'def>, TranslationError>;
 
     fn translate_drop_glue_type(&self, ty: ty::Ty<'tcx>) -> Result<specs::Type<'def>, TranslationError>;
@@ -64,7 +64,7 @@ pub(crate) trait MirDropTranslation<'def, 'tcx: 'def>:
 
         match dropped_ty.kind() {
             ty::TyKind::Adt(adt_def, adt_args) => {
-                self.register_use_adt_drop_glue(dropped_ty, *adt_def, adt_args)
+                self.register_use_adt_drop_glue(dropped_ty, *adt_def, *adt_args)
             },
             ty::TyKind::Tuple(args) => self.register_use_tuple_drop_glue(dropped_ty, args),
             ty::TyKind::Param(_) => self.register_use_assumed_drop_glue(dropped_ty),
@@ -81,10 +81,10 @@ pub(crate) trait MirDropTranslation<'def, 'tcx: 'def>:
         &mut self,
         dropped_ty: ty::Ty<'tcx>,
         adt_def: ty::AdtDef<'tcx>,
-        adt_args: ty::GenericArgsRef<'tcx>,
+        adt_args: ty::GenericArgs<'tcx>,
     ) -> Result<(code::Expr, ProcedureInst<'tcx, 'def>), TranslationError> {
         let key = procedures::DropGlueKey::Adt(OrderedDefId::new(self.tcx(), adt_def.did()));
-        let generics_key = types::generate_args_inst_key(self.tcx(), adt_args)?;
+        let generics_key = types::generate_args_inst_key(self.tcx(), adt_args.as_slice())?;
         let trait_reqs = self.resolve_drop_glue_trait_requirements(adt_def.did(), adt_args)?;
         let quantified_args = self.get_drop_glue_generic_abstraction(adt_def.did(), adt_args, trait_reqs)?;
 
@@ -112,7 +112,7 @@ pub(crate) trait MirDropTranslation<'def, 'tcx: 'def>:
 
         let method_params_vec: Vec<_> = args.iter().map(ty::GenericArg::from).collect();
         let method_params = self.tcx().mk_args(&method_params_vec);
-        let generics_key = types::generate_args_inst_key(self.tcx(), method_params)?;
+        let generics_key = types::generate_args_inst_key(self.tcx(), method_params.as_slice())?;
 
         let quantified_args = self.get_tuple_drop_glue_generic_abstraction(method_params)?;
 
@@ -130,7 +130,7 @@ pub(crate) trait MirDropTranslation<'def, 'tcx: 'def>:
         dropped_ty: ty::Ty<'tcx>,
         key: procedures::DropGlueKey,
         generics_key: types::GenericsKey<'tcx>,
-        method_params: ty::GenericArgsRef<'tcx>,
+        method_params: ty::GenericArgs<'tcx>,
         mut quantified_args: types::AbstractedGenerics<'def>,
     ) -> Result<(code::Expr, ProcedureInst<'tcx, 'def>), TranslationError> {
         let used_key = TranslationKey::DropGlue(key.clone(), generics_key.clone());

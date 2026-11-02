@@ -9,7 +9,7 @@ use std::collections::BTreeMap;
 use attribute_parse::parse;
 use derive_more::Display;
 use radium::coq;
-use rr_rustc_interface::hir;
+use rr_rustc_interface::attr_ir::AttrItem;
 use rr_rustc_interface::span::Span;
 
 use crate::spec_parsers::SpannedError;
@@ -41,7 +41,7 @@ fn parse_err(span: Span, err: parse::Error) -> SpannedError<ParserError> {
 pub(crate) trait CrateAttrParser {
     fn parse_crate_attrs<'a>(
         &'a mut self,
-        attrs: &'a [&'a hir::AttrItem],
+        attrs: &'a [&'a AttrItem],
         span: Span,
     ) -> Result<CrateAttrs, SpannedError<ParserError>>;
 }
@@ -66,7 +66,7 @@ impl VerboseCrateAttrParser {
 impl CrateAttrParser for VerboseCrateAttrParser {
     fn parse_crate_attrs<'a>(
         &'a mut self,
-        attrs: &'a [&'a hir::AttrItem],
+        attrs: &'a [&'a AttrItem],
         span: Span,
     ) -> Result<CrateAttrs, SpannedError<ParserError>> {
         let mut exports: Vec<coq::module::Export> = Vec::new();

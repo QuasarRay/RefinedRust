@@ -67,7 +67,7 @@ pub(crate) fn make_trait_method_use_data<'def>(
 }
 
 pub(crate) struct ProcedureInst<'tcx, 'def> {
-    pub method_params: ty::GenericArgsRef<'tcx>,
+    pub method_params: ty::GenericArgs<'tcx>,
     pub type_hint: Vec<specs::Type<'def>>,
     pub lft_hint: Vec<specs::Lft>,
     pub num_of_latebounds: usize,

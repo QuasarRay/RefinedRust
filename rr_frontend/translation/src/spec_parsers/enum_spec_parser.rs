@@ -7,7 +7,7 @@
 use attribute_parse::{MToken, parse};
 use parse::Peek as _;
 use radium::{coq, specs};
-use rr_rustc_interface::hir;
+use rr_rustc_interface::attr_ir::{AttrArgs, AttrItem};
 use rr_rustc_interface::span::{DUMMY_SP, Span};
 
 use crate::spec_parsers::SpannedError;
@@ -47,7 +47,7 @@ fn parse_err(span: Span, err: parse::Error) -> SpannedError<ParserError> {
     spanned_error(span, ParserError::Parse(str_err(err)))
 }
 
-fn first_span(attrs: &[&hir::AttrItem]) -> Span {
+fn first_span(attrs: &[&AttrItem]) -> Span {
     attrs.first().map_or(DUMMY_SP, |a| a.span)
 }
 
@@ -66,8 +66,8 @@ pub(crate) trait EnumSpecParser {
     fn parse_enum_spec<'a>(
         &'a mut self,
         ty_name: &str,
-        attrs: &'a [&'a hir::AttrItem],
-        variant_attrs: &[Vec<&'a hir::AttrItem>],
+        attrs: &'a [&'a AttrItem],
+        variant_attrs: &[Vec<&'a AttrItem>],
     ) -> Result<specs::enums::Spec, SpannedError<ParserError>>;
 }
 
@@ -125,8 +125,8 @@ impl<'def, T: ParamLookup<'def>> EnumSpecParser for VerboseEnumSpecParser<'_, T>
     fn parse_enum_spec<'a>(
         &'a mut self,
         ty_name: &str,
-        attrs: &'a [&'a hir::AttrItem],
-        variant_attrs: &[Vec<&'a hir::AttrItem>],
+        attrs: &'a [&'a AttrItem],
+        variant_attrs: &[Vec<&'a AttrItem>],
     ) -> Result<specs::enums::Spec, SpannedError<ParserError>> {
         let mut variant_patterns: Vec<(String, Vec<String>, String)> = Vec::new();
         let mut rfn_type = None;
@@ -221,12 +221,12 @@ impl<'def, T: ParamLookup<'def>> EnumSpecParser for VerboseEnumSpecParser<'_, T>
 /// Parse the arguments of a `rr::refine_as` annotation.
 /// Returns the optional specified name.
 pub(crate) fn parse_enum_refine_as(
-    attrs: &hir::AttrArgs,
+    attrs: &AttrArgs,
     span: Span,
 ) -> Result<Option<String>, SpannedError<ParserError>> {
     let buffer = parse::Buffer::new(&attr_args_tokens(attrs));
 
-    if matches!(attrs, hir::AttrArgs::Empty) {
+    if matches!(attrs, AttrArgs::Empty) {
         Ok(None)
     } else {
         let name: parse::LitStr = buffer.parse(&()).map_err(|err| parse_err(span, err))?;

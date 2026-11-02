@@ -34,7 +34,7 @@ pub(crate) fn collect_adt_layout_deps(tcx: ty::TyCtxt<'_>, adt_did: DefId) -> BT
     let adt = tcx.adt_def(adt_did);
     let root_ty = tcx.type_of(adt_did).instantiate_identity().skip_norm_wip();
     if let ty::TyKind::Adt(_, args) = root_ty.kind() {
-        collector.walk_adt_fields(adt, args);
+        collector.walk_adt_fields(adt, *args);
     }
 
     collector.deps
@@ -60,7 +60,7 @@ impl<'tcx> Collector<'tcx> {
         match ty.kind() {
             ty::TyKind::Adt(adt, args) => {
                 self.deps.insert(OrderedDefId::new(self.tcx, adt.did()));
-                self.walk_adt_fields(*adt, args);
+                self.walk_adt_fields(*adt, *args);
             },
 
             ty::TyKind::Array(ty, _) => self.walk_ty(*ty),
@@ -80,7 +80,7 @@ impl<'tcx> Collector<'tcx> {
         }
     }
 
-    fn walk_adt_fields(&mut self, adt: ty::AdtDef<'tcx>, args: ty::GenericArgsRef<'tcx>) {
+    fn walk_adt_fields(&mut self, adt: ty::AdtDef<'tcx>, args: ty::GenericArgs<'tcx>) {
         let key = format!("{}<{:?}>", adt.did().index.as_usize(), args);
         if !self.visited_adts.insert(key) {
             return;

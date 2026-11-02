@@ -65,7 +65,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> MirDropTranslation<'def, 'tcx> for TX<'a, 'def, '
     fn get_drop_glue_generic_abstraction(
         &self,
         owner_did: DefId,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
         trait_reqs: Vec<ResolvedTraitReq<'tcx, 'def>>,
     ) -> Result<types::AbstractedGenerics<'def>, TranslationError> {
         self.ty_translator
@@ -76,7 +76,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> MirDropTranslation<'def, 'tcx> for TX<'a, 'def, '
     fn resolve_drop_glue_trait_requirements(
         &self,
         owner_did: DefId,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
     ) -> Result<Vec<ResolvedTraitReq<'tcx, 'def>>, TranslationError> {
         let mut scope = self.ty_translator.scope.borrow_mut();
         let mut state = types::STInner::InFunction(&mut scope);
@@ -86,7 +86,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> MirDropTranslation<'def, 'tcx> for TX<'a, 'def, '
 
     fn get_tuple_drop_glue_generic_abstraction(
         &self,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
     ) -> Result<types::AbstractedGenerics<'def>, TranslationError> {
         let trait_reqs = {
             let mut scope = self.ty_translator.scope.borrow_mut();
@@ -156,7 +156,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> MirTypeTranslation<'def, 'tcx> for TX<'a, 'def, '
     fn generate_enum_use(
         &self,
         adt_def: ty::AdtDef<'tcx>,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
     ) -> Result<specs::types::LiteralUse<'def>, TranslationError> {
         self.ty_translator.generate_enum_use(adt_def, args)
     }
@@ -164,7 +164,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> MirTypeTranslation<'def, 'tcx> for TX<'a, 'def, '
     fn generate_enum_use_with_regions(
         &self,
         adt_def: ty::AdtDef<'tcx>,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
     ) -> Result<specs::types::LiteralUse<'def>, TranslationError> {
         self.ty_translator.generate_enum_use_with_regions(adt_def, args)
     }
@@ -172,7 +172,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> MirTypeTranslation<'def, 'tcx> for TX<'a, 'def, '
     fn generate_struct_use(
         &self,
         variant_id: DefId,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
     ) -> Result<specs::types::LiteralUse<'def>, TranslationError> {
         self.ty_translator.generate_struct_use(variant_id, args)
     }
@@ -180,7 +180,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> MirTypeTranslation<'def, 'tcx> for TX<'a, 'def, '
     fn generate_enum_variant_use(
         &self,
         variant_id: DefId,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
     ) -> Result<specs::types::LiteralUse<'def>, TranslationError> {
         self.ty_translator.generate_enum_variant_use(variant_id, args)
     }

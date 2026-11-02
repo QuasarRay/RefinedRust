@@ -9,7 +9,6 @@
 use log::info;
 use rr_rustc_interface::hir::def_id::DefId;
 use rr_rustc_interface::middle::ty;
-use rr_rustc_interface::middle::ty::RegionExt as _;
 use rr_rustc_interface::{ast, span};
 use serde::{Deserialize, Serialize};
 use span::symbol::Symbol;

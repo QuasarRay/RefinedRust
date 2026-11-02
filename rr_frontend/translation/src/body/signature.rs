@@ -10,10 +10,11 @@ use std::collections::HashMap;
 
 use log::{info, trace};
 use radium::{code, coq, specs};
+use rr_rustc_interface::attr_ir::{AttrArgs, AttrItem};
 use rr_rustc_interface::hir::def_id::DefId;
 use rr_rustc_interface::middle::{mir, ty};
+use rr_rustc_interface::span;
 use rr_rustc_interface::target::spec::PanicStrategy;
-use rr_rustc_interface::{hir, span};
 use typed_arena::Arena;
 
 use crate::base::*;
@@ -42,7 +43,7 @@ pub(crate) struct TX<'a, 'def, 'tcx> {
     /// registry of consts
     const_registry: &'a consts::Scope<'def>,
     /// attributes on this function
-    attrs: &'a [&'a hir::AttrItem],
+    attrs: &'a [&'a AttrItem],
     /// translator for types
     ty_translator: types::LocalTX<'def, 'tcx>,
     /// trait registry in the current scope
@@ -62,12 +63,12 @@ pub(crate) fn function_has_nontrivial_annotations(tcx: ty::TyCtxt<'_>, did: DefI
         || environment::has_tool_attribute(tcx, did, "use_panic_abort")
 }
 
-fn use_panic_abort(tcx: ty::TyCtxt<'_>, attrs: &[&hir::AttrItem]) -> Result<bool, TranslationError> {
+fn use_panic_abort(tcx: ty::TyCtxt<'_>, attrs: &[&AttrItem]) -> Result<bool, TranslationError> {
     let Some(attr) = attrs.iter().find(|attr| attrs::get_tool_attr_name(attr) == Some("use_panic_abort"))
     else {
         return Ok(false);
     };
-    if !matches!(attr.args, hir::AttrArgs::Empty) {
+    if !matches!(attr.args, AttrArgs::Empty) {
         return Err(TranslationError::ErrorReported(tcx.dcx().span_err(
             attr.span,
             Message::AttributeError("rr::use_panic_abort does not accept arguments".to_owned()),
@@ -99,7 +100,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
         name: &str,
         spec_name: &str,
         trait_req_incl_name: &str,
-        attrs: &'a [&'a hir::AttrItem],
+        attrs: &'a [&'a AttrItem],
         ty_translator: &'def types::TX<'def, 'tcx>,
         trait_registry: &'def registry::TR<'tcx, 'def>,
     ) -> Result<specs::functions::Spec<'def, specs::functions::InnerSpec<'def>>, TranslationError> {
@@ -129,7 +130,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
         let num_universal_regions = num_late_bounds + num_early_bounds + 2;
         let (inputs, output, region_substitution) = regions::replace_fnsig_args_with_polonius_vars(
             tcx,
-            params,
+            params.as_slice(),
             proc_did,
             num_universal_regions,
             num_early_bounds,
@@ -225,7 +226,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
         tcx: ty::TyCtxt<'tcx>,
         meta: &procedures::Meta,
         proc: Procedure<'tcx>,
-        attrs: &'a [&'a hir::AttrItem],
+        attrs: &'a [&'a AttrItem],
         ty_translator: &'def types::TX<'def, 'tcx>,
         trait_registry: &'def registry::TR<'tcx, 'def>,
         proc_registry: &'a procedures::Scope<'tcx, 'def>,
@@ -432,7 +433,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
         tcx: ty::TyCtxt<'tcx>,
         meta: &procedures::Meta,
         proc: Procedure<'tcx>,
-        attrs: &'a [&'a hir::AttrItem],
+        attrs: &'a [&'a AttrItem],
         ty_translator: &'def types::TX<'def, 'tcx>,
         trait_registry: &'def registry::TR<'tcx, 'def>,
         proc_registry: &'a procedures::Scope<'tcx, 'def>,
@@ -482,9 +483,15 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
             let expected_sig = trait_registry.get_expected_sig_for_impl_fn(proc.get_id());
             info!("expected sig: {expected_sig:?}");
 
-            body_regions.normalize_trait_impl_expected_sig(tcx, params, proc.get_id(), sig, expected_sig)
+            body_regions.normalize_trait_impl_expected_sig(
+                tcx,
+                params.as_slice(),
+                proc.get_id(),
+                sig,
+                expected_sig,
+            )
         } else {
-            body_regions.normalize_fn_sig(tcx, params, proc.get_id(), sig)
+            body_regions.normalize_fn_sig(tcx, params.as_slice(), proc.get_id(), sig)
         };
         info!("normalized signature: {inputs:?} -> {output:?}");
 
@@ -609,7 +616,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
 
 impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
     /// Get type parameters of the given procedure.
-    fn get_proc_ty_params(tcx: ty::TyCtxt<'tcx>, did: DefId) -> ty::GenericArgsRef<'tcx> {
+    fn get_proc_ty_params(tcx: ty::TyCtxt<'tcx>, did: DefId) -> ty::GenericArgs<'tcx> {
         let ty = tcx.type_of(did).instantiate_identity().skip_norm_wip();
         match ty.kind() {
             ty::TyKind::FnDef(_, params) => params
@@ -757,7 +764,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
 
     /// Parse and process attributes of this function.
     fn process_attrs(
-        attrs: &[&hir::AttrItem],
+        attrs: &[&AttrItem],
         ty_translator: &types::LocalTX<'def, 'tcx>,
         translator: &mut code::FunctionBuilder<'def>,
         arg_names: &[String],

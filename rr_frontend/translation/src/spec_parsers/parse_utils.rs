@@ -13,14 +13,15 @@ use log::trace;
 use parse::Peek as _;
 use radium::{coq, specs};
 use regex::{Captures, Regex};
-use rr_rustc_interface::span::{DUMMY_SP, Span};
+use rr_rustc_interface::ast;
 /// This provides some general utilities for RefinedRust-specific attribute parsing.
-use rr_rustc_interface::{ast, hir};
+use rr_rustc_interface::attr_ir::AttrArgs;
+use rr_rustc_interface::span::{DUMMY_SP, Span};
 
-pub(crate) fn attr_args_tokens(x: &hir::AttrArgs) -> ast::tokenstream::TokenStream {
+pub(crate) fn attr_args_tokens(x: &AttrArgs) -> ast::tokenstream::TokenStream {
     match x {
-        hir::AttrArgs::Delimited(args) => args.tokens.clone(),
-        hir::AttrArgs::Empty | hir::AttrArgs::Eq { .. } => ast::tokenstream::TokenStream::default(),
+        AttrArgs::Delimited(args) => args.tokens.clone(),
+        AttrArgs::Empty | AttrArgs::Eq { .. } => ast::tokenstream::TokenStream::default(),
     }
 }
 

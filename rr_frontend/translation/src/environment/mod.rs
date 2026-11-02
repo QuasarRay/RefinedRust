@@ -19,7 +19,7 @@ pub(crate) mod polonius_info;
 pub(crate) mod procedure;
 pub(crate) mod region_folder;
 
-use rr_rustc_interface::hir;
+use rr_rustc_interface::attr_ir::{AttrArgs, AttrItem, Attribute};
 use rr_rustc_interface::hir::def_id::{DefId, LocalDefId};
 use rr_rustc_interface::middle::{mir, ty};
 
@@ -145,11 +145,7 @@ pub(crate) fn has_bare_tool_attribute(tcx: ty::TyCtxt<'_>, def_id: DefId, name: 
 
 /// Find whether the procedure has a particular `[tool]::<name>` attribute; if so, return its
 /// name.
-pub(crate) fn get_tool_attribute<'a>(
-    tcx: ty::TyCtxt<'a>,
-    def_id: DefId,
-    name: &str,
-) -> Option<&'a hir::AttrArgs> {
+pub(crate) fn get_tool_attribute<'a>(tcx: ty::TyCtxt<'a>, def_id: DefId, name: &str) -> Option<&'a AttrArgs> {
     #[expect(deprecated)]
     attrs::get_tool_attr(tcx.get_all_attrs(def_id), name)
 }
@@ -161,7 +157,7 @@ pub(crate) fn has_any_tool_attribute(tcx: ty::TyCtxt<'_>, def_id: DefId) -> bool
 }
 
 /// Get the attributes of an item (e.g. procedures).
-pub(crate) fn get_attributes(tcx: ty::TyCtxt<'_>, def_id: DefId) -> &[hir::Attribute] {
+pub(crate) fn get_attributes(tcx: ty::TyCtxt<'_>, def_id: DefId) -> &[Attribute] {
     #[expect(deprecated)]
     tcx.get_all_attrs(def_id)
 }
@@ -171,9 +167,9 @@ pub(crate) fn get_attributes_of_function<'tcx, F>(
     tcx: ty::TyCtxt<'tcx>,
     did: DefId,
     propagate_from_impl: &F,
-) -> Vec<&'tcx hir::AttrItem>
+) -> Vec<&'tcx AttrItem>
 where
-    F: for<'a> Fn(&'a hir::AttrItem) -> bool,
+    F: for<'a> Fn(&'a AttrItem) -> bool,
 {
     let attrs = get_attributes(tcx, did);
     let mut filtered_attrs = attrs::filter_for_tool(attrs);

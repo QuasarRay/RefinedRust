@@ -12,7 +12,7 @@ pub(crate) mod verbose_function_spec_parser;
 
 use attribute_parse::{MToken, parse};
 use parse::{Parse, Peek as _};
-use rr_rustc_interface::hir;
+use rr_rustc_interface::attr_ir::AttrItem;
 use rr_rustc_interface::span::{DUMMY_SP, Span};
 
 /// For parsing of `RustPaths`
@@ -63,7 +63,7 @@ impl<F> Parse<F> for ExportAs {
     }
 }
 
-pub(crate) fn get_export_as_attr(attrs: &[&hir::AttrItem]) -> Result<ExportAs, String> {
+pub(crate) fn get_export_as_attr(attrs: &[&AttrItem]) -> Result<ExportAs, String> {
     for &it in attrs {
         let path_segs = &it.path.segments;
 
@@ -96,7 +96,7 @@ impl<F> Parse<F> for DependsOn {
     }
 }
 
-pub(crate) fn get_depends_on_attrs(attrs: &[&hir::AttrItem]) -> Result<Vec<RustPath>, String> {
+pub(crate) fn get_depends_on_attrs(attrs: &[&AttrItem]) -> Result<Vec<RustPath>, String> {
     let mut deps = Vec::new();
     for &it in attrs {
         let path_segs = &it.path.segments;
@@ -148,7 +148,7 @@ where
 }
 
 /// Extract a shim annotation from a list of annotations of a function or method.
-pub(crate) fn get_shim_attrs(attrs: &[&hir::AttrItem]) -> Result<ShimAnnot, String> {
+pub(crate) fn get_shim_attrs(attrs: &[&AttrItem]) -> Result<ShimAnnot, String> {
     for &it in attrs {
         let path_segs = &it.path.segments;
 
@@ -194,7 +194,7 @@ where
 }
 
 /// Extract a code shim annotation from a list of annotations of a function or method.
-pub(crate) fn get_code_shim_attrs(attrs: &[&hir::AttrItem]) -> Result<CodeShimAnnot, String> {
+pub(crate) fn get_code_shim_attrs(attrs: &[&AttrItem]) -> Result<CodeShimAnnot, String> {
     for &it in attrs {
         let path_segs = &it.path.segments;
 
@@ -211,7 +211,7 @@ pub(crate) fn get_code_shim_attrs(attrs: &[&hir::AttrItem]) -> Result<CodeShimAn
 }
 
 /// Check whether we should propagate this attribute of a method from a surrounding impl.
-pub(crate) fn propagate_method_attr_from_impl(it: &hir::AttrItem) -> bool {
+pub(crate) fn propagate_method_attr_from_impl(it: &AttrItem) -> bool {
     if let Some(ident) = it.path.segments.get(1) {
         matches!(ident.as_str(), "context") || matches!(ident.as_str(), "verify")
     } else {

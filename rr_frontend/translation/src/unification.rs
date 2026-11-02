@@ -38,8 +38,8 @@ fn unify_args<'tcx>(
 }
 
 fn unify_generic_args<'tcx>(
-    arg1: ty::GenericArgsRef<'tcx>,
-    arg2: ty::GenericArgsRef<'tcx>,
+    arg1: ty::GenericArgs<'tcx>,
+    arg2: ty::GenericArgs<'tcx>,
     mapping: UnificationMap<'_, 'tcx>,
 ) -> bool {
     if arg1.len() != arg2.len() {
@@ -81,7 +81,7 @@ pub(crate) fn unify_types<'tcx>(
                 return false;
             }
 
-            unify_generic_args(args1, args2, mapping)
+            unify_generic_args(*args1, *args2, mapping)
         },
         ty::TyKind::Ref(r1, ty1, m1) => {
             let ty::TyKind::Ref(r2, ty2, m2) = ty2.kind() else {

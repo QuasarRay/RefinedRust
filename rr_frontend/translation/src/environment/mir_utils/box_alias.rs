@@ -169,7 +169,7 @@ pub(crate) fn collect_box_materialization_aliases<'tcx>(
 /// Collect synthetic raw-pointer aliases introduced for lowered `Box` derefs.
 ///
 /// rustc may lower a semantic `*box_place` into an administrative raw pointer local. The lang-item
-/// `Box` uses `BoxDerefTransmute` from its `Unique` field, while the stdlib Box shim uses an ordinary
+/// `Box` uses `BoxDerefTransmute` from its `BoxRaw` field, while the stdlib Box shim uses an ordinary
 /// `Transmute` from the nested `NonNull` field:
 ///
 /// ```text

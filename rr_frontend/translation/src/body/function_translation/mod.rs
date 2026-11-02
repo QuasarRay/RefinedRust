@@ -18,8 +18,9 @@ pub(crate) use calls::get_arg_syntypes_for_procedure_call;
 use log::{info, trace};
 use radium::{code, lang, specs};
 use rr_rustc_interface::hir::def_id::DefId;
-use rr_rustc_interface::middle::{bug, mir, ty};
+use rr_rustc_interface::middle::{mir, ty};
 use rr_rustc_interface::mir_dataflow::impls::always_storage_live_locals;
+use rr_rustc_interface::span::bug;
 use typed_arena::Arena;
 
 use crate::base::*;
@@ -71,7 +72,7 @@ pub(crate) struct TX<'a, 'def, 'tcx> {
     /// `(code_loc_parameter_name, spec_name, type_inst, syntype_of_all_args)`
     collected_procedures: HashMap<TranslationKey<'tcx>, code::UsedProcedure<'def>>,
     /// Rust-level descriptions of direct calls, retained so inline callers can replay them.
-    direct_call_dependencies: HashMap<TranslationKey<'tcx>, (DefId, ty::GenericArgsRef<'tcx>)>,
+    direct_call_dependencies: HashMap<TranslationKey<'tcx>, (DefId, ty::GenericArgs<'tcx>)>,
     /// Whether this function calls the built-in, argument-erasing panic shim.
     panic_shim_used: bool,
     /// used statics
@@ -345,7 +346,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
                 };
                 inline_dependencies.procedures.push(procedures::InlineProcedureDependency::Function {
                     did: *did,
-                    args,
+                    args: *args,
                     loc_name: used_proc.loc_name.clone(),
                 });
             }

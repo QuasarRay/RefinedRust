@@ -13,7 +13,8 @@ use derive_more::{Constructor, Debug};
 use log::{info, trace};
 use radium::{coq, lang, push_str_list, specs};
 use rr_rustc_interface::hir::def_id::DefId;
-use rr_rustc_interface::middle::{bug, mir, ty};
+use rr_rustc_interface::middle::{mir, ty};
+use rr_rustc_interface::span::bug;
 use rr_rustc_interface::{abi, ast, span};
 use typed_arena::Arena;
 
@@ -82,7 +83,7 @@ impl<'tcx, 'def> FunctionState<'tcx, 'def> {
     pub(crate) fn new_with_traits(
         did: DefId,
         tcx: ty::TyCtxt<'tcx>,
-        ty_params: ty::GenericArgsRef<'tcx>,
+        ty_params: ty::GenericArgs<'tcx>,
         lifetimes: EarlyLateRegionMap<'def>,
         type_translator: &TX<'def, 'tcx>,
         trait_registry: &registry::TR<'tcx, 'def>,
@@ -895,7 +896,7 @@ impl<'def, 'tcx: 'def> TX<'def, 'tcx> {
                 // Check if we have a shim
                 // we prefer to use the registered ADT instead of the shim, to support things like `#raw`
                 if self.is_registered_remote_adt(adt.did()) {
-                    return self.generate_adt_shim_use(*adt, args, st);
+                    return self.generate_adt_shim_use(*adt, *args, st);
                 }
 
                 if adt.is_struct() {
@@ -903,7 +904,7 @@ impl<'def, 'tcx: 'def> TX<'def, 'tcx> {
                     // register the ADT, if necessary
                     self.register_adt(*adt)?;
 
-                    return self.generate_struct_use_noshim(adt.did(), args, st).map(specs::Type::Struct);
+                    return self.generate_struct_use_noshim(adt.did(), *args, st).map(specs::Type::Struct);
                 }
 
                 if adt.is_enum() {
@@ -918,7 +919,7 @@ impl<'def, 'tcx: 'def> TX<'def, 'tcx> {
                     self.register_adt(*adt)?;
 
                     return self
-                        .generate_enum_variant_use_noshim(adt.did(), variant, args, st)
+                        .generate_enum_variant_use_noshim(adt.did(), variant, *args, st)
                         .map(specs::Type::Struct);
                 }
 
@@ -940,7 +941,7 @@ impl<'def, 'tcx: 'def> TX<'def, 'tcx> {
     fn generate_enum_use_noshim(
         &self,
         adt_def: ty::AdtDef<'tcx>,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
         state: ST<'_, '_, 'def, 'tcx>,
     ) -> Result<specs::enums::AbstractUse<'def>, TranslationError> {
         info!("generating enum use for {:?}", adt_def.did());
@@ -964,7 +965,7 @@ impl<'def, 'tcx: 'def> TX<'def, 'tcx> {
     fn generate_struct_use_noshim(
         &self,
         variant_id: DefId,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
         state: ST<'_, '_, 'def, 'tcx>,
     ) -> Result<specs::structs::AbstractUse<'def>, TranslationError> {
         info!("generating struct use for {:?}", variant_id);
@@ -991,7 +992,7 @@ impl<'def, 'tcx: 'def> TX<'def, 'tcx> {
         &self,
         adt_id: DefId,
         variant_idx: abi::VariantIdx,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
         state: ST<'_, '_, 'def, 'tcx>,
     ) -> Result<specs::structs::AbstractUse<'def>, TranslationError> {
         info!("generating variant use for variant {:?} of {:?}", variant_idx, adt_id);
@@ -1676,7 +1677,7 @@ impl<'def, 'tcx: 'def> TX<'def, 'tcx> {
     fn generate_adt_shim_use(
         &self,
         adt: ty::AdtDef<'tcx>,
-        substs: ty::GenericArgsRef<'tcx>,
+        substs: ty::GenericArgs<'tcx>,
         state: ST<'_, '_, 'def, 'tcx>,
     ) -> Result<specs::Type<'def>, TranslationError> {
         let Some(shim) = self.lookup_adt_shim(adt.did()) else {
@@ -1773,7 +1774,7 @@ impl<'def, 'tcx: 'def> TX<'def, 'tcx> {
                 // we prefer to use the registered local ADT instead of the shim, to support things like
                 // `#raw`
                 if self.is_registered_remote_adt(adt.did()) {
-                    return self.generate_adt_shim_use(*adt, substs, &mut *state);
+                    return self.generate_adt_shim_use(*adt, *substs, &mut *state);
                 }
 
                 if adt.is_struct() {
@@ -1781,7 +1782,7 @@ impl<'def, 'tcx: 'def> TX<'def, 'tcx> {
                 }
 
                 if adt.is_enum() {
-                    return self.generate_enum_use_noshim(*adt, substs, &mut *state).map(specs::Type::Enum);
+                    return self.generate_enum_use_noshim(*adt, *substs, &mut *state).map(specs::Type::Enum);
                 }
 
                 Err(TranslationError::ErrorReported(
@@ -1844,7 +1845,7 @@ impl<'def, 'tcx: 'def> TX<'def, 'tcx> {
                         info!("Trying to resolve projection of {:?} for {:?}", def_id, alias_ty.args);
 
                         let trait_did = self.tcx.parent(def_id);
-                        let entry = &state.lookup_trait_use(self.tcx, trait_did, alias_ty.args);
+                        let entry = &state.lookup_trait_use(self.tcx, trait_did, alias_ty.args.as_slice());
                         let assoc_type = entry.get_associated_type_use(self.tcx, def_id);
 
                         info!("Resolved projection to {assoc_type:?}");
@@ -2064,12 +2065,12 @@ impl<'def, 'tcx> TX<'def, 'tcx> {
                     info!("generating struct use for {:?}", adt.did());
                     // register the ADT, if necessary
                     self.register_adt(*adt)?;
-                    self.generate_struct_use(adt.did(), args, state)
+                    self.generate_struct_use(adt.did(), *args, state)
                 } else if adt.is_enum() {
                     if let Some(variant) = variant {
                         self.register_adt(*adt)?;
                         let v = &adt.variants()[variant];
-                        self.generate_enum_variant_use(v.def_id, args, state)
+                        self.generate_enum_variant_use(v.def_id, *args, state)
                     } else {
                         Err(TranslationError::ErrorReported(
                             self.tcx
@@ -2101,7 +2102,7 @@ impl<'def, 'tcx> TX<'def, 'tcx> {
     pub(crate) fn generate_enum_use(
         &self,
         adt_def: ty::AdtDef<'tcx>,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
         state: ST<'_, '_, 'def, 'tcx>,
     ) -> Result<specs::types::LiteralUse<'def>, TranslationError> {
         info!("generating enum use for {:?}", adt_def.did());
@@ -2134,7 +2135,7 @@ impl<'def, 'tcx> TX<'def, 'tcx> {
     pub(crate) fn generate_struct_use(
         &self,
         variant_id: DefId,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
         state: ST<'_, '_, 'def, 'tcx>,
     ) -> Result<specs::types::LiteralUse<'def>, TranslationError> {
         info!("generating struct use for {:?}", variant_id);
@@ -2163,7 +2164,7 @@ impl<'def, 'tcx> TX<'def, 'tcx> {
     pub(crate) fn generate_enum_variant_use(
         &self,
         variant_id: DefId,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
         state: ST<'_, '_, 'def, 'tcx>,
     ) -> Result<specs::types::LiteralUse<'def>, TranslationError> {
         info!("generating enum variant use for {:?}", variant_id);

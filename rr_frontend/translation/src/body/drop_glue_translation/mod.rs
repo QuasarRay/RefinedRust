@@ -13,7 +13,7 @@ use std::collections::{BTreeMap, HashMap, HashSet};
 use attribute_parse::parse;
 use log::{info, trace};
 use radium::{code, coq, lang, specs};
-use rr_rustc_interface::hir::attrs::lang_items::LangItem;
+use rr_rustc_interface::attr_ir::LangItem;
 use rr_rustc_interface::hir::def_id::DefId;
 use rr_rustc_interface::middle::{mir, ty};
 use rr_rustc_interface::mir_dataflow::impls::always_storage_live_locals;
@@ -102,7 +102,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> DropGlueTX<'a, 'def, 'tcx> {
         let generic_scope = Self::setup_generic_scope(
             tcx,
             adt_did,
-            adt_args,
+            *adt_args,
             ty_translator,
             trait_registry,
             &mut translated_fn,
@@ -190,7 +190,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> DropGlueTX<'a, 'def, 'tcx> {
     fn setup_generic_scope(
         tcx: ty::TyCtxt<'tcx>,
         adt_did: DefId,
-        adt_args: ty::GenericArgsRef<'tcx>,
+        adt_args: ty::GenericArgs<'tcx>,
         ty_translator: &'def types::TX<'def, 'tcx>,
         trait_registry: &'def registry::TR<'tcx, 'def>,
         translated_fn: &mut code::FunctionBuilder<'def>,
@@ -562,7 +562,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> DropGlueTX<'a, 'def, 'tcx> {
                         "drop-glue semantic place typing got missing field {field:?} of {current_ty:?} in {place:?}"
                     ))))
                 })?;
-                Ok(field_def.ty(self.tcx, adt_args).skip_norm_wip())
+                Ok(field_def.ty(self.tcx, *adt_args).skip_norm_wip())
             },
 
             ty::TyKind::Tuple(fields) => fields.get(field.as_usize()).copied().ok_or_else(|| {

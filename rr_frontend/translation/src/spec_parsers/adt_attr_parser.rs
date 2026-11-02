@@ -12,7 +12,7 @@
 
 use attribute_parse::{MToken, parse};
 use derive_more::Display;
-use rr_rustc_interface::hir;
+use rr_rustc_interface::attr_ir::{AttrArgs, AttrItem};
 use rr_rustc_interface::span::Span;
 
 use crate::attrs;
@@ -53,9 +53,9 @@ fn parse_err(span: Span, err: parse::Error) -> SpannedError<ParserError> {
     spanned_error(span, ParserError::Parse(str_err(err)))
 }
 
-fn parse_adt_drop_glue_targets(attr: &hir::AttrItem) -> Result<Vec<String>, SpannedError<ParserError>> {
+fn parse_adt_drop_glue_targets(attr: &AttrItem) -> Result<Vec<String>, SpannedError<ParserError>> {
     // Bare `skip` remains the broad ADT skip; bare assumed modes have no ADT-wide meaning.
-    if matches!(attr.args, hir::AttrArgs::Empty) {
+    if matches!(attr.args, AttrArgs::Empty) {
         return Ok(Vec::new());
     }
 
@@ -67,7 +67,7 @@ fn parse_adt_drop_glue_targets(attr: &hir::AttrItem) -> Result<Vec<String>, Span
 }
 
 pub(crate) fn get_adt_drop_glue_mode(
-    attr_items: &[&hir::AttrItem],
+    attr_items: &[&AttrItem],
 ) -> Result<AdtDropGlueMode, SpannedError<ParserError>> {
     // Default to proving drop glue unless an ADT-specific mode overrides it.
     let mut mode = AdtDropGlueMode::Prove;
@@ -113,7 +113,7 @@ pub(crate) fn get_adt_drop_glue_mode(
     Ok(mode)
 }
 
-pub(crate) fn has_non_drop_glue_adt_attr(attr_items: &[&hir::AttrItem]) -> bool {
+pub(crate) fn has_non_drop_glue_adt_attr(attr_items: &[&AttrItem]) -> bool {
     // Used by derived-trait discovery: targeted drop-glue attrs should not make unrelated derived
     // trait obligations look annotated.
     attr_items

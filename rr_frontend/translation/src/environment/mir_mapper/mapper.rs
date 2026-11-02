@@ -597,8 +597,12 @@ impl<'a, 'tcx> Mapper<'a, 'tcx> {
     fn recurse_direct(&mut self, tt: &mir::Terminator<'tcx>, ts: &mir::Terminator<'tcx>) {
         match (&tt.kind, &ts.kind) {
             (
-                mir::TerminatorKind::Goto { target: target_t },
-                mir::TerminatorKind::Goto { target: target_s }
+                mir::TerminatorKind::Goto {
+                    target: target_t, ..
+                },
+                mir::TerminatorKind::Goto {
+                    target: target_s, ..
+                }
                 | mir::TerminatorKind::FalseEdge {
                     real_target: target_s,
                     ..
@@ -617,7 +621,9 @@ impl<'a, 'tcx> Mapper<'a, 'tcx> {
                     real_target: target_t,
                     ..
                 },
-                mir::TerminatorKind::Goto { target: target_s },
+                mir::TerminatorKind::Goto {
+                    target: target_s, ..
+                },
             ) => self.align_successor(*target_t, *target_s),
 
             (
@@ -1053,7 +1059,10 @@ impl<'a, 'tcx> Mapper<'a, 'tcx> {
         let loc_t = (bb_t, dt.statements.len());
         let source_loc = (bb_s, ds.statements.len());
 
-        let mir::TerminatorKind::Goto { target: target_t } = dt.terminator().kind else {
+        let mir::TerminatorKind::Goto {
+            target: target_t, ..
+        } = dt.terminator().kind
+        else {
             return false;
         };
         let mir::TerminatorKind::Call {
@@ -1154,7 +1163,7 @@ impl<'a, 'tcx> Mapper<'a, 'tcx> {
             }
 
             let next_s = match &ts.kind {
-                mir::TerminatorKind::Goto { target }
+                mir::TerminatorKind::Goto { target, .. }
                 | mir::TerminatorKind::FalseEdge {
                     real_target: target,
                     ..
@@ -1336,7 +1345,7 @@ impl<'a, 'tcx> Mapper<'a, 'tcx> {
                     }
                     *target
                 },
-                mir::TerminatorKind::Goto { target }
+                mir::TerminatorKind::Goto { target, .. }
                 | mir::TerminatorKind::FalseEdge {
                     real_target: target,
                     ..
@@ -1374,7 +1383,7 @@ impl<'a, 'tcx> Mapper<'a, 'tcx> {
         }
 
         match &data.terminator().kind {
-            mir::TerminatorKind::Goto { target } => OpenDropNode::LinearGoto { target: *target },
+            mir::TerminatorKind::Goto { target, .. } => OpenDropNode::LinearGoto { target: *target },
             mir::TerminatorKind::SwitchInt { discr, targets } => {
                 let local = match discr {
                     mir::Operand::Copy(place) | mir::Operand::Move(place)
@@ -1483,7 +1492,9 @@ impl<'a, 'tcx> Mapper<'a, 'tcx> {
             // target goto has no effect of its own, so Polonius point queries
             // should observe the point before the source drop effect.
             if let (
-                mir::TerminatorKind::Goto { target: target_t },
+                mir::TerminatorKind::Goto {
+                    target: target_t, ..
+                },
                 mir::TerminatorKind::Drop {
                     target: target_s, ..
                 },
@@ -1505,7 +1516,9 @@ impl<'a, 'tcx> Mapper<'a, 'tcx> {
             // These inserted blocks are still CFG successors, so map their
             // locations to the point before the eliminated drop effect.
             if let (
-                mir::TerminatorKind::Goto { target: target_t },
+                mir::TerminatorKind::Goto {
+                    target: target_t, ..
+                },
                 mir::TerminatorKind::Drop {
                     target: target_s, ..
                 },

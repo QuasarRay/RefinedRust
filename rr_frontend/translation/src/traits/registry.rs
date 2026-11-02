@@ -9,9 +9,10 @@ use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet, btree_map};
 
 use log::{info, trace};
 use radium::{coq, specs};
-use rr_rustc_interface::hir;
+use rr_rustc_interface::attr_ir::AttrItem;
 use rr_rustc_interface::hir::def_id::{DefId, LocalDefId};
-use rr_rustc_interface::middle::{bug, span_bug, ty};
+use rr_rustc_interface::middle::ty;
+use rr_rustc_interface::span::{bug, span_bug};
 use traits::resolution;
 use typed_arena::Arena;
 
@@ -98,7 +99,7 @@ impl<'tcx> TraitUseRef<'tcx> {
         tcx: ty::TyCtxt<'tcx>,
     ) -> Result<scope::GenericsKey<'tcx>, TranslationError> {
         match self {
-            Self::Rust(trait_ref) => scope::generate_args_inst_key(tcx, trait_ref.args),
+            Self::Rust(trait_ref) => scope::generate_args_inst_key(tcx, trait_ref.args.as_slice()),
             Self::VirtualDropGlue { self_ty } => {
                 scope::generate_args_inst_key(tcx, &[ty::GenericArg::from(*self_ty)])
             },
@@ -123,7 +124,7 @@ impl<'tcx> TraitUseRef<'tcx> {
 #[derive(Debug)]
 pub(crate) struct ResolvedTraitReq<'tcx, 'def> {
     pub(crate) req_inst: specs::traits::ReqInst<'def, ty::Ty<'tcx>>,
-    pub(crate) args: ty::GenericArgsRef<'tcx>,
+    pub(crate) args: ty::GenericArgs<'tcx>,
 }
 
 /// A using occurrence of a trait in the signature of the function.
@@ -247,8 +248,13 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
         let args = ty::GenericArgs::identity_for_item(self.tcx, did);
         // Closure signature/capture parameters are rustc implementation details;
         // only the enclosing item's generics occur in our closure scope.
-        let args =
-            if self.tcx.is_closure_like(did) { args.as_closure().parent_args() } else { args.as_slice() };
+        let closure_args;
+        let args = if self.tcx.is_closure_like(did) {
+            closure_args = args.as_closure();
+            closure_args.parent_args()
+        } else {
+            args.as_slice()
+        };
         for arg in args {
             if let Some(ty) = arg.as_type()
                 && let ty::TyKind::Param(param) = ty.kind()
@@ -886,7 +892,7 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
         } else {
             match self_ty.kind() {
                 ty::TyKind::Adt(def, args) => {
-                    let impl_inst = self.compute_scope_inst_in_state(&mut *state, def.did(), args)?;
+                    let impl_inst = self.compute_scope_inst_in_state(&mut *state, def.did(), *args)?;
 
                     (VirtualImpl::DropGlueForAdt(OrderedDefId::new(self.tcx, def.did())), impl_inst)
                 },
@@ -1000,7 +1006,7 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
         &self,
         state: types::ST<'_, '_, 'def, 'tcx>,
         closure_args: ty::ClosureArgs<ty::TyCtxt<'tcx>>,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
     ) -> Vec<ty::Region<'tcx>> {
         let sig = closure_args.sig();
         let late_bounds_to_unify = sig.bound_vars();
@@ -1035,7 +1041,7 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
         state: types::ST<'_, '_, 'def, 'tcx>,
         closure_did: DefId,
         closure_args: ty::ClosureArgs<ty::TyCtxt<'tcx>>,
-        trait_args: ty::GenericArgsRef<'tcx>,
+        trait_args: ty::GenericArgs<'tcx>,
         below_binders: ty::Binder<'tcx, ()>,
     ) -> Vec<ty::Region<'tcx>> {
         // Also instantiate the external regions for the upvars and closure inputs
@@ -1079,7 +1085,7 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
         closure_did: DefId,
         trait_did: DefId,
         closure_args: ty::ClosureArgs<ty::TyCtxt<'tcx>>,
-        trait_args: ty::GenericArgsRef<'tcx>,
+        trait_args: ty::GenericArgs<'tcx>,
         below_binders: ty::Binder<'tcx, ()>,
     ) -> Result<(specs::traits::SpecializedImpl<'def>, Vec<ty::Ty<'tcx>>), TranslationError> {
         let closure_kind = search::get_closure_kind_of_trait_did(self.tcx, trait_did).unwrap_or_else(|| {
@@ -1144,7 +1150,7 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
         &self,
         state: types::ST<'_, '_, 'def, 'tcx>,
         trait_did: DefId,
-        trait_args: ty::GenericArgsRef<'tcx>,
+        trait_args: ty::GenericArgs<'tcx>,
         below_binders: ty::Binder<'tcx, ()>,
         bound_regions: &[ty::BoundRegionKind<'tcx>],
         origin: specs::TyParamOrigin,
@@ -1327,7 +1333,7 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
         &self,
         state: types::ST<'_, '_, 'def, 'tcx>,
         did: DefId,
-        params: ty::GenericArgsRef<'tcx>,
+        params: ty::GenericArgs<'tcx>,
         include_self: bool,
         include_assoc_bounds: bool,
     ) -> Result<Vec<ResolvedTraitReq<'tcx, 'def>>, TranslationError> {
@@ -1345,7 +1351,7 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
         &self,
         state: types::ST<'_, '_, 'def, 'tcx>,
         did: DefId,
-        params: ty::GenericArgsRef<'tcx>,
+        params: ty::GenericArgs<'tcx>,
         include_self: bool,
         include_assoc_bounds: bool,
         purpose: ScopePurpose,
@@ -1498,8 +1504,9 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
     ) -> Result<ResolvedTraitReq<'tcx, 'def>, TranslationError> {
         let args = self.tcx.mk_args(&[self_ty.into()]);
         let spec = self.lookup_virtual_trait(VirtualTrait::DropGlue).unwrap();
-        if let Some(entry) =
-            state.try_lookup_virtual_trait_use(self.tcx, VirtualTrait::DropGlue, args).or_else(|| {
+        if let Some(entry) = state
+            .try_lookup_virtual_trait_use(self.tcx, VirtualTrait::DropGlue, args.as_slice())
+            .or_else(|| {
                 state.try_lookup_normalized_virtual_trait_use(self.tcx, VirtualTrait::DropGlue, self_ty)
             })
         {
@@ -1544,7 +1551,7 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
                         format!("drop glue not registered for {self_ty:?}"),
                     )))
                 })?;
-                let inst = self.compute_scope_inst_in_state(state, adt.did(), adt_args)?;
+                let inst = self.compute_scope_inst_in_state(state, adt.did(), *adt_args)?;
                 specs::traits::ReqInstSpec::Specialized(specs::traits::SpecializedImpl::new(impl_ref, inst))
             },
             ty::TyKind::Tuple(tys) if !tys.is_empty() && tys.len() <= 5 => {
@@ -1589,7 +1596,7 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
     pub(crate) fn resolve_drop_glue_requirements_for_args(
         &self,
         state: types::ST<'_, '_, 'def, 'tcx>,
-        args: ty::GenericArgsRef<'tcx>,
+        args: ty::GenericArgs<'tcx>,
     ) -> Result<Vec<ResolvedTraitReq<'tcx, 'def>>, TranslationError> {
         args.iter()
             .filter_map(ty::GenericArg::as_type)
@@ -1601,7 +1608,7 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
     pub(crate) fn compute_scope_inst_in_state_without_traits(
         &self,
         state: types::ST<'_, '_, 'def, 'tcx>,
-        params_inst: ty::GenericArgsRef<'tcx>,
+        params_inst: ty::GenericArgs<'tcx>,
     ) -> Result<specs::GenericScopeInst<'def>, TranslationError> {
         let mut scope_inst = specs::GenericScopeInst::empty();
 
@@ -1643,7 +1650,7 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
         &self,
         state: types::ST<'_, '_, 'def, 'tcx>,
         did: DefId,
-        params_inst: ty::GenericArgsRef<'tcx>,
+        params_inst: ty::GenericArgs<'tcx>,
         include_assoc_bounds: bool,
         purpose: ScopePurpose,
     ) -> Result<Vec<specs::traits::ReqInst<'def, specs::Type<'def>>>, TranslationError> {
@@ -1674,7 +1681,7 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
         &self,
         state: types::ST<'_, '_, 'def, 'tcx>,
         did: DefId,
-        params_inst: ty::GenericArgsRef<'tcx>,
+        params_inst: ty::GenericArgs<'tcx>,
     ) -> Result<specs::GenericScopeInst<'def>, TranslationError> {
         self.compute_scope_inst_for_purpose(state, did, params_inst, ScopePurpose::Specification)
     }
@@ -1683,7 +1690,7 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
         &self,
         state: types::ST<'_, '_, 'def, 'tcx>,
         did: DefId,
-        params_inst: ty::GenericArgsRef<'tcx>,
+        params_inst: ty::GenericArgs<'tcx>,
         purpose: ScopePurpose,
     ) -> Result<specs::GenericScopeInst<'def>, TranslationError> {
         let mut scope_inst = self.compute_scope_inst_in_state_without_traits(state, params_inst)?;
@@ -1701,7 +1708,7 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
         &self,
         state: types::ST<'_, '_, 'def, 'tcx>,
         did: DefId,
-        params_inst: ty::GenericArgsRef<'tcx>,
+        params_inst: ty::GenericArgs<'tcx>,
     ) -> Result<specs::GenericScopeInst<'def>, TranslationError> {
         let mut scope_inst = self.compute_scope_inst_in_state_without_traits(state, params_inst)?;
 
@@ -1846,7 +1853,7 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
     pub(crate) fn get_derive_trait_impl_attrs(
         &self,
         trait_impl_did: DefId,
-    ) -> Result<Option<Vec<&'tcx hir::AttrItem>>, TranslationError> {
+    ) -> Result<Option<Vec<&'tcx AttrItem>>, TranslationError> {
         let subject = self.tcx.impl_trait_header(trait_impl_did);
         let trait_ref = subject.trait_ref.skip_binder();
 
@@ -1880,7 +1887,7 @@ impl<'tcx, 'def> TR<'tcx, 'def> {
     pub(crate) fn get_trait_impl_attrs(
         &self,
         trait_impl_did: DefId,
-    ) -> Result<Vec<&'tcx hir::AttrItem>, TranslationError> {
+    ) -> Result<Vec<&'tcx AttrItem>, TranslationError> {
         let trait_impl_attrs = attrs::filter_for_tool(environment::get_attributes(self.tcx, trait_impl_did));
         attrs::check_tool_attrs(&trait_impl_attrs, TRAIT_IMPL_ATTRS.iter().copied()).map_err(|err| {
             let err = self.tcx.dcx().span_err(

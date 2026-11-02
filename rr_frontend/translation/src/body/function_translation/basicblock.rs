@@ -6,7 +6,8 @@
 
 use log::info;
 use radium::code;
-use rr_rustc_interface::middle::{bug, mir, ty};
+use rr_rustc_interface::middle::{mir, ty};
+use rr_rustc_interface::span::bug;
 
 use super::TX;
 use crate::base::*;

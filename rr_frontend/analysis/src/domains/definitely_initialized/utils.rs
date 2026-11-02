@@ -37,7 +37,7 @@ fn expand_struct_place<'tcx>(
             for (index, field_def) in variant.fields.iter().enumerate() {
                 if Some(index) != without_field {
                     let field_place =
-                        tcx.mk_place_field(place, index.into(), field_def.ty(tcx, substs).skip_norm_wip());
+                        tcx.mk_place_field(place, index.into(), field_def.ty(tcx, *substs).skip_norm_wip());
                     places.push(field_place);
                 }
             }
@@ -129,6 +129,7 @@ fn expand_one_level<'tcx>(
             expand_struct_place(current_place, mir, tcx, Some(projected_field.index()))
         },
         mir::ProjectionElem::Deref
+        | mir::ProjectionElem::PhantomDeref
         | mir::ProjectionElem::Index(..)
         | mir::ProjectionElem::ConstantIndex { .. }
         | mir::ProjectionElem::Subslice { .. }
@@ -187,12 +188,14 @@ const fn place_elem_variant(a: &mir::PlaceElem<'_>) -> u8 {
         mir::ProjectionElem::Downcast(..) => 5,
         mir::ProjectionElem::OpaqueCast(_) => 6,
         mir::ProjectionElem::UnwrapUnsafeBinder(_) => 7,
+        mir::ProjectionElem::PhantomDeref => 8,
     }
 }
 
 fn cmp_place_elem<'tcx>(tcx: ty::TyCtxt<'tcx>, a: mir::PlaceElem<'tcx>, b: mir::PlaceElem<'tcx>) -> Ordering {
     place_elem_variant(&a).cmp(&place_elem_variant(&b)).then_with(|| match (a, b) {
-        (mir::ProjectionElem::Deref, mir::ProjectionElem::Deref) => Ordering::Equal,
+        (mir::ProjectionElem::Deref, mir::ProjectionElem::Deref)
+        | (mir::ProjectionElem::PhantomDeref, mir::ProjectionElem::PhantomDeref) => Ordering::Equal,
         (mir::ProjectionElem::Field(idx1, ty1), mir::ProjectionElem::Field(idx2, ty2)) => {
             idx1.cmp(&idx2).then_with(|| stable_comparator(tcx).cmp_ty(ty1, ty2))
         },

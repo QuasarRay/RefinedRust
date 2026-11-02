@@ -5,7 +5,6 @@
 // file, You can obtain one at https://opensource.org/license/bsd-3-clause/.
 
 use rr_rustc_interface::middle::ty;
-use rr_rustc_interface::middle::ty::RegionExt as _;
 use rr_rustc_interface::type_ir::{TypeFoldable, TypeSuperFoldable as _, TypeVisitableExt as _};
 
 use crate::environment::polonius_info::{PoloniusInfo, RegionKind};
@@ -156,7 +155,7 @@ impl<'tcx> ty::TypeFolder<ty::TyCtxt<'tcx>> for RelabelLateParamVisitor<'tcx> {
                 //let new_idx = self.rename_map.get(idx).unwrap();
 
                 //new_idx.to_owned()
-                ty::Region::new_from_kind(self.cx(), ty::ReErased)
+                self.cx().lifetimes.re_erased
             },
             _ => r,
         }

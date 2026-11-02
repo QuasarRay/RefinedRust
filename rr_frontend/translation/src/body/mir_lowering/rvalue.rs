@@ -491,7 +491,7 @@ pub(crate) trait MirRvalueTranslation<'def, 'tcx: 'def>:
                     )));
                 };
 
-                let enum_use = self.generate_enum_use(*adt_def, args)?;
+                let enum_use = self.generate_enum_use(*adt_def, *args)?;
                 let els = enum_use.generate_raw_syn_type_term();
 
                 let discriminant_acc = code::Expr::EnumDiscriminant {

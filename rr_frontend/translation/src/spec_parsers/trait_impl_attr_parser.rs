@@ -9,7 +9,7 @@ use std::collections::BTreeMap;
 use attribute_parse::MToken;
 use attribute_parse::parse::{self, Peek as _};
 use radium::{coq, specs};
-use rr_rustc_interface::hir;
+use rr_rustc_interface::attr_ir::AttrItem;
 use rr_rustc_interface::span::Span;
 
 use crate::spec_parsers::SpannedError;
@@ -51,7 +51,7 @@ fn parse_err(span: Span, err: parse::Error) -> SpannedError<ParserError> {
 pub(crate) trait TraitImplAttrParser {
     fn parse_trait_impl_attrs<'a>(
         &'a mut self,
-        attrs: &'a [&'a hir::AttrItem],
+        attrs: &'a [&'a AttrItem],
     ) -> Result<TraitImplAttrs, SpannedError<ParserError>>;
 }
 
@@ -133,7 +133,7 @@ impl<'a, 'def, T: ParamLookup<'def>> VerboseTraitImplAttrParser<'a, T> {
 impl<'def, T: ParamLookup<'def>> TraitImplAttrParser for VerboseTraitImplAttrParser<'_, T> {
     fn parse_trait_impl_attrs<'a>(
         &'a mut self,
-        attrs: &'a [&'a hir::AttrItem],
+        attrs: &'a [&'a AttrItem],
     ) -> Result<TraitImplAttrs, SpannedError<ParserError>> {
         let mut trait_attrs = BTreeMap::new();
         let mut context_items = Vec::new();

@@ -17,6 +17,8 @@ pub(super) struct NormalizedPlace {
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub(super) enum NormalizedPlaceElem {
     Deref,
+    // A symbolic Reborrow projection is not an executable pointer dereference.
+    PhantomDeref,
     Field(usize),
     Index(Local),
     ConstantIndex {

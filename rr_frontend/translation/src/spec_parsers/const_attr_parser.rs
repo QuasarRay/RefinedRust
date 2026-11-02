@@ -6,7 +6,7 @@
 
 use attribute_parse::parse;
 use derive_more::Display;
-use rr_rustc_interface::hir;
+use rr_rustc_interface::attr_ir::AttrItem;
 use rr_rustc_interface::hir::def_id::LocalDefId;
 use rr_rustc_interface::span::Span;
 
@@ -43,7 +43,7 @@ pub(crate) trait ConstAttrParser {
         &'a mut self,
         did: LocalDefId,
         span: Span,
-        attrs: &'a [&'a hir::AttrItem],
+        attrs: &'a [&'a AttrItem],
     ) -> Result<ConstAttrs, SpannedError<ParserError>>;
 }
 
@@ -65,7 +65,7 @@ impl ConstAttrParser for VerboseConstAttrParser {
         &'a mut self,
         _did: LocalDefId,
         span: Span,
-        attrs: &'a [&'a hir::AttrItem],
+        attrs: &'a [&'a AttrItem],
     ) -> Result<ConstAttrs, SpannedError<ParserError>> {
         let mut name: Option<String> = None;
 

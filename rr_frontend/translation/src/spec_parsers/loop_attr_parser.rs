@@ -9,7 +9,7 @@ use std::collections::{BTreeMap, HashSet};
 use attribute_parse::{MToken, parse};
 use parse::{Parse, Peek as _};
 use radium::{code, coq, model, specs};
-use rr_rustc_interface::hir;
+use rr_rustc_interface::attr_ir::AttrItem;
 use rr_rustc_interface::middle::mir;
 use rr_rustc_interface::span::{DUMMY_SP, Span};
 
@@ -42,7 +42,7 @@ fn parse_err(span: Span, err: parse::Error) -> SpannedError<ParserError> {
 pub(crate) trait LoopAttrParser {
     fn parse_loop_attrs<'a>(
         &'a mut self,
-        attrs: &'a [&'a hir::AttrItem],
+        attrs: &'a [&'a AttrItem],
     ) -> Result<specs::LoopSpec, SpannedError<ParserError>>;
 }
 
@@ -263,7 +263,7 @@ impl<'def, 'a, T: ParamLookup<'def>> VerboseLoopAttrParser<'def, 'a, T> {
 impl<'def, T: ParamLookup<'def>> LoopAttrParser for VerboseLoopAttrParser<'def, '_, T> {
     fn parse_loop_attrs<'b>(
         &'b mut self,
-        attrs: &'b [&'b hir::AttrItem],
+        attrs: &'b [&'b AttrItem],
     ) -> Result<specs::LoopSpec, SpannedError<ParserError>> {
         let mut invariant: Vec<coq::iris::IProp> = Vec::new();
         let mut inv_vars: Vec<InvVar> = Vec::new();

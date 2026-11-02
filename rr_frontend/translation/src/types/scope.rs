@@ -13,9 +13,8 @@ use derive_more::{Constructor, Debug};
 use log::{info, trace, warn};
 use radium::{coq, lang, specs};
 use rr_rustc_interface::hir::def_id::DefId;
-use rr_rustc_interface::middle::ty::{RegionExt as _, TypeFoldable as _, TypeSuperFoldable as _};
-use rr_rustc_interface::middle::{span_bug, ty};
-use rr_rustc_interface::span::DUMMY_SP;
+use rr_rustc_interface::middle::ty::{self, TypeFoldable as _, TypeSuperFoldable as _};
+use rr_rustc_interface::span::{DUMMY_SP, span_bug};
 
 use crate::base::*;
 use crate::error::Message;
@@ -70,7 +69,7 @@ impl<'tcx> ty::TypeFolder<ty::TyCtxt<'tcx>> for RegionOccurrenceCollector<'tcx> 
 
     fn fold_region(&mut self, r: ty::Region<'tcx>) -> ty::Region<'tcx> {
         self.regions.push(r);
-        ty::Region::new_from_kind(self.tcx, ty::RegionKind::ReErased)
+        self.tcx.lifetimes.re_erased
     }
 
     fn fold_ty(&mut self, t: ty::Ty<'tcx>) -> ty::Ty<'tcx> {
@@ -169,7 +168,7 @@ impl<'tcx> ty::TypeFolder<ty::TyCtxt<'tcx>> for GenericKeyFolder<'tcx> {
     }
 
     fn fold_region(&mut self, _: ty::Region<'tcx>) -> ty::Region<'tcx> {
-        ty::Region::new_from_kind(self.tcx, ty::RegionKind::ReErased)
+        self.tcx.lifetimes.re_erased
     }
 
     fn fold_ty(&mut self, t: ty::Ty<'tcx>) -> ty::Ty<'tcx> {
@@ -443,7 +442,7 @@ impl<'tcx, 'def> Params<'tcx, 'def> {
     /// Create from generics, optionally annotating the type parameters with their origin.
     pub(crate) fn new_from_generics(
         tcx: ty::TyCtxt<'tcx>,
-        x: ty::GenericArgsRef<'tcx>,
+        x: ty::GenericArgs<'tcx>,
         with_origin: Option<DefId>,
     ) -> Self {
         let mut scope = Vec::new();
@@ -480,7 +479,7 @@ impl<'tcx, 'def> Params<'tcx, 'def> {
                 }
             } else if let Some(ty) = p.as_type() {
                 let ty::TyKind::Param(x) = ty.kind() else {
-                    unreachable!("Should not convert a non-parametric GenericArgsRef to a Params");
+                    unreachable!("Should not convert non-parametric GenericArgs to Params");
                 };
 
                 ty_names.insert(x.name.as_str().to_owned(), num);
@@ -730,7 +729,7 @@ impl<'tcx, 'def> Params<'tcx, 'def> {
         for req in requirements {
             let key = (
                 TraitKey::rust(tcx, req.trait_ref.def_id),
-                generate_args_inst_key(tcx, req.trait_ref.args).unwrap(),
+                generate_args_inst_key(tcx, req.trait_ref.args.as_slice()).unwrap(),
             );
             if req.is_self_in_trait_decl {
                 assert!(req.bound_regions.is_empty());
@@ -1196,7 +1195,7 @@ impl<'tcx, 'def> Traits<'tcx, 'def> {
         entry_indices.iter().find_map(|&entry_idx| {
             let entry = self.trait_use_entries.get(entry_idx)?;
             let trait_ref = entry.rust_trait_ref()?;
-            trait_args_match_region_pattern(tcx, trait_ref.args, args, entry.bound_regions.len())
+            trait_args_match_region_pattern(tcx, trait_ref.args.as_slice(), args, entry.bound_regions.len())
                 .then_some(entry)
         })
     }
@@ -1251,10 +1250,13 @@ impl<'tcx, 'def> Traits<'tcx, 'def> {
             .collect::<Vec<_>>();
         let trait_ref = ty::TraitRef::new(tcx, trait_did, args.iter().copied());
         let normalized = requirements::normalize_trait_ref(tcx, trait_ref, &equalities);
-        let normalized_key =
-            (TraitKey::rust(tcx, trait_did), generate_args_inst_key(tcx, normalized.args).unwrap());
+        let normalized_key = (
+            TraitKey::rust(tcx, trait_did),
+            generate_args_inst_key(tcx, normalized.args.as_slice()).unwrap(),
+        );
         if let Some(indices) = self.entry_indices_by_erased_key.get(&normalized_key)
-            && let Some(trait_use) = self.find_matching_rust_trait_use(tcx, indices, normalized.args)
+            && let Some(trait_use) =
+                self.find_matching_rust_trait_use(tcx, indices, normalized.args.as_slice())
         {
             return Some(trait_use);
         }
@@ -1266,11 +1268,11 @@ impl<'tcx, 'def> Traits<'tcx, 'def> {
                 return false;
             };
             let normalized_candidate = requirements::normalize_trait_ref(tcx, candidate_ref, &equalities);
-            generate_args_inst_key(tcx, normalized_candidate.args).unwrap() == normalized_key.1
+            generate_args_inst_key(tcx, normalized_candidate.args.as_slice()).unwrap() == normalized_key.1
                 && trait_args_match_region_pattern(
                     tcx,
-                    normalized_candidate.args,
-                    normalized.args,
+                    normalized_candidate.args.as_slice(),
+                    normalized.args.as_slice(),
                     trait_use.bound_regions.len(),
                 )
         }) {

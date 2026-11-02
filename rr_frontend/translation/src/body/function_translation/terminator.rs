@@ -10,7 +10,8 @@ use std::iter::repeat_n;
 use log::{info, trace, warn};
 use radium::{code, lang, specs};
 use rr_rustc_interface::hir::def_id::DefId;
-use rr_rustc_interface::middle::{bug, mir, ty};
+use rr_rustc_interface::middle::{mir, ty};
+use rr_rustc_interface::span::bug;
 
 use super::{ExprInfo, TX};
 use crate::base::*;
@@ -111,10 +112,20 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
             warn!("Failed to determine DefId of core::panicking::panic");
         }
 
-        if let Some(panic_fmt_id) = search::try_resolve_did(self.tcx, &["core", "panicking", "panic_fmt"])
-            && Self::check_call_destination(func, panic_fmt_id)
-        {
-            return true;
+        // The default-message macro entry points delegate directly to `panic`.
+        // Like `panic_fmt`, they can unwind and use the same argument-erasing shim.
+        for name in [
+            "panic_fmt",
+            "panic_default_msg",
+            "unreachable_default_msg",
+            "unimplemented_default_msg",
+            "todo_default_msg",
+        ] {
+            if let Some(panic_id) = search::try_resolve_did(self.tcx, &["core", "panicking", name])
+                && Self::check_call_destination(func, panic_id)
+            {
+                return true;
+            }
         }
 
         false
@@ -157,7 +168,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
                 format!("RefinedRust does currently not support discriminant accesses on non-enum types (got {:?})", ty),
             ))));
         };
-        let enum_use = self.generate_enum_use(*adt_def, args)?;
+        let enum_use = self.generate_enum_use(*adt_def, *args)?;
         let els = enum_use.generate_raw_syn_type_term();
 
         let discriminant_acc = code::Expr::EnumDiscriminant {
@@ -208,7 +219,7 @@ impl<'a, 'def: 'a, 'tcx: 'def> TX<'a, 'def, 'tcx> {
         loc: mir::Location,
     ) -> Result<code::Stmt, TranslationError> {
         match &term.kind {
-            mir::TerminatorKind::Goto { target } => self.translate_goto_like(&loc, *target),
+            mir::TerminatorKind::Goto { target, .. } => self.translate_goto_like(&loc, *target),
 
             mir::TerminatorKind::Call {
                 func,

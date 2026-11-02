@@ -25,7 +25,7 @@ fn main() {
     if env::args().nth(1) == Some("-vV".to_owned()) {
         driver::catch_with_exit_code(move || {
             println!("RefinedRust {}", env!("RR_VERSION"));
-            driver::run_compiler(&env::args().collect::<Vec<_>>(), &mut RRCompilerCalls {});
+            driver::compiler_entrypoint(&env::args().collect::<Vec<_>>(), &mut RRCompilerCalls {});
         })
         .exit_process();
     }
@@ -39,7 +39,7 @@ fn main() {
 
     // If we should act like rustc, just run the main function of the driver
     if rrconfig::be_rustc() {
-        driver::main();
+        driver::main().exit_process();
     }
 
     // otherwise, initialize our loggers
@@ -116,7 +116,7 @@ fn main() {
     debug!("rustc arguments: {:?}", rustc_args);
 
     driver::catch_with_exit_code(move || {
-        driver::run_compiler(&rustc_args, &mut RRCompilerCalls {});
+        driver::compiler_entrypoint(&rustc_args, &mut RRCompilerCalls {});
     })
     .exit_process();
 }
