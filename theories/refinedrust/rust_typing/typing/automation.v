@@ -359,7 +359,7 @@ Ltac liRNormalizeSpatialContext :=
 
 Ltac liRIntroduceLetInGoal :=
   lazymatch goal with
-  | |- @envs_entails ?PROP ?Δ ?P =>
+  | |- @envs_entails ?SI ?PROP ?Δ ?P =>
     let H := fresh "GOAL" in
     lazymatch P with
     (*
@@ -370,13 +370,13 @@ Ltac liRIntroduceLetInGoal :=
       *)
 
     | @typed_write ?Σ ?tG ?E ?L ?f ?e ?ot ?v ?rt ?ty ?r ?T =>
-      li_let_bind T (fun H => constr:(@envs_entails PROP Δ (@typed_write Σ tG E L f e ot v rt ty r H)))
+      li_let_bind T (fun H => constr:(@envs_entails SI PROP Δ (@typed_write Σ tG E L f e ot v rt ty r H)))
     | @typed_read ?Σ ?tG ?E ?L ?f ?e ?ot ?rm ?T =>
-      li_let_bind T (fun H => constr:(@envs_entails PROP Δ (@typed_read Σ tG E L f e ot rm H)))
+      li_let_bind T (fun H => constr:(@envs_entails SI PROP Δ (@typed_read Σ tG E L f e ot rm H)))
     | @typed_borrow_mut ?Σ ?tG ?E ?L ?f ?e ?κ ?ort ?T =>
-      li_let_bind T (fun H => constr:(@envs_entails PROP Δ (@typed_borrow_mut Σ tG E L f e κ ort H)))
+      li_let_bind T (fun H => constr:(@envs_entails SI PROP Δ (@typed_borrow_mut Σ tG E L f e κ ort H)))
     | @typed_borrow_shr ?Σ ?tG ?E ?L ?f ?e ?κ ?ort ?T =>
-      li_let_bind T (fun H => constr:(@envs_entails PROP Δ (@typed_borrow_shr Σ tG E L f e κ ort H)))
+      li_let_bind T (fun H => constr:(@envs_entails SI PROP Δ (@typed_borrow_shr Σ tG E L f e κ ort H)))
     (* NOTE: these two guys really hurt Qed performance. Not a good idea at all! *)
     (*| @typed_place ?Σ ?tG ?π ?E ?L ?l ?rto ?lt ?r ?b ?bmin ?P ?T =>*)
       (*pose (H := LET_ID T); change_no_check (@envs_entails PROP Δ (@typed_place Σ tG π E L l rto lt r b bmin P H))*)
@@ -385,7 +385,7 @@ Ltac liRIntroduceLetInGoal :=
       (*change_no_check (@envs_entails PROP Δ (@typed_context_fold Σ tG Acc P M π E L m tcx acc H))*)
 
     | @typed_pre_context_fold ?Σ ?tG ?π ?E ?L ?M ?m ?T =>
-      li_let_bind T (fun H => constr:(@envs_entails PROP Δ (@typed_pre_context_fold Σ tG π E L M m H)))
+      li_let_bind T (fun H => constr:(@envs_entails SI PROP Δ (@typed_pre_context_fold Σ tG π E L M m H)))
       (*
     | @typed_bin_op ?Σ ?tG ?E ?L ?f ?v1 ?P1 ?v2 ?P2 ?op ?ot1 ?ot2 ?T =>
       li_let_bind T (fun H => constr:(@envs_entails PROP Δ (@typed_bin_op Σ tG E L f v1 P1 v2 P2 op ot1 ot2 H)))
@@ -511,17 +511,17 @@ Ltac liRStmt :=
 
 Ltac liRIntroduceTypedStmt :=
   lazymatch goal with
-  | |- @envs_entails ?PROP ?Δ (introduce_typed_stmt ?E ?L ?f ?ϝ ?fn ?R ?U) =>
+  | |- @envs_entails ?SI ?PROP ?Δ (introduce_typed_stmt ?E ?L ?f ?ϝ ?fn ?R ?U) =>
     iEval (rewrite /introduce_typed_stmt);
       lazymatch goal with
-      | |- @envs_entails ?PROP ?Δ (@typed_stmt ?Σ ?tG ?E ?L ?f ?s ?fn ?R ?U ?ϝ) =>
+      | |- @envs_entails ?SI ?PROP ?Δ (@typed_stmt ?Σ ?tG ?E ?L ?f ?s ?fn ?R ?U ?ϝ) =>
         let Hfn := fresh "FN" in
         let HR := fresh "R" in
         let HU := fresh "U" in
         pose (Hfn := (CODE_MARKER fn));
         pose (HR := (RETURN_MARKER R));
         pose (HU := (UNWIND_MARKER U));
-        change_no_check (@envs_entails PROP Δ (@typed_stmt Σ tG E L f s Hfn HR HU ϝ));
+        change_no_check (@envs_entails SI PROP Δ (@typed_stmt Σ tG E L f s Hfn HR HU ϝ));
         iEval (simpl) (* To simplify f_init *)
       end
   end.
@@ -630,7 +630,7 @@ Ltac liRBinder :=
   | |- envs_entails _ (introduce_with_hooks _ _ ?P _) =>
     let P := eval simpl in P in
     match P with
-    | @bi_exist _ ?T ?Φ =>
+    | @bi_exist _ _ ?T ?Φ =>
       match T with
       | name_hint_ty _ _ =>
         notypeclasses refine (tac_fast_apply (introduce_with_hooks_exists _ _ _ _) _)
@@ -641,7 +641,7 @@ Ltac liRBinder :=
           notypeclasses refine (tac_introduce_with_hooks_exists ident _ _ _ _ _ _)
         end
       end
-    | boringly (@bi_exist _ ?T ?Φ) =>
+    | boringly (@bi_exist _ _ ?T ?Φ) =>
       match T with
       | name_hint_ty _ _ =>
         notypeclasses refine (tac_fast_apply (introduce_with_hooks_boringly_exist _ _ _ _) _)
@@ -656,7 +656,7 @@ Ltac liRBinder :=
   | |- envs_entails _ (prove_with_subtype _ _ _ _ ?P _ _) =>
       let P := eval simpl in P in
       match P with
-      | @bi_exist _ ?T ?Φ =>
+      | @bi_exist _ _ ?T ?Φ =>
         match T with
         | name_hint_ty _ _ =>
           notypeclasses refine (tac_fast_apply (prove_with_subtype_exists _ _ _ _ _ _ _) _)
@@ -1069,7 +1069,7 @@ Ltac liRStep :=
 
 Tactic Notation "liRStepUntil" open_constr(id) :=
   repeat lazymatch goal with
-         | |- @environments.envs_entails _ _ ?P =>
+         | |- @environments.envs_entails _ _ _ ?P =>
            lazymatch P with
            | id _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ => fail
            | id _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ => fail

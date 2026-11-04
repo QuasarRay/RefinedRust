@@ -213,7 +213,7 @@ Ltac liFromSyntax :=
 
 Ltac liFromSyntaxGoal :=
   match goal with
-  | |- @envs_entails ?PROP ?Δ ?P =>
+  | |- @envs_entails ?SI ?PROP ?Δ ?P =>
       let Q := liFromSyntaxTerm P in
       change (envs_entails Δ Q)
   end.
@@ -234,16 +234,16 @@ Ltac liToSyntax :=
   liToSyntax_hook;
   change (bi_sep ?a) with (li.bind0 (li.exhale (liToSyntax_UNFOLD_MARKER a)));
   change (bi_wand ?a) with (li.bind0 (li.inhale (liToSyntax_UNFOLD_MARKER a)));
-  change (@bi_forall (iPropI ?Σ) ?A) with (@li.all Σ A);
-  change (@bi_exist (iPropI ?Σ) ?A) with (@li.exist Σ A);
-  change (@bi_pure (iPropI ?Σ) True) with (@li.done Σ);
-  change (@bi_pure (iPropI ?Σ) False) with (@li.false Σ);
+  change (@bi_forall _ (iPropI ?Σ) ?A) with (@li.all Σ A);
+  change (@bi_exist _ (iPropI ?Σ) ?A) with (@li.exist Σ A);
+  change (@bi_pure _ (iPropI ?Σ) True) with (@li.done Σ);
+  change (@bi_pure _ (iPropI ?Σ) False) with (@li.false Σ);
   repeat (progress change (big_opM bi_and ?f ?m) with (li.bind2 (li.and_map m) f));
-  change (@bi_and (iPropI ?Σ)) with (@li.and Σ);
+  change (@bi_and _ (iPropI ?Σ)) with (@li.and Σ);
   change (find_in_context ?a) with (li.bind1 (li.find_in_context a));
   change (@case_if ?Σ ?P) with (@li.case_if Σ P);
   change (@case_destruct ?Σ ?A ?a) with (li.bind2 (@li.case_destruct Σ A a));
-  change (@bi_intuitionistically (iPropI ?Σ)) with (li.bind0 (@li.drop_spatial Σ));
+  change (@bi_intuitionistically _ (iPropI ?Σ)) with (li.bind0 (@li.drop_spatial Σ));
   change (li_tactic ?t) with (li.bind1 (li.tactic t));
   change (@accu ?Σ) with (li.bind1 (@li.accu Σ));
   change (@li_trace ?Σ ?A ?t) with (li.bind0 (@li.trace Σ A t));
@@ -256,8 +256,8 @@ Ltac liToSyntax :=
               with (a ∗ liToSyntax_UNFOLD_MARKER b)%I
             | progress change (liToSyntax_UNFOLD_MARKER (li.bind0 (@li.drop_spatial ?Σ) ?b))
               with (□ liToSyntax_UNFOLD_MARKER b)%I ]);
-  change (liToSyntax_UNFOLD_MARKER (@li.done ?Σ)) with (@bi_pure (iPropI Σ) True);
-  change (liToSyntax_UNFOLD_MARKER (@li.false ?Σ)) with (@bi_pure (iPropI Σ) False);
+  change (liToSyntax_UNFOLD_MARKER (@li.done ?Σ)) with (@bi_pure _ (iPropI Σ) True);
+  change (liToSyntax_UNFOLD_MARKER (@li.false ?Σ)) with (@bi_pure _ (iPropI Σ) False);
   unfold liToSyntax_UNFOLD_MARKER.
 
 Ltac liToSyntaxGoal :=

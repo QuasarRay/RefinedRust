@@ -3,6 +3,7 @@ From iris.proofmode Require Import proofmode.
 
 (** Defines the [Boringly] modality which carves out the part of a proposition [P] which is persistent. *)
 Section boringly.
+  Context {SI : sidx}.
   Context {PROP : bi}.
   Context `{!Sbi PROP}.
   Context `{!BiAffine PROP}.

@@ -179,7 +179,7 @@ Section pinned_borrows.
     iSplitL "HP". { iNext. iApply "HP0P". iRewrite "Hag". done. }
     iSplitL "Hvs". {
       iNext. iIntros "HP". iDestruct ("HPP0" with "HP") as "[HP0 | HQ]".
-      - iRewrite "Hag" in "HP0". iApply ("Hvs" with "HP0").
+      - iRewrite -"Hag" in "Hvs". iApply ("Hvs" with "HP0").
       - eauto.
     }
     iIntros (R) "Hvs' Hcred HR".
@@ -214,10 +214,10 @@ Section pinned_borrows.
     iDestruct "HP" as (P') "(Hsaved2 & HP & >Hcred & Hvs)".
     iModIntro. iExists κ'. iFrame "Hincl". iNext.
     iPoseProof (saved_prop_agree with "Hsaved1 Hsaved2") as "#Hag".
-    iSplitL "HP". { iNext. iRewrite -"Hag" in "HP". iApply "HP0P". done. }
+    iSplitL "HP". { iNext. iRewrite "Hag" in "HP0P". iApply "HP0P". done. }
     iSplitL "Hvs". {
       iNext. iIntros "HP". iDestruct ("HPP0" with "HP") as "[HP0 | HQ]".
-      - iRewrite "Hag" in "HP0". iApply ("Hvs" with "HP0").
+      - iRewrite -"Hag" in "Hvs". iApply ("Hvs" with "HP0").
       - eauto.
     }
     iIntros (R) "Hvs' HR".
@@ -336,6 +336,7 @@ Section pinned_borrows.
        4. close the borrow, with the full borrow + inheritance; the fact that we have the ↑lftN mask is crucial for the inheritance here.
        5. use bor_sep and throw away the borrow of the inheritance
        6. use the bor_unnest lemma *)
+    rewrite !step_fupdN_succ_l step_fupdN_0.
     iIntros (?) "#LFT Hcred2 Htok Hb".
     iMod (bor_acc_strong with "LFT Hb Htok") as "(%κ'' & #Hincl & Hb & Hcl)"; first done.
     iModIntro. iNext. iMod (fupd_mask_mono with "Hb") as "Hb"; first done.

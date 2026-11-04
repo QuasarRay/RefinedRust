@@ -141,7 +141,9 @@ Section mut_ref.
     (* unnest the pinned borrow *)
     rewrite /num_cred. assert (5 = 2 + 3) as Heq by lia.
     rewrite {1}Heq. iDestruct "Hcred" as "(Hcred1 & Hcred)".
-    iMod (pinned_bor_unnest_full with "LFT Hcred1 Htok_κ' Hb") as "Hb"; first done.
+    iPoseProof (pinned_bor_unnest_full E with "LFT Hcred1 Htok_κ' Hb") as "Hb"; first done.
+    iEval (rewrite !step_fupdN_succ_l step_fupdN_0) in "Hb".
+    iMod "Hb".
     iDestruct "Hcred" as "(Hcred1 & Hcred2 & Hcred)".
     iApply (lc_fupd_add_later with "Hcred1"). iNext.
     iMod "Hb". iMod "Hb".

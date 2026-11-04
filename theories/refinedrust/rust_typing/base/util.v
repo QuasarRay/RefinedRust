@@ -31,7 +31,7 @@ Proof.
   intros ? -> ?. f_equal. apply proof_irrel.
 Qed.
 
-Lemma Fractional_fractional_le {Σ} (Φ : Qp → iProp Σ) `{Fractional _ Φ} (q q' : Qp):
+Lemma Fractional_fractional_le {Σ} (Φ : Qp → iProp Σ) `{!Fractional Φ} (q q' : Qp):
   (q' ≤ q)%Qp →
   Φ q -∗
   Φ q' ∗ (Φ q' -∗ Φ q).
@@ -603,7 +603,7 @@ Proof.
   - rewrite !left_id. iApply (fupd_mask_mono with "HP"); done.
 Qed.
 
-Lemma lc_fupd_maybe_elim_later E P wl :
+Lemma lc_fupd_maybe_elim_later E (P : iProp Σ) wl :
   £ (Nat.b2n wl) -∗ (▷?wl P) ={E}=∗ P.
 Proof.
   iIntros "Hcred HP".
@@ -614,7 +614,7 @@ Qed.
 
 Lemma lc_split_le (m n : nat) :
   m ≤ n →
-  £ n -∗ £ m ∗ £ (n - m).
+  (£ n : iProp Σ) -∗ £ m ∗ £ (n - m).
 Proof.
   intros ?. replace n with (m + (n - m))%nat by lia.
   replace (m + (n - m) - m)%nat with (n - m)%nat by lia.
@@ -794,4 +794,3 @@ Section max_list.
   Qed.
 End max_list.
 Global Hint Rewrite -> @max_list_Z_with_app_single @max_list_Z_with_app : lithium_rewrite.
-

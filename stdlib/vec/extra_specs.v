@@ -123,7 +123,7 @@ Qed.
 (** Accessors that can be used by unsafe code doing funky stuff *)
 Lemma vec_access_elems {T_rt A_rt} (T_ty : type T_rt) (A_ty : type A_rt) (A_attrs : Allocator_spec_attrs A_rt) π rs l F :
   lftE ⊆ F →
-  £ 1 -∗
+  (£ 1 : iProp Σ) -∗
   l ◁ₗ[π, Owned] #(<#> rs) @ (◁ (Vec_inv_t T_rt A_rt A_attrs <TY> T_ty <TY> A_ty <INST!>)) ={F}=∗
   ∃ (l' : loc),
     (l' ◁ₗ[π, Owned] # (<#> rs) @ ◁ (array_t (length rs) T_ty)) ∗
@@ -324,7 +324,7 @@ Qed.
 
 Lemma vec_extract_invariant {T_inner_rt T_rt A_rt} (P : ex_inv_def T_inner_rt T_rt) (T_ty : type T_inner_rt) (A_ty : type A_rt) (A_attrs : Allocator_spec_attrs A_rt) π xs l F :
   lftE ⊆ F →
-  £ 1 -∗
+  (£ 1 : iProp Σ) -∗
   l ◁ₗ[π, Owned] #(<#> xs) @ (◁ (Vec_inv_t T_rt A_rt A_attrs <TY> (∃; P, T_ty) <TY> A_ty <INST!>)) ={F}=∗
   ∃ (xs' : list (RT_rt T_inner_rt)),
   ([∗ list] x1; x2 ∈ xs'; xs, P.(inv_P) π x1 x2) ∗

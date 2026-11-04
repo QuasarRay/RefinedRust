@@ -171,7 +171,7 @@ Ltac li_pm_reflexivity := li_pm_reduce; exact eq_refl.
 
 Ltac let_bind_envs :=
   lazymatch goal with
-  | |- @envs_entails ?PROP ?Δ ?P =>
+  | |- @envs_entails ?SI ?PROP ?Δ ?P =>
     let with_H tac :=
       match goal with
       | [ H := Envs _ _ _ |- _] =>

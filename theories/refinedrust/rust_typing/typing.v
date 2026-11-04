@@ -4,6 +4,8 @@ From refinedrust Require Export automation.loc_eq manual automation.
 From iris.proofmode Require Import rocq_tactics reduction string_ident.
 From refinedrust Require Export automation.simpl.
 From refinedrust Require Export options.
+(* Prefer RefinedRust's [enum] without reimporting [type]'s tactic hooks. *)
+Export type (enum).
 
 (* In my experience, this has led to more problems with [normalize_autorewrite] rewriting below definitions too eagerly. *)
 #[export] Unset Keyed Unification.

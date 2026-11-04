@@ -19,7 +19,7 @@ Section fupd_derived.
   Lemma step_fupdN_S_fupd_l n E P :
     (|={E}[∅]▷=>^(S n) P) ⊣⊢ (|={E}=> |={E}[∅]▷=>^(S n) P).
   Proof.
-    apply (anti_symm (⊢)); rewrite !Nat.iter_succ.
+    apply (anti_symm (⊢)); rewrite !step_fupdN_succ_l.
     - apply fupd_intro.
     - by rewrite fupd_trans.
   Qed.
@@ -177,14 +177,17 @@ Section physical_step.
   Lemma physical_step_intro_trp {E E'} P n :
     ⧖ n -∗ (£ (tr_f $ S $ n) -∗ ⧗ (tr_f $ S $ n) -∗ |={E}[E']▷=>^(S $ tr_f $ n) P) -∗ |={E}⧗=> P.
   Proof using HBUpdFUpd.
+    rewrite !step_fupdN_succ_l.
     iIntros "H⧖ HP".
     iApply physical_step_step; iSplit.
     { iMod (fupd_mask_subseteq ∅) as "_"; [set_solver|done]. }
     iIntros "??". iMod ("HP" with "[$] [$]") as "HP". iClear "H⧖".
+    rewrite !step_fupdN_succ_l.
     iMod (fupd_mask_subseteq ∅) as "Hcl"; [set_solver|]. do 3 iModIntro.
     iMod "Hcl" as "_". iMod "HP".
     iInduction (tr_f n) as [|n'].
     { simpl. iApply fupd_mask_intro_subseteq; set_solver. }
+    rewrite !step_fupdN_succ_l.
     iMod "HP". iMod (fupd_mask_subseteq ∅) as "Hcl"; [set_solver|].
     do 3 iModIntro. iMod "Hcl" as "_". iMod "HP".
     by iApply "IHn'".
@@ -195,7 +198,7 @@ Section physical_step.
   Proof using HBUpdFUpd.
     unseal. iIntros "HP HPQ" (nsup ntr) "Hsup H£".
     iMod ("HP" with "[$] [$]") as "HP".
-    rewrite !Nat.iter_succ_r. iModIntro.
+    rewrite !step_fupdN_succ_r. iModIntro.
     iApply (step_fupdN_wand with "[$]").
     iIntros ">H". do 3 iModIntro.
     iMod "H" as ">($ & HP)".
@@ -267,8 +270,8 @@ Section physical_step.
     (|={∅}▷=>^n P) -∗ (|={∅}▷=>^ n Q) -∗ |={∅}▷=>^n P ∗ Q.
   Proof using HBUpdFUpd.
     iIntros "HP HQ".
-    iInduction n as [|n] "IH"; first by iFrame.
-    simpl. iMod "HP". iMod "HQ". do 2 iModIntro. iMod "HP". iMod "HQ". iModIntro.
+    iInduction n as [|n] "IH"; simpl; first by iFrame.
+    iMod "HP". iMod "HQ". do 2 iModIntro. iMod "HP". iMod "HQ". iModIntro.
     iApply ("IH" with "[$] [$]").
   Qed.
 
@@ -386,11 +389,11 @@ Section physical_step.
   Proof.
     intros n P Q HPQ. unseal. rewrite /physical_step_def.
     do 7 f_equiv.
-    rewrite !Nat.iter_succ.
+    rewrite !step_fupdN_succ_l.
     f_equiv. f_contractive. f_equiv.
     induction (tr_f (2*a)).
     - by repeat f_equiv.
-    - rewrite !Nat.iter_succ.
+    - rewrite !step_fupdN_succ_l.
       by do 3 f_equiv.
   Qed.
 
@@ -539,7 +542,7 @@ Section soundness.
     iInduction k as [] forall (m P).
     { simpl. iFrame. iApply fupd_mask_intro_subseteq; [set_solver|done]. }
     rewrite Nat.iter_succ_r.
-    rewrite /lc_up_to_steps /laters_up_to_steps !seq_S !sum_list_with_app !Nat.iter_add /= Nat.add_0_r.
+    rewrite /lc_up_to_steps /laters_up_to_steps !seq_S !sum_list_with_app !step_fupdN_add /= Nat.add_0_r.
     iDestruct "H£" as "[H£ H£']".
     iDestruct ("IHk" with "[$] [$] [$]") as ">HP".
     iApply (step_fupdN_wand with "[$]").

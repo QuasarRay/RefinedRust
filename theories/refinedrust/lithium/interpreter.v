@@ -878,9 +878,9 @@ End coq_tactics.
 
 Ltac liCase :=
   lazymatch goal with
-  | |- @envs_entails ?PROP ?Δ (case_if ?P ?T1 ?T2) =>
+  | |- @envs_entails ?SI ?PROP ?Δ (case_if ?P ?T1 ?T2) =>
       notypeclasses refine (tac_case_if _ _ _ _ _ _)
-  | |- @envs_entails ?PROP ?Δ (case_destruct (@bool_decide ?P ?b) ?T) =>
+  | |- @envs_entails ?SI ?PROP ?Δ (case_destruct (@bool_decide ?P ?b) ?T) =>
       (* Rewrite occurrences in the continuation too: merely introducing [P]
          or [¬ P] leaves a closed-over [bool_decide P] unchanged, so a rule
          destructing that expression can be selected repeatedly. *)
@@ -888,7 +888,7 @@ Ltac liCase :=
       notypeclasses refine (tac_case_destruct true _ _ _ _);
       case_eq (@bool_decide P b);
       [rewrite bool_decide_eq_true | rewrite bool_decide_eq_false]
-  | |- @envs_entails ?PROP ?Δ (case_destruct ?x ?T) =>
+  | |- @envs_entails ?SI ?PROP ?Δ (case_destruct ?x ?T) =>
       tryif (non_trivial_destruct x) then
         notypeclasses refine (tac_case_destruct true _ _ _ _);
         liDestruct_hook x;
@@ -942,16 +942,16 @@ Ltac liAccu :=
 (** ** [liTrace] *)
 Ltac liTrace :=
   lazymatch goal with
-  | |- @envs_entails ?PROP ?Δ (li_trace ?info ?T) =>
-    change_no_check (@envs_entails PROP Δ T);
+  | |- @envs_entails ?SI ?PROP ?Δ (li_trace ?info ?T) =>
+    change_no_check (@envs_entails SI PROP Δ T);
     liTrace_hook info
   end.
 
 (** ** [liClear] *)
 Ltac liClear :=
   lazymatch goal with
-  | |- @envs_entails ?PROP ?Δ (li_clear ?t ?T) =>
-    change_no_check (@envs_entails PROP Δ T);
+  | |- @envs_entails ?SI ?PROP ?Δ (li_clear ?t ?T) =>
+    change_no_check (@envs_entails SI PROP Δ T);
     try clear dependent t
   end.
 
