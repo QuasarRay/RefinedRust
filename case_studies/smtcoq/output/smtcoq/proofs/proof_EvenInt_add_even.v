@@ -44,8 +44,12 @@ Ltac2 my_Zeven_goal_trigger () :=
   TContains (TGoal, NotArg) (TConstant (Init.Some "Zeven") NotArg).
 
 Ltac2 Set sniper_transformations as st := fun () =>
-  ((my_Zeven_hyp_trigger (), Init.false, Init.None), "my_Zeven_rewrite_hyps", trivial_filter) ::
-  ((my_Zeven_goal_trigger (), Init.false, Init.None), "my_Zeven_rewrite_goal", trivial_filter) ::
+  ((my_Zeven_hyp_trigger (), Init.false, Init.None), "my_Zeven_rewrite_hyps", trivial_filter,
+    "Expose an evenness witness in a hypothesis",
+    "Rewrite Zeven in a hypothesis using its characterization by Z.div2.") ::
+  ((my_Zeven_goal_trigger (), Init.false, Init.None), "my_Zeven_rewrite_goal", trivial_filter,
+    "Expose evenness witnesses in the goal",
+    "Add the linearity of Z.div2 and rewrite Zeven using its characterization by Z.div2.") ::
   (st ()).
 
 

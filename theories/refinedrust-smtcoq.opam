@@ -18,9 +18,9 @@ depends: [
 ]
 
 pin-depends: [
-	["rocq-sniper.dev" "git+https://github.com/smtcoq/sniper.git#e743fadcd9e6da909d3cb7161d612bdcaeb554fb"]
-	["rocq-smtcoq.dev" "git+https://github.com/smtcoq/smtcoq#6de39db2a996cdc663634cb79193b9d75f95b48a"]
-	["rocq-trakt.dev" "git+https://github.com/rocq-trakt/trakt#23f5fbd8cb710722509201e4fa40fc637c3800ee"]
+	["rocq-sniper.dev" "git+https://github.com/smtcoq/sniper.git#97d5296ec96fec2d40008dd9aca9a77ae08601e9"]
+	["rocq-smtcoq.dev" "git+https://github.com/smtcoq/smtcoq#c0bd765e4283eef55a8f495706475305dc83c583"]
+	["rocq-trakt.dev" "git+https://github.com/rocq-trakt/trakt#65a99129401c743baa54821a7a3b975e72b65e37"]
 ]
 
 build: [

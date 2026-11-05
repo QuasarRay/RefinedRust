@@ -70,8 +70,8 @@
         };
 
         smtcoq = {
-          version = "6de39db2a996cdc663634cb79193b9d75f95b48a";
-          sha256 = "sha256-adhKClONIp3tltToQcoDO1wfqGzBCe/UE/WyBIPYlis=";
+          version = "c0bd765e4283eef55a8f495706475305dc83c583";
+          sha256 = "sha256-2eeJKWD58IgMi8mAN4ANqOV3NHKeXHxQaA9wqAhlyKk=";
         };
 
         verit = {
@@ -80,8 +80,8 @@
         };
 
         sniper = {
-          version = "14fd1f02104f6e1214ad436d21eaacfb0d71db19";
-          sha256 = "sha256-bFjwYVVP2/SNixSrThp3c8RYrmSmLb7NdjzpNtcDyAk=";
+          version = "97d5296ec96fec2d40008dd9aca9a77ae08601e9";
+          sha256 = "sha256-qoCueGkoad0mkOIO5WWNzyKJ/E8UCXNXAK7/BliEIqs=";
         };
       };
 
