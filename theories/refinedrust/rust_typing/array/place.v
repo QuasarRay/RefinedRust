@@ -179,7 +179,7 @@ Section place.
         (* sidecondition for other components *)
         ⌜lctx_place_update_kind_outlives E L2 (UpdUniq [κ]) (mjoin ((λ lt, ltype_blocked_lfts lt.2) <$> (lts)))⌝ ∗
         ⌜lctx_place_update_kind_incl E L2 (UpdUniq [κ]) bmin0⌝ ∗
-        typed_place E L2 f (l offsetst{ty_syn_type def MetaNone}ₗ i') lt r (bmin0 ⊓ₚ RestrictWeak) (Owned) P (λ L3 κs' li bi bmin2 rti ltyi ri updcx,
+        typed_place E L2 f (l offsetst{ty_syn_type def MetaNone}ₗ i') lt r ((bmin0 ⊓ₚ Uniq κ γ) ⊓ₚ RestrictWeak) (Owned) P (λ L3 κs' li bi bmin2 rti ltyi ri updcx,
           T L3 (κs ++ κs') li bi bmin2 rti ltyi ri
             (λ L4 upd cont, updcx L4 upd (λ upd',
               ⌜lctx_place_update_kind_incl E L4 upd'.(pupd_performed) (UpdUniq [κ])⌝ ∗

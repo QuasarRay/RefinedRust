@@ -33,6 +33,26 @@ Section paid_stratification_test.
   Qed.
 End paid_stratification_test.
 
+Section array_uniq_test.
+  Context `{!typeGS Σ}.
+
+  (* Borrowing an element must permit closing the array with a blocked element. *)
+  Lemma array_uniq_blocked_update E L L' κs f l {rt} (ty : type rt)
+      (x : rt) κ γ γ' ly v :
+    syn_type_has_layout (ty_syn_type ty MetaNone) ly →
+    lctx_lft_alive_count E L κ κs L' →
+    ⊢ typed_place E L f l (ArrayLtype ty 1 []) (#([(#x)])) UpdStrong (Uniq κ γ)
+      [BinOpPCtx (PtrOffsetOp ly) (IntOp USize) v MetaNone ZRT (int USize) 0]
+      (λ L2 _ _ _ bmin _ lt _ updcx,
+        prove_place_cond E L2 bmin lt (BlockedLtype ty κ) (λ upd,
+          updcx L2 (typed_place_finish_upd upd (BlockedLtype ty κ) (👻 γ'))
+            (λ _, True))).
+  Proof.
+    intros Hly Hal. iStartProof. repeat liRStep.
+    Unshelve. all: sidecond_solver.
+  Qed.
+End array_uniq_test.
+
 Lemma effective_unwind_condition_unwind (P : Prop) :
   @effective_unwind_condition panic_unwind_config P ↔ P.
 Proof. done. Qed.
