@@ -157,7 +157,9 @@ impl Type<'_> {
                 coq::term::Type::Literal(su.get_rfn_type())
             },
 
-            Self::Array(ty, _) => coq::term::Type::List(Box::new(ty.get_rfn_type())),
+            Self::Array(ty, _) => {
+                coq::term::Type::List(Box::new(model::Type::PlaceRfn(Box::new(ty.get_rfn_type())).into()))
+            },
 
             Self::Unit | Self::Never | Self::Uninit(_) => {
                 // NOTE: could also choose to use an uninhabited type for Never
